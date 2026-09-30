@@ -1,0 +1,15 @@
+{
+  "name": "Lumiole – Lumi dessine les mots",
+  "short_name": "Lumiole",
+  "description": "Lumi, la poussière de lumière qui dessine les mots, en français, anglais et arabe.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1026",
+  "theme_color": "#0d1026",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
