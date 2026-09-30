@@ -264,6 +264,7 @@
   }
   @media (orientation: landscape) and (max-height: 520px) {
     .corps { display: grid; grid-template-columns: 2fr 3fr; gap: 16px; }
+    [data-ecran="coloriage"] .corps { grid-template-columns: 1fr; }
     .scene, [data-ecran="accueil"] .scene { max-height: 62vh; }
   }
   @media (prefers-reduced-motion: reduce) { #decor { display: none; } }
@@ -271,21 +272,59 @@
 
   /* ---------- Coloriage ---------- */
   [data-ecran="coloriage"] .cote-lumi { display: none; }
-  .coloriage { display: flex; flex-direction: column; gap: 12px; }
-  .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .pastille { aspect-ratio: 1; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); cursor: pointer;
-              box-shadow: 0 3px 10px rgba(0,0,0,.35); transition: transform .15s, border-color .15s; }
-  .pastille.actif { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(255,255,255,.2), 0 4px 14px rgba(0,0,0,.4); }
-  .feuille { background: #fff; border-radius: 24px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); touch-action: manipulation; }
-  .feuille svg { display: block; width: 100%; height: auto; max-height: 62vh; }
-  .feuille svg * { stroke: #1b1030; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
-  .feuille .z { fill: #fff; cursor: pointer; transition: fill .25s; }
-  .col-actions { display: flex; gap: 10px; }
-  .col-actions button { flex: 1; padding: 14px; border-radius: 18px; border: 1px solid var(--bord); background: var(--carte);
-                        color: inherit; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; }
+  .coloriage { display: grid; gap: 12px; grid-template-areas: "bulle" "feuille" "palette" "actions" "autres"; }
+  .col-bulle { grid-area: bulle; display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; border-radius: 22px;
+               background: var(--carte); border: 1px solid var(--bord); min-height: 64px; }
+  .col-bulle .lumi { flex: none; width: 46px; height: 46px; border-radius: 50%;
+                     background: radial-gradient(circle at 40% 35%, #fff 0 12%, var(--c) 45%, transparent 72%);
+                     box-shadow: 0 0 24px var(--c); animation: respire 3s ease-in-out infinite; }
+  .col-bulle .txt { font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .col-bulle.parle .lumi { animation: respire 3s ease-in-out infinite, bondit .5s ease-out; }
+  .col-bulle.parle .txt { animation: bondit .5s ease-out; }
+  @keyframes respire { 50% { transform: scale(1.08); } }
+  @keyframes bondit { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .feuille { grid-area: feuille; position: relative; background: #fffdf7; border-radius: 26px; padding: 10px;
+             box-shadow: 0 0 0 6px var(--pinceau, #fff3), 0 14px 34px rgba(0,0,0,.4); transition: box-shadow .3s; touch-action: manipulation; }
+  .feuille svg { display: block; width: 100%; height: auto; max-height: 56vh; margin: 0 auto; }
+  .feuille svg *, .mini svg * { stroke: #1b1030; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+  .feuille .z, .mini .z { fill: #fff; transition: fill .25s; }
+  .feuille .z { cursor: pointer; }
+  .feuille .z.peint { animation: peint .35s ease-out; transform-box: fill-box; transform-origin: center; }
+  @keyframes peint { 40% { transform: scale(1.04); } }
+  .palette { grid-area: palette; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 10px;
+             border-radius: 22px; background: var(--carte); border: 1px solid var(--bord); }
+  .pastille { aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer; position: relative;
+              background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.75) 0 10%, transparent 34%), var(--c);
+              box-shadow: inset 0 -5px 0 rgba(0,0,0,.18), 0 4px 10px rgba(0,0,0,.35); transition: transform .15s; }
+  .pastille:active { transform: scale(.9); }
+  .pastille.actif { transform: scale(1.14) translateY(-3px); box-shadow: inset 0 -5px 0 rgba(0,0,0,.18), 0 0 0 4px #fff, 0 0 20px var(--c); }
+  .pastille.actif::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 900;
+                           color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  .col-actions { grid-area: actions; display: grid; grid-template-columns: 1fr 1.3fr 1.6fr; gap: 10px; }
+  .col-actions button { padding: 14px 8px; border-radius: 18px; border: 1px solid var(--bord); background: var(--carte);
+                        color: inherit; font: inherit; font-size: 19px; font-weight: 800; cursor: pointer; }
+  .col-actions button:active { transform: scale(.95); }
+  .col-actions .magie { background: linear-gradient(135deg, #a855f7, #f472b6); border: none; color: #fff; }
   .col-actions .fini { background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; }
+  .col-autres { grid-area: autres; display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+  .col-autres .autre { flex: none; width: 74px; padding: 5px; border-radius: 16px; background: #fffdf7; border: 3px solid transparent; cursor: pointer; }
+  .col-autres .autre.ici { border-color: var(--soleil); transform: scale(1.05); }
+  .mini svg { display: block; width: 100%; height: auto; border-radius: 10px; }
+  .univers.a-colorier .mini { width: 64px; background: #fffdf7; border-radius: 14px; padding: 4px; }
   #decor .goutte { position: fixed; width: 14px; height: 14px; border-radius: 50%; }
-  @media (min-width: 600px) { .palette { grid-template-columns: repeat(10, 1fr); } }
+  @media (min-width: 600px) {
+    .palette { grid-template-columns: repeat(10, 1fr); }
+    .col-bulle .txt { font-size: 32px; }
+    .col-autres .autre { width: 90px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    [data-ecran="coloriage"] .corps { grid-template-columns: 1fr; }
+    .coloriage { grid-template-columns: 1fr 360px; grid-template-rows: auto auto auto 1fr auto;
+                 grid-template-areas: "feuille bulle" "feuille palette" "feuille actions" "feuille ." "autres autres"; align-items: start; }
+    .palette { grid-template-columns: repeat(5, 1fr); }
+    .feuille svg { max-height: 74vh; }
+    .col-autres .autre { width: 84px; }
+  }
 </style>
 </head>
 <body>
@@ -362,12 +401,15 @@
       </section>
       <section id="ecran-coloriage" hidden>
         <div class="coloriage">
-          <div class="palette" id="palette"></div>
+          <div class="col-bulle" id="col-bulle" aria-live="polite"><span class="lumi"></span><span class="txt"></span></div>
           <div class="feuille" id="feuille"></div>
+          <div class="palette" id="palette"></div>
           <div class="col-actions">
             <button type="button" id="col-effacer" aria-label="↺">↺</button>
+            <button type="button" id="col-magie" class="magie"><span>🪄</span> <span></span></button>
             <button type="button" id="col-fini" class="fini"><span>✓</span> <span></span></button>
           </div>
+          <div class="col-autres" id="col-autres"></div>
         </div>
       </section>
     </div>
@@ -1135,6 +1177,7 @@ function carteMot(entree, sous = '') {
 function parler(texte, l = langue) {
   return new Promise((ok) => {
     if (!('speechSynthesis' in window)) return ok();
+    const occupe = speechSynthesis.speaking || speechSynthesis.pending;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texte);
     u.lang = LANGUES[l].voix; u.rate = .9; u.pitch = 1.25;
@@ -1146,7 +1189,9 @@ function parler(texte, l = langue) {
     u.onboundary = () => avatar?.syllabe();
     u.onend = u.onerror = fin;
     setTimeout(fin, 1500 + texte.length * 120); // filet si la voix ne répond pas
-    speechSynthesis.speak(u);
+    // Safari avale parfois un speak() lancé juste après cancel() : on laisse un souffle
+    if (occupe) setTimeout(() => speechSynthesis.speak(u), 90); else speechSynthesis.speak(u);
+    speechSynthesis.resume?.();
   });
 }
 // ---------- Petits sons, fabriqués en direct (aucun fichier audio) ----------
@@ -1182,7 +1227,13 @@ function debloquerAudio() {
     const b = audio.createBuffer(1, 1, 22050), s = audio.createBufferSource();
     s.buffer = b; s.connect(audio.destination); s.start(0);
   } catch {}
+  // iOS : la voix doit aussi être réveillée une fois par un vrai geste
+  if (!voixReveillee && 'speechSynthesis' in window && !speechSynthesis.speaking) {
+    voixReveillee = true;
+    try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch {}
+  }
 }
+let voixReveillee = false;
 ['touchend', 'click', 'keydown'].forEach((n) => document.addEventListener(n, debloquerAudio, true));
 
 // chaque bouton fait « pop » sous le doigt
@@ -1862,6 +1913,7 @@ function tuileUnivers(id, i) {
   b.type = 'button'; b.className = 'univers u' + (i % 5);
   b.innerHTML = '<span class="e"></span><span><span class="n"></span><br><span class="d"></span></span>';
   b.querySelector('.e').textContent = n.emoji;
+  if (n.type === 'colorier') { b.classList.add('a-colorier'); b.querySelector('.e').replaceWith(miniDessin(n.dessin)); }
   b.querySelector('.n').textContent = n.nom[langue];
   b.querySelector('.d').textContent = n.desc ? n.desc[langue] : '';
   b.onclick = () => aller(id);
@@ -2020,14 +2072,39 @@ function eclat(x, y, couleur) {
       { duration: 550, easing: 'ease-out' }).onfinish = () => e.remove();
   }
 }
+const TXT_COL = {
+  fini: { fr: 'Fini !', en: 'Done!', ar: 'انتهيت!' },
+  magie: { fr: 'Magie', en: 'Magic', ar: 'سحر' },
+  choisis: { fr: 'Choisis une couleur', en: 'Pick a color', ar: 'اختر لونًا' },
+  touche: { fr: 'Touche le dessin !', en: 'Tap the picture!', ar: 'المس الرسم!' },
+};
+// Lumi parle dans sa bulle, au-dessus du dessin
+function bulleCol(texte, couleur, dire = true) {
+  const b = $('col-bulle');
+  b.querySelector('.txt').textContent = texte;
+  b.style.setProperty('--c', couleur || 'rgba(255,255,255,.15)');
+  b.classList.remove('parle'); void b.offsetWidth; b.classList.add('parle');
+  if (dire) parler(texte);
+}
+function nomCouleur(c) { const m = PAR_EMOJI.get(c[0]); return m ? majusculeSimple(motDans(m)) : ''; }
 function choisirPinceau(c, dire = true) {
   pinceau = c;
   document.querySelectorAll('.pastille').forEach((p) => p.classList.toggle('actif', p.dataset.c === c[0]));
+  $('feuille').style.setProperty('--pinceau', c[1]);
   if (dire) {
     son('pop');
-    const m = PAR_EMOJI.get(c[0]);
-    if (m) { parler(motDans(m)); avatar?.forme(c[0]); avatar?.syllabe(); revenirAuNuage(1500); }
+    bulleCol(nomCouleur(c) + ' !', c[1]);
+    avatar?.forme(c[0]); revenirAuNuage(1500);
   }
+}
+// Une miniature du dessin, avec les couleurs déjà posées
+function miniDessin(k) {
+  const d = document.createElement('div');
+  d.className = 'mini';
+  d.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${DESSINS[k]}</svg>`;
+  const faites = Coloriages.lire(k);
+  d.querySelectorAll('.z').forEach((z, i) => { if (faites[i]) z.style.fill = faites[i]; });
+  return d;
 }
 function construireColoriage(k) {
   coloriageEnCours = k;
@@ -2035,33 +2112,62 @@ function construireColoriage(k) {
   pal.innerHTML = '';
   COULEURS_PINCEAU.forEach((c) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'pastille'; b.dataset.c = c[0]; b.style.background = c[1];
-    b.setAttribute('aria-label', motDans(PAR_EMOJI.get(c[0])));
+    b.type = 'button'; b.className = 'pastille'; b.dataset.c = c[0]; b.style.setProperty('--c', c[1]);
+    b.setAttribute('aria-label', nomCouleur(c));
     b.onclick = () => choisirPinceau(c);
     pal.appendChild(b);
   });
   choisirPinceau(pinceau, false);
+  bulleCol(TXT_COL.choisis[langue], pinceau[1], false);
   const f = $('feuille');
   f.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${DESSINS[k]}</svg>`;
-  const zones = [...f.querySelectorAll('.z')], faites = Coloriages.lire(k);
-  zones.forEach((z, i) => {
-    if (faites[i]) z.style.fill = faites[i];
+  const zones = [...f.querySelectorAll('.z')];
+  const sauver = () => Coloriages.ecrire(k, zones.map((z) => z.style.fill ? z.dataset.c : null));
+  const peindre = (z, couleur) => {
+    z.dataset.c = couleur; z.style.fill = couleur;
+    z.classList.remove('peint'); void z.getBoundingClientRect(); z.classList.add('peint');
+  };
+  let premiere = true;
+  Coloriages.lire(k).forEach((c, i) => { if (c && zones[i]) { zones[i].dataset.c = c; zones[i].style.fill = c; } });
+  zones.forEach((z) => {
     z.addEventListener('pointerdown', (ev) => {
       ev.preventDefault();
-      z.style.fill = pinceau[1];
-      const v = Coloriages.lire(k).slice(); v[i] = pinceau[1]; Coloriages.ecrire(k, v);
+      peindre(z, pinceau[1]); sauver();
       son('pop'); eclat(ev.clientX, ev.clientY, pinceau[1]);
+      if (premiere) { premiere = false; bulleCol(nomCouleur(pinceau) + ' !', pinceau[1], false); }
     });
   });
-  $('col-effacer').onclick = () => { zones.forEach((z) => { z.style.fill = ''; }); Coloriages.ecrire(k, []); son('pop'); };
+  $('col-effacer').onclick = () => { zones.forEach((z) => { z.style.fill = ''; delete z.dataset.c; }); sauver(); son('pop'); bulleCol(TXT_COL.choisis[langue], pinceau[1], false); };
+  // Baguette magique : les zones encore blanches se colorient une à une
+  $('col-magie').onclick = () => {
+    const vides = zones.filter((z) => !z.style.fill);
+    const cibles = vides.length ? vides : zones;
+    cibles.forEach((z, n) => setTimeout(() => {
+      if (coloriageEnCours !== k) return;
+      peindre(z, hasardDe(COULEURS_PINCEAU.slice(0, 8))[1]); son('pop');
+      if (n === cibles.length - 1) sauver();
+    }, n * 140));
+    bulleCol('✨ ' + TXT_COL.magie[langue] + ' !', '#a855f7');
+  };
   $('col-fini').onclick = () => {
     const m = PAR_EMOJI.get(NOEUDS['col-' + k].emoji);
     fete(); Progres.gagner(null);
-    carte(m.emoji, BEAU[langue], nomComplet(m), false);
+    bulleCol(BEAU[langue], '#facc15');
     avatar?.forme(m.emoji); revenirAuNuage(4000);
-    parler(BEAU[langue]);
   };
-  $('col-fini').lastElementChild.textContent = { fr: 'Fini !', en: 'Done!', ar: 'انتهيت!' }[langue];
+  $('col-fini').lastElementChild.textContent = TXT_COL.fini[langue];
+  $('col-magie').lastElementChild.textContent = TXT_COL.magie[langue];
+  // Les autres dessins, pour changer d'un doigt
+  const autres = $('col-autres');
+  autres.innerHTML = '';
+  Object.keys(DESSINS).forEach((d) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'autre' + (d === k ? ' ici' : '');
+    b.setAttribute('aria-label', NOEUDS['col-' + d].nom[langue]);
+    b.appendChild(miniDessin(d));
+    b.onclick = () => { if (d === k) return; pile.pop(); aller('col-' + d, false); bulleCol(NOEUDS['col-' + d].nom[langue], pinceau[1]); };
+    autres.appendChild(b);
+  });
 }
 
 function afficher() {
