@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Krousty en appel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --nuit: #0b1110;       /* fond */
+    --laque: #131c19;      /* surfaces */
+    --jade: #1f3a2c;       /* veste du chef */
+    --or: #c9b273;         /* anneau de la marque */
+    --menthe: #7fd6b0;     /* voix en direct */
+    --riz: #eef2ea;        /* texte */
+    --the: #8fa198;        /* texte secondaire */
+    --piment: #e5484d;     /* raccrocher */
+    --bord: #24312c;
+    --amp: 0;              /* niveau de voix, mis à jour en JS */
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  .haut, .scene, .identite, .suggestions, .ecrire, .commandes, .legende { flex: none; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--nuit); color: var(--riz);
+    font: 15px/1.45 "DM Sans", system-ui, sans-serif;
+    display: flex; justify-content: center; padding-inline: 16px;
+  }
+  .appel {
+    width: 100%; max-width: 440px; min-height: 100%; display: flex; flex-direction: column; gap: 14px;
+    padding-block: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ---------- Barre du haut ---------- */
+  .haut { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .resto { display: flex; flex-direction: column; font-size: 12px; color: var(--the); letter-spacing: .04em; }
+  .resto b { font: 600 13px "Sora", sans-serif; color: var(--riz); letter-spacing: .02em; }
+  .chrono { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--the); display: flex; align-items: center; gap: 6px; }
+  .chrono i { width: 7px; height: 7px; border-radius: 50%; background: var(--menthe); box-shadow: 0 0 8px var(--menthe); }
+  .fin .chrono i { background: var(--the); box-shadow: none; }
+
+  /* ---------- Scène 3D ---------- */
+  .scene { position: relative; width: 100%; aspect-ratio: 1; max-height: 50vh; margin-inline: auto; }
+  canvas#rendu { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+}
+  .orbe-css { width: 55%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #eef2ea, var(--menthe) 35%, var(--jade) 75%);
+              box-shadow: 0 0 calc(40px + var(--amp) * 60px) var(--menthe); scale: calc(1 + var(--amp) * .08); }
+  .scene.sans3d .repli { display: grid; }
+  .repli { display: none; position: absolute; inset: 0; place-items: center; color: var(--the); font-size: 13px; text-align: center; padding: 20%; }
+
+  /* ---------- Identité + état ---------- */
+  .identite { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: -6px; }
+  .identite h1 { margin: 0; font: 700 24px/1.1 "Sora", sans-serif; letter-spacing: -.01em; text-wrap: balance; }
+  .etat {
+    display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 10px; border-radius: 99px;
+    background: var(--laque); border: 1px solid var(--bord); font-size: 13px; color: var(--riz);
+  }
+  .barres { display: flex; align-items: center; gap: 3px; height: 16px; }
+  .barres span { width: 3px; height: 4px; border-radius: 2px; background: var(--menthe); transition: height .08s; }
+  [data-travail] .barres span { background: var(--or); }
+  [data-etat="erreur"] .barres span { background: var(--piment); }
+  [data-etat="repos"] .barres span, .fin .barres span { background: var(--the); }
+  .test { font-size: 13px; color: var(--the); flex: none; }
+  .test summary { cursor: pointer; padding-block: 4px; }
+  .test-corps { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
+  .test-titre { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  .puces { display: flex; flex-wrap: wrap; gap: 6px; }
+  .test .puce { font-size: 12px; padding: 6px 10px; color: var(--riz); }
+  .bascule { display: flex; align-items: center; gap: 8px; color: var(--riz); }
+
+  /* ---------- Transcription ---------- */
+  .fil { flex: 1; min-height: 150px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; overflow: hidden;
+         mask-image: linear-gradient(transparent 0, #000 40px); }
+  .msg { max-width: 86%; padding: 9px 13px; border-radius: 16px; font-size: 15px; line-height: 1.4; animation: entre .25s ease-out; }
+  @keyframes entre { from { opacity: 0; translate: 0 6px; } }
+  .msg.agent { align-self: flex-start; background: var(--laque); border: 1px solid var(--bord); border-bottom-left-radius: 6px; }
+  .msg.vous { align-self: flex-end; background: color-mix(in srgb, var(--menthe) 16%, var(--laque)); border-bottom-right-radius: 6px; }
+  .msg .curseur { display: inline-block; width: 6px; height: 1em; vertical-align: -2px; margin-left: 2px; background: var(--menthe); border-radius: 2px; animation: clig 1s steps(1) infinite; }
+  @keyframes clig { 50% { opacity: 0; } }
+
+  .suggestions { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .suggestions button { flex: none; }
+
+  /* ---------- Commandes ---------- */
+  button { font: inherit; color: inherit; cursor: pointer; border: none; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--menthe); outline-offset: 2px; }
+  .puce { padding: 8px 14px; border-radius: 99px; background: var(--laque); border: 1px solid var(--bord); font-size: 13px; }
+  .puce:hover { border-color: var(--or); }
+  .commandes { display: flex; justify-content: center; align-items: center; gap: 22px; }
+  .rond { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--laque); border: 1px solid var(--bord); }
+  .rond svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .rond.coupe { background: color-mix(in srgb, var(--piment) 22%, var(--laque)); color: var(--piment); border-color: color-mix(in srgb, var(--piment) 40%, transparent); }
+  .rond.raccrocher { width: 70px; height: 70px; background: var(--piment); border: none; color: #fff; }
+  .rond.raccrocher svg { width: 30px; height: 30px; }
+  .rond.lancer { width: 70px; height: 70px; background: var(--menthe); border: none; color: #0b1110; }
+  .legende { display: flex; justify-content: center; gap: 22px; font-size: 11px; color: var(--the); margin-top: -12px; }
+  .legende span { width: 58px; text-align: center; }
+  .legende span.grand { width: 70px; }
+
+  .ecrire { display: flex; gap: 8px; }
+  .ecrire input { flex: 1; min-width: 0; font: inherit; color: var(--riz); background: var(--laque); border: 1px solid var(--bord); border-radius: 99px; padding: 10px 16px; }
+  .ecrire button { padding: 0 16px; border-radius: 99px; background: var(--menthe); color: #0b1110; font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) { .msg { animation: none; } }
+</style>
+</head>
+<body>
+<div class="appel" id="appel" data-etat="repos">
+  <header class="haut">
+    <div class="resto"><b>Krousty · Asian Kitchen</b>Commande vocale</div>
+    <div class="chrono"><i></i><span id="chrono">00:00</span></div>
+  </header>
+
+  <div class="scene" id="scene">
+    <canvas id="rendu" aria-label="Krousty, poussière de lumière"></canvas>
+    <div class="repli"><div class="orbe-css"></div></div>
+  </div>
+
+  <div class="identite">
+    <h1>Krousty</h1>
+    <div class="etat"><div class="barres" id="barres"><span></span><span></span><span></span><span></span><span></span></div><span id="etat-texte">Prêt à prendre ta commande</span></div>
+  </div>
+
+  <div class="fil" id="fil" aria-live="polite"></div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="puce">Voir le menu du jour</button>
+    <button class="puce">Commander à emporter</button>
+    <button class="puce">Horaires d'ouverture</button>
+  </div>
+
+  <details class="test">
+    <summary>Panneau de test (à retirer en production)</summary>
+    <div class="test-corps">
+      <div class="test-titre">Actions de l'agent</div>
+      <div class="puces" id="test-actions"></div>
+      <div class="test-titre">Faire apparaître un emoji ou un mot</div>
+      <form class="ecrire" id="imagine">
+        <input id="imagine-saisie" type="text" placeholder="🍣, 🛵, Merci…" autocomplete="off">
+        <button type="submit">Voir</button>
+      </form>
+      <label class="bascule"><input type="checkbox" id="test-emojis" checked> Emojis automatiques dans les phrases</label>
+    </div>
+  </details>
+
+  <form class="ecrire" id="ecrire" hidden>
+    <input id="saisie" type="text" placeholder="Écris ton message…" autocomplete="off">
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <div class="commandes">
+    <button class="rond" id="btn-micro" aria-label="Couper le micro">
+      <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    </button>
+    <button class="rond lancer" id="btn-principal" aria-label="Lancer l'appel">
+      <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+    </button>
+    <button class="rond" id="btn-ecrire" aria-label="Continuer par écrit">
+      <svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>
+    </button>
+  </div>
+  <div class="legende"><span id="leg-micro">Micro</span><span class="grand" id="leg-principal">Appeler</span><span>Écrire</span></div>
+</div>
+
+<script>
+// =====================================================================
+//  Poussière de lumière (WebGL pur) : ~7 000 grains devant un halo
+//  Tout le mouvement est calculé sur la carte graphique.
+// =====================================================================
+const avatar = (() => {
+  const canvas = document.getElementById('rendu');
+  const gl = canvas.getContext('webgl', { alpha: false, antialias: false });
+  if (!gl) { document.getElementById('scene').classList.add('sans3d'); return null; }
+
+  const programme = (vs, fs) => {
+    const p = gl.createProgram();
+    [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(([type, src]) => {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s);
+      gl.attachShader(p, s);
+    });
+    gl.linkProgram(p);
+    return p;
+  };
+
+  // --- Halo de lumière derrière ---
+  const HALO_FS = `
+  precision highp float;
+  uniform vec2 uRes, uDecal; uniform float uT, uAmp, uEnergie, uRespire, uProche; uniform vec3 uFond, uC2, uC3;
+  void main(){
+    vec2 uv = (gl_FragCoord.xy - .5*uRes) / min(uRes.x, uRes.y);
+    float bord = smoothstep(.5, .26, length(uv));
+    uv = (uv - uDecal) / (1. + uProche*.45);                  // le halo suit l'être quand il s'approche
+    float r = length(uv), ang = atan(uv.y, uv.x);
+    float g = (exp(-r*r*16.) * (.34 + uAmp*.4 + uEnergie*.06) + exp(-r*r*4.5) * (.09 + uAmp*.06)) * (1. + uRespire*4. + uProche*.9);
+    float rayons = pow(.5 + .5*sin(ang*7. + uT*.12), 6.) * pow(.5 + .5*sin(ang*4. - uT*.09 + 1.), 4.) * exp(-r*4.2) * (.1 + uAmp*.12);
+    vec3 c = uFond + (mix(uC2, uC3, .3)*g + uC3*rayons) * bord;
+    gl_FragColor = vec4(c, 1.);
+  }`;
+  // --- Grains ---
+  const GRAINS_VS = `
+  attribute vec4 a;
+  attribute vec3 aA, aB;                                      // forme précédente et forme visée
+  attribute vec4 aCA, aCB;                                    // leurs couleurs (w = 1 : couleur de l'emoji)
+  uniform vec2 uEchelle; uniform float uT, uAmp, uForme, uMix, uSerre, uTour, uDpr, uEnergie;
+  uniform vec3 uC1, uC2, uC3;
+  uniform float uRespire, uProche;                            // souffle, et distance à l'écran (0 = au fond)
+  uniform vec2 uDecal;                                        // léger déplacement : il flotte, il se penche vers le doigt
+  uniform vec3 uDoigt, uOnde0, uOnde1;                        // doigt (x, y, appui) ; ondes (x, y, âge en s, < 0 = aucune)
+  varying vec3 vCol; varying float vA;
+  mat2 rot(float x){ float c = cos(x), s = sin(x); return mat2(c, -s, s, c); }
+  void main(){
+    float s1 = a.x, s2 = a.y, s3 = a.z, s4 = a.w;
+    float th = s1*6.2832, ph = acos(2.*s2 - 1.);
+    float rr = pow(s3, .6);                                   // plus dense au centre
+    vec3 dir = vec3(sin(ph)*cos(th), cos(ph), sin(ph)*sin(th));
+    float R = .34 * rr * uSerre;
+    R *= 1. + uAmp*.3*sin(rr*11. - uT*9.) + uAmp*.1;           // onde de voix qui traverse la poussière
+    R *= 1. + uRespire;                                        // il respire
+    vec3 p = dir * R;
+    p.xz = rot(uT*uTour*(.5 + (1. - rr)*1.3) + s4*6.2832) * p.xz;   // tourbillon : le cœur tourne plus vite
+    p += .028*vec3(sin(uT*.7 + s1*40. + p.y*7.), sin(uT*.6 + s2*40. + p.z*7.), sin(uT*.8 + s3*40. + p.x*7.)) * (1. + uEnergie);
+    p.yz = rot(.42) * p.yz;
+    // la poussière dessine une forme : chaque grain part avec un léger décalage et fait une courbe
+    vec3 cible = mix(aA, aB, uMix);
+    cible.xz = rot(sin(uT*.6)*.28) * cible.xz;
+    cible *= 1. + uAmp*.08*sin(length(cible.xy)*30. - uT*10.);
+    cible += .006*vec3(sin(uT*1.3 + s1*60.), sin(uT*1.1 + s2*60.), 0.);
+    float f = smoothstep(0., 1., clamp(uForme*1.5 - s3*.5, 0., 1.)) * step(.1, s4);
+    p = mix(p, cible, f) + vec3(-cible.y, cible.x, 0.) * sin(f*3.1416) * .5 * (s2 - .5);
+    p.xy += uDecal;
+    float z = 1.7 - p.z - uProche*.55;                          // il s'approche de la vitre
+    vec2 sp = p.xy / z * 1.7;
+    // toucher : des ondes parcourent la poussière, et les grains viennent vers le doigt
+    float eclat = 0.;
+    for (int k = 0; k < 2; k++) {
+      vec3 o = k == 0 ? uOnde0 : uOnde1;
+      if (o.z >= 0.) {
+        vec2 dv = sp - o.xy; float d = length(dv) + 1e-4;
+        float env = exp(-abs(d - o.z*.5) * 14.) * exp(-o.z*1.2);
+        sp += dv / d * env * .075;
+        eclat += env * 2.;
+      }
+    }
+    vec2 dd = uDoigt.xy - sp;
+    float attire = exp(-length(dd) * 7.) * uDoigt.z;
+    sp += dd * attire * .22;
+    eclat += attire * .8;
+    gl_Position = vec4(sp * uEchelle, 0., 1.);
+    float grand = pow(s4, 10.) * 5.;                            // quelques éclats plus gros
+    gl_PointSize = (2.2 + grand) * uDpr * (1.7 / z) * (1. + uAmp*.6*s4) * (1. + eclat*.5);
+    float scintille = .45 + .55*(.5 + .5*sin(uT*(1. + s2*3.) + s1*50.));
+    vA = scintille * (.5 + .5*(1. - rr)) * .7 * (1. + eclat*1.6);
+    vCol = mix(uC1, uC2, smoothstep(.1, .75, rr));
+    vCol = mix(vCol, uC3, step(.82, s2) * .85);
+    vec4 cc = mix(aCA, aCB, uMix);
+    vCol = mix(vCol, cc.rgb * 1.3, f * cc.w * .9);
+  }`;
+  const GRAINS_FS = `
+  precision mediump float;
+  varying vec3 vCol; varying float vA;
+  void main(){
+    vec2 c = gl_PointCoord - .5;
+    float g = exp(-dot(c, c)*22.);
+    gl_FragColor = vec4(vCol * g * vA, 1.);
+  }`;
+
+  let pHalo, pGrains;
+  try { pHalo = programme(`attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`, HALO_FS); pGrains = programme(GRAINS_VS, GRAINS_FS); }
+  catch (e) { console.error(e); document.getElementById('scene').classList.add('sans3d'); return null; }
+
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const N = matchMedia('(max-width: 500px)').matches ? 6000 : 9000;
+  const graines = new Float32Array(N * 4).map(() => Math.random());
+  const bufGrains = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufGrains);
+  gl.bufferData(gl.ARRAY_BUFFER, graines, gl.STATIC_DRAW);
+  // Formes : dessinées sur un petit canevas, puis chaque grain reçoit un point au hasard dans le dessin
+  const FORMES = {
+    question(g) { g.font = '800 150px Sora, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 80, 86); },
+    euro(g) { g.font = '700 130px Sora, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('€', 80, 86); },
+    recherche(g) { g.lineWidth = 14; g.beginPath(); g.arc(66, 66, 40, 0, 7); g.stroke(); g.lineWidth = 20; g.beginPath(); g.moveTo(96, 96); g.lineTo(136, 136); g.stroke(); },
+    horloge(g) { g.lineWidth = 11; g.beginPath(); g.arc(80, 80, 60, 0, 7); g.stroke(); g.lineWidth = 10; g.beginPath(); g.moveTo(80, 80); g.lineTo(80, 42); g.moveTo(80, 80); g.lineTo(110, 94); g.stroke(); },
+    check(g) { g.lineWidth = 9; g.beginPath(); g.arc(80, 80, 64, 0, 7); g.stroke(); g.lineWidth = 17; g.beginPath(); g.moveTo(48, 82); g.lineTo(72, 106); g.lineTo(116, 56); g.stroke(); },
+    coeur(g) { g.beginPath(); g.moveTo(80, 136); g.bezierCurveTo(10, 90, 14, 30, 56, 30); g.bezierCurveTo(70, 30, 78, 40, 80, 50); g.bezierCurveTo(82, 40, 90, 30, 104, 30); g.bezierCurveTo(146, 30, 150, 90, 80, 136); g.fill(); },
+    bol(g) { // bol de nouilles, baguettes et vapeur
+      g.beginPath(); g.moveTo(18, 84); g.lineTo(142, 84); g.arc(80, 84, 62, 0, Math.PI); g.fill();
+      g.lineWidth = 6; [52, 70, 88, 106].forEach((x) => { g.beginPath(); g.moveTo(x, 84); g.bezierCurveTo(x - 8, 68, x + 8, 60, x, 46); g.stroke(); });
+      g.lineWidth = 7; g.beginPath(); g.moveTo(104, 60); g.lineTo(146, 14); g.moveTo(114, 64); g.lineTo(152, 26); g.stroke();
+      g.lineWidth = 4; [44, 62].forEach((x) => { g.beginPath(); g.moveTo(x, 36); g.bezierCurveTo(x - 8, 26, x + 8, 18, x, 6); g.stroke(); });
+    },
+    gyoza(g) { // un ravioli en contour, avec ses plis sur le dessus
+      g.lineWidth = 10;
+      g.beginPath(); g.moveTo(14, 104); g.quadraticCurveTo(80, 142, 146, 104); g.quadraticCurveTo(140, 30, 80, 28); g.quadraticCurveTo(20, 30, 14, 104); g.stroke();
+      g.lineWidth = 7;
+      [[44, 44, 50, 70], [62, 34, 64, 62], [80, 30, 80, 58], [98, 34, 96, 62], [116, 44, 110, 70]].forEach(([x1, y1, x2, y2]) => { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); });
+    },
+    anneau(g) { g.lineWidth = 12; g.beginPath(); g.arc(80, 80, 58, 0, 7); g.stroke(); [0, 2.1, 4.2].forEach((a) => { g.beginPath(); g.arc(80 + Math.cos(a) * 58, 80 + Math.sin(a) * 58, 12, 0, 7); g.fill(); }); },
+    crayon(g) { // crayon qui écrit une ligne
+      g.save(); g.translate(92, 64); g.rotate(Math.PI / 4);
+      g.fillRect(-14, -58, 28, 84); g.beginPath(); g.moveTo(-14, 30); g.lineTo(14, 30); g.lineTo(0, 58); g.closePath(); g.fill();
+      g.save(); g.globalCompositeOperation = 'destination-out'; g.fillRect(-15, 18, 30, 5); g.restore(); g.restore();
+      g.lineWidth = 7; g.beginPath(); g.moveTo(14, 140); g.bezierCurveTo(30, 124, 42, 150, 56, 136); g.stroke();
+    },
+    engrenage(g) {
+      g.beginPath();
+      for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = i % 2 ? 50 : 66; g.lineTo(80 + Math.cos(a) * r, 80 + Math.sin(a) * r); }
+      g.closePath(); g.fill();
+      g.save(); g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(80, 80, 22, 0, 7); g.fill(); g.restore();
+    },
+    sablier(g) { g.lineWidth = 9; g.beginPath(); g.moveTo(40, 22); g.lineTo(120, 22); g.moveTo(40, 138); g.lineTo(120, 138);
+      g.moveTo(48, 22); g.lineTo(80, 80); g.lineTo(48, 138); g.moveTo(112, 22); g.lineTo(80, 80); g.lineTo(112, 138); g.stroke();
+      g.beginPath(); g.moveTo(58, 132); g.lineTo(102, 132); g.lineTo(80, 104); g.closePath(); g.fill(); },
+    erreur(g) { g.lineWidth = 10; g.beginPath(); g.moveTo(80, 18); g.lineTo(148, 138); g.lineTo(12, 138); g.closePath(); g.stroke();
+      g.lineWidth = 14; g.beginPath(); g.moveTo(80, 62); g.lineTo(80, 100); g.stroke(); g.beginPath(); g.arc(80, 120, 8, 0, 7); g.fill(); },
+  };
+  const cacheFormes = {};
+  // Une forme = des positions (x, y, z) et des couleurs (r, g, b, w) pour chaque grain.
+  // Nom connu → dessin ci-dessus. Sinon, n'importe quel emoji ou mot est dessiné puis échantillonné.
+  function pointsForme(nom) {
+    if (cacheFormes[nom]) return cacheFormes[nom];
+    const T = 160, c = document.createElement('canvas'); c.width = c.height = T;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round';
+    if (FORMES[nom]) FORMES[nom](g);
+    else {
+      let taille = 130;
+      const police = (px) => `700 ${px}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Sora, system-ui, sans-serif`;
+      g.font = police(taille);
+      const larg = g.measureText(nom).width;
+      if (larg > 150) { taille *= 150 / larg; g.font = police(taille); }
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(nom, T / 2, T / 2 + taille * .04);
+    }
+    const px = g.getImageData(0, 0, T, T).data, pleins = [];
+    for (let i = 0; i < T * T; i++) if (px[i * 4 + 3] > 128) pleins.push(i);
+    const pos = new Float32Array(N * 3), col = new Float32Array(N * 4);
+    for (let k = 0; k < N; k++) {
+      const i = pleins[(Math.random() * pleins.length) | 0] ?? 0;
+      pos[k * 3] = ((i % T) / T - .5) * .62 + (Math.random() - .5) * .006;
+      pos[k * 3 + 1] = -(((i / T) | 0) / T - .5) * .62 + (Math.random() - .5) * .006;
+      pos[k * 3 + 2] = (Math.random() - .5) * .05;
+      const r = px[i * 4], v = px[i * 4 + 1], bl = px[i * 4 + 2];
+      col.set([r / 255, v / 255, bl / 255, Math.max(r, v, bl) - Math.min(r, v, bl) > 30 ? 1 : 0], k * 4); // pixel coloré → on garde sa couleur
+    }
+    return (cacheFormes[nom] = { pos, col });
+  }
+  let formeA = pointsForme('question'), formeB = formeA, formeNom = null;
+  const bufA = gl.createBuffer(), bufB = gl.createBuffer(), bufCA = gl.createBuffer(), bufCB = gl.createBuffer();
+  const envoyer = (buf, data) => { gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW); };
+  const envoyerFormes = () => { envoyer(bufA, formeA.pos); envoyer(bufB, formeB.pos); envoyer(bufCA, formeA.col); envoyer(bufCB, formeB.col); };
+  envoyerFormes();
+  const uni = (p, noms) => Object.fromEntries(noms.map((n) => [n, gl.getUniformLocation(p, n)]));
+  const UH = uni(pHalo, ['uRes', 'uT', 'uAmp', 'uEnergie', 'uFond', 'uC2', 'uC3', 'uRespire', 'uProche', 'uDecal']);
+  const UG = uni(pGrains, ['uEchelle', 'uT', 'uAmp', 'uForme', 'uMix', 'uSerre', 'uTour', 'uDpr', 'uEnergie', 'uC1', 'uC2', 'uC3',
+    'uRespire', 'uProche', 'uDecal', 'uDoigt', 'uOnde0', 'uOnde1']);
+  const locH = gl.getAttribLocation(pHalo, 'p'), locG = gl.getAttribLocation(pGrains, 'a');
+  const locA = gl.getAttribLocation(pGrains, 'aA'), locB = gl.getAttribLocation(pGrains, 'aB');
+  const locCA = gl.getAttribLocation(pGrains, 'aCA'), locCB = gl.getAttribLocation(pGrains, 'aCB');
+
+  // Palettes par état : cœur, lumière principale, éclats — et mouvement
+  const PAL = {
+    attente:   { c: [[1, .95, .85], [.45, .9, .72], [.92, .78, .48]], tour: .25, serre: 1,   energie: 0 },
+    ecoute:    { c: [[.92, 1, .97], [.4, .95, .85], [.6, .85, 1]],     tour: .35, serre: .82, energie: .4 },
+    reflechit: { c: [[1, .95, .8], [1, .76, .36], [1, .56, .3]],       tour: .9,  serre: .9,  energie: .3 },
+    parle:     { c: [[1, .97, .9], [.5, .95, .75], [1, .85, .5]],      tour: .45, serre: 1.05, energie: .6 },
+    heureux:   { c: [[1, .95, .85], [1, .7, .45], [1, .55, .6]],       tour: .7,  serre: 1.15, energie: 1 },
+    fin:       { c: [[.5, .55, .53], [.25, .32, .3], [.35, .4, .38]],  tour: .08, serre: .7,  energie: 0 },
+    travail:   { c: [[.9, .98, 1], [.35, .8, .95], [.75, .95, .7]],    tour: 1.1, serre: .9,  energie: .5 },
+    erreur:    { c: [[1, .9, .85], [1, .42, .38], [1, .7, .45]],       tour: .3,  serre: .85, energie: .7 },
+  };
+  const cur = { c: PAL.attente.c.map((v) => [...v]), tour: .25, serre: 1, energie: 0, forme: 0, mix: 1 };
+  const etat = { mode: 'attente', ouverture: 0, parle: false, pulse: 0, externe: 0, externeT: -1e9 };
+  const fond = [11 / 255, 17 / 255, 16 / 255];
+
+  function redim() {
+    const r = canvas.getBoundingClientRect(), k = Math.min(devicePixelRatio, 2);
+    canvas.width = Math.round(r.width * k); canvas.height = Math.round(r.height * k);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  new ResizeObserver(redim).observe(canvas); redim();
+
+  // --------- Comportement « vivant » : souffle, visites vers l'écran, réaction au doigt ---------
+  const vie = {
+    proche: 0, procheCible: 0, decal: [0, 0], penche: null,
+    doigt: [0, 0, 0], appui: false, ondes: [[0, 0, -1], [0, 0, -1]], onde: 0, derniereOnde: 0,
+    prochaineVisite: 6 + Math.random() * 6, finVisite: 0, lache: 0,
+  };
+  const versScene = (e) => { // coordonnées du doigt dans l'espace de la poussière (centre = 0, y vers le haut)
+    const r = canvas.getBoundingClientRect(), m = Math.min(r.width, r.height);
+    return [(e.clientX - r.left - r.width / 2) / m, -(e.clientY - r.top - r.height / 2) / m];
+  };
+  const onde = (x, y) => { vie.ondes[vie.onde] = [x, y, 0]; vie.onde = 1 - vie.onde; vie.derniereOnde = performance.now(); };
+  canvas.style.touchAction = 'none';
+  canvas.addEventListener('pointerdown', (e) => {
+    const [x, y] = versScene(e);
+    vie.appui = true; vie.doigt[0] = x; vie.doigt[1] = y;
+    vie.procheCible = .42; vie.penche = [x * .18, y * .18]; clearTimeout(vie.lache);
+    onde(x, y);
+    try { navigator.vibrate?.(8); } catch {}
+    canvas.setPointerCapture?.(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!vie.appui) return;
+    const [x, y] = versScene(e), dx = x - vie.doigt[0], dy = y - vie.doigt[1];
+    vie.doigt[0] = x; vie.doigt[1] = y; vie.penche = [x * .18, y * .18];
+    if (performance.now() - vie.derniereOnde > 260 && Math.hypot(dx, dy) > .004) onde(x, y);
+  });
+  const relacher = () => {
+    if (!vie.appui) return;
+    vie.appui = false;
+    vie.lache = setTimeout(() => { vie.procheCible = 0; vie.penche = null; }, 900);
+  };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((n) => canvas.addEventListener(n, relacher));
+
+  const lent = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const t0 = performance.now();
+  let tPrec = 0;
+  (function boucle() {
+    const t = (performance.now() - t0) / 1000 * (lent ? .35 : 1);
+    const dt = Math.min(.05, t - tPrec); tPrec = t;
+    // souffle : inspiration lente, expiration un peu plus rapide
+    const cycle = (t * .2) % 1;
+    const respire = (cycle < .55 ? Math.sin(cycle / .55 * Math.PI / 2) : Math.cos((cycle - .55) / .45 * Math.PI / 2)) * .05 - .02;
+    // de temps en temps, il vient voir de plus près
+    if (!vie.appui && etat.mode !== 'fin' && t > vie.prochaineVisite) {
+      vie.procheCible = .26 + Math.random() * .12;
+      vie.penche = [(Math.random() - .5) * .06, (Math.random() - .3) * .04];
+      vie.finVisite = t + 2 + Math.random() * 1.5;
+      vie.prochaineVisite = t + 12 + Math.random() * 14;
+    }
+    if (vie.finVisite && t > vie.finVisite && !vie.appui) { vie.finVisite = 0; vie.procheCible = 0; vie.penche = null; }
+    if (etat.mode === 'fin') vie.procheCible = 0;
+    vie.proche += (vie.procheCible - vie.proche) * (vie.procheCible > vie.proche ? .03 : .02);
+    const flotte = vie.penche || [Math.sin(t * .21) * .02, Math.sin(t * .17 + 1) * .015];
+    vie.decal[0] += (flotte[0] - vie.decal[0]) * .03; vie.decal[1] += (flotte[1] - vie.decal[1]) * .03;
+    vie.doigt[2] += ((vie.appui ? 1 : 0) - vie.doigt[2]) * .12;
+    vie.ondes.forEach((o) => { if (o[2] >= 0) { o[2] += dt; if (o[2] > 3) o[2] = -1; } });
+    const p = PAL[etat.mode] || PAL.attente;
+    cur.c.forEach((c, i) => c.forEach((v, j) => (c[j] += (p.c[i][j] - v) * .04)));
+    for (const k of ['tour', 'serre', 'energie']) cur[k] += (p[k] - cur[k]) * .035;
+    cur.forme += ((formeNom ? 1 : 0) - cur.forme) * .045;
+    cur.mix += (1 - cur.mix) * .06;
+    etat.pulse *= .9;
+    let cible = 0;
+    if (etat.parle && performance.now() - etat.externeT < 200) cible = etat.externe;
+    else if (etat.parle) cible = .3 + .7 * Math.abs(Math.sin(t * 17) * Math.sin(t * 6.3 + 1)) * (.6 + etat.pulse * .6);
+    else if (etat.mode === 'ecoute') cible = .06 + .06 * Math.abs(Math.sin(t * 3.1) * Math.sin(t * 1.7));
+    etat.ouverture += (cible - etat.ouverture) * .22;
+    const amp = Math.max(0, etat.ouverture), w = canvas.width, h = canvas.height, m = Math.min(w, h);
+
+    // 1. halo
+    gl.disable(gl.BLEND);
+    gl.useProgram(pHalo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.enableVertexAttribArray(locH); gl.vertexAttribPointer(locH, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(UH.uRes, w, h); gl.uniform1f(UH.uT, t); gl.uniform1f(UH.uAmp, amp); gl.uniform1f(UH.uEnergie, cur.energie);
+    gl.uniform3fv(UH.uFond, fond); gl.uniform3fv(UH.uC2, cur.c[1]); gl.uniform3fv(UH.uC3, cur.c[2]);
+    gl.uniform1f(UH.uRespire, respire); gl.uniform1f(UH.uProche, vie.proche); gl.uniform2fv(UH.uDecal, vie.decal);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.disableVertexAttribArray(locH);
+
+    // 2. grains, en lumière additive
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    gl.useProgram(pGrains);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufGrains);
+    gl.enableVertexAttribArray(locG); gl.vertexAttribPointer(locG, 4, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(UG.uEchelle, 2 * m / w, 2 * m / h);
+    gl.uniform1f(UG.uT, t); gl.uniform1f(UG.uAmp, amp); gl.uniform1f(UG.uForme, cur.forme); gl.uniform1f(UG.uMix, cur.mix);
+    gl.uniform1f(UG.uSerre, cur.serre); gl.uniform1f(UG.uTour, cur.tour); gl.uniform1f(UG.uDpr, Math.min(devicePixelRatio, 2));
+    gl.uniform1f(UG.uEnergie, cur.energie);
+    gl.uniform3fv(UG.uC1, cur.c[0]); gl.uniform3fv(UG.uC2, cur.c[1]); gl.uniform3fv(UG.uC3, cur.c[2]);
+    gl.uniform1f(UG.uRespire, respire); gl.uniform1f(UG.uProche, vie.proche); gl.uniform2fv(UG.uDecal, vie.decal);
+    gl.uniform3fv(UG.uDoigt, vie.doigt); gl.uniform3fv(UG.uOnde0, vie.ondes[0]); gl.uniform3fv(UG.uOnde1, vie.ondes[1]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufA); gl.enableVertexAttribArray(locA); gl.vertexAttribPointer(locA, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufB); gl.enableVertexAttribArray(locB); gl.vertexAttribPointer(locB, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufCA); gl.enableVertexAttribArray(locCA); gl.vertexAttribPointer(locCA, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufCB); gl.enableVertexAttribArray(locCB); gl.vertexAttribPointer(locCB, 4, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.POINTS, 0, N);
+    [locG, locA, locB, locCA, locCB].forEach((l) => gl.disableVertexAttribArray(l));
+
+    document.documentElement.style.setProperty('--amp', amp.toFixed(3));
+    requestAnimationFrame(boucle);
+  })();
+
+  return {
+    mode(m) { etat.mode = m; },
+    parle(on) { etat.parle = on; },
+    syllabe() { etat.pulse = 1; },
+    approche() { vie.prochaineVisite = 0; },               // déclenche une visite vers l'écran
+    niveauExterne(v) { etat.externe = Math.max(0, Math.min(1, v)); etat.externeT = performance.now(); },
+    niveau: () => (etat.parle ? etat.ouverture : 0),
+    // Fait prendre une forme à la poussière : nom de dessin, emoji ou mot (null : redevient un nuage)
+    forme(nom) {
+      nom = nom ? String(nom).trim() : null;
+      if (nom === formeNom) return;
+      if (nom) {
+        const nouvelle = pointsForme(nom);
+        if (cur.forme > .2) {
+          // d'une forme à l'autre : on part de la position et de la couleur actuelles des grains
+          const m = (a, b) => a.map((v, i) => v + (b[i] - v) * cur.mix);
+          formeA = { pos: m(formeA.pos, formeB.pos), col: m(formeA.col, formeB.col) }; cur.mix = 0;
+        } else { formeA = nouvelle; cur.mix = 1; }
+        formeB = nouvelle;
+        envoyerFormes();
+      }
+      formeNom = nom;
+    },
+  };
+})();
+
+// =====================================================================
+//  CONFIGURATION : tout ce qu'il faut adapter pour le vrai projet
+// =====================================================================
+
+// 1. Actions de l'agent : ce que la poussière montre pendant qu'il travaille.
+//    palette = couleurs et mouvement (voir PAL dans le module de la poussière)
+//    forme   = dessin intégré, emoji, mot, ou null (nuage libre)
+//    travail = true pour les actions « en cours » (barres qui balaient, pas de micro)
+const ACTIONS = {
+  repos:     { palette: 'attente',   forme: null,        texte: 'Prêt à prendre ta commande' },
+  ecoute:    { palette: 'ecoute',    forme: null,        texte: "Je t'écoute" },
+  reflechit: { palette: 'reflechit', forme: 'anneau',    texte: 'Je réfléchis',   travail: true },
+  cherche:   { palette: 'reflechit', forme: 'recherche', texte: 'Je cherche',     travail: true },
+  redige:    { palette: 'travail',   forme: 'crayon',    texte: 'Je rédige',      travail: true },
+  execute:   { palette: 'travail',   forme: 'engrenage', texte: "J'exécute",      travail: true },
+  attend:    { palette: 'attente',   forme: 'sablier',   texte: 'Un instant…',    travail: true },
+  question:  { palette: 'parle',     forme: 'question',  texte: "J'ai une question" },
+  termine:   { palette: 'heureux',   forme: 'check',     texte: "C'est fait" },
+  erreur:    { palette: 'erreur',    forme: 'erreur',    texte: 'Oups, un souci' },
+  parle:     { palette: 'parle',     forme: undefined,   texte: 'Je parle' },      // undefined : la phrase décide
+  fin:       { palette: 'fin',       forme: null,        texte: 'Appel terminé' },
+};
+
+// 2. Emojis automatiques pendant qu'il parle : mot-clé trouvé dans la phrase → emoji.
+//    Le premier qui correspond gagne. Un emoji, un mot ou un nom de forme intégrée marche aussi.
+const MOTS_EMOJI = [
+  [/nouille|ramen|pad thaï|\bbol\b/i, '🍜'],
+  [/gyoza|ravioli/i, '🥟'],
+  [/sushi|maki/i, '🍣'],
+  [/crevette/i, '🍤'],
+  [/\briz\b/i, '🍚'],
+  [/bœuf|lok lak/i, '🥩'],
+  [/poulet/i, '🍗'],
+  [/épicé|piment/i, '🌶️'],
+  [/livr/i, '🛵'],
+  [/boisson|\bthé\b/i, '🍵'],
+  [/dessert|mochi/i, '🍡'],
+  [/\d+ ?h\b|heure|minute|ouvert/i, 'horloge'],
+  [/€|euro|prix/i, 'euro'],
+  [/plaisir|merci|adore/i, 'coeur'],
+];
+
+// 3. Règles : les emojis ne doivent pas apparaître à chaque phrase.
+const REGLES_EMOJI = {
+  actif: true,          // false : jamais d'emoji automatique (les actions gardent leurs formes)
+  questions: true,      // une phrase qui finit par « ? » dessine un point d'interrogation
+  unePhraseSur: 2,      // au plus un emoji toutes les 2 phrases
+  pauseMin: 6000,       // et au moins 6 s entre deux emojis
+  duree: 4000,          // l'emoji reste 4 s, puis la poussière redevient nuage
+};
+
+// =====================================================================
+//  Écran d'appel : états, transcription propre, voix
+// =====================================================================
+const $ = (id) => document.getElementById(id);
+const appel = $('appel');
+let enCours = false, micro = true, voix = true, jeton = 0, debut = 0, dernierAuteur = null, bulleCourante = null;
+let actionCourante = 'repos';
+
+// Passe à une action : couleurs, mouvement, forme et texte d'état
+function action(nom, texte) {
+  const a = ACTIONS[nom] || ACTIONS.repos;
+  actionCourante = nom;
+  appel.dataset.etat = nom;
+  appel.toggleAttribute('data-travail', !!a.travail);
+  $('etat-texte').textContent = texte || a.texte;
+  avatar?.mode(a.palette);
+  if (a.forme !== undefined) avatar?.forme(a.forme);
+}
+
+// Choisit la forme d'une phrase en appliquant les règles
+const emojiStats = { phrases: 99, dernier: 0 };
+function formePourPhrase(texte) {
+  const R = REGLES_EMOJI;
+  emojiStats.phrases++;
+  if (R.questions && /\?\s*$/.test(texte)) return 'question';
+  if (!R.actif) return null;
+  const trouve = MOTS_EMOJI.find(([re]) => re.test(texte));
+  if (!trouve) return null;
+  if (emojiStats.phrases < R.unePhraseSur || Date.now() - emojiStats.dernier < R.pauseMin) return null;
+  emojiStats.phrases = 0; emojiStats.dernier = Date.now();
+  return trouve[1];
+}
+
+// Supprime les annotations de la reconnaissance vocale : [inhale], [rires]… même non fermées
+const nettoyer = (t) => t.replace(/\[[^\]]*(\]|$)/g, '').replace(/\s{2,}/g, ' ').trim();
+
+// Ajoute du texte : fusionne avec la bulle précédente si c'est le même auteur
+function ajouter(auteur, texte) {
+  texte = nettoyer(texte);
+  if (!texte) return null;
+  if (auteur !== dernierAuteur || !bulleCourante) {
+    bulleCourante = document.createElement('div');
+    bulleCourante.className = 'msg ' + auteur;
+    $('fil').appendChild(bulleCourante);
+    dernierAuteur = auteur;
+    while ($('fil').children.length > 6) $('fil').firstChild.remove();
+  } else texte = ' ' + texte;
+  const s = document.createElement('span'); s.textContent = texte; bulleCourante.appendChild(s);
+  return s;
+}
+
+// Barres sous le nom : suivent la voix quand il parle, le micro quand il écoute, balaient quand il travaille
+const barres = [...$('barres').children];
+(function niveaux() {
+  const e = appel.dataset.etat, t = performance.now() / 1000;
+  barres.forEach((b, i) => {
+    let h = 4;
+    if (e === 'parle') h = 4 + (avatar ? avatar.niveau() : Math.abs(Math.sin(t * 12 + i))) * 12 * (0.6 + 0.4 * Math.sin(t * 9 + i * 1.7));
+    else if (e === 'ecoute' && micro) h = 4 + Math.abs(Math.sin(t * 5 + i * 1.3)) * 6;
+    else if (appel.hasAttribute('data-travail')) h = 4 + (Math.floor(t * 4) % 5 === i ? 6 : 0);
+    b.style.height = h.toFixed(1) + 'px';
+  });
+  requestAnimationFrame(niveaux);
+})();
+
+const pause = (ms, j) => new Promise((ok, ko) => setTimeout(() => (j === jeton ? ok() : ko('annulé')), ms));
+
+// Krousty parle : texte mot à mot synchronisé avec la voix (ou un rythme estimé).
+// options.forme : impose une forme (emoji, mot, nom de forme) ; null = aucune ; absent = règles automatiques
+let minuteurForme;
+function dire(texte, j = jeton, options = {}) {
+  return new Promise((ok) => {
+    action('parle'); avatar?.parle(true);
+    const forme = 'forme' in options ? options.forme : formePourPhrase(texte);
+    avatar?.forme(forme);
+    clearTimeout(minuteurForme);
+    if (forme) minuteurForme = setTimeout(() => { if (actionCourante === 'parle') avatar?.forme(null); }, REGLES_EMOJI.duree);
+    const propre = nettoyer(texte), mots = propre.split(' ');
+    const cible = ajouter('agent', mots[0]); // nouvelle bulle, ou suite de la précédente
+    const prefixe = cible.textContent.startsWith(' ') ? ' ' : '';
+    const curseur = document.createElement('i'); curseur.className = 'curseur'; bulleCourante.appendChild(curseur);
+    let n = 1, fini = false, voixActive = false;
+    const avancer = () => { n = Math.min(n + 1, mots.length); cible.textContent = prefixe + mots.slice(0, n).join(' '); avatar?.syllabe(); };
+    const terminer = () => {
+      if (fini) return; fini = true;
+      clearInterval(minuteur); curseur.remove();
+      cible.textContent = prefixe + propre;
+      avatar?.parle(false); ok();
+    };
+    // Rythme estimé : utilisé quand la voix du navigateur est coupée ou absente
+    const minuteur = setInterval(() => {
+      if (j !== jeton) return terminer();
+      if (voixActive) return;
+      avancer();
+      if (n >= mots.length) setTimeout(terminer, 350);
+    }, 300);
+    if (voix && 'speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(propre);
+      u.lang = 'fr-FR'; u.rate = 1.05; u.pitch = 1.05;
+      const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith('fr'));
+      if (v) u.voice = v;
+      u.onstart = () => { voixActive = true; };
+      u.onboundary = (e) => { if (voixActive && (!e.name || e.name === 'word')) avancer(); };
+      u.onend = u.onerror = () => { if (voixActive) setTimeout(terminer, 150); };
+      speechSynthesis.speak(u);
+    }
+  });
+}
+
+async function vousDites(texte, j) {
+  action('ecoute');
+  await pause(900, j);
+  // la transcription arrive par morceaux, comme une vraie reconnaissance vocale
+  let brut = '', s = null;
+  for (const m of texte.split(' ')) {
+    brut += ' ' + m;
+    const propre = nettoyer(brut);
+    if (propre) s ? (s.textContent = propre) : (s = ajouter('vous', propre));
+    await pause(170, j);
+  }
+  await pause(500, j);
+}
+
+// Démo : une commande complète, avec les actions qu'un vrai agent déclencherait
+const SCENARIO = [
+  ['dire', "Salut Kamel, ici Krousty de l'Asian Kitchen ! Qu'est-ce qui te ferait plaisir ce soir ?"],
+  ['vous', '[inhale] Je voudrais des nouilles sautées au poulet, pas trop épicées.'],
+  ['action', 'reflechit', 1200],
+  ['action', 'cherche', 1600, 'Je cherche dans le menu'],
+  ['dire', 'Très bon choix. Nouilles sautées au poulet, épices douces.'],
+  ['dire', 'Je te mets des gyozas en entrée ?'],
+  ['vous', "Oui, six gyozas s'il te plaît."],
+  ['action', 'redige', 1600, 'Je prépare ta commande'],
+  ['action', 'execute', 1800, "J'envoie en cuisine"],
+  ['action', 'termine', 1800, 'Commande envoyée'],
+  ['dire', "C'est noté : nouilles au poulet et six gyozas, 18,50 €. Prêt dans vingt minutes !", { forme: null }],
+];
+
+async function lancer() {
+  const j = ++jeton;
+  enCours = true; appel.classList.remove('fin');
+  $('fil').innerHTML = ''; dernierAuteur = null; bulleCourante = null;
+  emojiStats.phrases = 99; emojiStats.dernier = 0;
+  debut = Date.now();
+  majBoutonPrincipal();
+  try {
+    for (const [type, a, b, c] of SCENARIO) {
+      if (type === 'dire') { await dire(a, j, b); await pause(250, j); }
+      if (type === 'vous') await vousDites(a, j);
+      if (type === 'action') { action(a, c); await pause(b, j); }
+    }
+    action('ecoute');
+  } catch { /* appel interrompu */ }
+}
+
+function raccrocher() {
+  jeton++; enCours = false;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  avatar?.parle(false);
+  action('fin'); appel.classList.add('fin');
+  majBoutonPrincipal();
+}
+
+function majBoutonPrincipal() {
+  const b = $('btn-principal');
+  b.className = 'rond ' + (enCours ? 'raccrocher' : 'lancer');
+  b.setAttribute('aria-label', enCours ? 'Raccrocher' : "Lancer l'appel");
+  b.innerHTML = enCours
+    ? '<svg viewBox="0 0 24 24"><path d="M3 15c5-5 13-5 18 0l-2.5 2.5-3-1.5v-2.5a10 10 0 0 0-5 0V16l-3 1.5z"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
+  $('leg-principal').textContent = enCours ? 'Raccrocher' : (appel.classList.contains('fin') ? 'Rappeler' : 'Appeler');
+}
+
+const demarrer = () => { const j = ++jeton; enCours = true; majBoutonPrincipal(); if (!debut) debut = Date.now(); return j; };
+
+$('btn-principal').onclick = () => (enCours ? raccrocher() : lancer());
+$('btn-micro').onclick = () => {
+  micro = !micro;
+  $('btn-micro').classList.toggle('coupe', !micro);
+  $('leg-micro').textContent = micro ? 'Micro' : 'Micro coupé';
+};
+$('btn-ecrire').onclick = () => { const f = $('ecrire'); f.hidden = !f.hidden; if (!f.hidden) $('saisie').focus(); };
+$('ecrire').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const t = $('saisie').value.trim(); if (!t) return;
+  $('saisie').value = '';
+  const j = demarrer();
+  bulleCourante = null; ajouter('vous', t); bulleCourante = null;
+  try { action('reflechit'); await pause(900, j); await dire('Super choix ! Je transmets ça tout de suite à la cuisine.', j); action('ecoute'); } catch {}
+});
+const REPONSES = {
+  'Voir le menu du jour': ['cherche', "Ce soir : bœuf lok lak, pad thaï aux crevettes et bao au porc croustillant."],
+  'Commander à emporter': ['reflechit', 'Avec plaisir ! Dis-moi ce que tu veux, je prépare ta commande.'],
+  "Horaires d'ouverture": ['cherche', 'On est ouverts tous les jours de 11 h 30 à 14 h 30, et de 18 h à 23 h.'],
+};
+document.querySelectorAll('.suggestions .puce').forEach((b) => b.onclick = async () => {
+  const j = demarrer();
+  bulleCourante = null; ajouter('vous', b.textContent); bulleCourante = null;
+  const [act, rep] = REPONSES[b.textContent];
+  try { action(act); await pause(1200, j); await dire(rep, j); action('ecoute'); } catch {}
+});
+
+// ---------- Panneau de test (à retirer en production) ----------
+Object.keys(ACTIONS).filter((n) => n !== 'parle').forEach((nom) => {
+  const b = document.createElement('button');
+  b.className = 'puce'; b.type = 'button'; b.textContent = ACTIONS[nom].texte;
+  b.onclick = () => { jeton++; if ('speechSynthesis' in window) speechSynthesis.cancel(); avatar?.parle(false); action(nom); };
+  $('test-actions').appendChild(b);
+});
+$('imagine').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = $('imagine-saisie').value.trim(); if (!v) return;
+  avatar?.forme(v);
+  clearTimeout(minuteurForme);
+  minuteurForme = setTimeout(() => avatar?.forme(ACTIONS[actionCourante]?.forme ?? null), 6000);
+});
+$('test-emojis').onchange = (e) => { REGLES_EMOJI.actif = e.target.checked; };
+
+setInterval(() => {
+  if (!enCours || !debut) return;
+  const s = Math.floor((Date.now() - debut) / 1000);
+  $('chrono').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}, 500);
+
+// =====================================================================
+//  API pour le vrai projet : window.Krousty
+//  (et la même chose par postMessage si la page est dans une iframe ou une WebView)
+// =====================================================================
+window.Krousty = {
+  action,                                            // Krousty.action('cherche', 'Je cherche ta commande')
+  forme: (f) => avatar?.forme(f),                    // Krousty.forme('🍣') · Krousty.forme(null)
+  dire: (texte, options) => dire(texte, jeton, options), // voix du navigateur + transcription (démo)
+  parle: (on) => { avatar?.parle(on); if (on) action('parle'); }, // ta propre voix joue : l'orbe réagit
+  niveau: (v) => avatar?.niveauExterne(v),            // volume réel de ta voix, 0 à 1, à chaque image
+  transcription: (auteur, texte) => ajouter(auteur === 'vous' ? 'vous' : 'agent', texte), // 'agent' | 'vous'
+  approche: () => avatar?.approche(),                // il vient voir de plus près (il le fait aussi seul)
+  formePourPhrase,                                   // applique MOTS_EMOJI + REGLES_EMOJI à une phrase
+  raccrocher,
+  config: { ACTIONS, MOTS_EMOJI, REGLES_EMOJI },
+};
+addEventListener('message', (e) => {
+  const m = e.data && e.data.krousty;                // ex. { krousty: { action: 'cherche' } }
+  if (!m) return;
+  if (m.action) action(m.action, m.texte);
+  if ('forme' in m) avatar?.forme(m.forme);
+  if (m.dire) dire(m.dire, jeton, m.options || {});
+  if (m.transcription) ajouter(m.auteur === 'vous' ? 'vous' : 'agent', m.transcription);
+  if (typeof m.niveau === 'number') avatar?.niveauExterne(m.niveau);
+  if ('parle' in m) window.Krousty.parle(m.parle);
+});
+
+// État au chargement : le premier message est déjà visible
+ajouter('agent', "Salut ! Appuie sur le bouton vert pour parler à Krousty.");
+action('repos');
+</script>
+</body>
+</html>
