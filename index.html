@@ -171,6 +171,43 @@
     .bouton-langue { min-width: 52px; height: 40px; padding: 0 10px; font-size: 16px; }
     .haut h1 { font-size: clamp(16px, 4.6vw, 22px); }
   }
+  /* ---------- Progression : bandeau, album, pouvoirs ---------- */
+  .bandeau { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;
+             padding: 12px 16px; border-radius: 20px; background: linear-gradient(90deg, rgba(255,209,102,.22), rgba(195,166,255,.18));
+             border: 1px solid rgba(255,209,102,.35); font-weight: 800; }
+  .bandeau .compteur-etoiles { font-size: 22px; color: var(--soleil); }
+  .bandeau .album-lien { font-size: 15px; }
+  .album { display: flex; flex-direction: column; gap: 8px; }
+  .pouvoirs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .pouvoir { border-radius: 16px; padding: 8px 2px; background: var(--carte); border: 2px solid var(--bord); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .pouvoir .e { font-size: 28px; } .pouvoir .n { font-size: 11px; line-height: 1.1; text-align: center; }
+  .pouvoir.actif { border-color: var(--soleil); background: rgba(255,209,102,.18); }
+  .pouvoir.verrou { opacity: .55; }
+  .barre { height: 8px; border-radius: 99px; background: var(--carte); overflow: hidden; }
+  .barre span { display: block; height: 100%; background: linear-gradient(90deg, var(--menthe), var(--soleil)); border-radius: 99px; }
+  .autocollants { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; margin-bottom: 6px; }
+  .autocollant { aspect-ratio: 1; border-radius: 14px; background: var(--carte); border: 1px solid var(--bord); font-size: 30px; }
+  .autocollant.manque { filter: grayscale(1) brightness(.35); opacity: .6; }
+  #decor .confetti { left: 50vw; top: 40vh; opacity: 1; font-size: 26px; }
+
+  /* ---------- « Attrape les bulles » ---------- */
+  .aire-bulles { position: relative; height: 56vh; border-radius: 26px; overflow: hidden; touch-action: manipulation;
+                 background: linear-gradient(180deg, rgba(124,198,254,.05), rgba(124,198,254,.14)); border: 1px solid var(--bord); }
+  [data-ecran="jeu"][data-jeu="bulles"] .scene { max-height: 20vh; }
+  [data-ecran="jeu"][data-jeu="bulles"] .carte .mot { font-size: 24px; }
+  [data-ecran="jeu"][data-jeu="bulles"] .carte .emoji { font-size: 32px; }
+  [data-ecran="jeu"][data-jeu="bulles"] .aire-bulles { height: 52vh; }
+  .bulle { position: absolute; bottom: -110px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
+           font-size: 48px; border: 2px solid rgba(190, 230, 255, .6);
+           background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.55), rgba(124,198,254,.18) 45%, rgba(124,198,254,.06) 70%);
+           box-shadow: inset 0 0 18px rgba(190,230,255,.25); animation: bulleMonte var(--d) linear forwards; }
+  @keyframes bulleMonte { 0% { transform: translate(0, 0); } 50% { transform: translate(var(--dx), -35vh); } 100% { transform: translate(0, -72vh); } }
+  .bulle span { display: block; transition: transform .3s, opacity .3s; }
+  .bulle.faux span { animation: non .4s; }
+  .bulle.eclate { border-color: transparent; background: none; box-shadow: none; }
+  .bulle.eclate span { transform: scale(1.8); opacity: 0; }
+  @media (min-width: 600px) { .bulle { width: 120px; height: 120px; font-size: 64px; } .pouvoir .n { font-size: 13px; } .autocollant { font-size: 38px; } }
+
   /* ---------- Décor d'ambiance : léger, derrière rien d'important, jamais cliquable ---------- */
   #decor { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
   #decor span { position: absolute; left: var(--x); top: var(--y); opacity: 0; will-change: transform, opacity; }
@@ -264,6 +301,7 @@
     <div class="cote-activite">
       <!-- Accueil -->
       <section id="ecran-accueil">
+        <button class="bandeau" id="bandeau" type="button"></button>
         <h2 class="titre-section" id="titre-jour">Du jour</h2>
         <div class="du-jour" id="du-jour"></div>
         <h2 class="titre-section" id="titre-jouer">On joue à quoi ?</h2>
@@ -301,6 +339,7 @@
             <button class="reecouter" id="btn-reecouter" type="button" hidden><span>🔁</span> <span></span></button>
           </div>
           <div class="choix" id="choix"></div>
+          <div class="aire-bulles" id="aire-bulles" hidden></div>
         </div>
       </section>
     </div>
@@ -522,6 +561,10 @@ const avatar = (() => {
     ecole:     { c: [[1, 1, 1], [.6, .7, 1], [1, .65, .85]],           tour: .5,  serre: 1.05, energie: .7 },
     maison:    { c: [[1, .95, .9], [1, .72, .55], [.9, .65, 1]],      tour: .45, serre: 1.05, energie: .6 },
     luciole:   { c: [[1, 1, .85], [.8, 1, .45], [.5, .85, 1]],        tour: .5,  serre: 1.05, energie: .7 },
+    or:        { c: [[1, .97, .85], [1, .8, .3], [1, .95, .6]],        tour: .5,  serre: 1.05, energie: .7 },
+    arcenciel: { c: [[1, 1, 1], [1, .45, .6], [.45, .8, 1]],           tour: .6,  serre: 1.08, energie: .9 },
+    bonbon:    { c: [[1, .95, 1], [1, .55, .85], [.7, .6, 1]],         tour: .55, serre: 1.08, energie: .8 },
+    galaxie:   { c: [[.95, .9, 1], [.55, .4, 1], [.3, .9, 1]],         tour: .7,  serre: 1.1,  energie: 1 },
     erreur:    { c: [[1, .9, .85], [1, .42, .38], [1, .7, .45]],       tour: .3,  serre: .85, energie: .7 },
   };
   const cur = { c: PAL.attente.c.map((v) => [...v]), tour: .25, serre: 1, energie: 0, forme: 0, mix: 1 };
@@ -915,7 +958,9 @@ const NOEUDS = {
   nombres:   { emoji: '🔢', nom: { fr: 'Les nombres', en: 'Numbers', ar: 'الأرقام' }, desc: { fr: 'Compter jusqu’à 10', en: 'Count to 10', ar: 'العد حتى ١٠' }, type: 'nombres' },
   dessin:    { emoji: '✍️', nom: { fr: 'Dessine', en: 'Draw', ar: 'ارسم' }, desc: { fr: 'Trace les lettres', en: 'Trace the letters', ar: 'ارسم الحروف' }, type: 'dessin' },
   jeux:      { emoji: '🎮', nom: { fr: 'Les jeux', en: 'Games', ar: 'الألعاب' }, desc: { fr: 'Devine, écoute, range…', en: 'Guess, listen, sort…', ar: 'خمّن، استمع، رتّب…' },
-               enfants: ['devine', 'ecoute', 'range', 'intrus'] },
+               enfants: ['bulles', 'devine', 'ecoute', 'range', 'intrus'] },
+  bulles:    { emoji: '🫧', nom: { fr: 'Attrape les bulles', en: 'Catch the bubbles', ar: 'التقط الفقاعات' }, desc: { fr: 'Vite, éclate les bonnes !', en: 'Quick, pop the right ones!', ar: 'بسرعة، فرقع الصحيحة!' }, type: 'jeu', jeu: 'bulles' },
+  album:     { emoji: '📒', nom: { fr: 'Mon album', en: 'My album', ar: 'ألبومي' }, type: 'album' },
   devine:    { emoji: '🔮', nom: { fr: 'Devine !', en: 'Guess!', ar: 'خمّن!' }, desc: { fr: 'Qu’est-ce que Lumi dessine ?', en: 'What is Lumi drawing?', ar: 'ماذا يرسم لومي؟' }, type: 'jeu', jeu: 'devine' },
   ecoute:    { emoji: '👂', nom: { fr: 'Écoute et trouve', en: 'Listen and find', ar: 'استمع وابحث' }, desc: { fr: 'Lumi dit un mot, trouve l’image', en: 'Lumi says a word, find the picture', ar: 'لومي يقول كلمة، جد الصورة' }, type: 'jeu', jeu: 'ecoute' },
   range:     { emoji: '🧺', nom: { fr: 'Où ça va ?', en: 'Where does it go?', ar: 'أين مكانه؟' }, desc: { fr: 'À l’école, à la ferme…', en: 'At school, on the farm…', ar: 'في المدرسة، في المزرعة…' }, type: 'jeu', jeu: 'range' },
@@ -938,7 +983,8 @@ const LANGUES = {
     voix: 'fr-FR', dir: 'ltr', micro: 'Dis un mot', ecoute: "Je t'écoute…", ecrire: 'Écris un mot…',
     inconnu: 'Je ne connais pas encore ce mot, mais je l’écris !', microKo: 'Le micro n’est pas disponible ici. Écris le mot !',
     lettre: (l, m) => (m ? `${l}, comme ${m}` : l), toutVoir: 'Tout voir',
-    tracer: 'Trace-la avec ton doigt', bravo: 'Bravo !', aToi: 'À toi !', super: 'Super ! Tu as tout trouvé !',
+    tracer: 'Trace-la avec ton doigt', bravo: 'Bravo !', attrape: (x) => `Attrape ${x} !`, pouvoir: (x) => `Nouveau pouvoir : Lumi ${x} !`,
+    encoreEtoiles: (n) => `encore ${n} ⭐`, pouvoirs: 'Les pouvoirs de Lumi', etoilesTxt: (n) => `${n} étoile${n > 1 ? 's' : ''}`, albumTxt: 'Mon album', aToi: 'À toi !', super: 'Super ! Tu as tout trouvé !',
     touche1: (x) => `Touche ${x} !`, pasCa: (a, b) => `Ça, c’est ${a}. Où est ${b} ?`, encore: 'Essaie encore !', devine: 'Qu’est-ce que Lumi dessine ?',
     ouEst: (m) => `Où est : ${m} ?`, touche: (d) => `Touche tout ce qu’on trouve ${d} !`, pasIci: (m, d) => `Non ! ${m}, c’est ${d}.`,
     intrus: 'Lequel n’est pas pareil ?', pasUn: (m, u) => `${m} n’est pas ${u} !`, reecouter: 'Réécouter',
@@ -953,7 +999,8 @@ const LANGUES = {
     voix: 'en-US', dir: 'ltr', micro: 'Say a word', ecoute: 'I’m listening…', ecrire: 'Type a word…',
     inconnu: 'I don’t know this word yet, but I can write it!', microKo: 'The microphone isn’t available here. Type the word!',
     lettre: (l, m) => (m ? `${l} is for ${m}` : l), toutVoir: 'See all',
-    tracer: 'Trace it with your finger', bravo: 'Well done!', aToi: 'Your turn!', super: 'Super! You found them all!',
+    tracer: 'Trace it with your finger', bravo: 'Well done!', attrape: (x) => `Catch ${x}!`, pouvoir: (x) => `New power: ${x} Lumi!`,
+    encoreEtoiles: (n) => `${n} more ⭐`, pouvoirs: 'Lumi’s powers', etoilesTxt: (n) => `${n} star${n > 1 ? 's' : ''}`, albumTxt: 'My album', aToi: 'Your turn!', super: 'Super! You found them all!',
     touche1: (x) => `Touch the ${x}!`, pasCa: (a, b) => `That’s the ${a}. Where is the ${b}?`, encore: 'Try again!', devine: 'What is Lumi drawing?',
     ouEst: (m) => `Where is the ${m}?`, touche: (d) => `Touch everything you find ${d}!`, pasIci: (m, d) => `No! The ${m} goes ${d}.`,
     intrus: 'Which one is different?', pasUn: (m, u) => `The ${m} is not ${u}!`, reecouter: 'Listen again',
@@ -968,7 +1015,8 @@ const LANGUES = {
     voix: 'ar-SA', dir: 'rtl', micro: 'قل كلمة', ecoute: 'أنا أستمع…', ecrire: 'اكتب كلمة…',
     inconnu: 'لا أعرف هذه الكلمة بعد، لكني سأكتبها!', microKo: 'الميكروفون غير متاح هنا. اكتب الكلمة!',
     lettre: (l, m) => (m ? `${l}، ${m}` : l), toutVoir: 'شاهد الكل',
-    tracer: 'ارسمه بإصبعك', bravo: 'أحسنت!', aToi: 'دورك!', super: 'رائع! وجدتها كلها!',
+    tracer: 'ارسمه بإصبعك', bravo: 'أحسنت!', attrape: (x) => `التقط ${x}!`, pouvoir: (x) => `قوة جديدة: لومي ${x}!`,
+    encoreEtoiles: (n) => `${n} ⭐ أخرى`, pouvoirs: 'قوى لومي', etoilesTxt: (n) => `${n} نجمة`, albumTxt: 'ألبومي', aToi: 'دورك!', super: 'رائع! وجدتها كلها!',
     touche1: (x) => `المس ${x}!`, pasCa: (a, b) => `هذا ${a}. أين ${b}؟`, encore: 'حاول مرة أخرى!', devine: 'ماذا يرسم لومي؟',
     ouEst: (m) => `أين ${m}؟`, touche: (d) => `المس كل ما نجده ${d}!`, pasIci: (m, d) => `لا! ${m} ${d}.`,
     intrus: 'أيها مختلف؟', pasUn: (m, u) => `${m} ليس ${u}!`, reecouter: 'استمع مرة أخرى',
@@ -1487,7 +1535,8 @@ function construireDecor(type) {
 function appliquerAmbiance(nom) {
   const a = AMBIANCES[nom] || AMBIANCES.nuit;
   if (nom !== ambianceCourante || !$('decor').children.length) construireDecor(a.decor);
-  ambianceCourante = nom; paletteAmb = a.palette;
+  ambianceCourante = nom; paletteAmb = Progres.skin !== 'enfant' ? Progres.skin : a.palette;
+  avatar?.mode(paletteAmb);
   document.documentElement.style.setProperty('--fond-rgb', a.fond.join(','));
   avatar?.couleurFond?.(a.fond);
   Ambiance.jouer(a.son);
@@ -1661,6 +1710,57 @@ $('btn-son').onclick = () => {
 };
 $('btn-son').textContent = Ambiance.actif ? '🔊' : '🔇';
 
+// ---------- Progression : étoiles, mots trouvés, pouvoirs de Lumi (gardés sur le téléphone) ----------
+const SKINS = [
+  { id: 'enfant',    seuil: 0,   emoji: '✨', nom: { fr: 'étoilé', en: 'starry', ar: 'المتلألئ' } },
+  { id: 'or',        seuil: 10,  emoji: '🌟', nom: { fr: 'doré', en: 'golden', ar: 'الذهبي' } },
+  { id: 'arcenciel', seuil: 25,  emoji: '🌈', nom: { fr: 'arc-en-ciel', en: 'rainbow', ar: 'قوس قزح' } },
+  { id: 'bonbon',    seuil: 50,  emoji: '🍬', nom: { fr: 'bonbon', en: 'candy', ar: 'الحلوى' } },
+  { id: 'galaxie',   seuil: 100, emoji: '🌌', nom: { fr: 'galaxie', en: 'galaxy', ar: 'المجرة' } },
+];
+const Progres = (() => {
+  let d = { etoiles: 0, mots: {}, skin: 'enfant' };
+  try { d = { ...d, ...JSON.parse(localStorage.getItem('lumi-progres') || '{}') }; } catch {}
+  const sauver = () => { try { localStorage.setItem('lumi-progres', JSON.stringify(d)); } catch {} };
+  function gagner(entree) {
+    const avant = d.etoiles;
+    d.etoiles++;
+    if (entree) d.mots[entree.emoji] = (d.mots[entree.emoji] || 0) + 1;
+    sauver();
+    document.querySelectorAll('.compteur-etoiles').forEach((e) => { e.textContent = '⭐ ' + d.etoiles; });
+    const nouveau = SKINS.find((k) => k.seuil > avant && k.seuil <= d.etoiles);
+    if (nouveau) setTimeout(() => nouveauPouvoir(nouveau), 1800);
+  }
+  return {
+    gagner, a: (e) => !!d.mots[e],
+    get etoiles() { return d.etoiles; }, get skin() { return d.skin; },
+    choisirSkin(k) { d.skin = k; sauver(); },
+  };
+})();
+
+// Une pluie d'étoiles qui jaillit du centre de l'écran
+function fete() {
+  for (let i = 0; i < 36; i++) {
+    const e = document.createElement('span');
+    e.className = 'confetti'; e.textContent = hasardDe(['⭐', '✨', '🌟', '💫', '🎉', '💖']);
+    $('decor').appendChild(e);
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 280;
+    e.animate([
+      { transform: 'translate(-50%, -50%) scale(.3)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${(Math.cos(a) * d).toFixed(0)}px), calc(-50% + ${(Math.sin(a) * d).toFixed(0)}px)) scale(1.3) rotate(${(Math.random() * 360) | 0}deg)`, opacity: 0 },
+    ], { duration: 1200 + Math.random() * 700, easing: 'cubic-bezier(.2, .8, .3, 1)' }).onfinish = () => e.remove();
+  }
+  avatar?.mode('heureux'); son('juste');
+}
+function nouveauPouvoir(k) {
+  const L = LANGUES[langue];
+  Progres.choisirSkin(k.id);
+  appliquerAmbiance(ambianceCourante);
+  fete(); avatar?.forme(k.emoji);
+  carte(k.emoji, L.pouvoir(k.nom[langue]), '', false);
+  parler(L.pouvoir(k.nom[langue]));
+}
+
 // ---------- « À toi ! » : Lumi demande, l'enfant touche la bonne image dans la grille ----------
 let quiz = null;
 function quizTheme(id) {
@@ -1687,7 +1787,7 @@ async function repondreQuiz(m, t) {
   }
   const j = ++jeton;
   quiz.pause = true;
-  t.classList.add('juste'); son('juste'); score++;
+  t.classList.add('juste'); son('juste'); Progres.gagner(bon);
   avatar?.mode('heureux'); avatar?.forme(bon.emoji);
   carteMot(bon, L.bravo);
   try { await parler(`${L.bravo} ${majuscule(nomComplet(bon))} !`); await epeler(j); await pause(500, j); } catch { return; }
@@ -1695,7 +1795,7 @@ async function repondreQuiz(m, t) {
   if (++quiz.i < quiz.liste.length) return questionQuiz();
   // fin : une pluie d'étoiles
   quiz = null;
-  avatar?.forme('⭐'); son('juste');
+  fete(); avatar?.forme('⭐');
   carte('🌟', L.super, '⭐ ⭐ ⭐ ⭐ ⭐', false);
   try { await parler(L.super); } catch {}
   revenirAuNuage(5000);
@@ -1736,6 +1836,11 @@ async function toutVoir(liste) {
 
 function construireAccueil() {
   const L = LANGUES[langue], dj = duJour();
+  const trouves = TOUS.filter((m) => Progres.a(m.emoji)).length;
+  $('bandeau').innerHTML = '<span class="compteur-etoiles"></span><span class="album-lien"></span>';
+  $('bandeau').firstChild.textContent = '⭐ ' + Progres.etoiles;
+  $('bandeau').lastChild.textContent = `📒 ${L.albumTxt} · ${trouves}/${TOUS.length}  ›`;
+  $('bandeau').onclick = () => aller('album');
   $('titre-jour').textContent = L.duJour;
   $('titre-jouer').textContent = L.jouer;
   $('du-jour').innerHTML = '';
@@ -1760,6 +1865,7 @@ function construireListe(id) {
   p.innerHTML = '';
   p.className = n.enfants ? 'grille' : 'panneau';
   if (n.enfants) { n.enfants.forEach((e, i) => p.appendChild(tuileUnivers(e, i))); return; }
+  if (n.type === 'album') return construireAlbum(p, L);
   let actions = [];
   const lettres = L.alphabet.split(' ').map((x) => x.split(':')[0]);
   if (n.type === 'dessin') {
@@ -1781,6 +1887,43 @@ function construireListe(id) {
   }
   p.prepend(tuile('▶', L.toutVoir, () => toutVoir(actions), 'tout'));
   if (n.mots) p.children[0].after(tuile('🎯', L.aToi, () => quizTheme(id), 'tout a-toi'));
+}
+
+function construireAlbum(p, L) {
+  p.className = 'album';
+  const titre = (t) => { const h = document.createElement('h2'); h.className = 'titre-section'; h.textContent = t; p.appendChild(h); };
+  titre(`${L.pouvoirs} · ⭐ ${Progres.etoiles}`);
+  const rangee = document.createElement('div'); rangee.className = 'pouvoirs';
+  SKINS.forEach((k) => {
+    const ok = Progres.etoiles >= k.seuil, b = document.createElement('button');
+    b.type = 'button'; b.className = 'pouvoir' + (Progres.skin === k.id ? ' actif' : '') + (ok ? '' : ' verrou');
+    b.innerHTML = '<span class="e"></span><span class="n"></span>';
+    b.querySelector('.e').textContent = ok ? k.emoji : '🔒';
+    b.querySelector('.n').textContent = ok ? k.nom[langue] : L.encoreEtoiles(k.seuil - Progres.etoiles);
+    if (ok) b.onclick = () => {
+      Progres.choisirSkin(k.id); appliquerAmbiance(ambianceCourante);
+      avatar?.forme(k.emoji); parler(L.pouvoir(k.nom[langue]));
+      construireAlbum(p.replaceChildren() || p, L);
+    };
+    rangee.appendChild(b);
+  });
+  p.appendChild(rangee);
+  THEMES_MOTS.forEach(([id, t]) => {
+    const liste = entrees(t.mots), faits = liste.filter((m) => Progres.a(m.emoji)).length;
+    titre(`${t.emoji} ${t.nom[langue]} · ${faits}/${liste.length}`);
+    const barre = document.createElement('div'); barre.className = 'barre';
+    barre.innerHTML = '<span></span>'; barre.firstChild.style.width = (faits / liste.length * 100).toFixed(0) + '%';
+    p.appendChild(barre);
+    const g = document.createElement('div'); g.className = 'autocollants';
+    liste.forEach((m) => {
+      const b = document.createElement('button'), a = Progres.a(m.emoji);
+      b.type = 'button'; b.className = 'autocollant' + (a ? '' : ' manque'); b.textContent = m.emoji;
+      b.setAttribute('aria-label', a ? motDans(m) : '?');
+      b.onclick = () => (a ? montrerEntree(m, true, id) : (son('faux'), parler(LANGUES[langue].aToi)));
+      g.appendChild(b);
+    });
+    p.appendChild(g);
+  });
 }
 
 function construireParler() {
@@ -1814,7 +1957,7 @@ function afficher() {
 }
 
 function aller(id, montrerCarte = true) {
-  diapo++; jeuEnCours = false; quiz = null;
+  diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
   pile.push(id);
   afficher();
@@ -1831,7 +1974,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
-  diapo++; jeuEnCours = false; quiz = null; ++jeton;
+  diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles); ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
   afficher();
@@ -1850,7 +1993,7 @@ function accueillir() {
 // Écoute et trouve : Lumi dit un mot, l'enfant le trouve. (compréhension orale)
 // Où ça va ? : trier ce qu'on trouve dans un lieu.        (catégories, associations)
 // L'intrus : trouver celui qui n'est pas de la famille.  (catégories, raisonnement)
-let jeuEnCours = false, jeuType = 'devine', score = 0, bonne = null, aTrouver = 0, dernierTheme = null;
+let jeuEnCours = false, jeuType = 'devine', bonne = null, aTrouver = 0, dernierTheme = null;
 const THEMES_MOTS = Object.entries(NOEUDS).filter(([, n]) => n.mots && n.un);
 const PARENT = {};
 Object.entries(NOEUDS).forEach(([id, n]) => (n.enfants || []).forEach((e) => { PARENT[e] = id; }));
@@ -1875,9 +2018,12 @@ function nouvelleManche() {
   jeuEnCours = true; ++jeton;
   const L = LANGUES[langue];
   $('btn-tracer').hidden = true;
-  $('score').textContent = '⭐ ' + score;
+  $('score').textContent = '⭐ ' + Progres.etoiles;
   $('btn-reecouter').hidden = jeuType !== 'ecoute';
   avatar?.mode(paletteAmb);
+  $('choix').hidden = jeuType === 'bulles'; $('aire-bulles').hidden = jeuType !== 'bulles';
+  $('app').dataset.jeu = jeuType;
+  if (jeuType === 'bulles') return lancerBulles();
 
   if (jeuType === 'devine') {
     do { bonne = hasard(TOUS); } while (bonne.emoji === $('carte-emoji').textContent);
@@ -1918,8 +2064,71 @@ function nouvelleManche() {
   }
 }
 
+// ---------- « Attrape les bulles » : des bulles montent, on éclate celles de la bonne famille ----------
+const TOUS_NOM = {
+  ferme: ['les animaux de la ferme', 'the farm animals', 'حيوانات المزرعة'], ocean: ['les animaux de la mer', 'the sea animals', 'حيوانات البحر'],
+  sauvages: ['les animaux sauvages', 'the wild animals', 'الحيوانات البرية'], oiseaux: ['les oiseaux', 'the birds', 'الطيور'],
+  insectes: ['les petites bêtes', 'the bugs', 'الحشرات'], fruits: ['les fruits', 'the fruits', 'الفواكه'], legumes: ['les légumes', 'the vegetables', 'الخضروات'],
+  couleurs: ['les couleurs', 'the colors', 'الألوان'], famille: ['la famille', 'the family', 'أفراد العائلة'], maison: ['les objets de la maison', 'the things in the house', 'أشياء البيت'],
+  ecole: ['les choses de l’école', 'the school things', 'أدوات المدرسة'], corps: ['les parties du corps', 'the body parts', 'أجزاء الجسم'],
+  vetements: ['les vêtements', 'the clothes', 'الملابس'], vehicules: ['les véhicules', 'the vehicles', 'وسائل النقل'],
+  nature: ['la nature', 'nature', 'الطبيعة'], jouets: ['les jouets', 'the toys', 'الألعاب'],
+};
+let bulles = null, minuteurBulles = null;
+function lancerBulles() {
+  const L = LANGUES[langue], i = { fr: 0, en: 1, ar: 2 }[langue];
+  const [id, theme] = hasard(THEMES_MOTS.filter(([t]) => t !== dernierTheme && TOUS_NOM[t]));
+  dernierTheme = id;
+  const autres = THEMES_MOTS.filter(([t]) => t !== id && PARENT[t] !== PARENT[id]).flatMap(([, t]) => entrees(t.mots)).filter((m) => !theme.mots.includes(m.emoji));
+  bulles = { id, theme, cibles: entrees(theme.mots), autres, attrapes: 0, but: 6, vitesse: 8.5 };
+  $('aire-bulles').innerHTML = '';
+  const consigne = L.attrape(TOUS_NOM[id][i]);
+  avatar?.forme(NOEUDS[id].emoji);
+  carte(NOEUDS[id].emoji, consigne, `0 / ${bulles.but}`, false);
+  parler(consigne);
+  clearInterval(minuteurBulles);
+  minuteurBulles = setInterval(() => {
+    if (!jeuEnCours || jeuType !== 'bulles') return clearInterval(minuteurBulles);
+    if ($('aire-bulles').children.length < 7) nouvelleBulle();
+  }, 1000);
+}
+function nouvelleBulle() {
+  const bonneBulle = Math.random() < .5, m = hasard(bonneBulle ? bulles.cibles : bulles.autres);
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'bulle'; b.innerHTML = '<span></span>';
+  b.firstChild.textContent = m.emoji; b.setAttribute('aria-label', motDans(m));
+  b.style.left = (4 + Math.random() * 68).toFixed(1) + '%';
+  b.style.setProperty('--d', (bulles.vitesse * (.85 + Math.random() * .3)).toFixed(1) + 's');
+  b.style.setProperty('--dx', ((Math.random() - .5) * 70).toFixed(0) + 'px');
+  b.addEventListener('animationend', (e) => { if (e.animationName === 'bulleMonte') b.remove(); });
+  b.onclick = () => toucherBulle(m, b);
+  $('aire-bulles').appendChild(b);
+}
+function toucherBulle(m, b) {
+  const L = LANGUES[langue];
+  if (!bulles || b.classList.contains('eclate')) return;
+  if (!bulles.cibles.includes(m)) {
+    b.classList.remove('faux'); void b.offsetWidth; b.classList.add('faux'); son('faux');
+    parler(majuscule(L.pasUn(nomComplet(m), bulles.theme.un[langue])));
+    return;
+  }
+  b.classList.add('eclate'); son('pop'); son('juste');
+  setTimeout(() => b.remove(), 350);
+  Progres.gagner(m); avatar?.forme(m.emoji); avatar?.syllabe();
+  parler(nomComplet(m));
+  bulles.attrapes++; bulles.vitesse = Math.max(4.5, bulles.vitesse - .5); // de plus en plus vite
+  $('carte-sous').textContent = `${bulles.attrapes} / ${bulles.but}`;
+  $('score').textContent = '⭐ ' + Progres.etoiles;
+  if (bulles.attrapes >= bulles.but) {
+    clearInterval(minuteurBulles);
+    const fini = bulles; bulles = null;
+    setTimeout(() => { fete(); carte('🏆', L.super, '', false); parler(L.super); }, 400);
+    setTimeout(() => { if (jeuEnCours && jeuType === 'bulles' && !bulles) { $('aire-bulles').innerHTML = ''; lancerBulles(); } }, 4200);
+  }
+}
+
 async function gagne(texte, j) {
-  score++; $('score').textContent = '⭐ ' + score;
+  $('score').textContent = '⭐ ' + Progres.etoiles;
   [...$('choix').children].forEach((x) => { x.disabled = true; });
   avatar?.mode('heureux');
   try { await parler(texte); if ($('tuiles').children.length) await epeler(j); await pause(900, j); } catch { return; }
@@ -1931,7 +2140,7 @@ function repondre(m, b) {
   if (m !== bonne) { secouer(b); son('faux'); parler(L.encore); return; }
   son('juste');
   const j = ++jeton;
-  b.classList.add('juste');
+  b.classList.add('juste'); Progres.gagner(bonne);
   avatar?.forme(bonne.emoji);
   const phrase = jeuType === 'intrus' ? majuscule(L.pasUn(nomComplet(bonne), bonne.un[langue])) : nomComplet(bonne);
   carteMot(bonne, jeuType === 'intrus' ? phrase : L.bravo);
@@ -1948,7 +2157,7 @@ function ranger(m, b, bons) {
     return;
   }
   b.classList.add('juste'); b.disabled = true;
-  avatar?.syllabe(); son('juste');
+  avatar?.syllabe(); son('juste'); Progres.gagner(m);
   if (--aTrouver > 0) { parler(nomComplet(m)); return; }
   const j = ++jeton;
   carte(bonne.emoji, L.bravo, bons.map((x) => nomComplet(x)).join(' · '), false);
