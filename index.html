@@ -843,7 +843,7 @@ const avatar = (() => {
 const MOTS = `
 🐄|vache|cow|بقرة
 🐑|mouton|sheep|خروف
-🐴|cheval|horse|حصان
+🐴|cheval/chevaux|horse|حصان
 🐔|poule|hen/chicken|دجاجة
 🐓|coq|rooster|ديك
 🐤|poussin|chick|كتكوت
@@ -883,7 +883,7 @@ const MOTS = `
 🐪|chameau|camel|جمل
 🐸|grenouille|frog|ضفدع
 🦋|papillon|butterfly|فراشة
-🦕|dinosaure|dinosaur|ديناصور
+🦕|dinosaure/dino|dinosaur|ديناصور
 🍎|pomme|apple|تفاحة
 🍌|banane|banana|موز
 🍓|fraise|strawberry|فراولة
@@ -1032,12 +1032,45 @@ const MOTS = `
 ❄️|neige|snow|ثلج
 ⛄|bonhomme de neige|snowman|رجل الثلج
 ⚡|éclair|lightning|برق
-🌊|vague|wave|موجة
+🌊|mer/vague|sea/wave|بحر/موجة
 🧸|nounours|teddy bear|دبدوب
 🪁|cerf-volant|kite|طائرة ورقية
 🧩|puzzle|puzzle|أحجية
 🥁|tambour|drum|طبل
 🎈|ballon de baudruche|balloon|بالون
+🐉|dragon|dragon|تنين
+🦄|licorne|unicorn|حصان وحيد القرن
+🦖|tyrannosaure/t rex|t rex/tyrannosaurus|تيرانوصور
+👸|princesse|princess|أميرة
+🤴|prince|prince|أمير
+👾|monstre|monster|وحش
+🐍|serpent|snake|أفعى/ثعبان
+🐭|souris|mouse|فأر
+🐷|cochon|pig|خنزير
+🔥|feu|fire|نار
+💧|eau|water|ماء
+🥛|lait|milk|حليب
+🍞|pain|bread|خبز
+🎂|gâteau|cake|كعكة
+🥚|œuf/oeuf|egg|بيضة
+🍟|frites/frite|fries|بطاطا مقلية
+🍔|hamburger/burger|burger/hamburger|برغر
+🍫|chocolat|chocolate|شوكولاتة
+🍬|bonbon|candy/sweet|حلوى
+🍪|biscuit/cookie|cookie/biscuit|بسكويت
+🧀|fromage|cheese|جبن
+⛰️|montagne|mountain|جبل
+🏖️|plage|beach|شاطئ
+📱|téléphone|phone|هاتف
+👓|lunettes|glasses|نظارة
+👨‍🚒|pompier|firefighter|رجل إطفاء
+👮|policier/police|police officer/police|شرطي
+🧑‍⚕️|docteur/médecin|doctor|طبيب
+🎸|guitare|guitar|غيتار
+🎹|piano|piano|بيانو
+🎵|musique/chanson|music/song|موسيقى
+🪆|poupée|doll|دمية
+👋|bonjour/salut/coucou|hello/hi|مرحبا/السلام عليكم
 🔴|rouge|red|أحمر
 🟠|orange|orange|برتقالي
 🟡|jaune|yellow|أصفر
@@ -1193,19 +1226,52 @@ function chercher(phrase) {
   const mots = n.split(' ').map(sansArticle);
   for (let i = 0; i < mots.length - 1; i++) { const p = mots[i] + ' ' + mots[i + 1]; if (INDEX.has(p)) return INDEX.get(p); }
   for (const w of mots) for (const e of [w, w.replace(/s$/, '')]) if (INDEX.has(e)) return INDEX.get(e);
-  return null;
+  return approcher(mots);
+}
+// Mot mal entendu ou mal écrit (« Lyon » → lion, « elefant » → éléphant) : on cherche le plus proche
+const sonore = (w) => w.replace(/ph/g, 'f').replace(/y/g, 'i').replace(/qu|k/g, 'c').replace(/eau|au/g, 'o').replace(/ai|ei/g, 'e')
+  .replace(/(.)\1/g, '$1').replace(/h/g, '').replace(/[estx]$/, '');
+const PROCHES = {}; // par langue : on ne rapproche que des mots de la langue choisie
+function ecart(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 9;
+  let prec = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cour = [i];
+    for (let k = 1; k <= b.length; k++) cour[k] = Math.min(prec[k] + 1, cour[k - 1] + 1, prec[k - 1] + (a[i - 1] === b[k - 1] ? 0 : 1));
+    prec = cour;
+  }
+  return prec[b.length];
+}
+function approcher(mots) {
+  if (!PROCHES[langue]) {
+    const liste = [];
+    MOTS.forEach((m) => m[langue].forEach((w) => { const k = sansArticle(normaliser(w)); if (!k.includes(' ')) liste.push([k, sonore(k), m]); }));
+    PROCHES[langue] = liste;
+  }
+  let meilleur = null, score = 9;
+  for (const w of mots) {
+    if (w.length < 4) continue;
+    const s = sonore(w), permis = w.length >= 9 ? 2 : w.length >= 5 ? 1 : 0;
+    for (const [k, ks, m] of PROCHES[langue]) {
+      if (ks === s) return m;
+      if (k.slice(0, 2) !== w.slice(0, 2)) continue;
+      const d = ecart(w, k);
+      if (d <= permis && d < score) { score = d; meilleur = m; }
+    }
+  }
+  return meilleur;
 }
 const motDans = (entree, l = langue) => entree[l][0];
 
 // Articles : le / la / l' / les en français, « ال » attaché en arabe, rien en anglais
-const FEMININ = new Set(`vache poule chèvre dinde abeille baleine pieuvre tortue méduse girafe grenouille pomme banane fraise orange
+const FEMININ = new Set(`licorne princesse souris eau montagne plage guitare musique chanson poupée frite frites police vache poule chèvre dinde abeille baleine pieuvre tortue méduse girafe grenouille pomme banane fraise orange
   pastèque poire pêche mangue carotte tomate aubergine salade glace pizza lune étoile fleur île maison fusée voiture reine enveloppe
   plume main usine colombe coccinelle fourmi chenille araignée sauterelle école maîtresse règle cloche chaise porte fenêtre télévision
   lampe horloge clé baignoire douche éponge poêle cuillère fourchette oreille bouche langue dent jambe robe casquette écharpe
   ambulance moto pluie neige vague famille maman fille mamie tata sœur`.split(/\s+/));
 const FEMININ_GROUPES = ['pomme de terre', 'brosse à dents', 'voiture de police'];
-const PLURIEL = new Set(['cerises', 'ciseaux', 'livres', 'crayons de couleur', 'chaussettes', 'chaussures', 'bottes', 'gants']);
-const H_ASPIRE = new Set(['hibou']);
+const PLURIEL = new Set(['frites', 'lunettes', 'cerises', 'ciseaux', 'livres', 'crayons de couleur', 'chaussettes', 'chaussures', 'bottes', 'gants']);
+const H_ASPIRE = new Set(['hibou', 'hamburger']);
 function articleFr(mot) {
   if (PLURIEL.has(mot)) return 'les ';
   if (/^[aeiouéèêàâîïôûœ]/i.test(mot) || (/^h/i.test(mot) && !H_ASPIRE.has(mot))) return 'l’';
@@ -2684,17 +2750,20 @@ $('btn-micro').onclick = () => {
     reco = new Reco();
     reco.lang = LANGUES[langue].voix; reco.interimResults = true; reco.maxAlternatives = 3;
     reco.onstart = () => { $('btn-micro').classList.add('ecoute'); $('legende').textContent = LANGUES[langue].ecoute; avatar?.mode('ecoute'); avatar?.forme(null); };
+    let alts = [], fait = false, silence;
+    // parmi les propositions, on prend la première qu'on sait dessiner
+    const conclure = () => { if (fait || !alts.length) return; fait = true; clearTimeout(silence); montrer(alts.find((a) => chercher(a)) || alts[0]); };
     reco.onresult = (e) => {
       const r = e.results[e.results.length - 1];
+      alts = [...r].map((a) => a.transcript).filter((a) => a.trim());
       $('legende').textContent = r[0].transcript;
-      if (r.isFinal) {
-        // parmi les propositions, on prend la première qu'on sait dessiner
-        const alts = [...r].map((a) => a.transcript);
-        montrer(alts.find((a) => chercher(a)) || alts[0]);
-      }
+      if (r.isFinal) { conclure(); reco?.stop(); return; }
+      // iOS n'envoie pas toujours de résultat « final » : après un court silence, on s'arrête
+      clearTimeout(silence);
+      silence = setTimeout(() => { conclure(); reco?.stop(); }, 1300);
     };
     reco.onerror = (e) => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') microIndisponible(); };
-    reco.onend = () => { reco = null; $('btn-micro').classList.remove('ecoute'); if ($('legende').textContent === LANGUES[langue].ecoute) $('legende').textContent = LANGUES[langue].micro; };
+    reco.onend = () => { conclure(); reco = null; $('btn-micro').classList.remove('ecoute'); if ($('legende').textContent === LANGUES[langue].ecoute) $('legende').textContent = LANGUES[langue].micro; };
     reco.start();
   } catch { reco = null; microIndisponible(); }
 };
