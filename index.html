@@ -84,6 +84,7 @@
   .carte { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
   .carte .emoji { font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 12px rgba(255, 209, 102, .25)); }
   .carte .mot { font-size: 34px; font-weight: 800; line-height: 1.1; text-wrap: balance; }
+  .carte .mot .article { font-size: .62em; font-weight: 700; color: var(--doux); margin-inline-end: .12em; }
   .carte .sous { font-size: 16px; color: var(--doux); text-wrap: balance; }
   .tuiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
   .tuile {
@@ -770,6 +771,18 @@ const MOTS = `
 ❤️|cœur|heart|قلب
 🪀|yo-yo|yo-yo|يويو
 🏭|usine|factory|مصنع
+👪|famille|family|عائلة
+👨|papa|dad/daddy|أب/بابا
+👩|maman|mom/mummy|أم/ماما
+👦|garçon|boy|ولد
+👧|fille|girl|بنت
+👶|bébé|baby|رضيع
+👴|papi/grand-père|grandpa/grandfather|جد
+👵|mamie/grand-mère|grandma/grandmother|جدة
+🧔|tonton/oncle|uncle|عم
+👩‍🦱|tata/tante|aunt|عمة
+👦🏽|frère|brother|أخ
+👧🏽|sœur|sister|أخت
 🐦|oiseau|bird|طائر
 🦅|aigle|eagle|نسر
 🦜|perroquet|parrot|ببغاء
@@ -876,8 +889,8 @@ const NOEUDS = {
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
                enfants: ['fruits', 'legumes'] },
-  monde:     { emoji: '🏡', nom: { fr: 'Mon monde', en: 'My world', ar: 'عالمي' }, desc: { fr: 'Maison, école, corps…', en: 'Home, school, body…', ar: 'البيت، المدرسة، الجسم…' },
-               enfants: ['maison', 'ecole', 'corps', 'vetements', 'vehicules', 'nature', 'jouets'] },
+  monde:     { emoji: '🏡', nom: { fr: 'Mon monde', en: 'My world', ar: 'عالمي' }, desc: { fr: 'Famille, maison, école…', en: 'Family, home, school…', ar: 'العائلة، البيت، المدرسة…' },
+               enfants: ['famille', 'maison', 'ecole', 'corps', 'vetements', 'vehicules', 'nature', 'jouets'] },
   ferme:     { emoji: '🐄', nom: { fr: 'La ferme', en: 'The farm', ar: 'المزرعة' }, un: { fr: 'un animal de la ferme', en: 'a farm animal', ar: 'حيوان مزرعة' }, mots: '🐄 🐑 🐴 🐔 🐓 🐤 🦆 🐐 🦃 🐇 🐱 🐶' },
   ocean:     { emoji: '🐠', nom: { fr: 'La mer', en: 'The sea', ar: 'البحر' }, un: { fr: 'un animal de la mer', en: 'a sea animal', ar: 'حيوان بحري' }, mots: '🐟 🐋 🐬 🦈 🐙 🦀 🐢 🦑 🐚 🦭 🪼' },
   sauvages:  { emoji: '🦁', nom: { fr: 'Animaux sauvages', en: 'Wild animals', ar: 'حيوانات برية' }, un: { fr: 'un animal sauvage', en: 'a wild animal', ar: 'حيوان بري' }, mots: '🦁 🐘 🦒 🦓 🐒 🐯 🦛 🐊 🐻 🦊 🐺 🐨 🦘 🐪 🐸 🦕' },
@@ -886,6 +899,7 @@ const NOEUDS = {
   fruits:    { emoji: '🍎', nom: { fr: 'Les fruits', en: 'Fruits', ar: 'الفواكه' }, un: { fr: 'un fruit', en: 'a fruit', ar: 'فاكهة' }, mots: '🍎 🍌 🍓 🍇 🍋 🍊 🍉 🍐 🍒 🍑 🥭 🍍 🥝' },
   legumes:   { emoji: '🥕', nom: { fr: 'Les légumes', en: 'Vegetables', ar: 'الخضروات' }, un: { fr: 'un légume', en: 'a vegetable', ar: 'من الخضروات' }, mots: '🥕 🍅 🥒 🌽 🥔 🧅 🥦 🍆 🫑 🥬 🧄 🍄' },
   couleurs:  { emoji: '🎨', nom: { fr: 'Les couleurs', en: 'Colors', ar: 'الألوان' }, desc: { fr: 'Rouge, bleu, jaune…', en: 'Red, blue, yellow…', ar: 'أحمر، أزرق، أصفر…' }, un: { fr: 'une couleur', en: 'a color', ar: 'لون' }, mots: '🔴 🟠 🟡 🟢 🔵 🟣 🩷 🟤 ⚫ ⚪' },
+  famille:   { emoji: '👪', nom: { fr: 'La famille', en: 'Family', ar: 'العائلة' }, un: { fr: 'quelqu’un de la famille', en: 'a family member', ar: 'من العائلة' }, mots: '👪 👨 👩 👦 👧 👶 👴 👵 👦🏽 👧🏽 🧔 👩‍🦱' },
   maison:    { emoji: '🏠', nom: { fr: 'La maison', en: 'The house', ar: 'البيت' }, un: { fr: 'un objet de la maison', en: 'a thing in the house', ar: 'من أشياء البيت' }, mots: '🛏️ 🪑 🚪 🪟 🛋️ 📺 💡 🕰️ 🔑 🛁 🚿 🪥 🧼 🧽 🪞 🍳 🥄 🍴' },
   ecole:     { emoji: '🏫', nom: { fr: 'L’école', en: 'School', ar: 'المدرسة' }, un: { fr: 'une chose de l’école', en: 'a school thing', ar: 'من أدوات المدرسة' }, mots: '🏫 👩‍🏫 🎒 ✏️ 🖊️ 🖍️ 📏 ✂️ 📚 📓 🧮 🔔' },
   corps:     { emoji: '✋', nom: { fr: 'Mon corps', en: 'My body', ar: 'جسمي' }, un: { fr: 'une partie du corps', en: 'a body part', ar: 'جزء من الجسم' }, mots: '👁️ 👂 👃 👄 👅 🦷 ✋ 💪 🦵 🦶 ❤️ 🧠' },
@@ -986,6 +1000,36 @@ function chercher(phrase) {
 }
 const motDans = (entree, l = langue) => entree[l][0];
 
+// Articles : le / la / l' / les en français, « ال » attaché en arabe, rien en anglais
+const FEMININ = new Set(`vache poule chèvre dinde abeille baleine pieuvre tortue méduse girafe grenouille pomme banane fraise orange
+  pastèque poire pêche mangue carotte tomate aubergine salade glace pizza lune étoile fleur île maison fusée voiture reine enveloppe
+  plume main usine colombe coccinelle fourmi chenille araignée sauterelle école maîtresse règle cloche chaise porte fenêtre télévision
+  lampe horloge clé baignoire douche éponge poêle cuillère fourchette oreille bouche langue dent jambe robe casquette écharpe
+  ambulance moto pluie neige vague famille maman fille mamie tata sœur`.split(/\s+/));
+const FEMININ_GROUPES = ['pomme de terre', 'brosse à dents', 'voiture de police'];
+const PLURIEL = new Set(['cerises', 'ciseaux', 'livres', 'crayons de couleur', 'chaussettes', 'chaussures', 'bottes', 'gants']);
+const H_ASPIRE = new Set(['hibou']);
+function articleFr(mot) {
+  if (PLURIEL.has(mot)) return 'les ';
+  if (/^[aeiouéèêàâîïôûœ]/i.test(mot) || (/^h/i.test(mot) && !H_ASPIRE.has(mot))) return 'l’';
+  return FEMININ.has(mot) || FEMININ_GROUPES.includes(mot) ? 'la ' : 'le ';
+}
+const arabeDefini = (m) => (!m.includes(' ') && !m.startsWith('ال') ? 'ال' + m : m);
+function nomComplet(entree, l = langue) {
+  const m = motDans(entree, l);
+  if (l === 'fr') return articleFr(m) + m;
+  if (l === 'ar') return arabeDefini(m);
+  return m;
+}
+const majuscule = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+// La carte d'un mot : l'article en petit devant, les tuiles pour le nom seul
+function carteMot(entree, sous = '') {
+  const m = motDans(entree);
+  if (langue === 'fr') carte(entree.emoji, m, sous, m, articleFr(m));
+  else if (langue === 'ar') carte(entree.emoji, arabeDefini(m), sous, m);
+  else carte(entree.emoji, m, sous, m);
+}
+
 // ---------- Voix ----------
 function parler(texte, l = langue) {
   return new Promise((ok) => {
@@ -1053,13 +1097,15 @@ function voirLumi() {
 const pause = (ms, j) => new Promise((ok, ko) => setTimeout(() => (j === jeton ? ok() : ko()), ms));
 
 // ---------- Carte du mot ----------
-function carte(emoji, mot, sous = '', tuiles = true) {
+function carte(emoji, mot, sous = '', tuiles = true, article = '') {
   const e = $('carte-emoji'), m = $('carte-mot');
-  e.textContent = emoji; m.textContent = mot; $('carte-sous').textContent = sous;
+  e.textContent = emoji; m.textContent = ''; $('carte-sous').textContent = sous;
+  if (article) { const a = document.createElement('span'); a.className = 'article'; a.textContent = article; m.append(a); }
+  m.append(mot);
   [e, m].forEach((x) => { x.style.animation = 'none'; void x.offsetWidth; x.style.animation = ''; });
   $('tuiles').innerHTML = '';
   if (!tuiles) return;
-  Array.from(mot).forEach((c) => {
+  Array.from(typeof tuiles === 'string' ? tuiles : mot).forEach((c) => {
     const vide = /[\s-]/.test(c), t = document.createElement('button');
     t.type = 'button'; t.className = 'tuile' + (vide ? ' espace' : ''); t.textContent = vide ? '' : c;
     if (!vide) t.onclick = () => { diapo++; montrerLettre(c, true); };
@@ -1087,11 +1133,11 @@ async function montrerEntree(entree, avecVoix = true) {
   voirLumi();
   avatar?.mode(paletteAmb);
   avatar?.forme(entree.emoji);
-  carte(entree.emoji, mot);
+  carteMot(entree);
   try {
-    if (avecVoix) await parler(mot);
+    if (avecVoix) await parler(nomComplet(entree));
     await epeler(j);
-    if (avecVoix) await parler(mot);
+    if (avecVoix) await parler(nomComplet(entree));
   } catch {}
   revenirAuNuage(12000);
 }
@@ -1348,7 +1394,7 @@ const AMBIANCES = {
 // Quel thème a quelle ambiance (les autres : la nuit étoilée)
 const AMB_THEME = {
   animaux: 'foret', ferme: 'ferme', ocean: 'mer', sauvages: 'foret', oiseaux: 'foret', insectes: 'lucioles',
-  manger: 'jardin', fruits: 'jardin', legumes: 'jardin', nature: 'foret', ecole: 'ecole', maison: 'maison', vehicules: 'ciel',
+  manger: 'jardin', fruits: 'jardin', legumes: 'jardin', nature: 'foret', ecole: 'ecole', maison: 'maison', famille: 'maison', vehicules: 'ciel',
 };
 let ambianceCourante = 'nuit', paletteAmb = 'enfant';
 
@@ -1630,7 +1676,7 @@ function construireListe(id) {
     actions = L.nombres.map((nom, i) => { p.appendChild(tuile(L.chiffre(i + 1), nom, () => montrerNombre(i + 1), 'lettre c' + (i % 4))); return () => montrerNombre(i + 1); });
   } else {
     actions = n.mots.split(' ').map((e) => PAR_EMOJI.get(e)).filter(Boolean).map((m) => {
-      p.appendChild(tuile(m.emoji, motDans(m), () => montrerEntree(m)));
+      p.appendChild(tuile(m.emoji, nomComplet(m), () => montrerEntree(m)));
       return () => montrerEntree(m);
     });
   }
@@ -1745,9 +1791,9 @@ function nouvelleManche() {
     const choix = melanger(entrees(theme.mots)).slice(0, 4);
     bonne = hasard(choix);
     avatar?.forme('question');
-    carte('👂', L.ouEst(motDans(bonne)), '', false);
+    carte('👂', L.ouEst(nomComplet(bonne)), '', false);
     boutonsChoix(choix, repondre);
-    parler(L.ouEst(motDans(bonne)));
+    parler(L.ouEst(nomComplet(bonne)));
   } else if (jeuType === 'range') {
     const lieu = hasard(LIEUX);
     const bons = melanger(entrees(lieu.mots)).slice(0, 3);
@@ -1787,8 +1833,8 @@ function repondre(m, b) {
   const j = ++jeton;
   b.classList.add('juste');
   avatar?.forme(bonne.emoji);
-  const phrase = jeuType === 'intrus' ? L.pasUn(motDans(bonne), bonne.un[langue]) : motDans(bonne);
-  carte(bonne.emoji, motDans(bonne), jeuType === 'intrus' ? phrase : L.bravo);
+  const phrase = jeuType === 'intrus' ? majuscule(L.pasUn(nomComplet(bonne), bonne.un[langue])) : nomComplet(bonne);
+  carteMot(bonne, jeuType === 'intrus' ? phrase : L.bravo);
   gagne(`${L.bravo} ${phrase}`, j);
 }
 
@@ -1798,17 +1844,17 @@ function ranger(m, b, bons) {
   if (!bons.includes(m)) {
     secouer(b); son('faux');
     const chez = LIEUX.find((l) => l.mots.includes(m.emoji));
-    parler(chez ? L.pasIci(motDans(m), chez.dans[langue]) : L.encore);
+    parler(chez ? L.pasIci(nomComplet(m), chez.dans[langue]) : L.encore);
     return;
   }
   b.classList.add('juste'); b.disabled = true;
   avatar?.syllabe(); son('juste');
-  if (--aTrouver > 0) { parler(motDans(m)); return; }
+  if (--aTrouver > 0) { parler(nomComplet(m)); return; }
   const j = ++jeton;
-  carte(bonne.emoji, L.bravo, bons.map((x) => motDans(x)).join(' · '), false);
+  carte(bonne.emoji, L.bravo, bons.map((x) => nomComplet(x)).join(' · '), false);
   gagne(L.bravo, j);
 }
-$('btn-reecouter').onclick = () => { if (jeuType === 'ecoute' && bonne) parler(LANGUES[langue].ouEst(motDans(bonne))); };
+$('btn-reecouter').onclick = () => { if (jeuType === 'ecoute' && bonne) parler(LANGUES[langue].ouEst(nomComplet(bonne))); };
 
 // ---------- Langue ----------
 function choisirLangue(l) {
