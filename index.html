@@ -1025,8 +1025,23 @@ function son(type = 'pop') {
     });
   } catch {}
 }
+// iPhone / iPad : le son n'est autorisé qu'au moment où le doigt se RELÈVE (touchend, click),
+// pas quand il touche. On déverrouille donc l'audio sur ces gestes-là, et on demande le mode « lecture »
+// pour que le bouton silencieux du téléphone ne coupe pas la musique (Safari 16.4 et plus).
+function debloquerAudio() {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state !== 'running') audio.resume();
+    // un son vide d'un instant : la façon la plus sûre de réveiller l'audio sur iOS
+    const b = audio.createBuffer(1, 1, 22050), s = audio.createBufferSource();
+    s.buffer = b; s.connect(audio.destination); s.start(0);
+  } catch {}
+}
+['touchend', 'click', 'keydown'].forEach((n) => document.addEventListener(n, debloquerAudio, true));
+
 // chaque bouton fait « pop » sous le doigt
-document.addEventListener('pointerdown', (e) => { if (e.target.closest('button') && !e.target.closest('#choix')) son('pop'); }, true);
+document.addEventListener('pointerdown', (e) => { if (audio && e.target.closest('button') && !e.target.closest('#choix')) son('pop'); }, true);
 
 // Sur téléphone, si Lumi est sorti de l'écran (liste longue), on remonte pour le voir dessiner
 function voirLumi() {
@@ -1523,7 +1538,12 @@ const Ambiance = (() => {
   // la voix passe au-dessus de l'ambiance
   function baisser(oui) { if (ctx && actif && gen) maitre.gain.setTargetAtTime(oui ? .3 : .9, ctx.currentTime, .2); }
   // le navigateur n'autorise le son qu'après un premier geste
-  document.addEventListener('pointerdown', () => { if (actif && !gen) { init(); ctx.resume?.(); demarrer(); } }, true);
+  const lancer = () => { if (actif && !gen) { debloquerAudio(); init(); ctx.resume?.(); demarrer(); } };
+  ['touchend', 'click', 'keydown'].forEach((n) => document.addEventListener(n, lancer, true));
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend?.(); else if (actif) ctx.resume?.();
+  });
   return { jouer, basculer, baisser, get actif() { return actif; } };
 })();
 
