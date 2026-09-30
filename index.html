@@ -53,18 +53,25 @@
   button:focus-visible, input:focus-visible { outline: 3px solid var(--ciel); outline-offset: 2px; }
 
   /* ---------- Barre du haut ---------- */
-  .haut { display: flex; align-items: center; gap: 10px; min-height: 48px;
+  .haut { display: flex; align-items: center; gap: 10px; min-height: 72px;
           position: sticky; top: 0; z-index: 20; margin-inline: -16px;
           padding: max(10px, env(safe-area-inset-top, 0px)) 16px 10px;
-          background: rgba(var(--fond-rgb), .86); transition: background-color 1.2s; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+          background: rgba(var(--fond-rgb), .9); transition: background-color 1.2s; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
           border-bottom: 1px solid rgba(38, 43, 85, .6); }
-  .haut h1 { margin: 0; flex: 1; min-width: 0; font-size: clamp(18px, 5.2vw, 26px); font-weight: 800; line-height: 1.1; letter-spacing: -.01em;
+  .haut h1 { margin: 0; flex: 1; min-width: 0; font-size: clamp(20px, 5.4vw, 30px); font-weight: 800; line-height: 1.1; letter-spacing: -.01em;
              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .retour { width: 46px; height: 46px; flex: none; border-radius: 50%; background: var(--carte); border: 1px solid var(--bord); font-size: 22px; font-weight: 800; }
+  /* Gros boutons, faciles à toucher pour un petit doigt */
+  .retour { width: 60px; height: 60px; flex: none; border-radius: 20px; background: var(--soleil); color: #2a1f00;
+            font-size: 32px; font-weight: 900; line-height: 1; display: grid; place-items: center;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.3); }
+  .retour[hidden] { display: none; }
+  .retour:active, .bouton-son:active, .bouton-langue:active { transform: scale(.92); }
+  .retour.maison { background: var(--menthe); font-size: 28px; }
   .app[dir="rtl"] .retour span { display: inline-block; transform: scaleX(-1); }
-  .bouton-son { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--carte); border: 1px solid var(--bord); font-size: 19px; }
-  .bouton-langue { flex: none; min-width: 58px; height: 44px; padding: 0 12px; border-radius: 99px; background: var(--soleil); color: #2a1f00;
-                   font-weight: 800; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+  .bouton-son { width: 56px; height: 56px; flex: none; border-radius: 50%; background: var(--carte); border: 2px solid var(--bord); font-size: 26px; }
+  .bouton-langue { flex: none; min-width: 64px; height: 56px; padding: 0 14px; border-radius: 99px; background: var(--soleil); color: #2a1f00;
+                   font-weight: 900; font-size: 19px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+                   box-shadow: inset 0 -4px 0 rgba(0,0,0,.15); }
   .bouton-langue::before { content: '🌍'; font-size: 16px; }
   .langues { display: flex; flex: none; background: var(--carte); border: 1px solid var(--bord); border-radius: 99px; padding: 3px; }
   .langues button { min-width: 42px; padding: 4px 10px; border-radius: 99px; background: none; color: var(--doux); font-weight: 700; }
@@ -166,10 +173,12 @@
 
   /* Petit téléphone : en-tête plus compact pour que le titre reste lisible */
   @media (max-width: 430px) {
-    .haut { gap: 6px; }
-    .retour, .bouton-son { width: 40px; height: 40px; }
-    .bouton-langue { min-width: 52px; height: 40px; padding: 0 10px; font-size: 16px; }
-    .haut h1 { font-size: clamp(16px, 4.6vw, 22px); }
+    .haut { gap: 7px; min-height: 66px; }
+    .retour { width: 54px; height: 54px; font-size: 28px; }
+    .bouton-son { width: 50px; height: 50px; font-size: 22px; }
+    .bouton-langue { min-width: 54px; height: 50px; padding: 0 10px; font-size: 16px; }
+    .haut h1 { font-size: clamp(16px, 4.6vw, 20px); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+    .haut h1 .e { display: none; }
   }
   /* ---------- Progression : bandeau, album, pouvoirs ---------- */
   .bandeau { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;
@@ -325,6 +334,34 @@
     .feuille svg { max-height: 74vh; }
     .col-autres .autre { width: 84px; }
   }
+  /* ---------- Comptines ---------- */
+  .chansons { display: flex; flex-direction: column; gap: 12px; }
+  .ch-filtres { display: flex; gap: 8px; flex-wrap: wrap; }
+  .puce { padding: 10px 16px; border-radius: 99px; background: var(--carte); border: 2px solid var(--bord); font-weight: 800; font-size: 17px; }
+  .puce.on { background: var(--soleil); color: #2a1f00; border-color: var(--soleil); }
+  .ch-liste { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ch-tuile { position: relative; min-height: 96px; border-radius: 22px; padding: 12px; display: flex; flex-direction: column; align-items: flex-start;
+              justify-content: space-between; text-align: start; color: #1b1030; font-weight: 800; font-size: 17px; line-height: 1.15; }
+  .ch-tuile .e { font-size: 36px; line-height: 1; }
+  .ch-tuile .l { position: absolute; top: 10px; inset-inline-end: 12px; font-size: 20px; }
+  .ch-tuile.u0 { background: #ffd166; } .ch-tuile.u1 { background: #ff8fab; } .ch-tuile.u2 { background: #7cc6fe; }
+  .ch-tuile.u3 { background: #7de2c3; } .ch-tuile.u4 { background: #c3a6ff; }
+  .ch-tuile.joue { outline: 4px solid #fff; animation: respire 1.6s ease-in-out infinite; }
+  .ch-lecteur { border-radius: 24px; background: var(--carte); border: 1px solid var(--bord); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .ch-lecteur[hidden] { display: none; }
+  .ch-titre { font-weight: 800; font-size: 20px; }
+  .ch-paroles { max-height: 34vh; overflow-y: auto; padding: 6px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .ch-ligne { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.35; color: var(--doux); opacity: .55; transition: opacity .3s; }
+  .ch-ligne.active { opacity: 1; color: var(--texte, #fff); }
+  .ch-mot { display: inline-block; transition: transform .15s, color .15s; border-radius: 8px; }
+  .ch-mot.on { color: var(--soleil); transform: translateY(-4px) scale(1.15); text-shadow: 0 0 14px rgba(255,209,102,.6); }
+  [data-ecran="chansons"] .scene { max-height: 26vh; }
+  [data-ecran="chansons"] .carte .emoji { display: none; }
+  .ch-commandes { display: grid; grid-template-columns: 72px 1fr 1fr; gap: 10px; }
+  .ch-commandes button { height: 60px; border-radius: 18px; background: rgba(255,255,255,.08); border: 2px solid var(--bord); font-size: 18px; font-weight: 800; }
+  .ch-commandes #ch-lecture { background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; font-size: 28px; }
+  .ch-commandes button.on { background: var(--soleil); color: #2a1f00; border-color: var(--soleil); }
+  @media (min-width: 600px) { .ch-liste { grid-template-columns: repeat(3, 1fr); } .ch-ligne { font-size: 28px; } .ch-paroles { max-height: 40vh; } }
 </style>
 </head>
 <body>
@@ -332,6 +369,7 @@
 <div class="app" id="app" dir="ltr" data-ecran="accueil">
   <header class="haut">
     <button class="retour" id="btn-retour" type="button" hidden aria-label="Retour"><span>←</span></button>
+    <button class="retour maison" id="btn-maison" type="button" hidden aria-label="Accueil">🏠</button>
     <h1 id="titre">Lumi ✦</h1>
     <button class="bouton-son" id="btn-son" type="button" aria-label="Son de fond" aria-pressed="true">🔊</button>
     <button class="bouton-langue" id="btn-langue" type="button" aria-label="Changer de langue">FR</button>
@@ -397,6 +435,21 @@
           </div>
           <div class="choix" id="choix"></div>
           <div class="aire-bulles" id="aire-bulles" hidden></div>
+        </div>
+      </section>
+      <section id="ecran-chansons" hidden>
+        <div class="chansons">
+          <div class="ch-lecteur" id="ch-lecteur" hidden>
+            <div class="ch-titre" id="ch-titre"></div>
+            <div class="ch-paroles" id="ch-paroles"></div>
+            <div class="ch-commandes">
+              <button type="button" id="ch-lecture" aria-label="Lecture">▶</button>
+              <button type="button" id="ch-lent"></button>
+              <button type="button" id="ch-boucle"></button>
+            </div>
+          </div>
+          <div class="ch-filtres" id="ch-filtres"></div>
+          <div class="ch-liste" id="ch-liste"></div>
         </div>
       </section>
       <section id="ecran-coloriage" hidden>
@@ -1001,7 +1054,7 @@ const PAR_EMOJI = new Map(MOTS.map((m) => [m.emoji, m]));
 // ---------- L'arbre des activités : accueil → univers → thèmes ----------
 const NOEUDS = {
   accueil:   { emoji: '✦', nom: { fr: 'Lumi', en: 'Lumi', ar: 'لومي' },
-               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage', 'jeux', 'parler'] },
+               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'jeux', 'parler'] },
   animaux:   { emoji: '🐾', nom: { fr: 'Les animaux', en: 'Animals', ar: 'الحيوانات' }, desc: { fr: 'Ferme, mer, oiseaux…', en: 'Farm, sea, birds…', ar: 'المزرعة، البحر، الطيور…' },
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
@@ -1040,6 +1093,7 @@ const NOEUDS = {
   'col-chat': { emoji: '🐱', type: 'colorier', dessin: 'chat' },
   'col-glace': { emoji: '🍦', type: 'colorier', dessin: 'glace' },
   'col-fusee': { emoji: '🚀', type: 'colorier', dessin: 'fusee' },
+  chansons:  { emoji: '🎵', nom: { fr: 'Comptines', en: 'Songs', ar: 'أناشيد' }, desc: { fr: 'On chante avec Lumi', en: 'Sing along with Lumi', ar: 'نغني مع لومي' }, type: 'chansons' },
   album:     { emoji: '📒', nom: { fr: 'Mon album', en: 'My album', ar: 'ألبومي' }, type: 'album' },
   devine:    { emoji: '🔮', nom: { fr: 'Devine !', en: 'Guess!', ar: 'خمّن!' }, desc: { fr: 'Qu’est-ce que Lumi dessine ?', en: 'What is Lumi drawing?', ar: 'ماذا يرسم لومي؟' }, type: 'jeu', jeu: 'devine' },
   ecoute:    { emoji: '👂', nom: { fr: 'Écoute et trouve', en: 'Listen and find', ar: 'استمع وابحث' }, desc: { fr: 'Lumi dit un mot, trouve l’image', en: 'Lumi says a word, find the picture', ar: 'لومي يقول كلمة، جد الصورة' }, type: 'jeu', jeu: 'ecoute' },
@@ -2170,23 +2224,222 @@ function construireColoriage(k) {
   });
 }
 
+// =====================================================================
+// ---------- Comptines : CONFIGURATION ----------
+// Toutes les mélodies sont traditionnelles (domaine public). Les paroles
+// françaises et anglaises sont anciennes (XVIIIe–XIXe siècle, domaine
+// public) ; les paroles arabes sont écrites pour Lumi (libres).
+// Pour ajouter une comptine : une entrée { id, langue, emoji, titre, tempo, lignes }.
+//  - chaque ligne = [paroles, notes]
+//  - dans les paroles, « - » coupe un mot en syllabes : une syllabe = une note
+//    (un vrai trait d'union s'écrit « -- » : « dor-mez--vous »)
+//  - notes : C4 D4 E4… (do ré mi), « :2 » = deux temps, « :.5 » = un demi-temps
+// =====================================================================
+const CHANSONS = [
+  { id: 'frere-jacques', langue: 'fr', emoji: '🔔', titre: 'Frère Jacques', tempo: 112, lignes: [
+    ['Frè-re Jac-ques, frè-re Jac-ques,', 'C4 D4 E4 C4 C4 D4 E4 C4'],
+    ['dor-mez--vous ? dor-mez--vous ?', 'E4 F4 G4:2 E4 F4 G4:2'],
+    ['Son-nez les ma-ti-nes, son-nez les ma-ti-nes,', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4'],
+    ['Ding, ding, dong ! Ding, ding, dong !', 'C4 G3 C4:2 C4 G3 C4:2'],
+  ] },
+  { id: 'clair-lune', langue: 'fr', emoji: '🌙', titre: 'Au clair de la lune', tempo: 104, lignes: [
+    ['Au clair de la lu-ne, mon a-mi Pier-rot,', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
+    ['Prê-te--moi ta plu-me pour é-crire un mot.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
+    ['Ma chan-delle est mor-te, je n’ai plus de feu.', 'D4 D4 D4 D4 A3:2 A3:2 D4 C4 B3 A3 G3:4'],
+    ['Ou-vre--moi ta por-te pour l’a-mour de Dieu.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
+  ] },
+  { id: 'dirai-je', langue: 'fr', emoji: '🍬', titre: 'Ah ! vous dirai-je, maman', tempo: 112, lignes: [
+    ['Ah ! vous di-rai--je, ma-man,', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['ce qui cau-se mon tour-ment ?', 'F4 F4 E4 E4 D4 D4 C4:2'],
+    ['Pa-pa veut que je rai-sonne', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['comme u-ne gran-de per-sonne.', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['Moi, je dis que les bon-bons', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['va-lent mieux que la rai-son !', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  ] },
+  { id: 'twinkle', langue: 'en', emoji: '⭐', titre: 'Twinkle, Twinkle, Little Star', tempo: 108, lignes: [
+    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2'],
+    ['Up a-bove the world so high,', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['like a dia-mond in the sky.', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  ] },
+  { id: 'row-boat', langue: 'en', emoji: '🚣', titre: 'Row, Row, Row Your Boat', tempo: 230, lignes: [
+    ['Row, row, row your boat,', 'C4:3 C4:3 C4:2 D4 E4:3'],
+    ['gent-ly down the stream.', 'E4:2 D4 E4:2 F4 G4:6'],
+    ['Mer-ri-ly, mer-ri-ly, mer-ri-ly, mer-ri-ly,', 'C5 C5 C5 G4 G4 G4 E4 E4 E4 C4 C4 C4'],
+    ['life is but a dream!', 'G4:2 F4 E4:2 D4 C4:6'],
+  ] },
+  { id: 'macdonald', langue: 'en', emoji: '🐄', titre: 'Old MacDonald', tempo: 128, lignes: [
+    ['Old Mac-Don-ald had a farm,', 'G4 G4 G4 D4 E4 E4 D4:2'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
+    ['And on that farm he had a cow,', 'D4 G4 G4 G4 D4 E4 E4 D4:2'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
+    ['Old Mac-Don-ald had a farm,', 'G4 G4 G4 D4 E4 E4 D4:2'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
+  ] },
+  { id: 'najma', langue: 'ar', emoji: '⭐', titre: 'لمعي يا نجمة', tempo: 104, lignes: [
+    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2'],
+    ['تل-م-ع مث-ل الما-سة', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['في ال-سما-ء ال-صا-فية', 'G4 G4 F4 F4 E4 E4 D4:2'],
+    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2'],
+    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  ] },
+  { id: 'qum-akhi', langue: 'ar', emoji: '🔔', titre: 'قم يا أخي', tempo: 112, lignes: [
+    ['قم يا أ-خي، قم يا أ-خي', 'C4 D4 E4 C4 C4 D4 E4 C4'],
+    ['هل ت-نام؟ هل ت-نام؟', 'E4 F4 G4:2 E4 F4 G4:2'],
+    ['ال-شم-س ط-لع-ت، ال-شم-س ط-لع-ت', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4'],
+    ['دن، دن، دان! دن، دن، دان!', 'C4 G3 C4:2 C4 G3 C4:2'],
+  ] },
+];
+const DRAPEAU = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦' };
+const TXT_CH = {
+  toutes: { fr: 'Toutes', en: 'All', ar: 'الكل' },
+  vite: { fr: 'Normal', en: 'Normal', ar: 'عادي' }, lent: { fr: 'Lent', en: 'Slow', ar: 'بطيء' },
+  boucle: { fr: 'Encore', en: 'Repeat', ar: 'أعد' },
+};
+// Réglages de l'utilisateur : langue des comptines, vitesse, répétition
+const ReglesChant = (() => {
+  let r = { langue: null, lent: false, boucle: false };
+  try { r = { ...r, ...JSON.parse(localStorage.getItem('lumi-chansons') || '{}') }; } catch {}
+  return { get: () => r, set(k, v) { r[k] = v; try { localStorage.setItem('lumi-chansons', JSON.stringify(r)); } catch {} } };
+})();
+
+// « C4:2 » → { f: fréquence, d: temps } ; le nombre de notes doit égaler le nombre de syllabes
+function lireNotes(txt) {
+  const DEMI = { C: -9, 'C#': -8, D: -7, 'D#': -6, E: -5, F: -4, 'F#': -3, G: -2, 'G#': -1, A: 0, 'A#': 1, B: 2 };
+  return txt.trim().split(/\s+/).map((t) => {
+    const [n, d] = t.split(':'), m = n.match(/^([A-G]#?)(\d)$/);
+    return { f: 440 * 2 ** ((DEMI[m[1]] + (m[2] - 4) * 12) / 12), d: d ? parseFloat(d) : 1 };
+  });
+}
+function preparerChanson(c) {
+  return c.lignes.map(([paroles, notes]) => {
+    const n = lireNotes(notes), mots = [];
+    paroles.split(' ').forEach((m) => {
+      // « ? » ou « ! » tout seuls se collent au mot d'avant, sans note
+      if (!/\p{L}/u.test(m) && mots.length) mots[mots.length - 1].texte += '\u00a0' + m;
+      else mots.push({ texte: m.replace(/--/g, '\u2011').replace(/-/g, ''), syl: m.replace(/--/g, '-').split('-').length });
+    });
+    const total = mots.reduce((s, m) => s + m.syl, 0);
+    if (total !== n.length) console.warn(`Comptine « ${c.titre} » : ${total} syllabes pour ${n.length} notes dans « ${paroles} »`);
+    return { mots, notes: n };
+  });
+}
+// Une note de boîte à musique
+function noteBoite(f, t, duree) {
+  const o = audio.createOscillator(), o2 = audio.createOscillator(), g = audio.createGain(), g2 = audio.createGain();
+  o.type = 'sine'; o2.type = 'sine'; o.frequency.value = f; o2.frequency.value = f * 2;
+  g2.gain.value = .25; o2.connect(g2); g2.connect(g); o.connect(g); g.connect(audio.destination);
+  const fin = t + Math.max(.5, duree * 1.4);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32, t + .015); g.gain.exponentialRampToValueAtTime(.0001, fin);
+  o.start(t); o2.start(t); o.stop(fin + .05); o2.stop(fin + .05);
+}
+let chant = null; // { id, jeton, minuteurs }
+function arreterChanson() {
+  if (!chant) return;
+  chant.minuteurs.forEach(clearTimeout); chant = null;
+  avatar?.parle(false); Ambiance.baisser(false); revenirAuNuage(800);
+  const b = $('ch-lecture'); if (b) b.textContent = '▶';
+  document.querySelectorAll('.ch-mot.on').forEach((m) => m.classList.remove('on'));
+}
+function chanter(c) {
+  arreterChanson();
+  debloquerAudio();
+  const lignes = preparerChanson(c), r = ReglesChant.get(), temps = 60 / c.tempo * (r.lent ? 1.35 : 1);
+  const bloc = $('ch-paroles');
+  bloc.innerHTML = ''; bloc.dir = c.langue === 'ar' ? 'rtl' : 'ltr';
+  const spans = lignes.map((l) => {
+    const p = document.createElement('p'); p.className = 'ch-ligne';
+    const s = l.mots.map((m) => { const e = document.createElement('span'); e.className = 'ch-mot'; e.textContent = m.texte; p.append(e, ' '); return e; });
+    bloc.appendChild(p); return s;
+  });
+  $('ch-titre').textContent = `${c.emoji} ${c.titre}`;
+  $('ch-lecture').textContent = '⏸';
+  chant = { id: c.id, minuteurs: [] };
+  const moi = chant, t0 = audio.currentTime + .25;
+  let t = 0;
+  avatar?.forme(c.emoji); avatar?.mode('heureux'); avatar?.parle(true); Ambiance.baisser(true);
+  const plus = (ms, fn) => moi.minuteurs.push(setTimeout(() => { if (chant === moi) fn(); }, ms));
+  lignes.forEach((l, i) => {
+    plus((t + .25) * 1000 - 50, () => {
+      bloc.querySelectorAll('.ch-ligne').forEach((p, k) => p.classList.toggle('active', k === i));
+      bloc.children[i].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      avatar?.forme(i % 2 ? null : c.emoji);
+    });
+    let k = 0;
+    l.mots.forEach((m, j) => {
+      for (let s = 0; s < m.syl; s++, k++) {
+        const n = l.notes[k]; if (!n) continue;
+        noteBoite(n.f, t0 + t, n.d * temps);
+        plus((t + .25) * 1000, () => {
+          document.querySelectorAll('.ch-mot.on').forEach((e) => e.classList.remove('on'));
+          spans[i][j].classList.add('on', 'chante'); avatar?.syllabe();
+        });
+        t += n.d * temps;
+      }
+    });
+    t += temps * .5; // petite respiration entre deux lignes
+  });
+  plus((t + .6) * 1000, () => {
+    const boucle = ReglesChant.get().boucle;
+    arreterChanson();
+    Progres.gagner(null); son('juste');
+    if (boucle && pile[pile.length - 1] === 'chansons') chanter(c);
+  });
+}
+function construireChansons() {
+  const r = ReglesChant.get(), choix = r.langue || langue;
+  const filtres = $('ch-filtres');
+  filtres.innerHTML = '';
+  [['toutes', '🌍 ' + TXT_CH.toutes[langue]], ['fr', '🇫🇷 FR'], ['en', '🇬🇧 EN'], ['ar', '🇸🇦 AR']].forEach(([k, t]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = t; b.className = 'puce' + (k === choix ? ' on' : '');
+    b.onclick = () => { ReglesChant.set('langue', k); construireChansons(); };
+    filtres.appendChild(b);
+  });
+  const liste = $('ch-liste');
+  liste.innerHTML = '';
+  CHANSONS.filter((c) => choix === 'toutes' || c.langue === choix).forEach((c, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ch-tuile u' + (i % 5) + (chant?.id === c.id ? ' joue' : '');
+    b.innerHTML = '<span class="e"></span><span class="n"></span><span class="l"></span>';
+    b.querySelector('.e').textContent = c.emoji; b.querySelector('.n').textContent = c.titre; b.querySelector('.l').textContent = DRAPEAU[c.langue];
+    b.dir = c.langue === 'ar' ? 'rtl' : 'ltr';
+    b.onclick = () => { $('ch-lecteur').hidden = false; chanter(c); dernier = c; liste.querySelectorAll('.joue').forEach((x) => x.classList.remove('joue')); b.classList.add('joue'); };
+    liste.appendChild(b);
+  });
+  $('ch-lent').textContent = r.lent ? '🐢 ' + TXT_CH.lent[langue] : '🐇 ' + TXT_CH.vite[langue];
+  $('ch-boucle').textContent = '🔁 ' + TXT_CH.boucle[langue];
+  $('ch-boucle').classList.toggle('on', r.boucle);
+}
+let dernier = null;
+$('ch-lecture').onclick = () => { if (chant) arreterChanson(); else if (dernier) chanter(dernier); };
+$('ch-lent').onclick = () => { ReglesChant.set('lent', !ReglesChant.get().lent); construireChansons(); if (chant && dernier) chanter(dernier); };
+$('ch-boucle').onclick = () => { ReglesChant.set('boucle', !ReglesChant.get().boucle); construireChansons(); };
+
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu', 'coloriage'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
+  $('btn-maison').hidden = pile.length < 3;
   $('btn-retour').setAttribute('aria-label', L.retour);
-  $('titre').textContent = id === 'accueil' ? 'Lumi ✦' : `${n.emoji} ${n.nom[langue]}`;
+  if (id === 'accueil') $('titre').textContent = 'Lumi ✦';
+  else { $('titre').innerHTML = '<span class="e"></span><span></span>'; $('titre').firstChild.textContent = n.emoji + ' '; $('titre').lastChild.textContent = n.nom[langue]; }
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
   if (ecran === 'accueil') construireAccueil();
   else if (ecran === 'parler') construireParler();
   else if (ecran === 'coloriage') construireColoriage(n.dessin);
+  else if (ecran === 'chansons') construireChansons();
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
 }
 
 function aller(id, montrerCarte = true) {
+  arreterChanson();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
   pile.push(id);
@@ -2204,6 +2457,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
+  arreterChanson();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles); ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
@@ -2211,6 +2465,7 @@ function retour() {
   if (pile.length === 1) accueillir();
 }
 $('btn-retour').onclick = retour;
+$('btn-maison').onclick = () => { while (pile.length > 2) pile.pop(); retour(); };
 
 function accueillir() {
   const L = LANGUES[langue];
