@@ -63,6 +63,9 @@
   .retour { width: 46px; height: 46px; flex: none; border-radius: 50%; background: var(--carte); border: 1px solid var(--bord); font-size: 22px; font-weight: 800; }
   .app[dir="rtl"] .retour span { display: inline-block; transform: scaleX(-1); }
   .bouton-son { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--carte); border: 1px solid var(--bord); font-size: 19px; }
+  .bouton-langue { flex: none; min-width: 58px; height: 44px; padding: 0 12px; border-radius: 99px; background: var(--soleil); color: #2a1f00;
+                   font-weight: 800; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+  .bouton-langue::before { content: '🌍'; font-size: 16px; }
   .langues { display: flex; flex: none; background: var(--carte); border: 1px solid var(--bord); border-radius: 99px; padding: 3px; }
   .langues button { min-width: 42px; padding: 4px 10px; border-radius: 99px; background: none; color: var(--doux); font-weight: 700; }
   .langues button[aria-pressed="true"] { background: var(--soleil); color: #2a1f00; }
@@ -97,6 +100,7 @@
   .tuile.cle { border: 2px solid var(--soleil); color: var(--soleil); }
   .tuile.espace { background: none; border: none; min-width: 12px; }
   @keyframes pop { from { transform: scale(.6); opacity: 0; } }
+  .carte .emoji { display: inline-block; }
   .carte .emoji, .carte .mot { animation: pop .35s cubic-bezier(.3, 1.6, .5, 1); }
   .bouton-trace { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; padding: 8px 18px; border-radius: 99px;
                   background: var(--soleil); color: #2a1f00; font-weight: 800; font-size: 17px; }
@@ -125,6 +129,10 @@
   .objet .n { font-size: 14px; line-height: 1.15; text-wrap: balance; }
   .objet:active { transform: scale(.95); }
   .objet.tout { background: var(--bonbon); color: #3a0716; border: none; font-weight: 800; }
+  .objet.a-toi { background: var(--menthe); color: #05281e; }
+  .objet.juste { border-color: var(--menthe); background: rgba(125, 226, 195, .25); animation: hop .5s; }
+  .objet.faux { animation: non .4s; }
+  @keyframes hop { 40% { transform: scale(1.12); } }
   .objet.lettre .e { font-size: 32px; font-weight: 800; }
   .objet.c0 .e { color: var(--soleil); } .objet.c1 .e { color: var(--bonbon); } .objet.c2 .e { color: var(--ciel); } .objet.c3 .e { color: var(--menthe); }
 
@@ -160,7 +168,7 @@
   @media (max-width: 430px) {
     .haut { gap: 6px; }
     .retour, .bouton-son { width: 40px; height: 40px; }
-    .langues button { min-width: 32px; padding: 3px 7px; font-size: 15px; }
+    .bouton-langue { min-width: 52px; height: 40px; padding: 0 10px; font-size: 16px; }
     .haut h1 { font-size: clamp(16px, 4.6vw, 22px); }
   }
   /* ---------- Décor d'ambiance : léger, derrière rien d'important, jamais cliquable ---------- */
@@ -232,11 +240,7 @@
     <button class="retour" id="btn-retour" type="button" hidden aria-label="Retour"><span>←</span></button>
     <h1 id="titre">Lumi ✦</h1>
     <button class="bouton-son" id="btn-son" type="button" aria-label="Son de fond" aria-pressed="true">🔊</button>
-    <div class="langues" role="group" aria-label="Langue">
-      <button data-langue="fr" aria-pressed="true">FR</button>
-      <button data-langue="en" aria-pressed="false">EN</button>
-      <button data-langue="ar" aria-pressed="false">ع</button>
-    </div>
+    <button class="bouton-langue" id="btn-langue" type="button" aria-label="Changer de langue">FR</button>
   </header>
 
   <div class="corps">
@@ -934,7 +938,8 @@ const LANGUES = {
     voix: 'fr-FR', dir: 'ltr', micro: 'Dis un mot', ecoute: "Je t'écoute…", ecrire: 'Écris un mot…',
     inconnu: 'Je ne connais pas encore ce mot, mais je l’écris !', microKo: 'Le micro n’est pas disponible ici. Écris le mot !',
     lettre: (l, m) => (m ? `${l}, comme ${m}` : l), toutVoir: 'Tout voir',
-    tracer: 'Trace-la avec ton doigt', bravo: 'Bravo !', encore: 'Essaie encore !', devine: 'Qu’est-ce que Lumi dessine ?',
+    tracer: 'Trace-la avec ton doigt', bravo: 'Bravo !', aToi: 'À toi !', super: 'Super ! Tu as tout trouvé !',
+    touche1: (x) => `Touche ${x} !`, pasCa: (a, b) => `Ça, c’est ${a}. Où est ${b} ?`, encore: 'Essaie encore !', devine: 'Qu’est-ce que Lumi dessine ?',
     ouEst: (m) => `Où est : ${m} ?`, touche: (d) => `Touche tout ce qu’on trouve ${d} !`, pasIci: (m, d) => `Non ! ${m}, c’est ${d}.`,
     intrus: 'Lequel n’est pas pareil ?', pasUn: (m, u) => `${m} n’est pas ${u} !`, reecouter: 'Réécouter',
     bonjour: 'Coucou !', salut: 'On apprend quoi aujourd’hui ?', duJour: 'Du jour', jouer: 'On joue à quoi ?', retour: 'Retour',
@@ -948,7 +953,8 @@ const LANGUES = {
     voix: 'en-US', dir: 'ltr', micro: 'Say a word', ecoute: 'I’m listening…', ecrire: 'Type a word…',
     inconnu: 'I don’t know this word yet, but I can write it!', microKo: 'The microphone isn’t available here. Type the word!',
     lettre: (l, m) => (m ? `${l} is for ${m}` : l), toutVoir: 'See all',
-    tracer: 'Trace it with your finger', bravo: 'Well done!', encore: 'Try again!', devine: 'What is Lumi drawing?',
+    tracer: 'Trace it with your finger', bravo: 'Well done!', aToi: 'Your turn!', super: 'Super! You found them all!',
+    touche1: (x) => `Touch the ${x}!`, pasCa: (a, b) => `That’s the ${a}. Where is the ${b}?`, encore: 'Try again!', devine: 'What is Lumi drawing?',
     ouEst: (m) => `Where is the ${m}?`, touche: (d) => `Touch everything you find ${d}!`, pasIci: (m, d) => `No! The ${m} goes ${d}.`,
     intrus: 'Which one is different?', pasUn: (m, u) => `The ${m} is not ${u}!`, reecouter: 'Listen again',
     bonjour: 'Hello!', salut: 'What shall we learn today?', duJour: 'Today', jouer: 'What shall we play?', retour: 'Back',
@@ -962,7 +968,8 @@ const LANGUES = {
     voix: 'ar-SA', dir: 'rtl', micro: 'قل كلمة', ecoute: 'أنا أستمع…', ecrire: 'اكتب كلمة…',
     inconnu: 'لا أعرف هذه الكلمة بعد، لكني سأكتبها!', microKo: 'الميكروفون غير متاح هنا. اكتب الكلمة!',
     lettre: (l, m) => (m ? `${l}، ${m}` : l), toutVoir: 'شاهد الكل',
-    tracer: 'ارسمه بإصبعك', bravo: 'أحسنت!', encore: 'حاول مرة أخرى!', devine: 'ماذا يرسم لومي؟',
+    tracer: 'ارسمه بإصبعك', bravo: 'أحسنت!', aToi: 'دورك!', super: 'رائع! وجدتها كلها!',
+    touche1: (x) => `المس ${x}!`, pasCa: (a, b) => `هذا ${a}. أين ${b}؟`, encore: 'حاول مرة أخرى!', devine: 'ماذا يرسم لومي؟',
     ouEst: (m) => `أين ${m}؟`, touche: (d) => `المس كل ما نجده ${d}!`, pasIci: (m, d) => `لا! ${m} ${d}.`,
     intrus: 'أيها مختلف؟', pasUn: (m, u) => `${m} ليس ${u}!`, reecouter: 'استمع مرة أخرى',
     bonjour: 'مرحبا!', salut: 'ماذا نتعلم اليوم؟', duJour: 'اليوم', jouer: 'ماذا نلعب؟', retour: 'رجوع',
@@ -978,6 +985,7 @@ const A_COMPTER = ['🍎', '⭐', '🐟', '🐤', '🍓', '🦋', '🌸', '⚽',
 
 const $ = (id) => document.getElementById(id);
 let langue = (navigator.language || 'fr').slice(0, 2);
+try { langue = localStorage.getItem('lumi-langue') || langue; } catch {}
 if (!LANGUES[langue]) langue = 'fr';
 let jeton = 0, diapo = 0, retourNuage;
 
@@ -1126,18 +1134,67 @@ function revenirAuNuage(ms) {
   retourNuage = setTimeout(() => { avatar?.forme(null); avatar?.mode('attente'); }, ms);
 }
 
+// ---------- Mise en scène : Lumi ne dit pas juste le mot, il le présente ----------
+const hasardDe = (liste) => liste[(Math.random() * liste.length) | 0];
+// Petites phrases par thème ; {x} = le mot avec son article
+const PHRASES = {
+  defaut:    { fr: ['Regarde, c’est {x} !', 'Voici {x} !', 'Oh ! {x} !'], en: ['Look, it’s the {x}!', 'Here is the {x}!', 'Wow, the {x}!'], ar: ['انظر! {x}!', 'هيا نرى: {x}!', 'واو، {x}!'] },
+  fruits:    { fr: ['Miam ! {x} !', 'Qu’il est bon, {x} !'], en: ['Yum! The {x}!', 'Mmm, the {x}!'], ar: ['يمّي! {x}!', 'ما ألذ {x}!'] },
+  legumes:   { fr: ['Miam ! {x} !', 'Dans le jardin, il y a {x} !'], en: ['Yum! The {x}!', 'In the garden, there is the {x}!'], ar: ['يمّي! {x}!', 'في الحديقة يوجد {x}!'] },
+  famille:   { fr: ['Coucou {x} !', 'Un gros bisou à {x} !'], en: ['Hello {x}!', 'A big hug for {x}!'], ar: ['مرحبا {x}!', 'قبلة كبيرة إلى {x}!'] },
+  ecole:     { fr: ['À l’école, il y a {x} !', 'Dans mon cartable, je range {x} !'], en: ['At school, there is the {x}!', 'Here is the {x} for school!'], ar: ['في المدرسة يوجد {x}!', 'هذا {x} للمدرسة!'] },
+  maison:    { fr: ['À la maison, voici {x} !', 'Chez moi, il y a {x} !'], en: ['At home, here is the {x}!', 'In my house, there is the {x}!'], ar: ['في البيت: {x}!', 'في بيتي يوجد {x}!'] },
+  corps:     { fr: ['Montre-moi… {x} !', 'Voici {x} !'], en: ['Show me… the {x}!', 'Here is the {x}!'], ar: ['أرني… {x}!', 'هذا {x}!'] },
+  vetements: { fr: ['Je m’habille : {x} !', 'Voici {x} !'], en: ['Let’s get dressed: the {x}!', 'Here is the {x}!'], ar: ['هيا نلبس: {x}!', 'هذا {x}!'] },
+  vehicules: { fr: ['Vroum ! Voici {x} !', 'Tut tut ! {x} arrive !'], en: ['Vroom! Here comes the {x}!', 'Beep beep! The {x}!'], ar: ['بروم! {x}!', 'بيب بيب! {x}!'] },
+  jouets:    { fr: ['On joue avec {x} ?', 'Youpi, {x} !'], en: ['Shall we play with the {x}?', 'Yay, the {x}!'], ar: ['هل نلعب بـ{x}؟', 'يااي، {x}!'] },
+  ocean:     { fr: ['Dans la mer, voici {x} !', 'Plouf ! {x} !'], en: ['In the sea, here is the {x}!', 'Splash! The {x}!'], ar: ['في البحر يوجد {x}!', 'طرطش! {x}!'] },
+  oiseaux:   { fr: ['Cui-cui ! Voici {x} !', 'Dans le ciel vole {x} !'], en: ['Tweet tweet! Here is the {x}!', 'In the sky flies the {x}!'], ar: ['تغريد! هذا {x}!', 'في السماء يطير {x}!'] },
+  insectes:  { fr: ['Chut… regarde {x} !', 'Tout petit : {x} !'], en: ['Shh… look at the {x}!', 'So tiny: the {x}!'], ar: ['هُس… انظر إلى {x}!', 'صغير جدا: {x}!'] },
+  nature:    { fr: ['Dehors, regarde {x} !', 'Oh ! {x} !'], en: ['Outside, look at the {x}!', 'Oh! The {x}!'], ar: ['في الخارج، انظر إلى {x}!', 'أوه! {x}!'] },
+};
+// Les cris des animaux (le mot sans article en français dans la phrase « {x} fait … »)
+const CRIS = {
+  '🐄': ['meuh', 'moo', 'موو'], '🐑': ['bêê', 'baa', 'ماااء'], '🐐': ['mêê', 'maa', 'ماااء'], '🐴': ['hiii', 'neigh', 'صهيل'],
+  '🐔': ['cot cot', 'cluck cluck', 'كاك كاك'], '🐓': ['cocorico', 'cock-a-doodle-doo', 'كوكوكو'], '🐤': ['piou piou', 'cheep cheep', 'سيو سيو'],
+  '🦆': ['coin coin', 'quack quack', 'كواك كواك'], '🦃': ['glou glou', 'gobble gobble', 'غلو غلو'], '🐱': ['miaou', 'meow', 'مياو'],
+  '🐶': ['ouaf ouaf', 'woof woof', 'هاو هاو'], '🐝': ['bzzz', 'buzz', 'بززز'], '🦁': ['grrraou', 'roar', 'زئير'], '🐯': ['grrr', 'roar', 'غرر'],
+  '🐸': ['croâ croâ', 'ribbit', 'نق نق'], '🦉': ['hou hou', 'hoot hoot', 'هوو هوو'], '🐺': ['aouuuh', 'awoo', 'عوووو'],
+  '🐘': ['pouêêt', 'toot', 'بووق'], '🐒': ['hou hou ha ha', 'ooh ooh ah ah', 'أو أو آ آ'], '🐦': ['cui-cui', 'tweet tweet', 'تغريد'],
+  '🐇': ['scrountch scrountch', 'munch munch', 'قرط قرط'], '🐻': ['grrr', 'grr', 'غرر'], '🦜': ['coucou !', 'hello!', 'مرحبا!'],
+};
+// Chaque couleur se transforme en un objet de cette couleur
+const COULEUR_OBJET = { '🔴': '🍓', '🟠': '🍊', '🟡': '☀️', '🟢': '🐸', '🔵': '🐋', '🟣': '🍇', '🩷': '🦩', '🟤': '🐻', '⚫': '🕷️', '⚪': '⛄' };
+const THEME_DE = {};
+Object.entries(NOEUDS).forEach(([id, n]) => (n.mots || '').split(' ').forEach((e) => { if (!THEME_DE[e]) THEME_DE[e] = id; }));
+
+function phraseDe(entree, theme) {
+  const x = nomComplet(entree), cri = CRIS[entree.emoji];
+  const i = { fr: 0, en: 1, ar: 2 }[langue];
+  if (cri && Math.random() < .75) {
+    return { fr: `${majuscule(x)} fait ${cri[0]} !`, en: `The ${x} says ${cri[1]}!`, ar: `${x}: ${cri[2]}!` }[langue];
+  }
+  const p = PHRASES[theme] || PHRASES.defaut;
+  return majuscule(hasardDe(p[langue]).replace('{x}', x));
+}
+
 // ---------- Montrer : un mot, une lettre, un nombre ----------
-async function montrerEntree(entree, avecVoix = true) {
-  const j = ++jeton, mot = motDans(entree);
+async function montrerEntree(entree, avecVoix = true, theme = THEME_DE[entree.emoji]) {
+  const j = ++jeton;
   $('btn-tracer').hidden = true; if (Trace.actif) Trace.fermer();
   voirLumi();
   avatar?.mode(paletteAmb);
   avatar?.forme(entree.emoji);
-  carteMot(entree);
+  const objet = theme === 'couleurs' ? PAR_EMOJI.get(COULEUR_OBJET[entree.emoji]) : null;
+  const phrase = objet
+    ? { fr: `${majuscule(motDans(entree))}, comme ${nomComplet(objet)} !`, en: `${majuscule(motDans(entree))}, like the ${motDans(objet)}!`, ar: `${motDans(entree)}، مثل ${nomComplet(objet)}!` }[langue]
+    : phraseDe(entree, theme);
+  carteMot(entree, avecVoix ? phrase : '');
   try {
-    if (avecVoix) await parler(nomComplet(entree));
+    if (avecVoix) await parler(phrase);
+    if (objet) { avatar?.forme(objet.emoji); $('carte-emoji').textContent = entree.emoji + ' ' + objet.emoji; }
     await epeler(j);
-    if (avecVoix) await parler(nomComplet(entree));
+    if (avecVoix) { await pause(250, j); await parler(nomComplet(entree)); }
   } catch {}
   revenirAuNuage(12000);
 }
@@ -1604,6 +1661,46 @@ $('btn-son').onclick = () => {
 };
 $('btn-son').textContent = Ambiance.actif ? '🔊' : '🔇';
 
+// ---------- « À toi ! » : Lumi demande, l'enfant touche la bonne image dans la grille ----------
+let quiz = null;
+function quizTheme(id) {
+  const liste = melanger(entrees(NOEUDS[id].mots)).slice(0, 5);
+  quiz = { liste, i: 0, id, trouves: 0 };
+  questionQuiz();
+}
+function questionQuiz() {
+  const L = LANGUES[langue], m = quiz.liste[quiz.i];
+  ++jeton; quiz.pause = false;
+  $('btn-tracer').hidden = true;
+  avatar?.mode(paletteAmb); avatar?.forme('question');
+  carte('🎯', L.touche1(nomComplet(m)), `${quiz.i + 1} / ${quiz.liste.length}`, false);
+  document.querySelectorAll('#panneau .objet').forEach((t) => t.classList.remove('juste', 'faux'));
+  parler(L.touche1(nomComplet(m)));
+}
+async function repondreQuiz(m, t) {
+  const L = LANGUES[langue], bon = quiz.liste[quiz.i];
+  if (quiz.pause) return;
+  if (m !== bon) {
+    t.classList.remove('faux'); void t.offsetWidth; t.classList.add('faux'); son('faux');
+    parler(L.pasCa(nomComplet(m), nomComplet(bon)));
+    return;
+  }
+  const j = ++jeton;
+  quiz.pause = true;
+  t.classList.add('juste'); son('juste'); score++;
+  avatar?.mode('heureux'); avatar?.forme(bon.emoji);
+  carteMot(bon, L.bravo);
+  try { await parler(`${L.bravo} ${majuscule(nomComplet(bon))} !`); await epeler(j); await pause(500, j); } catch { return; }
+  if (!quiz) return;
+  if (++quiz.i < quiz.liste.length) return questionQuiz();
+  // fin : une pluie d'étoiles
+  quiz = null;
+  avatar?.forme('⭐'); son('juste');
+  carte('🌟', L.super, '⭐ ⭐ ⭐ ⭐ ⭐', false);
+  try { await parler(L.super); } catch {}
+  revenirAuNuage(5000);
+}
+
 // ---------- Écrans : accueil, sous-menus, listes, « Parle à Lumi », jeu ----------
 let pile = ['accueil'];
 
@@ -1676,11 +1773,14 @@ function construireListe(id) {
     actions = L.nombres.map((nom, i) => { p.appendChild(tuile(L.chiffre(i + 1), nom, () => montrerNombre(i + 1), 'lettre c' + (i % 4))); return () => montrerNombre(i + 1); });
   } else {
     actions = n.mots.split(' ').map((e) => PAR_EMOJI.get(e)).filter(Boolean).map((m) => {
-      p.appendChild(tuile(m.emoji, nomComplet(m), () => montrerEntree(m)));
-      return () => montrerEntree(m);
+      const t = tuile(m.emoji, nomComplet(m), () => (quiz ? repondreQuiz(m, t) : montrerEntree(m, true, id)));
+      t.dataset.emoji = m.emoji;
+      p.appendChild(t);
+      return () => montrerEntree(m, true, id);
     });
   }
   p.prepend(tuile('▶', L.toutVoir, () => toutVoir(actions), 'tout'));
+  if (n.mots) p.children[0].after(tuile('🎯', L.aToi, () => quizTheme(id), 'tout a-toi'));
 }
 
 function construireParler() {
@@ -1714,7 +1814,7 @@ function afficher() {
 }
 
 function aller(id, montrerCarte = true) {
-  diapo++; jeuEnCours = false;
+  diapo++; jeuEnCours = false; quiz = null;
   if (Trace.actif) Trace.fermer();
   pile.push(id);
   afficher();
@@ -1731,7 +1831,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
-  diapo++; jeuEnCours = false; ++jeton;
+  diapo++; jeuEnCours = false; quiz = null; ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
   afficher();
@@ -1862,17 +1962,18 @@ function choisirLangue(l) {
   const L = LANGUES[l];
   $('app').dir = L.dir;
   document.documentElement.lang = l;
-  document.querySelectorAll('[data-langue]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.langue === l)));
+  $('btn-langue').textContent = { fr: 'FR', en: 'EN', ar: 'ع' }[l];
+  try { localStorage.setItem('lumi-langue', l); } catch {}
   afficher();
 }
-document.querySelectorAll('[data-langue]').forEach((b) => (b.onclick = () => {
+$('btn-langue').onclick = () => {
   const entree = chercher($('carte-mot').textContent);
-  diapo++;
-  choisirLangue(b.dataset.langue);
+  diapo++; quiz = null;
+  choisirLangue({ fr: 'en', en: 'ar', ar: 'fr' }[langue]);
   if (jeuEnCours) nouvelleManche();
   else if (entree) montrerEntree(entree); // le même mot, dans la nouvelle langue
   else if (pile.length === 1) accueillir();
-}));
+};
 
 // ---------- Micro : reconnaissance vocale du navigateur ----------
 const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
