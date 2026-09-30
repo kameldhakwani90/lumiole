@@ -386,6 +386,13 @@
   .hi-mode button { flex: 1; padding: 10px 6px; border-radius: 99px; background: none; font-weight: 800; font-size: 16px; color: var(--doux); white-space: nowrap; }
   .hi-mode button.on { background: linear-gradient(135deg, #c3a6ff, #7cc6fe); color: #1b1030; }
   .hi-lecteur.moi #hi-lecture { display: none; }
+  .hi-lecteur:not(.moi) #hi-micro { display: none; }
+  #hi-micro.rouge { background: #ef4444; border-color: #ef4444; animation: respire 1s ease-in-out infinite; }
+  .hi-points span.rec { box-shadow: 0 0 0 2px #ef4444; }
+  .hi-info { min-height: 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--menthe); }
+  .hi-reglage-voix { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; color: var(--doux); }
+  .hi-reglage-voix[hidden] { display: none; }
+  .hi-reglage-voix select { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 14px; background: var(--carte); color: var(--texte); border: 1px solid var(--bord); font: inherit; font-size: 15px; }
   .hi-lecteur.moi .hi-texte { font-size: 23px; }
   .app[dir="rtl"] #hi-prec, .app[dir="rtl"] #hi-suiv { transform: scaleX(-1); }
   [data-ecran="histoires"] .ch-tuile .n { font-size: 14px; }
@@ -471,6 +478,7 @@
             <div class="ch-haut">
               <div class="ch-titre" id="hi-titre"></div>
               <div class="ch-commandes">
+                <button type="button" id="hi-micro" aria-label="Enregistrer ma voix">🎙️</button>
                 <button type="button" id="hi-prec" aria-label="Page précédente">⏮</button>
                 <button type="button" id="hi-lecture" aria-label="Lecture">▶</button>
                 <button type="button" id="hi-suiv" aria-label="Page suivante">⏭</button>
@@ -478,11 +486,13 @@
             </div>
             <p class="hi-texte" id="hi-texte"></p>
             <div class="hi-points" id="hi-points"></div>
+            <div class="hi-info" id="hi-info" aria-live="polite"></div>
           </div>
           <div class="hi-mode" id="hi-mode">
             <button type="button" data-mode="lumi"></button>
             <button type="button" data-mode="moi"></button>
           </div>
+          <label class="hi-reglage-voix" id="hi-reglage-voix"><span id="hi-voix-nom"></span><select id="hi-voix"></select></label>
           <div class="ch-filtres" id="hi-filtres"></div>
           <div class="ch-liste" id="hi-liste"></div>
         </div>
@@ -1348,15 +1358,30 @@ function carteMot(entree, sous = '') {
 }
 
 // ---------- Voix ----------
-function parler(texte, l = langue) {
+// La plus belle voix disponible : premium / améliorée d'abord, jamais les voix « rigolotes »
+const RIGOLOTES = /Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Grandma|Grandpa|Eddy|Flo|Reed|Rocko|Sandy|Shelley|Fred|Junior|Kathy|Ralph/i;
+const JOLIES = /Amélie|Amelie|Thomas|Audrey|Aurélie|Marie|Samantha|Karen|Daniel|Moira|Serena|Ava|Zoe|Maged|Majed|Laila|Tarik|Hoda|Google/i;
+const CHOIX_VOIX = (() => { try { return JSON.parse(localStorage.getItem('lumi-voix-choix') || '{}'); } catch { return {}; } })();
+function voixDe(code) {
+  const v = speechSynthesis.getVoices().filter((x) => x.lang?.replace('_', '-').toLowerCase().startsWith(code));
+  const perso = v.find((x) => x.voiceURI === CHOIX_VOIX[code]);
+  if (perso) return perso;
+  const note = (x) => (/premium/i.test(x.name) ? 60 : 0) + (/enhanced|améliorée|natural|neural|online/i.test(x.name) ? 45 : 0)
+    + (JOLIES.test(x.name) ? 12 : 0) + (RIGOLOTES.test(x.name) ? -200 : 0) + (/-(FR|US|GB|SA)$/i.test(x.lang) ? 5 : 0);
+  return v.sort((a, b) => note(b) - note(a))[0] || null;
+}
+function voixDisponibles(code) {
+  return speechSynthesis.getVoices().filter((x) => x.lang?.replace('_', '-').toLowerCase().startsWith(code) && !RIGOLOTES.test(x.name));
+}
+function parler(texte, l = langue, o = {}) {
   return new Promise((ok) => {
     if (!('speechSynthesis' in window)) return ok();
     const occupe = speechSynthesis.speaking || speechSynthesis.pending;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(texte);
-    u.lang = LANGUES[l].voix; u.rate = .9; u.pitch = 1.25;
-    const v = speechSynthesis.getVoices().find((x) => x.lang?.replace('_', '-').startsWith(LANGUES[l].voix.slice(0, 2)));
-    if (v) u.voice = v;
+    const u = new SpeechSynthesisUtterance(texte), code = LANGUES[l].voix.slice(0, 2);
+    u.lang = LANGUES[l].voix; u.rate = o.vitesse || .92; u.pitch = o.ton || 1.12;
+    const v = voixDe(code);
+    if (v) { u.voice = v; u.lang = v.lang; }
     let fini = false;
     const fin = () => { if (fini) return; fini = true; avatar?.parle(false); Ambiance.baisser(false); ok(); };
     u.onstart = () => { avatar?.parle(true); Ambiance.baisser(true); };
@@ -1367,6 +1392,16 @@ function parler(texte, l = langue) {
     if (occupe) setTimeout(() => speechSynthesis.speak(u), 90); else speechSynthesis.speak(u);
     speechSynthesis.resume?.();
   });
+}
+// Raconter : phrase par phrase, voix naturelle (pas aiguë), petites respirations entre les phrases
+async function raconter(texte, l, encore) {
+  const phrases = texte.split(/(?<=[.!?…؟])\s+/).filter(Boolean);
+  for (const ph of phrases) {
+    if (!encore()) return;
+    await parler(ph, l, { vitesse: .95, ton: 1 });
+    if (!encore()) return;
+    await new Promise((ok) => setTimeout(ok, 280));
+  }
 }
 // ---------- Petits sons, fabriqués en direct (aucun fichier audio) ----------
 let audio = null;
@@ -2481,7 +2516,9 @@ const CHANSONS = [
     ['عيد مي-لاد س-عيد لك', 'F5:.75 F5:.25 E5 C5 D5 C5:2', '🎉'],
   ] },
 ];
-const DRAPEAU = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦' };
+const DRAPEAU = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦', tn: '🇹🇳' };
+const VOIX_LANGUE = (l) => (l === 'tn' ? 'ar' : l); // le tunisien est lu par la voix arabe
+const RTL = (l) => l === 'ar' || l === 'tn';
 const TXT_CH = {
   toutes: { fr: 'Toutes', en: 'All', ar: 'الكل' },
   vite: { fr: 'Normal', en: 'Normal', ar: 'عادي' }, lent: { fr: 'Lent', en: 'Slow', ar: 'بطيء' },
@@ -2736,45 +2773,149 @@ const HISTOIRES = [
     ['صاح الجار: وهل تموت القدور يا جحا؟ قال جحا: صدّقت أنّها تلد، فلماذا لا تصدّق أنّها تموت؟', '😲'],
     ['ضحك الجار، وضحك جحا، وأعاد له القدر في الغد. تصبح على خير!', '🌙'],
   ] },
+  // ----- خرّافات تونسية (بالدارجة التونسية) -----
+  { id: 'tn-jha-qmra', langue: 'tn', emoji: '🌙', palette: 'galaxie', titre: 'جحا والقمرة في البير', pages: [
+    ['نهار من النهارات، في الليل، جحا مشى للبير باش يجيب شويّة ماء.', '🧔'],
+    ['طلّ في البير… وشاف القمرة لتحت في الماء! قال: يا ربّي! القمرة طاحت في البير!', '🌙'],
+    ['جرى جاب حبل طويل، رماه في البير، وقعد يجبد ويجبد بكلّ جهدو: هيييه!', '🪢'],
+    ['الحبل تقطّع، وجحا طاح على ظهرو… طاق!', '💥'],
+    ['وهو راقد على ظهرو، شاف القمرة في السماء، منوّرة وتضحك.', '🌕'],
+    ['فرح جحا وقال: الحمد لله! تعبت أمّا رجّعت القمرة لبلاصتها!', '😄'],
+    ['والقمرة بقات تضوّي على الدنيا الكلّ. تصبح على خير يا حبيبي!', '🌙'],
+  ] },
+  { id: 'tn-jha-hmir', langue: 'tn', emoji: '🫏', palette: 'or', titre: 'جحا يعدّ في الحمير', pages: [
+    ['جحا شرى عشرة حمير من السوق، وروّح بيهم للدار.', '🫏'],
+    ['ركب على حمار، وبدا يعدّ: واحد، زوز، ثلاثة، أربعة، خمسة، ستّة، سبعة، ثمنية، تسعة… تسعة؟! وين الحمار العاشر؟', '🔢'],
+    ['هبط جحا يلوّج عليه، وعاود عدّ: واحد، زوز، ثلاثة… عشرة! الحمد لله، عشرة!', '😮'],
+    ['ركب من جديد، وعاود عدّ… تسعة! يا ربّي، الحمار ضاع مرّة أخرى!', '😟'],
+    ['قال جحا: خير نمشي على ساقيّ ويكونو عشرة، ولا نركب ويكونو تسعة!', '🚶'],
+    ['ومشى جحا على ساقيه حتّى للدار، ووراه العشرة حمير.', '🏠'],
+    ['أمّا إنتي تعرف وين كان الحمار العاشر؟ كان تحت جحا! هههه. تصبح على خير!', '😂'],
+  ] },
+  { id: 'tn-jha-jebba', langue: 'tn', emoji: '🧥', palette: 'bonbon', titre: 'كول يا جبّتي', pages: [
+    ['نهار، جحا تعزم على عرس، ومشى بحوايجو القدم متاع الخدمة.', '🧔'],
+    ['حتّى حدّ ما عطاه قيمة، حتّى حدّ ما قال لو اقعد، وحتّى حدّ ما قدّملو ماكلة.', '😕'],
+    ['روّح جحا للدار، لبس جبّة جديدة وشاشية حمراء، ورجع للعرس.', '🧥'],
+    ['الناس الكلّ قاموا: مرحبا بسي جحا! اقعد هوني! وجابولو صحن كسكسي بالعلوش.', '🍲'],
+    ['جحا شدّ كمّ الجبّة، حطّو في الصحن، وقال: كول يا جبّتي، كول!', '😋'],
+    ['الناس تعجّبت: شنوّة تعمل يا جحا؟ قال: الماكلة جات للجبّة، موش ليّا!', '😲'],
+    ['ومن نهارها، فهمو الناس اللي الإنسان موش بحوايجو. تصبح على خير!', '🌙'],
+  ] },
+  { id: 'tn-jha-himar', langue: 'tn', emoji: '👦', palette: 'jardin', titre: 'جحا وولدو والحمار', pages: [
+    ['جحا وولدو خرجو للسوق، ومعاهم حمارهم الصغير.', '🧔'],
+    ['ركب جحا ومشى ولدو. قالو الناس: شوف هالبو! يركب ويخلّي الصغير يمشي!', '🫏'],
+    ['هبط جحا وركّب ولدو. قالو الناس: شوف هالولد! يركب وبوه الكبير يمشي!', '👦'],
+    ['ركبو الزوز. قالو الناس: مسكين الحمار! زوز على حمار صغير!', '😢'],
+    ['هبطو الزوز ومشاو حذا الحمار. ضحكو الناس: عندهم حمار ويمشيو على ساقيهم!', '🚶'],
+    ['قال جحا لولدو: شفت يا وليدي؟ الناس ما يرضاو بحتّى شي. اعمل اللي تراه صحيح.', '😄'],
+    ['وضحك الولد، وروّحو للدار فرحانين. تصبح على خير!', '🌙'],
+  ] },
+  { id: 'tn-jha-tanjra', langue: 'tn', emoji: '🍲', palette: 'or', titre: 'جحا والطنجرة', pages: [
+    ['جحا مشى لجارو وقال لو: سلّفني طنجرتك الكبيرة يعيّشك.', '🧔'],
+    ['بعد أيّامات، رجّعلو الطنجرة ومعاها طنجرة صغيرة. قال: مبروك يا جاري، طنجرتك ولدت!', '🍲'],
+    ['الجار فرح برشا، خذا الزوز وقال: جحا راجل باهي!', '😊'],
+    ['بعد مدّة، جحا سلّف الطنجرة مرّة أخرى… وفاتت الأيّامات وما رجّعهاش.', '⏳'],
+    ['مشى الجار لجحا: وينها طنجرتي؟ قال جحا حزين: البقاء لله، طنجرتك ماتت!', '🤔'],
+    ['الجار صاح: وقتاش الطناجر يموتو يا جحا؟ قال جحا: صدّقت اللي تولد، علاش ما تصدّقش اللي تموت؟', '😲'],
+    ['ضحك الجار وضحك جحا، وغدوة رجّعلو طنجرتو. تصبح على خير!', '🌙'],
+  ] },
+  { id: 'tn-ommi-sissi', langue: 'tn', emoji: '🐞', palette: 'bonbon', titre: 'أمّي سيسي', pages: [
+    ['كان يا ما كان، في قديم الزمان، خنفوسة صغيرة اسمها أمّي سيسي.', '🐞'],
+    ['نهار من النهارات، وهي تكنس في دارها، لقات فرنك.', '🧹'],
+    ['شرات بيه كحل وحنّة، تزيّنت، لبست أحلى حوايجها وقعدت قدّام الباب.', '💄'],
+    ['فات الجمل وقال: يا أمّي سيسي، تحبّ تعرّس بيّا؟ قالت: وكي تغضب، بشنوّة تضربني؟ قال: بخفّي الكبير! قالت: لا لا، خفّك يوجعني!', '🐫'],
+    ['فات العجل وقال: تحبّ تعرّس بيّا؟ قالت: وكي تغضب، بشنوّة تضربني؟ قال: بقروني! قالت: لا لا، قرونك يخوّفوني!', '🐂'],
+    ['من بعد فات الفار الصغير: تحبّ تعرّس بيّا؟ قالت: وكي تغضب؟ قال: عمري ما نغضب عليك، ونحكيلك خرّافة كلّ ليلة!', '🐭'],
+    ['فرحت أمّي سيسي، وعاشت مع الفار في دار صغيرة دافية، وكلّ ليلة يحكيلها خرّافة. تصبح على خير!', '🌙'],
+  ] },
 ];
 const TXT_HI = {
   choisis: { fr: '🌙 Choisis une histoire 👇', en: '🌙 Pick a story 👇', ar: '🌙 اختر حكاية 👇' },
   lumi: { fr: '🗣️ Lumi raconte', en: '🗣️ Lumi reads', ar: '🗣️ لومي يحكي' },
-  moi: { fr: '📖 Je lis moi-même', en: '📖 I read it', ar: '📖 أنا أقرأ' },
+  moi: { fr: '📖 Je lis / j’enregistre', en: '📖 I read / record', ar: '📖 أقرأ / أسجّل' },
+  voix: { fr: 'Voix', en: 'Voice', ar: 'الصوت' },
+  auto: { fr: 'la plus belle', en: 'the best one', ar: 'الأجمل' },
+  enreg: { fr: '🎙️ Ta voix est gardée pour cette page', en: '🎙️ Your voice is saved for this page', ar: '🎙️ صوتك محفوظ لهذه الصفحة' },
+  micro: { fr: 'Le micro n’est pas disponible', en: 'The microphone is not available', ar: 'الميكروفون غير متاح' },
 };
 const ReglesConte = (() => {
   let r = { langue: null, mode: 'lumi' };
   try { r = { ...r, ...JSON.parse(localStorage.getItem('lumi-histoires') || '{}') }; } catch {}
   return { get: () => r, set(k, v) { r[k] = v; try { localStorage.setItem('lumi-histoires', JSON.stringify(r)); } catch {} } };
 })();
-let conte = null, jetonConte = 0; // { h, page, auto }
-function arreterHistoire() {
-  if (!conte) return;
-  conte = null; jetonConte++;
+// Voix enregistrées par les parents, page par page (IndexedDB, reste sur l'appareil)
+const VoixParent = (() => {
+  let base = null;
+  const ouvrir = () => base || (base = new Promise((ok, ko) => {
+    const r = indexedDB.open('lumi', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('voix');
+    r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error);
+  }));
+  const tx = async (mode, fn) => {
+    const d = await ouvrir();
+    return new Promise((ok, ko) => { const t = d.transaction('voix', mode), q = fn(t.objectStore('voix')); t.oncomplete = () => ok(q?.result); t.onerror = () => ko(t.error); });
+  };
+  let cles = new Set();
+  const pret = tx('readonly', (s) => s.getAllKeys()).then((k) => { cles = new Set(k); }).catch(() => {});
+  return {
+    pret, a: (k) => cles.has(k),
+    lire: (k) => tx('readonly', (s) => s.get(k)).catch(() => null),
+    ecrire: (k, b) => tx('readwrite', (s) => s.put(b, k)).then(() => cles.add(k)),
+  };
+})();
+const clePage = (c, p = c.page) => `${c.h.id}:${p}`;
+let lecteurAudio = null;
+function jouerVoixParent(blob, encore) {
+  return new Promise((ok) => {
+    const a = new Audio(URL.createObjectURL(blob));
+    lecteurAudio = a;
+    const pouls = setInterval(() => avatar?.syllabe(), 190);
+    const fin = () => { clearInterval(pouls); avatar?.parle(false); Ambiance.baisser(false); URL.revokeObjectURL(a.src); if (lecteurAudio === a) lecteurAudio = null; ok(); };
+    a.onended = a.onerror = fin; a.onpause = () => { if (!encore()) fin(); };
+    avatar?.parle(true); Ambiance.baisser(true);
+    a.play().catch(fin);
+  });
+}
+function taireHistoire() {
+  jetonConte++;
   try { speechSynthesis.cancel(); } catch {}
+  if (lecteurAudio) { lecteurAudio.pause(); lecteurAudio = null; }
   avatar?.parle(false);
+}
+let conte = null, jetonConte = 0; // { h, page, auto, fini }
+function arreterHistoire() {
+  arreterEnregistrement(false);
+  if (!conte) return;
+  conte = null; taireHistoire();
 }
 function pageHistoire() {
   const { h, page } = conte, [texte, dessin] = h.pages[page];
   const t = $('hi-texte');
-  t.textContent = texte; t.dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+  t.textContent = texte; t.dir = RTL(h.langue) ? 'rtl' : 'ltr';
   t.classList.remove('entre'); void t.offsetWidth; t.classList.add('entre');
   avatar?.forme(dessin);
-  $('hi-points').innerHTML = h.pages.map((_, i) => `<span class="${i === page ? 'on' : i < page ? 'lu' : ''}"></span>`).join('');
+  $('hi-points').innerHTML = h.pages.map((_, i) => `<span class="${[i === page ? 'on' : i < page ? 'lu' : '', VoixParent.a(clePage(conte, i)) ? 'rec' : ''].join(' ')}"></span>`).join('');
   $('hi-prec').disabled = page === 0;
   $('hi-suiv').disabled = page === h.pages.length - 1;
   $('hi-lecture').textContent = conte.auto ? '⏸' : '▶';
 }
+// Lire une page : la voix enregistrée du parent si elle existe, sinon la voix de synthèse
+async function direePage(c, encore) {
+  const cle = clePage(c);
+  if (VoixParent.a(cle)) { const b = await VoixParent.lire(cle); if (b && encore()) return jouerVoixParent(b, encore); }
+  return raconter(c.h.pages[c.page][0], VOIX_LANGUE(c.h.langue), encore);
+}
 async function lireHistoire() {
   if (!conte) return;
-  const j = ++jetonConte, c = conte;
+  taireHistoire();
+  const j = jetonConte, c = conte, encore = () => j === jetonConte && conte === c;
   pageHistoire();
   const texte = c.h.pages[c.page][0], debut = Date.now();
-  await parler(texte, c.h.langue);
-  if (j !== jetonConte || conte !== c || !c.auto) return;
+  await direePage(c, encore);
+  if (!encore() || !c.auto) return;
   // au moins le temps de lire la page, même si la voix manque
-  await new Promise((ok) => setTimeout(ok, Math.max(1100, 1500 + texte.length * 55 - (Date.now() - debut))));
-  if (j !== jetonConte || conte !== c || !c.auto) return;
+  await new Promise((ok) => setTimeout(ok, Math.max(1000, 1500 + texte.length * 55 - (Date.now() - debut))));
+  if (!encore() || !c.auto) return;
   if (c.page < c.h.pages.length - 1) { c.page++; lireHistoire(); }
   else { c.auto = false; pageHistoire(); finHistoire(); }
 }
@@ -2786,16 +2927,35 @@ function ouvrirHistoire(h) {
   avatar?.mode(h.palette || 'galaxie');
   $('hi-lecteur').classList.remove('vide');
   $('hi-titre').textContent = `${h.emoji} ${h.titre}`;
-  $('hi-titre').dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+  $('hi-titre').dir = RTL(h.langue) ? 'rtl' : 'ltr';
   document.querySelectorAll('#hi-liste .ch-tuile').forEach((x) => x.classList.toggle('joue', x.dataset.id === h.id));
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  remplirVoix();
   if (lumiLit) lireHistoire(); else pageHistoire();
 }
+// Choix de la voix de synthèse (par langue), gardé pour la prochaine fois
+function remplirVoix() {
+  const code = VOIX_LANGUE(conte?.h.langue || langue), sel = $('hi-voix');
+  const liste = voixDisponibles(code);
+  sel.innerHTML = '';
+  const auto = document.createElement('option'); auto.value = ''; auto.textContent = '✨ ' + TXT_HI.auto[langue]; sel.appendChild(auto);
+  liste.forEach((v) => { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = v.name.replace(/\s*\(.*?\)\s*/g, ' ').trim() + (/premium|enhanced|améliorée/i.test(v.name) ? ' ⭐' : ''); sel.appendChild(o); });
+  sel.value = CHOIX_VOIX[code] && liste.some((v) => v.voiceURI === CHOIX_VOIX[code]) ? CHOIX_VOIX[code] : '';
+  $('hi-voix-nom').textContent = '🔊 ' + TXT_HI.voix[langue];
+  sel.dataset.code = code;
+}
+$('hi-voix').onchange = (e) => {
+  const code = e.target.dataset.code;
+  if (e.target.value) CHOIX_VOIX[code] = e.target.value; else delete CHOIX_VOIX[code];
+  try { localStorage.setItem('lumi-voix-choix', JSON.stringify(CHOIX_VOIX)); } catch {}
+  if (conte) { conte.auto = true; lireHistoire(); } else parler(TXT_HI.voix[langue]);
+};
+if ('speechSynthesis' in window) speechSynthesis.addEventListener?.('voiceschanged', () => { if (pile[pile.length - 1] === 'histoires') remplirVoix(); });
 function construireHistoires() {
   const choix = ReglesConte.get().langue || langue;
   const filtres = $('hi-filtres');
   filtres.innerHTML = '';
-  [['toutes', '🌍 ' + TXT_CH.toutes[langue]], ['fr', '🇫🇷 FR'], ['en', '🇬🇧 EN'], ['ar', '🇹🇳 AR']].forEach(([k, t]) => {
+  [['toutes', '🌍'], ['fr', '🇫🇷 FR'], ['en', '🇬🇧 EN'], ['ar', '🇸🇦 AR'], ['tn', '🇹🇳 TN']].forEach(([k, t]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = t; b.className = 'puce' + (k === choix ? ' on' : '');
     b.onclick = () => { ReglesConte.set('langue', k); construireHistoires(); };
@@ -2806,16 +2966,17 @@ function construireHistoires() {
   HISTOIRES.filter((h) => choix === 'toutes' || h.langue === choix).forEach((h, i) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'ch-tuile u' + (i % 5) + (conte?.h.id === h.id ? ' joue' : '');
-    b.dataset.id = h.id; b.dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+    b.dataset.id = h.id; b.dir = RTL(h.langue) ? 'rtl' : 'ltr';
     b.innerHTML = '<span class="e"></span><span class="n"></span><span class="l"></span>';
     b.querySelector('.e').textContent = h.emoji; b.querySelector('.n').textContent = h.titre;
-    b.querySelector('.l').textContent = h.langue === 'ar' ? '🇹🇳' : DRAPEAU[h.langue];
+    b.querySelector('.l').textContent = DRAPEAU[h.langue] + (h.pages.some((_, p) => VoixParent.a(`${h.id}:${p}`)) ? '🎙️' : '');
     b.onclick = () => ouvrirHistoire(h);
     liste.appendChild(b);
   });
-  modeHistoire();
+  modeHistoire(); remplirVoix();
   if (!conte) { $('hi-lecteur').classList.add('vide'); $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; }
 }
+VoixParent.pret.then(() => { if (pile[pile.length - 1] === 'histoires') construireHistoires(); });
 function finHistoire() {
   if (!conte || conte.fini) return;
   conte.fini = true;
@@ -2823,26 +2984,60 @@ function finHistoire() {
 }
 const tournerPage = (d) => {
   if (!conte) return;
+  arreterEnregistrement(true);
   const p = conte.page + d;
   if (p < 0 || p >= conte.h.pages.length) return;
   conte.page = p; son('pop');
   if (conte.auto) return lireHistoire();
-  jetonConte++; try { speechSynthesis.cancel(); } catch {}
+  taireHistoire();
   pageHistoire();
-  if (ReglesConte.get().mode === 'lumi') parler(conte.h.pages[p][0], conte.h.langue);
   if (p === conte.h.pages.length - 1) finHistoire();
 };
-// Deux façons de lire : Lumi raconte (voix), ou le parent lit et tourne les pages
+// ----- Enregistrer sa voix, page par page -----
+let enreg = null; // { rec, flux, cle }
+async function commencerEnregistrement() {
+  if (!conte) return;
+  taireHistoire();
+  try {
+    const flux = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find((t) => window.MediaRecorder?.isTypeSupported?.(t)) || '';
+    const rec = new MediaRecorder(flux, type ? { mimeType: type } : undefined), morceaux = [], cle = clePage(conte), etat = { garder: true };
+    rec.ondataavailable = (e) => { if (e.data.size) morceaux.push(e.data); };
+    rec.onstop = async () => {
+      flux.getTracks().forEach((t) => t.stop());
+      if (!etat.garder || !morceaux.length) return;
+      await VoixParent.ecrire(cle, new Blob(morceaux, { type: rec.mimeType || type || 'audio/mp4' }));
+      son('juste'); if (conte) pageHistoire();
+      $('hi-info').textContent = TXT_HI.enreg[langue]; setTimeout(() => { $('hi-info').textContent = ''; }, 2500);
+    };
+    enreg = { rec, etat };
+    rec.start();
+    $('hi-micro').classList.add('rouge'); $('hi-micro').textContent = '⏹';
+    avatar?.mode('ecoute');
+  } catch { $('hi-info').textContent = TXT_HI.micro[langue]; enreg = null; }
+}
+function arreterEnregistrement(garder) {
+  if (!enreg) return;
+  enreg.etat.garder = garder;
+  try { enreg.rec.stop(); } catch {}
+  enreg = null;
+  $('hi-micro').classList.remove('rouge'); $('hi-micro').textContent = '🎙️';
+  if (conte) avatar?.mode(conte.h.palette || 'galaxie');
+}
+$('hi-micro').onclick = () => { if (enreg) arreterEnregistrement(true); else commencerEnregistrement(); };
+// Deux façons de lire : Lumi raconte (voix de synthèse ou voix enregistrée), ou le parent lit et enregistre
 function modeHistoire() {
   const m = ReglesConte.get().mode;
   document.querySelectorAll('#hi-mode button').forEach((b) => { b.classList.toggle('on', b.dataset.mode === m); b.textContent = TXT_HI[b.dataset.mode][langue]; });
   $('hi-lecteur').classList.toggle('moi', m === 'moi');
+  $('hi-reglage-voix').hidden = m !== 'lumi';
 }
 document.querySelectorAll('#hi-mode button').forEach((b) => {
   b.onclick = () => {
+    arreterEnregistrement(true);
     ReglesConte.set('mode', b.dataset.mode); modeHistoire();
     if (!conte) return;
-    if (b.dataset.mode === 'moi') { conte.auto = false; jetonConte++; try { speechSynthesis.cancel(); } catch {} avatar?.parle(false); pageHistoire(); }
+    if (b.dataset.mode === 'moi') { conte.auto = false; taireHistoire(); pageHistoire(); }
     else { conte.auto = true; lireHistoire(); }
   };
 });
@@ -2852,7 +3047,7 @@ $('hi-lecture').onclick = () => {
   if (!conte) return $('hi-liste').firstElementChild?.click();
   conte.auto = !conte.auto;
   if (conte.auto) { if (conte.page === conte.h.pages.length - 1) conte.page = 0; lireHistoire(); }
-  else { jetonConte++; try { speechSynthesis.cancel(); } catch {} avatar?.parle(false); pageHistoire(); }
+  else { taireHistoire(); pageHistoire(); }
 };
 
 function afficher() {
