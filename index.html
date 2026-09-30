@@ -397,6 +397,47 @@
   .app[dir="rtl"] #hi-prec, .app[dir="rtl"] #hi-suiv { transform: scaleX(-1); }
   [data-ecran="histoires"] .ch-tuile .n { font-size: 14px; }
   @media (min-width: 600px) { .hi-texte { font-size: 26px; } }
+  /* ---------- Famille : verrous, fenêtres, espace parents ---------- */
+  .ferme { position: relative; filter: saturate(.55); }
+  .univers .cadenas { position: absolute; top: 10px; inset-inline-end: 12px; font-size: 22px; filter: none; }
+  .bandeau .fa-moi { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border-radius: 99px; background: rgba(255,255,255,.12); font-weight: 800; }
+  .bandeau .fa-moi .e { font-size: 26px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.14); }
+  .fa-acces { grid-column: 1 / -1; margin-top: 6px; padding: 14px; border-radius: 18px; background: transparent; border: 1px dashed var(--bord); color: var(--doux); font-weight: 800; }
+  .fa-fond { position: fixed; inset: 0; z-index: 50; background: rgba(5,6,20,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+             display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+  .fa-fenetre { position: relative; width: min(100%, 460px); max-height: 100%; overflow-y: auto; border-radius: 28px; padding: 22px 18px;
+                background: #171b3a; border: 1px solid var(--bord); box-shadow: 0 20px 60px rgba(0,0,0,.5); text-align: center; animation: entre .3s ease-out; }
+  .fa-fenetre h2 { margin: 0 0 12px; font-size: 24px; }
+  .fa-fenetre h3 { margin: 0 0 6px; font-size: 19px; text-align: start; }
+  .fa-fenetre p { margin: 6px 0; color: var(--doux); line-height: 1.4; text-align: start; }
+  .fa-fermer { position: absolute; top: 12px; inset-inline-end: 12px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.08); font-size: 20px; }
+  .fa-consigne { font-size: 20px; font-weight: 800; color: var(--texte) !important; text-align: center !important; }
+  .fa-saisie { height: 28px; font-size: 20px; letter-spacing: 4px; color: var(--soleil); }
+  .fa-pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 8px auto 0; }
+  .fa-pave button { height: 64px; border-radius: 18px; background: rgba(255,255,255,.08); border: 1px solid var(--bord); font-size: 26px; font-weight: 800; }
+  .fa-cadenas { font-size: 64px; }
+  .fa-grand { font-size: 22px; font-weight: 800; color: var(--texte) !important; text-align: center !important; }
+  .fa-bouton { display: block; width: 100%; margin-top: 10px; padding: 14px; border-radius: 16px; background: rgba(255,255,255,.08); border: 1px solid var(--bord); font-weight: 800; font-size: 17px; }
+  .fa-bouton:disabled { opacity: .5; }
+  .fa-principal { background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; }
+  .fa-lien { margin-top: 10px; background: none; color: var(--doux); text-decoration: underline; font-size: 15px; }
+  .fa-danger { color: #ff8f8f; }
+  .fa-bloc { text-align: start; padding: 14px; margin-top: 12px; border-radius: 20px; background: rgba(255,255,255,.04); border: 1px solid var(--bord); scroll-margin-top: 10px; }
+  .fa-msg { min-height: 1.2em; font-weight: 700; color: var(--menthe) !important; }
+  .fa-ligne { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .fa-avatar { width: 52px; height: 52px; flex: none; border-radius: 50%; background: rgba(255,255,255,.1); font-size: 30px; }
+  .fa-ligne input, .fa-form input { flex: 1; min-width: 0; width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--bord); background: rgba(0,0,0,.25); color: var(--texte); font: inherit; font-size: 17px; }
+  .fa-form input { margin-top: 10px; }
+  .fa-suppr { width: 44px; height: 44px; flex: none; border-radius: 12px; background: none; font-size: 20px; }
+  .fa-suppr[hidden] { display: none; }
+  .fa-enfants { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+  .fa-enfant { padding: 16px 8px; border-radius: 22px; background: rgba(255,255,255,.07); border: 2px solid var(--bord); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .fa-enfant.on { border-color: var(--soleil); }
+  .fa-enfant .e { font-size: 54px; line-height: 1; }
+  .fa-enfant .n { font-weight: 800; font-size: 17px; }
+  .fa-enfant.plus .e { font-size: 34px; } .fa-enfant.plus .n { font-size: 14px; color: var(--doux); }
+  .fa-pied { text-align: center !important; margin-top: 14px !important; }
+  .fa-pied a { color: var(--doux); }
 </style>
 </head>
 <body>
@@ -1275,6 +1316,47 @@ try { langue = localStorage.getItem('lumi-langue') || langue; } catch {}
 if (!LANGUES[langue]) langue = 'fr';
 let jeton = 0, diapo = 0, retourNuage;
 
+// ---------- Configuration de l'app (boutiques, compte) ----------
+const CONFIG_APP = {
+  // Clés PUBLIQUES RevenueCat (tableau de bord RevenueCat > Project > API keys)
+  revenuecat: { ios: '', android: '' },
+  droit: 'complet',                  // « entitlement » RevenueCat qui débloque tout
+  // Compte parent (optionnel) : projet Supabase, clé publique « anon »
+  supabase: { url: '', cle: '' },
+  webToutOuvert: true,               // sur le site web (démo), tout reste ouvert
+  confidentialite: 'https://kameldhakwani90.github.io/lumiole/confidentialite.html',
+};
+// Dans l'app iPhone / Android, Capacitor fournit les modules natifs (voir essais/…-lumi-app-mobile)
+const NATIF = window.Capacitor?.isNativePlatform?.() === true;
+const PLUGINS = window.LumiNatif || {};
+const PLATEFORME = window.Capacitor?.getPlatform?.() || 'web';
+
+// ---------- Profils : chaque enfant a sa progression ----------
+const AVATARS = ['🦊', '🐻', '🐰', '🐼', '🦁', '🐸', '🦄', '🐱', '🐶', '🐧', '🦋', '🐢'];
+const Profils = (() => {
+  let d = { liste: [{ id: 'p1', nom: '', avatar: '🦊' }], actif: 'p1' };
+  try { const x = JSON.parse(localStorage.getItem('lumi-profils') || 'null'); if (x?.liste?.length) d = x; } catch {}
+  const sauver = () => { try { localStorage.setItem('lumi-profils', JSON.stringify(d)); } catch {} Famille?.changement?.(); };
+  return {
+    get liste() { return d.liste; }, get actif() { return d.liste.find((p) => p.id === d.actif) || d.liste[0]; },
+    // le premier profil garde les anciennes clés (rien n'est perdu)
+    cle: (base, id = d.actif) => (id === 'p1' ? base : `${base}@${id}`),
+    choisir(id) { d.actif = id; sauver(); },
+    ajouter(nom, avatar) { const p = { id: 'p' + Date.now().toString(36), nom, avatar }; d.liste.push(p); sauver(); return p; },
+    modifier(id, champs) { Object.assign(d.liste.find((p) => p.id === id) || {}, champs); sauver(); },
+    supprimer(id) {
+      if (d.liste.length < 2) return;
+      d.liste = d.liste.filter((p) => p.id !== id);
+      ['lumi-progres', 'lumi-coloriages'].forEach((b) => { try { localStorage.removeItem(`${b}@${id}`); } catch {} });
+      if (d.actif === id) d.actif = d.liste[0].id;
+      sauver();
+    },
+    exporter: () => JSON.parse(JSON.stringify(d)),
+    importer(x) { if (x?.liste?.length) { d = x; try { localStorage.setItem('lumi-profils', JSON.stringify(d)); } catch {} } },
+  };
+})();
+var Famille = null; // compte parent, défini plus bas
+
 // ---------- Retrouver un mot, dans n'importe quelle langue ----------
 const normaliser = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   .replace(/[ً-ْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
@@ -1373,7 +1455,24 @@ function voixDe(code) {
 function voixDisponibles(code) {
   return speechSynthesis.getVoices().filter((x) => x.lang?.replace('_', '-').toLowerCase().startsWith(code) && !RIGOLOTES.test(x.name));
 }
+// Dans l'app : la voix native du téléphone (accès aux voix « améliorées » installées)
+let paroleNative = 0;
+async function parlerNatif(texte, l, o) {
+  const moi = ++paroleNative, tts = PLUGINS.TextToSpeech;
+  try { await tts.stop(); } catch {}
+  avatar?.parle(true); Ambiance.baisser(true);
+  const pouls = setInterval(() => avatar?.syllabe(), 200);
+  try { await tts.speak({ text: texte, lang: LANGUES[l].voix, rate: o.vitesse || .92, pitch: o.ton || 1.08, volume: 1, category: 'playback' }); } catch {}
+  clearInterval(pouls);
+  if (moi === paroleNative) { avatar?.parle(false); Ambiance.baisser(false); }
+}
+function taireVoix() {
+  paroleNative++;
+  try { PLUGINS.TextToSpeech?.stop(); } catch {}
+  try { speechSynthesis.cancel(); } catch {}
+}
 function parler(texte, l = langue, o = {}) {
+  if (PLUGINS.TextToSpeech) return parlerNatif(texte, l, o);
   return new Promise((ok) => {
     if (!('speechSynthesis' in window)) return ok();
     const occupe = speechSynthesis.speaking || speechSynthesis.pending;
@@ -2029,8 +2128,8 @@ const SKINS = [
 ];
 const Progres = (() => {
   let d = { etoiles: 0, mots: {}, skin: 'enfant' };
-  try { d = { ...d, ...JSON.parse(localStorage.getItem('lumi-progres') || '{}') }; } catch {}
-  const sauver = () => { try { localStorage.setItem('lumi-progres', JSON.stringify(d)); } catch {} };
+  try { d = { ...d, ...JSON.parse(localStorage.getItem(Profils.cle('lumi-progres')) || '{}') }; } catch {}
+  const sauver = () => { try { localStorage.setItem(Profils.cle('lumi-progres'), JSON.stringify(d)); } catch {} Famille?.changement?.(); };
   function gagner(entree) {
     const avant = d.etoiles;
     d.etoiles++;
@@ -2129,6 +2228,7 @@ function tuileUnivers(id, i) {
   if (n.type === 'colorier') { b.classList.add('a-colorier'); b.querySelector('.e').replaceWith(miniDessin(n.dessin)); }
   b.querySelector('.n').textContent = n.nom[langue];
   b.querySelector('.d').textContent = n.desc ? n.desc[langue] : '';
+  if (!libre(id)) { b.classList.add('ferme'); b.append(Object.assign(document.createElement('span'), { className: 'cadenas', textContent: '🔒' })); }
   b.onclick = () => aller(id);
   return b;
 }
@@ -2151,6 +2251,7 @@ function construireAccueil() {
   $('bandeau').firstChild.textContent = '⭐ ' + Progres.etoiles;
   $('bandeau').lastChild.textContent = `📒 ${L.albumTxt} · ${trouves}/${TOUS.length}  ›`;
   $('bandeau').onclick = () => aller('album');
+  $('bandeau').prepend(bandeauEnfant());
   $('titre-jour').textContent = L.duJour;
   $('titre-jouer').textContent = L.jouer;
   $('du-jour').innerHTML = '';
@@ -2168,6 +2269,10 @@ function construireAccueil() {
   });
   $('grille').innerHTML = '';
   NOEUDS.accueil.enfants.forEach((id, i) => $('grille').appendChild(tuileUnivers(id, i)));
+  const par = document.createElement('button');
+  par.type = 'button'; par.className = 'fa-acces'; par.textContent = '👨‍👩‍👧 ' + tf('parents');
+  par.onclick = () => porteParents(() => espaceParents());
+  $('grille').appendChild(par);
 }
 
 function construireListe(id) {
@@ -2268,10 +2373,10 @@ const BEAU = { fr: 'Quel beau dessin !', en: 'What a beautiful picture!', ar: '�
 let pinceau = COULEURS_PINCEAU[0], coloriageEnCours = null;
 const Coloriages = (() => {
   let d = {};
-  try { d = JSON.parse(localStorage.getItem('lumi-coloriages') || '{}'); } catch {}
+  try { d = JSON.parse(localStorage.getItem(Profils.cle('lumi-coloriages')) || '{}'); } catch {}
   return {
     lire: (k) => d[k] || [],
-    ecrire(k, v) { d[k] = v; try { localStorage.setItem('lumi-coloriages', JSON.stringify(d)); } catch {} },
+    ecrire(k, v) { d[k] = v; try { localStorage.setItem(Profils.cle('lumi-coloriages'), JSON.stringify(d)); } catch {} Famille?.changement?.(); },
   };
 })();
 function eclat(x, y, couleur) {
@@ -2664,7 +2769,9 @@ function construireChansons() {
     b.querySelector('.e').textContent = c.emoji; b.querySelector('.n').textContent = c.titre; b.querySelector('.l').textContent = DRAPEAU[c.langue];
     b.dir = c.langue === 'ar' ? 'rtl' : 'ltr';
     b.dataset.id = c.id;
-    b.onclick = () => chanter(c);
+    const ok = Achat.ouvert || CHANSONS_LIBRES.has(c.id);
+    if (!ok) { b.classList.add('ferme'); b.querySelector('.l').textContent += ' 🔒'; }
+    b.onclick = () => (ok ? chanter(c) : proposerAchat());
     liste.appendChild(b);
   });
   $('ch-lent').textContent = r.lent ? '🐢' : '🐇';
@@ -2878,7 +2985,7 @@ function jouerVoixParent(blob, encore) {
 }
 function taireHistoire() {
   jetonConte++;
-  try { speechSynthesis.cancel(); } catch {}
+  taireVoix();
   if (lecteurAudio) { lecteurAudio.pause(); lecteurAudio = null; }
   avatar?.parle(false);
 }
@@ -2970,7 +3077,9 @@ function construireHistoires() {
     b.innerHTML = '<span class="e"></span><span class="n"></span><span class="l"></span>';
     b.querySelector('.e').textContent = h.emoji; b.querySelector('.n').textContent = h.titre;
     b.querySelector('.l').textContent = DRAPEAU[h.langue] + (h.pages.some((_, p) => VoixParent.a(`${h.id}:${p}`)) ? '🎙️' : '');
-    b.onclick = () => ouvrirHistoire(h);
+    const ok = Achat.ouvert || HISTOIRES_LIBRES.has(h.id);
+    if (!ok) { b.classList.add('ferme'); b.querySelector('.l').textContent += ' 🔒'; }
+    b.onclick = () => (ok ? ouvrirHistoire(h) : proposerAchat());
     liste.appendChild(b);
   });
   modeHistoire(); remplirVoix();
@@ -3073,6 +3182,7 @@ function afficher() {
 }
 
 function aller(id, montrerCarte = true) {
+  if (!libre(id)) return proposerAchat();
   arreterChanson(); arreterHistoire();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
@@ -3310,8 +3420,23 @@ function microIndisponible() {
   $('legende').textContent = LANGUES[langue].microKo;
   $('saisie').focus();
 }
+// Dans l'app : reconnaissance vocale native (Safari/Chrome dans une app n'en ont pas)
+async function microNatif() {
+  const R = PLUGINS.SpeechRecognition, b = $('btn-micro');
+  if (b.classList.contains('ecoute')) { try { await R.stop(); } catch {} return; }
+  try {
+    const perm = await R.requestPermissions?.();
+    if (perm && perm.speechRecognition && perm.speechRecognition !== 'granted') return microIndisponible();
+    b.classList.add('ecoute'); $('legende').textContent = LANGUES[langue].ecoute; avatar?.mode('ecoute'); avatar?.forme(null);
+    const { matches = [] } = await R.start({ language: LANGUES[langue].voix, maxResults: 3, partialResults: false, popup: false });
+    const bon = matches.find((a) => chercher(a)) || matches[0];
+    if (bon) { $('legende').textContent = bon; montrer(bon); }
+  } catch { microIndisponible(); }
+  b.classList.remove('ecoute');
+}
 $('btn-micro').onclick = () => {
   diapo++;
+  if (PLUGINS.SpeechRecognition) return microNatif();
   if (reco) { reco.stop(); return; }
   if (!Reco) return microIndisponible();
   try {
@@ -3342,9 +3467,293 @@ $('ecrire').addEventListener('submit', (e) => {
   montrer(v);
 });
 
+// =====================================================================
+// ---------- Famille : version gratuite / complète, zone parents, profils, compte ----------
+// =====================================================================
+// Ce qui reste gratuit sans achat (le reste s'ouvre avec l'achat unique « Lumiole complet »)
+const GRATUIT = new Set(['accueil', 'animaux', 'ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes', 'couleurs', 'lettres', 'nombres',
+  'dessin', 'parler', 'jeux', 'bulles', 'devine', 'album', 'coloriage', 'col-maison', 'col-poisson', 'chansons', 'histoires']);
+const CHANSONS_LIBRES = new Set(['frere-jacques', 'twinkle', 'najma']);
+const HISTOIRES_LIBRES = new Set(['chaperon', 'three-pigs', 'jha-himar', 'tn-jha-qmra']);
+
+const TXT_FA = {
+  parents: { fr: 'Espace parents', en: 'Parents', ar: 'ركن الأولياء' },
+  porte: { fr: 'Pour les parents : touche', en: 'For parents: tap', ar: 'للأولياء: المس' },
+  chiffres: { fr: ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'], en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'], ar: ['صفر', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'] },
+  verrou: { fr: 'C’est dans Lumiole complet. Demande à papa ou maman !', en: 'This is in Lumiole Full. Ask a grown-up!', ar: 'هذا في لوميول الكامل. اطلب من بابا أو ماما!' },
+  complet: { fr: 'Lumiole complet', en: 'Lumiole Full', ar: 'لوميول الكامل' },
+  completTxt: { fr: 'Un seul achat, pour toujours : tous les thèmes, jeux, coloriages, comptines et histoires, et toutes les mises à jour. Pas de pub, pas d’abonnement.', en: 'One purchase, forever: every theme, game, coloring page, song and story, plus all updates. No ads, no subscription.', ar: 'شراء واحد وإلى الأبد: كل المواضيع والألعاب والتلوين والأناشيد والحكايات، وكل التحديثات. بلا إعلانات ولا اشتراك.' },
+  acheter: { fr: 'Tout débloquer', en: 'Unlock everything', ar: 'افتح كل شيء' },
+  restaurer: { fr: 'Restaurer mes achats', en: 'Restore purchases', ar: 'استرجاع مشترياتي' },
+  debloque: { fr: '✅ Tout est débloqué. Merci !', en: '✅ Everything is unlocked. Thank you!', ar: '✅ كل شيء مفتوح. شكرًا!' },
+  webAchat: { fr: 'L’achat se fait dans l’app iPhone ou Android.', en: 'Purchases are made in the iPhone or Android app.', ar: 'الشراء يتم من تطبيق آيفون أو أندرويد.' },
+  enfants: { fr: 'Les enfants', en: 'Children', ar: 'الأطفال' },
+  ajouter: { fr: '➕ Ajouter un enfant', en: '➕ Add a child', ar: '➕ أضف طفلًا' },
+  prenom: { fr: 'Prénom', en: 'First name', ar: 'الاسم' },
+  qui: { fr: 'Qui joue ?', en: 'Who’s playing?', ar: 'من يلعب؟' },
+  supprimer: { fr: 'Supprimer', en: 'Delete', ar: 'حذف' },
+  compte: { fr: 'Compte parent (facultatif)', en: 'Parent account (optional)', ar: 'حساب الولي (اختياري)' },
+  compteTxt: { fr: 'Pour retrouver les profils et la progression des enfants sur un autre téléphone ou une tablette.', en: 'To find your children’s profiles and progress on another phone or tablet.', ar: 'لتجد ملفات الأطفال وتقدّمهم على هاتف أو لوحة أخرى.' },
+  email: { fr: 'Ton e-mail', en: 'Your email', ar: 'بريدك الإلكتروني' },
+  envoyerCode: { fr: 'Recevoir un code', en: 'Get a code', ar: 'أرسل لي رمزًا' },
+  code: { fr: 'Code reçu par e-mail', en: 'Code from the email', ar: 'الرمز من البريد' },
+  valider: { fr: 'Se connecter', en: 'Sign in', ar: 'دخول' },
+  connecte: { fr: 'Connecté :', en: 'Signed in:', ar: 'متصل:' },
+  synchro: { fr: 'Profils et progression sauvegardés ✔', en: 'Profiles and progress saved ✔', ar: 'تم حفظ الملفات والتقدّم ✔' },
+  deconnecter: { fr: 'Se déconnecter', en: 'Sign out', ar: 'خروج' },
+  supprimerCompte: { fr: 'Supprimer mon compte', en: 'Delete my account', ar: 'حذف حسابي' },
+  sur: { fr: 'Supprimer le compte et ses sauvegardes ? (les achats restent liés à ton compte App Store / Google Play)', en: 'Delete the account and its backups? (purchases stay linked to your App Store / Google Play account)', ar: 'حذف الحساب ونسخه الاحتياطية؟ (المشتريات تبقى مرتبطة بحساب المتجر)' },
+  bientot: { fr: 'Le compte parent sera disponible dans l’app.', en: 'Parent accounts will be available in the app.', ar: 'حساب الولي سيكون متاحًا في التطبيق.' },
+  erreur: { fr: 'Oups, ça n’a pas marché. Réessaie.', en: 'Oops, that didn’t work. Try again.', ar: 'عذرًا، لم ينجح ذلك. حاول مجددًا.' },
+  confidentialite: { fr: 'Confidentialité', en: 'Privacy', ar: 'الخصوصية' },
+  fermer: { fr: 'Fermer', en: 'Close', ar: 'إغلاق' },
+};
+const tf = (k) => TXT_FA[k][langue] ?? TXT_FA[k].fr;
+
+// ----- Achat unique (App Store / Google Play via RevenueCat) -----
+const Achat = (() => {
+  const P = PLUGINS.Purchases;
+  let ouvert = !NATIF && CONFIG_APP.webToutOuvert, paquet = null, pret = false;
+  try { if (localStorage.getItem('lumi-complet') === 'oui') ouvert = true; } catch {}
+  const noter = (info) => {
+    const oui = !!info?.entitlements?.active?.[CONFIG_APP.droit];
+    if (NATIF) { ouvert = oui; try { localStorage.setItem('lumi-complet', oui ? 'oui' : 'non'); } catch {} }
+    rafraichirVerrous();
+  };
+  async function init(idCompte) {
+    const cle = CONFIG_APP.revenuecat[PLATEFORME];
+    if (!P || !cle) return;
+    try {
+      if (!pret) { await P.configure({ apiKey: cle, appUserID: idCompte || undefined }); pret = true; }
+      else if (idCompte) await P.logIn({ appUserID: idCompte });
+      noter((await P.getCustomerInfo()).customerInfo);
+      const off = await P.getOfferings();
+      paquet = off?.current?.availablePackages?.[0] || null;
+    } catch (e) { console.warn('Achats', e); }
+  }
+  return {
+    init, get ouvert() { return ouvert; }, get dispo() { return !!(P && pret && paquet); },
+    get prix() { return paquet?.product?.priceString || ''; },
+    async acheter() { const r = await P.purchasePackage({ aPackage: paquet }); noter(r.customerInfo); return ouvert; },
+    async restaurer() { const r = await P.restorePurchases(); noter(r.customerInfo); return ouvert; },
+  };
+})();
+const libre = (id) => Achat.ouvert || GRATUIT.has(id);
+function rafraichirVerrous() {
+  if (typeof afficher === 'function' && pile.length) afficher();
+}
+
+// ----- Porte parents : une consigne écrite en lettres, qu'un petit ne sait pas lire -----
+function porteParents(ensuite) {
+  const suite = Array.from({ length: 3 }, () => 1 + ((Math.random() * 9) | 0));
+  let tape = [];
+  const f = fenetre('porte');
+  f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>🔒 ${tf('parents')}</h2>
+    <p class="fa-consigne"></p><div class="fa-saisie"></div><div class="fa-pave"></div>`;
+  f.querySelector('.fa-consigne').textContent = `${tf('porte')} ${suite.map((n) => TXT_FA.chiffres[langue][n]).join(', ')}`;
+  const pave = f.querySelector('.fa-pave');
+  for (let n = 1; n <= 9; n++) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
+    b.onclick = () => {
+      tape.push(n); f.querySelector('.fa-saisie').textContent = '● '.repeat(tape.length);
+      if (tape.length < 3) return;
+      if (tape.join() === suite.join()) { fermerFenetre(); ensuite(); } else { tape = []; f.querySelector('.fa-saisie').textContent = ''; trembler(pave); }
+    };
+    pave.appendChild(b);
+  }
+  f.querySelector('.fa-fermer').onclick = fermerFenetre;
+}
+function trembler(el) { el.animate([{ transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); }
+function fenetre(type) {
+  fermerFenetre();
+  const fond = document.createElement('div');
+  fond.className = 'fa-fond'; fond.id = 'fa-fond'; fond.dir = LANGUES[langue].dir;
+  fond.innerHTML = `<div class="fa-fenetre fa-t-${type}" role="dialog" aria-modal="true"></div>`;
+  fond.onclick = (e) => { if (e.target === fond) fermerFenetre(); };
+  document.body.appendChild(fond);
+  return fond.firstChild;
+}
+function fermerFenetre() { $('fa-fond')?.remove(); }
+
+// Un enfant touche un contenu fermé : Lumi l'explique, un parent peut ouvrir
+function proposerAchat() {
+  son('faux');
+  const f = fenetre('verrou');
+  f.innerHTML = `<div class="fa-cadenas">🔒✨</div><p class="fa-grand"></p><button class="fa-bouton fa-principal">👨‍👩‍👧 ${tf('parents')}</button><button class="fa-lien">${tf('fermer')}</button>`;
+  f.querySelector('.fa-grand').textContent = tf('verrou');
+  f.querySelector('.fa-principal').onclick = () => porteParents(() => espaceParents('achat'));
+  f.querySelector('.fa-lien').onclick = fermerFenetre;
+  parler(tf('verrou'));
+}
+
+// ----- Choisir l'enfant qui joue -----
+function choisirEnfant() {
+  const f = fenetre('enfants');
+  f.innerHTML = `<h2></h2><div class="fa-enfants"></div>`;
+  f.querySelector('h2').textContent = tf('qui');
+  Profils.liste.forEach((p) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'fa-enfant' + (p.id === Profils.actif.id ? ' on' : '');
+    b.innerHTML = '<span class="e"></span><span class="n"></span>';
+    b.querySelector('.e').textContent = p.avatar; b.querySelector('.n').textContent = p.nom || '';
+    b.onclick = () => { if (p.id === Profils.actif.id) return fermerFenetre(); Profils.choisir(p.id); location.reload(); };
+    f.querySelector('.fa-enfants').appendChild(b);
+  });
+  const plus = document.createElement('button'); plus.type = 'button'; plus.className = 'fa-enfant plus';
+  plus.innerHTML = '<span class="e">⚙️</span><span class="n"></span>'; plus.querySelector('.n').textContent = tf('parents');
+  plus.onclick = () => porteParents(() => espaceParents('enfants'));
+  f.querySelector('.fa-enfants').appendChild(plus);
+}
+
+// ----- Espace parents : enfants, achat, compte -----
+function espaceParents(section) {
+  const f = fenetre('parents');
+  f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>👨‍👩‍👧 ${tf('parents')}</h2>
+    <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-enfants"></section>
+    <section class="fa-bloc" id="fa-compte"></section><p class="fa-pied"><a target="_blank" rel="noopener"></a></p>`;
+  f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); construireAccueil?.(); };
+  f.querySelector('.fa-pied a').href = CONFIG_APP.confidentialite; f.querySelector('.fa-pied a').textContent = tf('confidentialite');
+  blocAchat(); blocEnfants(); blocCompte();
+  if (section) f.querySelector('#fa-' + section)?.scrollIntoView({ block: 'start' });
+}
+function blocAchat() {
+  const b = $('fa-achat'); if (!b) return;
+  b.innerHTML = `<h3>✨ ${tf('complet')}</h3><p></p><div class="fa-actions"></div><p class="fa-msg"></p>`;
+  b.querySelector('p').textContent = tf('completTxt');
+  const act = b.querySelector('.fa-actions'), msg = b.querySelector('.fa-msg');
+  if (Achat.ouvert) { msg.textContent = tf('debloque'); return; }
+  if (!NATIF) { msg.textContent = tf('webAchat'); return; }
+  const acheter = document.createElement('button'); acheter.className = 'fa-bouton fa-principal';
+  acheter.textContent = `${tf('acheter')}${Achat.prix ? ' · ' + Achat.prix : ''}`; acheter.disabled = !Achat.dispo;
+  const rest = document.createElement('button'); rest.className = 'fa-bouton'; rest.textContent = tf('restaurer');
+  const faire = async (fn) => { try { msg.textContent = '…'; const ok = await fn(); msg.textContent = ok ? tf('debloque') : ''; if (ok) { fete(); blocAchat(); } } catch (e) { msg.textContent = e?.userCancelled || /cancel/i.test(e?.message || '') ? '' : tf('erreur'); } };
+  acheter.onclick = () => faire(Achat.acheter); rest.onclick = () => faire(Achat.restaurer);
+  act.append(acheter, rest);
+}
+function blocEnfants() {
+  const b = $('fa-enfants'); if (!b) return;
+  b.innerHTML = `<h3>🧒 ${tf('enfants')}</h3><div class="fa-liste"></div>`;
+  Profils.liste.forEach((p) => {
+    const l = document.createElement('div'); l.className = 'fa-ligne';
+    l.innerHTML = `<button class="fa-avatar"></button><input maxlength="20"><button class="fa-suppr" aria-label="${tf('supprimer')}">🗑️</button>`;
+    l.querySelector('.fa-avatar').textContent = p.avatar;
+    l.querySelector('.fa-avatar').onclick = () => { const a = AVATARS[(AVATARS.indexOf(p.avatar) + 1) % AVATARS.length]; Profils.modifier(p.id, { avatar: a }); blocEnfants(); };
+    const champ = l.querySelector('input'); champ.value = p.nom; champ.placeholder = tf('prenom');
+    champ.onchange = () => Profils.modifier(p.id, { nom: champ.value.trim() });
+    const suppr = l.querySelector('.fa-suppr'); suppr.hidden = Profils.liste.length < 2;
+    suppr.onclick = () => { if (confirm(`${tf('supprimer')} ${p.nom || p.avatar} ?`)) { Profils.supprimer(p.id); blocEnfants(); } };
+    b.querySelector('.fa-liste').appendChild(l);
+  });
+  const plus = document.createElement('button'); plus.className = 'fa-bouton'; plus.textContent = tf('ajouter');
+  plus.onclick = () => { Profils.ajouter('', AVATARS[Profils.liste.length % AVATARS.length]); blocEnfants(); $('fa-enfants').querySelector('.fa-ligne:last-child input')?.focus(); };
+  b.appendChild(plus);
+}
+function blocCompte() {
+  const b = $('fa-compte'); if (!b) return;
+  b.innerHTML = `<h3>☁️ ${tf('compte')}</h3><p></p><div class="fa-form"></div><p class="fa-msg"></p>`;
+  b.querySelector('p').textContent = tf('compteTxt');
+  const form = b.querySelector('.fa-form'), msg = b.querySelector('.fa-msg');
+  if (!Famille.dispo) { msg.textContent = tf('bientot'); return; }
+  if (Famille.email) {
+    form.innerHTML = `<p class="fa-qui"></p><button class="fa-bouton" data-a="sortir"></button><button class="fa-lien fa-danger" data-a="suppr"></button>`;
+    form.querySelector('.fa-qui').textContent = `${tf('connecte')} ${Famille.email}`;
+    form.querySelector('[data-a=sortir]').textContent = tf('deconnecter');
+    form.querySelector('[data-a=suppr]').textContent = tf('supprimerCompte');
+    form.querySelector('[data-a=sortir]').onclick = () => { Famille.sortir(); blocCompte(); };
+    form.querySelector('[data-a=suppr]').onclick = async () => { if (!confirm(tf('sur'))) return; try { await Famille.supprimer(); blocCompte(); } catch { msg.textContent = tf('erreur'); } };
+    msg.textContent = Famille.derniereSynchro ? tf('synchro') : '';
+    return;
+  }
+  form.innerHTML = `<input type="email" autocomplete="email" inputmode="email"><button class="fa-bouton fa-principal" data-a="code"></button>
+    <input class="fa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" hidden><button class="fa-bouton" data-a="ok" hidden></button>`;
+  const [mail, , code] = form.querySelectorAll('input, button');
+  mail.placeholder = tf('email'); form.querySelector('.fa-code').placeholder = tf('code');
+  form.querySelector('[data-a=code]').textContent = tf('envoyerCode'); form.querySelector('[data-a=ok]').textContent = tf('valider');
+  form.querySelector('[data-a=code]').onclick = async () => {
+    try { msg.textContent = '…'; await Famille.envoyerCode(mail.value.trim()); msg.textContent = '📩'; form.querySelector('.fa-code').hidden = false; form.querySelector('[data-a=ok]').hidden = false; form.querySelector('.fa-code').focus(); }
+    catch { msg.textContent = tf('erreur'); }
+  };
+  form.querySelector('[data-a=ok]').onclick = async () => {
+    try { msg.textContent = '…'; await Famille.verifier(mail.value.trim(), form.querySelector('.fa-code').value.trim()); blocCompte(); blocEnfants(); }
+    catch { msg.textContent = tf('erreur'); }
+  };
+}
+
+// ----- Compte parent (Supabase, sans bibliothèque) : profils + progression sauvegardés -----
+Famille = (() => {
+  const { url, cle } = CONFIG_APP.supabase, dispo = !!(url && cle);
+  let s = null, minuteur = null, derniere = 0;
+  try { s = JSON.parse(localStorage.getItem('lumi-compte') || 'null'); } catch {}
+  const garder = () => { try { localStorage.setItem('lumi-compte', JSON.stringify(s)); } catch {} };
+  const api = async (chemin, opts = {}, auth = true) => {
+    const r = await fetch(url + chemin, { ...opts, headers: { apikey: cle, 'Content-Type': 'application/json', ...(auth && s ? { Authorization: 'Bearer ' + s.access_token } : {}), ...(opts.headers || {}) } });
+    if (r.status === 401 && auth && s?.refresh_token && !opts._re) { await rafraichir(); return api(chemin, { ...opts, _re: true }, auth); }
+    if (!r.ok) throw new Error(r.status + ' ' + (await r.text()));
+    return r.status === 204 ? null : r.json().catch(() => null);
+  };
+  async function rafraichir() {
+    const r = await api('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: s.refresh_token }) }, false);
+    s = { ...s, ...r }; garder();
+  }
+  // tout ce qui appartient aux enfants
+  function paquet() {
+    const d = { profils: Profils.exporter(), enfants: {} };
+    Profils.liste.forEach((p) => { d.enfants[p.id] = {}; ['lumi-progres', 'lumi-coloriages'].forEach((b) => { try { d.enfants[p.id][b] = JSON.parse(localStorage.getItem(Profils.cle(b, p.id)) || 'null'); } catch {} }); });
+    return d;
+  }
+  const etoiles = (id) => { try { return JSON.parse(localStorage.getItem(Profils.cle('lumi-progres', id)) || '{}').etoiles || 0; } catch { return 0; } };
+  function fusionner(d) {
+    if (!d?.profils?.liste) return;
+    const ici = Profils.exporter(), ids = new Set(ici.liste.map((p) => p.id));
+    d.profils.liste.forEach((p) => { if (!ids.has(p.id)) ici.liste.push(p); });
+    Profils.importer(ici);
+    Object.entries(d.enfants || {}).forEach(([id, x]) => {
+      if ((x?.['lumi-progres']?.etoiles || 0) < etoiles(id)) return; // on garde le plus avancé
+      Object.entries(x || {}).forEach(([b, v]) => { if (v) try { localStorage.setItem(Profils.cle(b, id), JSON.stringify(v)); } catch {} });
+    });
+  }
+  async function envoyer() {
+    if (!s) return;
+    await api('/rest/v1/familles', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: s.user.id, donnees: paquet(), maj: new Date().toISOString() }) });
+    derniere = Date.now();
+  }
+  async function recevoir() {
+    const r = await api(`/rest/v1/familles?user_id=eq.${s.user.id}&select=donnees`);
+    if (r?.[0]?.donnees) fusionner(r[0].donnees);
+  }
+  return {
+    dispo, get email() { return s?.user?.email || null; }, get id() { return s?.user?.id || null; }, get derniereSynchro() { return derniere; },
+    envoyerCode: (email) => api('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ email, create_user: true }) }, false),
+    async verifier(email, token) {
+      s = await api('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'email', email, token }) }, false); garder();
+      await recevoir(); await envoyer(); await Achat.init(s.user.id);
+    },
+    sortir() { s = null; try { localStorage.removeItem('lumi-compte'); } catch {} },
+    async supprimer() { await api('/functions/v1/supprimer-compte', { method: 'POST', body: '{}' }); this.sortir(); },
+    changement() { if (!s) return; clearTimeout(minuteur); minuteur = setTimeout(() => envoyer().catch(() => {}), 4000); },
+    async init() { if (!dispo || !s) return; try { await rafraichir(); await recevoir(); } catch {} },
+  };
+})();
+
+// ----- Le profil de l'enfant dans le bandeau d'accueil -----
+function bandeauEnfant() {
+  const p = Profils.actif, b = document.createElement('button');
+  b.type = 'button'; b.className = 'fa-moi';
+  b.innerHTML = '<span class="e"></span><span class="n"></span>';
+  b.querySelector('.e').textContent = p.avatar; b.querySelector('.n').textContent = p.nom || '';
+  b.onclick = (e) => { e.stopPropagation(); choisirEnfant(); };
+  return b;
+}
+async function demarrerFamille() {
+  if (PLUGINS.StatusBar) { try { await PLUGINS.StatusBar.setStyle({ style: 'DARK' }); if (PLATEFORME === 'android') { await PLUGINS.StatusBar.setBackgroundColor({ color: '#0d1026' }); await PLUGINS.StatusBar.setOverlaysWebView({ overlay: false }); } } catch {} }
+  await Famille.init();
+  await Achat.init(Famille.id);
+  if (Profils.liste.length > 1 && !sessionStorage.getItem('lumi-qui')) { try { sessionStorage.setItem('lumi-qui', '1'); } catch {} choisirEnfant(); }
+}
+
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
 accueillir();
+demarrerFamille();
 setTimeout(() => { avatar?.mode(paletteAmb); avatar?.forme(duJour().mot.emoji); revenirAuNuage(8000); }, 600);
 
 </script>
