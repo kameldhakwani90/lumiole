@@ -11,3 +11,5 @@ en français, en anglais et en arabe.
 - Jeux de langage : Devine !, Écoute et trouve, Où ça va ?, L'intrus.
 
 Démo : l'écran d'appel vocal Krousty → https://kameldhakwani90.github.io/lumiole/krousty/
+
+Sons d'ambiance : enregistrements CC0 (domaine public) de Freesound, détails dans [sons/CREDITS.md](sons/CREDITS.md).

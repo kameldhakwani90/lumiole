@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Lumi dessine les mots</title>
 <meta name="theme-color" content="#0d1026">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,6 +35,10 @@
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html, body { height: 100%; }
+  /* pas de zoom au double-tap, pas de sélection ni de loupe au doigt long */
+  html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  input { -webkit-user-select: text; user-select: text; }
   body {
     margin: 0; background: var(--nuit); color: var(--texte); transition: background-color 1.2s;
     font: 500 17px/1.35 "Baloo 2", system-ui, sans-serif;
@@ -1465,16 +1469,45 @@ const Ambiance = (() => {
     vent:     (m) => { bruitFiltre('bandpass', 900, .5, .05, .06, .8); boite(m, GAMMES.douce, 1.6, 3.5, .035); },
   };
 
+  // Vrais enregistrements (CC0, dossier sons/) quand ils existent, avec une boîte à musique discrète par-dessus.
+  // S'ils ne se chargent pas (page ouverte hors ligne, fichier absent), les sons fabriqués prennent le relais.
+  const FICHIERS = { mer: ['vagues', .5], foret: ['oiseaux', .55], ferme: ['oiseaux', .35], jardin: ['oiseaux', .3],
+                     grillons: ['grillons', .35], vent: ['vent', .4], maison: ['pluie', .3] };
+  const MUSIQUE_AVEC = { mer: ['grave', 2.5, 5, .03], foret: ['douce', 3, 6, .03], ferme: ['claire', 1.6, 3.2, .035], jardin: ['claire', 1.1, 2.4, .04],
+                         grillons: ['grave', 2.5, 5, .03], vent: ['douce', 1.8, 3.5, .035], maison: ['douce', 1.6, 3, .04] };
+  const tampons = {};
+  function charger(nom) {
+    if (!(nom in tampons)) {
+      tampons[nom] = fetch(`sons/${nom}.mp3`)
+        .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then((b) => new Promise((ok, ko) => ctx.decodeAudioData(b, ok, ko)))
+        .catch(() => null);
+    }
+    return tampons[nom];
+  }
+  function boucleFichier(tampon, vol) {
+    const s = ctx.createBufferSource(), g = ctx.createGain();
+    s.buffer = tampon; s.loop = true; g.gain.value = vol;
+    s.connect(g).connect(maitre); s.start(); continus.push(s);
+  }
+
   function demarrer() {
     const moi = ++gen, anciens = continus;
     continus = [];
     maitre.gain.setTargetAtTime(0, ctx.currentTime, .15);
-    setTimeout(() => {
+    const f = FICHIERS[courante];
+    const chargement = f ? charger(f[0]) : Promise.resolve(null);
+    setTimeout(() => chargement.then((tampon) => {
       anciens.forEach((n) => { try { n.stop(); } catch {} n.disconnect(); });
       if (moi !== gen || !actif) return;
-      RECETTES[courante]?.(moi);
+      if (tampon) {
+        boucleFichier(tampon, f[1]);
+        const [gamme, min, max, vol] = MUSIQUE_AVEC[courante];
+        boite(moi, GAMMES[gamme], min, max, vol);
+        if (courante === 'mer') boucle(moi, 3, 8, bulle);
+      } else RECETTES[courante]?.(moi);
       maitre.gain.setTargetAtTime(.9, ctx.currentTime, .8);
-    }, 450);
+    }), 450);
   }
   function jouer(nom) {
     if (nom === courante && gen) return;
@@ -1493,6 +1526,10 @@ const Ambiance = (() => {
   document.addEventListener('pointerdown', () => { if (actif && !gen) { init(); ctx.resume?.(); demarrer(); } }, true);
   return { jouer, basculer, baisser, get actif() { return actif; } };
 })();
+
+// Pas de zoom (pincement, double-tap) : c'est une app pour les petits doigts
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
 
 $('btn-son').onclick = () => {
   const on = Ambiance.basculer();
