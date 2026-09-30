@@ -335,8 +335,8 @@
     .col-autres .autre { width: 84px; }
   }
   /* ---------- Comptines ---------- */
-  [data-ecran="chansons"] .carte { display: none; }
-  [data-ecran="chansons"] .scene { max-height: 32vh; }
+  [data-ecran="chansons"] .carte, [data-ecran="histoires"] .carte { display: none; }
+  [data-ecran="chansons"] .scene, [data-ecran="histoires"] .scene { max-height: 32vh; }
   .chansons { display: flex; flex-direction: column; gap: 10px; }
   .ch-lecteur { border-radius: 24px; background: var(--carte); border: 1px solid var(--bord); padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
   .ch-haut { display: flex; align-items: center; gap: 8px; }
@@ -344,7 +344,7 @@
   .ch-commandes { display: flex; gap: 8px; flex: none; }
   .ch-commandes button { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.08); border: 2px solid var(--bord); font-size: 22px; }
   .ch-commandes button.on { background: var(--soleil); border-color: var(--soleil); }
-  .ch-commandes #ch-lecture { width: 58px; height: 58px; background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; font-size: 26px; }
+  .ch-commandes #ch-lecture, .ch-commandes #hi-lecture { width: 58px; height: 58px; background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; font-size: 26px; }
   .ch-lecteur.vide .ch-paroles { display: none; }
   .ch-paroles { min-height: 92px; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 4px 8px; text-align: center; }
   .ch-ligne { display: none; margin: 0; font-weight: 800; line-height: 1.3; }
@@ -368,8 +368,23 @@
   .ch-tuile.joue { outline: 4px solid #fff; outline-offset: -4px; }
   .ch-tuile.joue .e { animation: respire 1s ease-in-out infinite; }
   #decor .note-vole { position: fixed; font-size: 30px; font-weight: 900; pointer-events: none; text-shadow: 0 0 12px currentColor; z-index: 5; }
-  @media (min-width: 600px) and (min-height: 900px) { [data-ecran="chansons"] .scene { max-height: 48vh; } }
+  @media (min-width: 600px) and (min-height: 900px) { [data-ecran="chansons"] .scene, [data-ecran="histoires"] .scene { max-height: 48vh; } }
   @media (min-width: 600px) { .ch-ligne.active { font-size: 32px; } .ch-ligne.suivante { font-size: 21px; } .ch-tuile { width: 150px; height: 130px; } }
+  /* ---------- Histoires du soir ---------- */
+  .hi-lecteur .ch-titre { font-size: 17px; }
+  .hi-lecteur.vide .hi-texte, .hi-lecteur.vide .hi-points { display: none; }
+  .hi-lecteur.vide .ch-commandes button:not(#hi-lecture) { display: none; }
+  .hi-texte { margin: 4px 0 0; min-height: 5.6em; font-size: 20px; font-weight: 600; line-height: 1.45; text-align: center; padding: 0 6px; }
+  .hi-texte.entre { animation: entre .5s ease-out; }
+  @keyframes entre { from { opacity: 0; transform: translateY(8px); } }
+  .hi-points { display: flex; justify-content: center; gap: 6px; }
+  .hi-points span { width: 9px; height: 9px; border-radius: 50%; background: var(--bord); transition: all .3s; }
+  .hi-points span.lu { background: var(--doux); }
+  .hi-points span.on { background: var(--soleil); width: 22px; border-radius: 99px; }
+  .ch-commandes button:disabled { opacity: .35; }
+  .app[dir="rtl"] #hi-prec, .app[dir="rtl"] #hi-suiv { transform: scaleX(-1); }
+  [data-ecran="histoires"] .ch-tuile .n { font-size: 14px; }
+  @media (min-width: 600px) { .hi-texte { font-size: 26px; } }
 </style>
 <script>
 // App installée sur l'écran d'accueil de l'iPhone : si le système ne donne pas la hauteur
@@ -466,6 +481,24 @@
           </div>
           <div class="choix" id="choix"></div>
           <div class="aire-bulles" id="aire-bulles" hidden></div>
+        </div>
+      </section>
+      <section id="ecran-histoires" hidden>
+        <div class="chansons">
+          <div class="ch-lecteur hi-lecteur vide" id="hi-lecteur">
+            <div class="ch-haut">
+              <div class="ch-titre" id="hi-titre"></div>
+              <div class="ch-commandes">
+                <button type="button" id="hi-prec" aria-label="Page précédente">⏮</button>
+                <button type="button" id="hi-lecture" aria-label="Lecture">▶</button>
+                <button type="button" id="hi-suiv" aria-label="Page suivante">⏭</button>
+              </div>
+            </div>
+            <p class="hi-texte" id="hi-texte"></p>
+            <div class="hi-points" id="hi-points"></div>
+          </div>
+          <div class="ch-filtres" id="hi-filtres"></div>
+          <div class="ch-liste" id="hi-liste"></div>
         </div>
       </section>
       <section id="ecran-chansons" hidden>
@@ -1121,7 +1154,7 @@ const PAR_EMOJI = new Map(MOTS.map((m) => [m.emoji, m]));
 // ---------- L'arbre des activités : accueil → univers → thèmes ----------
 const NOEUDS = {
   accueil:   { emoji: '✦', nom: { fr: 'Lumi', en: 'Lumi', ar: 'لومي' },
-               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'jeux', 'parler'] },
+               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'histoires', 'jeux', 'parler'] },
   animaux:   { emoji: '🐾', nom: { fr: 'Les animaux', en: 'Animals', ar: 'الحيوانات' }, desc: { fr: 'Ferme, mer, oiseaux…', en: 'Farm, sea, birds…', ar: 'المزرعة، البحر، الطيور…' },
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
@@ -1160,6 +1193,7 @@ const NOEUDS = {
   'col-chat': { emoji: '🐱', type: 'colorier', dessin: 'chat' },
   'col-glace': { emoji: '🍦', type: 'colorier', dessin: 'glace' },
   'col-fusee': { emoji: '🚀', type: 'colorier', dessin: 'fusee' },
+  histoires: { emoji: '🌙', nom: { fr: 'Histoires du soir', en: 'Bedtime stories', ar: 'حكايات قبل النوم' }, desc: { fr: 'Lumi te raconte une histoire', en: 'Lumi tells you a story', ar: 'لومي يحكي لك حكاية' }, type: 'histoires' },
   chansons:  { emoji: '🎵', nom: { fr: 'Comptines', en: 'Songs', ar: 'أناشيد' }, desc: { fr: 'On chante avec Lumi', en: 'Sing along with Lumi', ar: 'نغني مع لومي' }, type: 'chansons' },
   album:     { emoji: '📒', nom: { fr: 'Mon album', en: 'My album', ar: 'ألبومي' }, type: 'album' },
   devine:    { emoji: '🔮', nom: { fr: 'Devine !', en: 'Guess!', ar: 'خمّن!' }, desc: { fr: 'Qu’est-ce que Lumi dessine ?', en: 'What is Lumi drawing?', ar: 'ماذا يرسم لومي؟' }, type: 'jeu', jeu: 'devine' },
@@ -1748,6 +1782,7 @@ const AMBIANCES = {
 };
 // Quel thème a quelle ambiance (les autres : la nuit étoilée)
 const AMB_THEME = {
+  histoires: 'nuit',
   animaux: 'foret', ferme: 'ferme', ocean: 'mer', sauvages: 'foret', oiseaux: 'foret', insectes: 'lucioles',
   manger: 'jardin', fruits: 'jardin', legumes: 'jardin', nature: 'foret', ecole: 'ecole', maison: 'maison', famille: 'maison', vehicules: 'ciel',
 };
@@ -2622,10 +2657,195 @@ $('ch-lecture').onclick = () => { if (chant) arreterChanson(); else if (dernier)
 $('ch-lent').onclick = () => { ReglesChant.set('lent', !ReglesChant.get().lent); construireChansons(); if (chant && dernier) chanter(dernier); };
 $('ch-boucle').onclick = () => { ReglesChant.set('boucle', !ReglesChant.get().boucle); construireChansons(); };
 
+// =====================================================================
+// ---------- Histoires du soir : CONFIGURATION ----------
+// Contes du domaine public, racontés avec des mots simples (versions douces pour le coucher).
+// Pour ajouter une histoire : { id, langue, emoji, titre, palette, pages: [[texte, emoji dessiné par la poussière], …] }
+// =====================================================================
+const HISTOIRES = [
+  // ----- Français -----
+  { id: 'chaperon', langue: 'fr', emoji: '👧', palette: 'bonbon', titre: 'Le Petit Chaperon rouge', pages: [
+    ['Il était une fois une petite fille qui portait toujours un joli chaperon rouge. Tout le monde l’appelait le Petit Chaperon rouge.', '👧'],
+    ['Un matin, sa maman lui dit : « Va porter cette galette et ce petit pot de beurre à ta mère-grand. »', '🧺'],
+    ['Le Petit Chaperon rouge traversa la forêt en cueillant des fleurs.', '🌸'],
+    ['Dans la forêt, elle rencontra le loup. « Où vas-tu, petite ? » « Chez ma mère-grand ! » Et le loup courut très vite par le chemin le plus court.', '🐺'],
+    ['Mère-grand l’entendit arriver et se cacha dans l’armoire. Le loup mit son bonnet et se coucha dans son lit.', '🏠'],
+    ['« Mère-grand, comme vous avez de grands yeux ! » « C’est pour mieux te voir, mon enfant ! » « Et comme vous avez de grandes dents ! »', '👀'],
+    ['Juste à ce moment, le bûcheron entra. Le loup eut si peur qu’il s’enfuit dans la forêt et ne revint jamais.', '🧔'],
+    ['Mère-grand sortit de l’armoire, et tous les trois partagèrent la galette. Bonne nuit, Petit Chaperon rouge… et bonne nuit à toi !', '🌙'],
+  ] },
+  { id: 'boucle-or', langue: 'fr', emoji: '🐻', palette: 'foret', titre: 'Boucle d’or et les trois ours', pages: [
+    ['Il était une fois une petite fille aux cheveux dorés. On l’appelait Boucle d’or.', '👧'],
+    ['En se promenant dans la forêt, elle trouva une jolie maison. Il n’y avait personne.', '🏡'],
+    ['Sur la table, il y avait trois bols de soupe. Le grand était trop chaud, le moyen trop froid, et le petit… parfait ! Elle le mangea tout.', '🥣'],
+    ['Elle essaya trois chaises. La petite était juste à sa taille… mais crac ! elle se cassa.', '🪑'],
+    ['En haut, il y avait trois lits. Le petit lit était si doux que Boucle d’or s’endormit.', '🛏️'],
+    ['Les trois ours rentrèrent. « Qui a mangé ma soupe ? » dit le petit ours. « Et qui dort dans mon lit ? »', '🐻'],
+    ['Boucle d’or se réveilla, vit les trois ours et courut vite, vite jusqu’à chez elle.', '🏃'],
+    ['Depuis ce jour, elle frappe toujours avant d’entrer. Bonne nuit !', '🌙'],
+  ] },
+  { id: 'lievre-tortue', langue: 'fr', emoji: '🐢', palette: 'jardin', titre: 'Le Lièvre et la Tortue', pages: [
+    ['Un lièvre très rapide se moquait de la tortue : « Tu es si lente ! »', '🐇'],
+    ['La tortue répondit calmement : « Faisons une course, et on verra bien. »', '🐢'],
+    ['Le départ est donné ! Le lièvre part comme une flèche. La tortue avance, pas à pas.', '🏁'],
+    ['Le lièvre est tellement en avance qu’il décide de faire une petite sieste sous un arbre.', '😴'],
+    ['Pendant ce temps, la tortue continue, doucement, mais sans jamais s’arrêter.', '🐢'],
+    ['Quand le lièvre se réveille, c’est trop tard : la tortue passe la ligne d’arrivée !', '🏆'],
+    ['Rien ne sert de courir, il faut partir à point. Bonne nuit !', '🌙'],
+  ] },
+  // ----- English -----
+  { id: 'three-pigs', langue: 'en', emoji: '🐷', palette: 'ferme', titre: 'The Three Little Pigs', pages: [
+    ['Once upon a time, three little pigs left home to build their own houses.', '🐷'],
+    ['The first little pig built a house of straw. The second little pig built a house of sticks.', '🌾'],
+    ['The third little pig worked hard all day and built a strong house of bricks.', '🧱'],
+    ['Along came the big bad wolf. He huffed and he puffed, and he blew the straw house down! The little pig ran to his brother.', '🐺'],
+    ['The wolf huffed and puffed again, and the stick house fell down too! The two little pigs ran to the brick house.', '💨'],
+    ['The wolf huffed, and puffed, and puffed… but the brick house did not move at all!', '🏠'],
+    ['The wolf climbed down the chimney and, splash, landed in a big pot of cold water! He ran away and never came back.', '💦'],
+    ['The three little pigs lived happily together in the strong brick house. Good night!', '🌙'],
+  ] },
+  { id: 'red-hen', langue: 'en', emoji: '🐔', palette: 'ferme', titre: 'The Little Red Hen', pages: [
+    ['Once upon a time, a little red hen found some grains of wheat.', '🐔'],
+    ['“Who will help me plant the wheat?” she asked. “Not I,” said the dog. “Not I,” said the cat. “Not I,” said the duck. So she planted it herself.', '🌱'],
+    ['The wheat grew tall and golden. “Who will help me cut the wheat?” “Not I!” said everyone. So she cut it herself.', '🌾'],
+    ['“Who will help me bake the bread?” “Not I!” So the little red hen baked a warm, delicious loaf.', '🍞'],
+    ['“Who will help me eat the bread?” “I will!” said the dog, the cat and the duck.', '🐶'],
+    ['“No,” said the little red hen. “I did all the work, so my chicks and I will eat it.”', '🐤'],
+    ['Next time, all the friends promised to help. Good night!', '🌙'],
+  ] },
+  { id: 'ugly-duckling', langue: 'en', emoji: '🦢', palette: 'mer', titre: 'The Ugly Duckling', pages: [
+    ['On a farm, a mother duck sat on her eggs. One by one they hatched: little yellow ducklings!', '🥚'],
+    ['The last egg was very big. Out came a grey, clumsy duckling. “How ugly he is!” said the other animals.', '🐣'],
+    ['The ugly duckling felt sad and alone, so he left the farm.', '😢'],
+    ['He spent a long, cold winter hiding in the reeds by the lake.', '❄️'],
+    ['When spring came, he saw beautiful white swans on the water.', '🌸'],
+    ['He looked at his reflection… he was not a grey duckling anymore. He was a beautiful swan!', '🦢'],
+    ['The swans welcomed him, and he was happy at last. Good night!', '🌙'],
+  ] },
+  // ----- حكايات تونسية (بالعربية الفصحى البسيطة) -----
+  { id: 'ommi-sissi', langue: 'ar', emoji: '🐞', palette: 'bonbon', titre: 'أمّي سيسي', pages: [
+    ['كان يا ما كان، في قديم الزمان، خنفساء صغيرة اسمها أمّي سيسي.', '🐞'],
+    ['في يوم من الأيّام، كانت أمّي سيسي تكنس بيتها، فوجدت قطعة نقود صغيرة.', '🧹'],
+    ['اشترت بها كحلًا وحنّاء، وتزيّنت، ولبست أجمل ثيابها، وجلست أمام الباب.', '💄'],
+    ['مرّ الجمل وقال: يا أمّي سيسي، هل تتزوّجينني؟ قالت: وإذا غضبت، بماذا تضربني؟ قال: بخفّي الكبير! قالت: لا، لا، خفّك يؤلمني!', '🐫'],
+    ['مرّ الثور وقال: هل تتزوّجينني؟ قالت: وإذا غضبت، بماذا تضربني؟ قال: بقرني القويّ! قالت: لا، لا، قرنك يخيفني!', '🐂'],
+    ['ثمّ مرّ الفأر الصغير وقال: هل تتزوّجينني؟ قالت: وإذا غضبت؟ قال: لن أغضب أبدًا، وسأحكي لك حكاية كلّ ليلة!', '🐭'],
+    ['فرحت أمّي سيسي، وعاشت مع الفأر في بيت صغير دافئ، وكان يحكي لها حكاية قبل النوم كلّ ليلة. تصبح على خير!', '🌙'],
+  ] },
+  { id: 'jha-himar', langue: 'ar', emoji: '🫏', palette: 'or', titre: 'جحا وابنه والحمار', pages: [
+    ['كان جحا ذاهبًا إلى السوق مع ابنه وحمارهما الصغير.', '🧔'],
+    ['ركب جحا الحمار ومشى ابنه. قال الناس: يا له من أب! يركب ويترك الولد الصغير يمشي!', '🫏'],
+    ['فنزل جحا وأركب ابنه. قال الناس: يا له من ولد! يركب ويترك أباه يمشي!', '👦'],
+    ['فركبا معًا. قال الناس: يا للحمار المسكين! رجلان على حمار صغير!', '🫏'],
+    ['فنزلا ومشيا بجانب الحمار. ضحك الناس وقالوا: معهما حمار ويمشيان!', '🚶'],
+    ['ابتسم جحا وقال لابنه: أرأيت يا بنيّ؟ لا يمكن أن نُرضي كلّ الناس. افعل ما تراه صوابًا.', '😄'],
+    ['وضحك الولد، وعادا إلى البيت سعيدين. تصبح على خير!', '🌙'],
+  ] },
+  { id: 'jha-qidr', langue: 'ar', emoji: '🍲', palette: 'or', titre: 'جحا والقِدر', pages: [
+    ['ذهب جحا إلى جاره، واستعار منه قِدرًا كبيرًا.', '🧔'],
+    ['بعد أيّام، أعاد جحا القدر ومعها قدر صغيرة، وقال: مبروك يا جاري، قدرك ولدت قدرًا صغيرة!', '🍲'],
+    ['فرح الجار وأخذ القدرين، وقال في نفسه: جحا رجل طيّب!', '😊'],
+    ['بعد مدّة، استعار جحا القدر الكبيرة مرّة أخرى… ومرّت الأيّام ولم يُرجعها.', '⏳'],
+    ['ذهب الجار إلى جحا وسأله: أين قدري؟ قال جحا حزينًا: قدرك ماتت يا جاري!', '🤔'],
+    ['صاح الجار: وهل تموت القدور يا جحا؟ قال جحا: صدّقت أنّها تلد، فلماذا لا تصدّق أنّها تموت؟', '😲'],
+    ['ضحك الجار، وضحك جحا، وأعاد له القدر في الغد. تصبح على خير!', '🌙'],
+  ] },
+];
+const TXT_HI = {
+  choisis: { fr: '🌙 Choisis une histoire 👇', en: '🌙 Pick a story 👇', ar: '🌙 اختر حكاية 👇' },
+};
+const ReglesConte = (() => {
+  let r = { langue: null };
+  try { r = { ...r, ...JSON.parse(localStorage.getItem('lumi-histoires') || '{}') }; } catch {}
+  return { get: () => r, set(k, v) { r[k] = v; try { localStorage.setItem('lumi-histoires', JSON.stringify(r)); } catch {} } };
+})();
+let conte = null, jetonConte = 0; // { h, page, auto }
+function arreterHistoire() {
+  if (!conte) return;
+  conte = null; jetonConte++;
+  try { speechSynthesis.cancel(); } catch {}
+  avatar?.parle(false);
+}
+function pageHistoire() {
+  const { h, page } = conte, [texte, dessin] = h.pages[page];
+  const t = $('hi-texte');
+  t.textContent = texte; t.dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+  t.classList.remove('entre'); void t.offsetWidth; t.classList.add('entre');
+  avatar?.forme(dessin);
+  $('hi-points').innerHTML = h.pages.map((_, i) => `<span class="${i === page ? 'on' : i < page ? 'lu' : ''}"></span>`).join('');
+  $('hi-prec').disabled = page === 0;
+  $('hi-suiv').disabled = page === h.pages.length - 1;
+  $('hi-lecture').textContent = conte.auto ? '⏸' : '▶';
+}
+async function lireHistoire() {
+  if (!conte) return;
+  const j = ++jetonConte, c = conte;
+  pageHistoire();
+  const texte = c.h.pages[c.page][0], debut = Date.now();
+  await parler(texte, c.h.langue);
+  if (j !== jetonConte || conte !== c || !c.auto) return;
+  // au moins le temps de lire la page, même si la voix manque
+  await new Promise((ok) => setTimeout(ok, Math.max(1100, 1500 + texte.length * 55 - (Date.now() - debut))));
+  if (j !== jetonConte || conte !== c || !c.auto) return;
+  if (c.page < c.h.pages.length - 1) { c.page++; lireHistoire(); }
+  else { c.auto = false; pageHistoire(); Progres.gagner(null); fete(); avatar?.forme('🌙'); }
+}
+function ouvrirHistoire(h) {
+  arreterHistoire();
+  debloquerAudio();
+  conte = { h, page: 0, auto: true };
+  avatar?.mode(h.palette || 'galaxie');
+  $('hi-lecteur').classList.remove('vide');
+  $('hi-titre').textContent = `${h.emoji} ${h.titre}`;
+  $('hi-titre').dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('#hi-liste .ch-tuile').forEach((x) => x.classList.toggle('joue', x.dataset.id === h.id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  lireHistoire();
+}
+function construireHistoires() {
+  const choix = ReglesConte.get().langue || langue;
+  const filtres = $('hi-filtres');
+  filtres.innerHTML = '';
+  [['toutes', '🌍 ' + TXT_CH.toutes[langue]], ['fr', '🇫🇷 FR'], ['en', '🇬🇧 EN'], ['ar', '🇹🇳 AR']].forEach(([k, t]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = t; b.className = 'puce' + (k === choix ? ' on' : '');
+    b.onclick = () => { ReglesConte.set('langue', k); construireHistoires(); };
+    filtres.appendChild(b);
+  });
+  const liste = $('hi-liste');
+  liste.innerHTML = '';
+  HISTOIRES.filter((h) => choix === 'toutes' || h.langue === choix).forEach((h, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ch-tuile u' + (i % 5) + (conte?.h.id === h.id ? ' joue' : '');
+    b.dataset.id = h.id; b.dir = h.langue === 'ar' ? 'rtl' : 'ltr';
+    b.innerHTML = '<span class="e"></span><span class="n"></span><span class="l"></span>';
+    b.querySelector('.e').textContent = h.emoji; b.querySelector('.n').textContent = h.titre;
+    b.querySelector('.l').textContent = h.langue === 'ar' ? '🇹🇳' : DRAPEAU[h.langue];
+    b.onclick = () => ouvrirHistoire(h);
+    liste.appendChild(b);
+  });
+  if (!conte) { $('hi-lecteur').classList.add('vide'); $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; }
+}
+const tournerPage = (d) => {
+  if (!conte) return;
+  const p = conte.page + d;
+  if (p < 0 || p >= conte.h.pages.length) return;
+  conte.page = p; son('pop');
+  if (conte.auto) lireHistoire(); else { jetonConte++; try { speechSynthesis.cancel(); } catch {} pageHistoire(); parler(conte.h.pages[p][0], conte.h.langue); }
+};
+$('hi-prec').onclick = () => tournerPage(-1);
+$('hi-suiv').onclick = () => tournerPage(1);
+$('hi-lecture').onclick = () => {
+  if (!conte) return $('hi-liste').firstElementChild?.click();
+  conte.auto = !conte.auto;
+  if (conte.auto) { if (conte.page === conte.h.pages.length - 1) conte.page = 0; lireHistoire(); }
+  else { jetonConte++; try { speechSynthesis.cancel(); } catch {} avatar?.parle(false); pageHistoire(); }
+};
+
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
   $('btn-maison').hidden = pile.length < 3;
@@ -2634,17 +2854,18 @@ function afficher() {
   else { $('titre').innerHTML = '<span class="e"></span><span></span>'; $('titre').firstChild.textContent = n.emoji + ' '; $('titre').lastChild.textContent = n.nom[langue]; }
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
   Ambiance.silence(ecran === 'chansons');
-  window.LUMI_ZOOM = ecran === 'chansons' ? 1.45 : 1;
+  window.LUMI_ZOOM = ecran === 'chansons' || ecran === 'histoires' ? 1.45 : 1;
   if (ecran === 'accueil') construireAccueil();
   else if (ecran === 'parler') construireParler();
   else if (ecran === 'coloriage') construireColoriage(n.dessin);
   else if (ecran === 'chansons') construireChansons();
+  else if (ecran === 'histoires') construireHistoires();
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
 }
 
 function aller(id, montrerCarte = true) {
-  arreterChanson();
+  arreterChanson(); arreterHistoire();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
   pile.push(id);
@@ -2662,7 +2883,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
-  arreterChanson();
+  arreterChanson(); arreterHistoire();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles); ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
