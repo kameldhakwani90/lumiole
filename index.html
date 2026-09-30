@@ -268,6 +268,24 @@
   }
   @media (prefers-reduced-motion: reduce) { #decor { display: none; } }
   @media (prefers-reduced-motion: reduce) { .micro.ecoute, .carte .emoji, .carte .mot, .choix button.faux { animation: none; } }
+
+  /* ---------- Coloriage ---------- */
+  [data-ecran="coloriage"] .cote-lumi { display: none; }
+  .coloriage { display: flex; flex-direction: column; gap: 12px; }
+  .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .pastille { aspect-ratio: 1; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); cursor: pointer;
+              box-shadow: 0 3px 10px rgba(0,0,0,.35); transition: transform .15s, border-color .15s; }
+  .pastille.actif { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(255,255,255,.2), 0 4px 14px rgba(0,0,0,.4); }
+  .feuille { background: #fff; border-radius: 24px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); touch-action: manipulation; }
+  .feuille svg { display: block; width: 100%; height: auto; max-height: 62vh; }
+  .feuille svg * { stroke: #1b1030; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+  .feuille .z { fill: #fff; cursor: pointer; transition: fill .25s; }
+  .col-actions { display: flex; gap: 10px; }
+  .col-actions button { flex: 1; padding: 14px; border-radius: 18px; border: 1px solid var(--bord); background: var(--carte);
+                        color: inherit; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; }
+  .col-actions .fini { background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; }
+  #decor .goutte { position: fixed; width: 14px; height: 14px; border-radius: 50%; }
+  @media (min-width: 600px) { .palette { grid-template-columns: repeat(10, 1fr); } }
 </style>
 </head>
 <body>
@@ -340,6 +358,16 @@
           </div>
           <div class="choix" id="choix"></div>
           <div class="aire-bulles" id="aire-bulles" hidden></div>
+        </div>
+      </section>
+      <section id="ecran-coloriage" hidden>
+        <div class="coloriage">
+          <div class="palette" id="palette"></div>
+          <div class="feuille" id="feuille"></div>
+          <div class="col-actions">
+            <button type="button" id="col-effacer" aria-label="↺">↺</button>
+            <button type="button" id="col-fini" class="fini"><span>✓</span> <span></span></button>
+          </div>
         </div>
       </section>
     </div>
@@ -931,7 +959,7 @@ const PAR_EMOJI = new Map(MOTS.map((m) => [m.emoji, m]));
 // ---------- L'arbre des activités : accueil → univers → thèmes ----------
 const NOEUDS = {
   accueil:   { emoji: '✦', nom: { fr: 'Lumi', en: 'Lumi', ar: 'لومي' },
-               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'jeux', 'parler'] },
+               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage', 'jeux', 'parler'] },
   animaux:   { emoji: '🐾', nom: { fr: 'Les animaux', en: 'Animals', ar: 'الحيوانات' }, desc: { fr: 'Ferme, mer, oiseaux…', en: 'Farm, sea, birds…', ar: 'المزرعة، البحر، الطيور…' },
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
@@ -960,6 +988,16 @@ const NOEUDS = {
   jeux:      { emoji: '🎮', nom: { fr: 'Les jeux', en: 'Games', ar: 'الألعاب' }, desc: { fr: 'Devine, écoute, range…', en: 'Guess, listen, sort…', ar: 'خمّن، استمع، رتّب…' },
                enfants: ['bulles', 'devine', 'ecoute', 'range', 'intrus'] },
   bulles:    { emoji: '🫧', nom: { fr: 'Attrape les bulles', en: 'Catch the bubbles', ar: 'التقط الفقاعات' }, desc: { fr: 'Vite, éclate les bonnes !', en: 'Quick, pop the right ones!', ar: 'بسرعة، فرقع الصحيحة!' }, type: 'jeu', jeu: 'bulles' },
+  coloriage: { emoji: '🖍️', nom: { fr: 'Colorie !', en: 'Coloring', ar: 'لوّن' }, desc: { fr: 'De vrais dessins à colorier', en: 'Real pictures to color', ar: 'رسومات حقيقية للتلوين' },
+               enfants: ['col-maison', 'col-poisson', 'col-fleur', 'col-papillon', 'col-voiture', 'col-chat', 'col-glace', 'col-fusee'] },
+  'col-maison': { emoji: '🏠', type: 'colorier', dessin: 'maison' },
+  'col-poisson': { emoji: '🐟', type: 'colorier', dessin: 'poisson' },
+  'col-fleur': { emoji: '🌸', type: 'colorier', dessin: 'fleur' },
+  'col-papillon': { emoji: '🦋', type: 'colorier', dessin: 'papillon' },
+  'col-voiture': { emoji: '🚗', type: 'colorier', dessin: 'voiture' },
+  'col-chat': { emoji: '🐱', type: 'colorier', dessin: 'chat' },
+  'col-glace': { emoji: '🍦', type: 'colorier', dessin: 'glace' },
+  'col-fusee': { emoji: '🚀', type: 'colorier', dessin: 'fusee' },
   album:     { emoji: '📒', nom: { fr: 'Mon album', en: 'My album', ar: 'ألبومي' }, type: 'album' },
   devine:    { emoji: '🔮', nom: { fr: 'Devine !', en: 'Guess!', ar: 'خمّن!' }, desc: { fr: 'Qu’est-ce que Lumi dessine ?', en: 'What is Lumi drawing?', ar: 'ماذا يرسم لومي؟' }, type: 'jeu', jeu: 'devine' },
   ecoute:    { emoji: '👂', nom: { fr: 'Écoute et trouve', en: 'Listen and find', ar: 'استمع وابحث' }, desc: { fr: 'Lumi dit un mot, trouve l’image', en: 'Lumi says a word, find the picture', ar: 'لومي يقول كلمة، جد الصورة' }, type: 'jeu', jeu: 'ecoute' },
@@ -968,6 +1006,13 @@ const NOEUDS = {
   parler:    { emoji: '🎤', nom: { fr: 'Parle à Lumi', en: 'Talk to Lumi', ar: 'تحدث مع لومي' }, desc: { fr: 'Dis un mot, il le dessine', en: 'Say a word, Lumi draws it', ar: 'قل كلمة وسيرسمها' }, type: 'parler' },
 };
 // Pour le jeu « Où ça va ? » : des lieux et ce qu'on y trouve
+// Les dessins à colorier prennent le nom du mot correspondant
+Object.values(NOEUDS).filter((n) => n.type === 'colorier').forEach((n) => {
+  const m = PAR_EMOJI.get(n.emoji);
+  n.nom = { fr: majusculeSimple(m.fr[0]), en: majusculeSimple(m.en[0]), ar: m.ar[0] };
+});
+function majusculeSimple(t) { return t[0].toUpperCase() + t.slice(1); }
+
 const LIEUX = [
   { amb: 'ecole', emoji: '🏫', dans: { fr: 'à l’école', en: 'at school', ar: 'في المدرسة' }, mots: '🎒 ✏️ 🖊️ 🖍️ 📏 ✂️ 📚 📓 🧮 🔔 👩‍🏫' },
   { amb: 'ferme', emoji: '🚜', dans: { fr: 'à la ferme', en: 'on the farm', ar: 'في المزرعة' }, mots: '🐄 🐑 🐴 🐔 🐓 🐤 🐐 🦃 🚜' },
@@ -1941,10 +1986,88 @@ function construireParler() {
   });
 }
 
+// ---------- Coloriage : de vrais dessins, zone par zone ----------
+const DESSINS = {
+"maison": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"210\"/><rect class=\"z\" x=\"0\" y=\"210\" width=\"300\" height=\"90\"/> <circle class=\"z\" cx=\"250\" cy=\"52\" r=\"28\"/><path class=\"z\" d=\"M40 72 a18 18 0 0 1 30 -12 a22 22 0 0 1 40 8 a16 16 0 0 1 4 30 h-70 a14 14 0 0 1 -4 -26z\"/> <rect class=\"z\" x=\"185\" y=\"90\" width=\"18\" height=\"42\"/><path class=\"z\" d=\"M68 142 L150 74 L232 142 Z\"/><rect class=\"z\" x=\"85\" y=\"142\" width=\"130\" height=\"95\"/> <rect class=\"z\" x=\"135\" y=\"177\" width=\"32\" height=\"60\" rx=\"4\"/><rect class=\"z\" x=\"98\" y=\"158\" width=\"28\" height=\"28\"/><rect class=\"z\" x=\"176\" y=\"158\" width=\"28\" height=\"28\"/> <rect class=\"z\" x=\"255\" y=\"175\" width=\"12\" height=\"48\"/><circle class=\"z\" cx=\"261\" cy=\"158\" r=\"26\"/>",
+"poisson": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/><path class=\"z\" d=\"M0 262 q40 -20 80 0 t80 0 t80 0 t60 0 V300 H0z\"/> <path class=\"z\" d=\"M35 264 C20 232 50 210 35 180 C57 205 32 232 52 264 Z\"/><path class=\"z\" d=\"M262 264 C247 228 277 206 260 172 C283 202 260 232 280 264 Z\"/> <path class=\"z\" d=\"M195 150 L258 104 L247 150 L258 196 Z\"/><path class=\"z\" d=\"M118 108 Q142 66 172 110 Z\"/><ellipse class=\"z\" cx=\"140\" cy=\"150\" rx=\"70\" ry=\"48\"/> <path class=\"z\" d=\"M150 104 Q139 150 150 196 L166 193 Q155 150 166 107 Z\"/><circle class=\"z\" cx=\"100\" cy=\"138\" r=\"12\"/> <circle cx=\"97\" cy=\"138\" r=\"5\" fill=\"#1b1030\"/><path d=\"M78 164 q10 8 20 0\" fill=\"none\"/> <circle class=\"z\" cx=\"60\" cy=\"82\" r=\"10\"/><circle class=\"z\" cx=\"76\" cy=\"52\" r=\"7\"/><circle class=\"z\" cx=\"58\" cy=\"30\" r=\"5\"/>",
+"fleur": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/><circle class=\"z\" cx=\"262\" cy=\"40\" r=\"22\"/> <rect class=\"z\" x=\"145\" y=\"133\" width=\"10\" height=\"88\"/><path class=\"z\" d=\"M150 192 C120 176 104 186 99 202 C120 207 140 202 150 192Z\"/> <path class=\"z\" d=\"M150 170 C180 154 196 164 201 180 C180 186 160 181 150 170Z\"/> <path class=\"z\" d=\"M105 232 h90 l-12 58 h-66 z\"/><rect class=\"z\" x=\"98\" y=\"218\" width=\"104\" height=\"18\" rx=\"4\"/> <ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(0 150 105)\"/><ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(60 150 105)\"/><ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(120 150 105)\"/><ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(180 150 105)\"/><ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(240 150 105)\"/><ellipse class=\"z\" cx=\"150\" cy=\"67\" rx=\"20\" ry=\"28\" transform=\"rotate(300 150 105)\"/><circle class=\"z\" cx=\"150\" cy=\"105\" r=\"20\"/>",
+"papillon": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/> <ellipse class=\"z\" cx=\"100\" cy=\"115\" rx=\"62\" ry=\"46\" transform=\"rotate(-25 100 115)\"/><ellipse class=\"z\" cx=\"200\" cy=\"115\" rx=\"62\" ry=\"46\" transform=\"rotate(25 200 115)\"/> <ellipse class=\"z\" cx=\"112\" cy=\"196\" rx=\"42\" ry=\"33\" transform=\"rotate(20 112 196)\"/><ellipse class=\"z\" cx=\"188\" cy=\"196\" rx=\"42\" ry=\"33\" transform=\"rotate(-20 188 196)\"/> <circle class=\"z\" cx=\"88\" cy=\"108\" r=\"16\"/><circle class=\"z\" cx=\"212\" cy=\"108\" r=\"16\"/><circle class=\"z\" cx=\"112\" cy=\"200\" r=\"11\"/><circle class=\"z\" cx=\"188\" cy=\"200\" r=\"11\"/> <ellipse class=\"z\" cx=\"150\" cy=\"160\" rx=\"14\" ry=\"62\"/><circle class=\"z\" cx=\"150\" cy=\"90\" r=\"16\"/> <path d=\"M145 76 Q130 45 115 40 M155 76 Q170 45 185 40\" fill=\"none\"/><circle class=\"z\" cx=\"113\" cy=\"39\" r=\"6\"/><circle class=\"z\" cx=\"187\" cy=\"39\" r=\"6\"/>",
+"voiture": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"222\"/><rect class=\"z\" x=\"0\" y=\"222\" width=\"300\" height=\"78\"/> <rect class=\"z\" x=\"20\" y=\"256\" width=\"40\" height=\"8\"/><rect class=\"z\" x=\"130\" y=\"256\" width=\"40\" height=\"8\"/><rect class=\"z\" x=\"240\" y=\"256\" width=\"40\" height=\"8\"/> <circle class=\"z\" cx=\"45\" cy=\"50\" r=\"26\"/> <path class=\"z\" d=\"M38 206 v-38 q0 -12 12 -14 l52 -6 l30 -36 h78 l36 40 q30 4 30 20 v34 z\"/> <path class=\"z\" d=\"M114 148 l24 -28 h36 v28 z\"/><path class=\"z\" d=\"M184 120 h26 l25 28 h-51 z\"/><circle class=\"z\" cx=\"262\" cy=\"178\" r=\"7\"/> <circle class=\"z\" cx=\"90\" cy=\"208\" r=\"26\"/><circle class=\"z\" cx=\"90\" cy=\"208\" r=\"10\"/><circle class=\"z\" cx=\"224\" cy=\"208\" r=\"26\"/><circle class=\"z\" cx=\"224\" cy=\"208\" r=\"10\"/>",
+"chat": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/> <path class=\"z\" d=\"M205 238 C262 232 272 180 246 158 C256 190 241 216 200 220 Z\"/><ellipse class=\"z\" cx=\"150\" cy=\"222\" rx=\"62\" ry=\"54\"/> <path class=\"z\" d=\"M98 98 L93 38 L140 76 Z\"/><path class=\"z\" d=\"M202 98 L207 38 L160 76 Z\"/> <path class=\"z\" d=\"M103 86 L100 54 L126 76 Z\"/><path class=\"z\" d=\"M197 86 L200 54 L174 76 Z\"/> <circle class=\"z\" cx=\"150\" cy=\"116\" r=\"55\"/><ellipse class=\"z\" cx=\"128\" cy=\"108\" rx=\"10\" ry=\"13\"/><ellipse class=\"z\" cx=\"172\" cy=\"108\" rx=\"10\" ry=\"13\"/> <ellipse cx=\"128\" cy=\"110\" rx=\"3.5\" ry=\"7\" fill=\"#1b1030\"/><ellipse cx=\"172\" cy=\"110\" rx=\"3.5\" ry=\"7\" fill=\"#1b1030\"/> <path class=\"z\" d=\"M142 128 h16 l-8 9z\"/><path d=\"M150 137 q-8 10 -16 4 M150 137 q8 10 16 4 M108 128 h-34 M108 136 l-32 8 M192 128 h34 M192 136 l32 8\" fill=\"none\"/> <ellipse class=\"z\" cx=\"124\" cy=\"272\" rx=\"18\" ry=\"10\"/><ellipse class=\"z\" cx=\"176\" cy=\"272\" rx=\"18\" ry=\"10\"/>",
+"glace": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/> <path class=\"z\" d=\"M108 150 L150 282 L192 150 Z\"/><path d=\"M122 176 L170 176 M131 204 L165 204 M140 232 L160 232 M125 160 L160 270 M175 160 L140 270\" fill=\"none\"/> <circle class=\"z\" cx=\"124\" cy=\"140\" r=\"30\"/><circle class=\"z\" cx=\"176\" cy=\"140\" r=\"30\"/><circle class=\"z\" cx=\"150\" cy=\"100\" r=\"33\"/> <path d=\"M150 66 q6 -18 20 -24\" fill=\"none\"/><circle class=\"z\" cx=\"150\" cy=\"62\" r=\"11\"/>",
+"fusee": "<rect class=\"z\" x=\"0\" y=\"0\" width=\"300\" height=\"300\"/><circle class=\"z\" cx=\"62\" cy=\"235\" r=\"40\"/><circle class=\"z\" cx=\"248\" cy=\"250\" r=\"16\"/> <path class=\"z\" d=\"M55.0 37.0 L59.8 48.4 L72.1 49.4 L62.7 57.5 L65.6 69.6 L55.0 63.1 L44.4 69.6 L47.3 57.5 L37.9 49.4 L50.2 48.4 Z\"/><path class=\"z\" d=\"M245.0 66.0 L248.7 74.9 L258.3 75.7 L251.0 81.9 L253.2 91.3 L245.0 86.3 L236.8 91.3 L239.0 81.9 L231.7 75.7 L241.3 74.9 Z\"/><path class=\"z\" d=\"M230.0 164.0 L232.9 171.0 L240.5 171.6 L234.7 176.5 L236.5 183.9 L230.0 179.9 L223.5 183.9 L225.3 176.5 L219.5 171.6 L227.1 171.0 Z\"/><path class=\"z\" d=\"M95.0 131.0 L97.4 136.7 L103.6 137.2 L98.9 141.3 L100.3 147.3 L95.0 144.1 L89.7 147.3 L91.1 141.3 L86.4 137.2 L92.6 136.7 Z\"/> <path class=\"z\" d=\"M134 226 Q150 290 166 226 Z\"/><path class=\"z\" d=\"M121 170 L94 228 L126 218 Z\"/><path class=\"z\" d=\"M179 170 L206 228 L174 218 Z\"/> <path class=\"z\" d=\"M150 38 C186 70 186 150 178 222 H122 C114 150 114 70 150 38 Z\"/><path class=\"z\" d=\"M135 70 Q150 30 165 70 Z\"/> <circle class=\"z\" cx=\"150\" cy=\"118\" r=\"18\"/><rect class=\"z\" x=\"126\" y=\"186\" width=\"48\" height=\"12\"/>"
+};
+const COULEURS_PINCEAU = [['🔴', '#ef4444'], ['🟠', '#fb923c'], ['🟡', '#facc15'], ['🟢', '#4ade80'], ['🔵', '#3b82f6'],
+  ['🟣', '#a855f7'], ['🩷', '#f472b6'], ['🟤', '#a16207'], ['⚫', '#374151'], ['⚪', '#ffffff']];
+const BEAU = { fr: 'Quel beau dessin !', en: 'What a beautiful picture!', ar: 'يا له من رسم جميل!' };
+let pinceau = COULEURS_PINCEAU[0], coloriageEnCours = null;
+const Coloriages = (() => {
+  let d = {};
+  try { d = JSON.parse(localStorage.getItem('lumi-coloriages') || '{}'); } catch {}
+  return {
+    lire: (k) => d[k] || [],
+    ecrire(k, v) { d[k] = v; try { localStorage.setItem('lumi-coloriages', JSON.stringify(d)); } catch {} },
+  };
+})();
+function eclat(x, y, couleur) {
+  for (let i = 0; i < 8; i++) {
+    const e = document.createElement('span');
+    e.className = 'goutte'; e.style.background = couleur; e.style.left = x + 'px'; e.style.top = y + 'px';
+    $('decor').appendChild(e);
+    const a = (i / 8) * Math.PI * 2, r = 30 + Math.random() * 30;
+    e.animate([{ transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${(Math.cos(a) * r) | 0}px), calc(-50% + ${(Math.sin(a) * r) | 0}px)) scale(.2)`, opacity: 0 }],
+      { duration: 550, easing: 'ease-out' }).onfinish = () => e.remove();
+  }
+}
+function choisirPinceau(c, dire = true) {
+  pinceau = c;
+  document.querySelectorAll('.pastille').forEach((p) => p.classList.toggle('actif', p.dataset.c === c[0]));
+  if (dire) {
+    son('pop');
+    const m = PAR_EMOJI.get(c[0]);
+    if (m) { parler(motDans(m)); avatar?.forme(c[0]); avatar?.syllabe(); revenirAuNuage(1500); }
+  }
+}
+function construireColoriage(k) {
+  coloriageEnCours = k;
+  const pal = $('palette');
+  pal.innerHTML = '';
+  COULEURS_PINCEAU.forEach((c) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pastille'; b.dataset.c = c[0]; b.style.background = c[1];
+    b.setAttribute('aria-label', motDans(PAR_EMOJI.get(c[0])));
+    b.onclick = () => choisirPinceau(c);
+    pal.appendChild(b);
+  });
+  choisirPinceau(pinceau, false);
+  const f = $('feuille');
+  f.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${DESSINS[k]}</svg>`;
+  const zones = [...f.querySelectorAll('.z')], faites = Coloriages.lire(k);
+  zones.forEach((z, i) => {
+    if (faites[i]) z.style.fill = faites[i];
+    z.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      z.style.fill = pinceau[1];
+      const v = Coloriages.lire(k).slice(); v[i] = pinceau[1]; Coloriages.ecrire(k, v);
+      son('pop'); eclat(ev.clientX, ev.clientY, pinceau[1]);
+    });
+  });
+  $('col-effacer').onclick = () => { zones.forEach((z) => { z.style.fill = ''; }); Coloriages.ecrire(k, []); son('pop'); };
+  $('col-fini').onclick = () => {
+    const m = PAR_EMOJI.get(NOEUDS['col-' + k].emoji);
+    fete(); Progres.gagner(null);
+    carte(m.emoji, BEAU[langue], nomComplet(m), false);
+    avatar?.forme(m.emoji); revenirAuNuage(4000);
+    parler(BEAU[langue]);
+  };
+  $('col-fini').lastElementChild.textContent = { fr: 'Fini !', en: 'Done!', ar: 'انتهيت!' }[langue];
+}
+
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
   $('btn-retour').setAttribute('aria-label', L.retour);
@@ -1952,6 +2075,7 @@ function afficher() {
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
   if (ecran === 'accueil') construireAccueil();
   else if (ecran === 'parler') construireParler();
+  else if (ecran === 'coloriage') construireColoriage(n.dessin);
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
 }
