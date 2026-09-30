@@ -55,7 +55,7 @@
   /* ---------- Barre du haut ---------- */
   .haut { display: flex; align-items: center; gap: 10px; min-height: 72px;
           position: sticky; top: 0; z-index: 20; margin-inline: -16px;
-          padding: max(10px, env(safe-area-inset-top, 0px)) 16px 10px;
+          padding: max(10px, env(safe-area-inset-top, 0px), var(--sur-haut, 0px)) 16px 10px;
           background: rgba(var(--fond-rgb), .9); transition: background-color 1.2s; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
           border-bottom: 1px solid rgba(38, 43, 85, .6); }
   .haut h1 { margin: 0; flex: 1; min-width: 0; font-size: clamp(20px, 5.4vw, 30px); font-weight: 800; line-height: 1.1; letter-spacing: -.01em;
@@ -268,7 +268,7 @@
   @media (min-width: 900px) and (orientation: landscape) {
     .app { max-width: 1200px; }
     .corps { display: grid; grid-template-columns: minmax(320px, 5fr) 6fr; gap: 28px; align-items: start; }
-    .cote-lumi { position: sticky; top: calc(max(10px, env(safe-area-inset-top, 0px)) + 78px); }
+    .cote-lumi { position: sticky; top: calc(max(10px, env(safe-area-inset-top, 0px), var(--sur-haut, 0px)) + 82px); }
     .scene, [data-ecran="accueil"] .scene { max-height: 58vh; }
   }
   @media (orientation: landscape) and (max-height: 520px) {
@@ -364,6 +364,29 @@
   .ch-commandes button.on { background: var(--soleil); color: #2a1f00; border-color: var(--soleil); }
   @media (min-width: 600px) { .ch-liste { grid-template-columns: repeat(3, 1fr); } .ch-ligne { font-size: 28px; } .ch-paroles { max-height: 40vh; } }
 </style>
+<script>
+// App installée sur l'écran d'accueil de l'iPhone : si le système ne donne pas la hauteur
+// de la barre d'état (heure, batterie), on la réserve nous-mêmes pour que l'en-tête passe dessous.
+(function () {
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var seul = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  if (!ios || !seul) return;
+  function regler() {
+    var sonde = document.createElement('div');
+    sonde.style.cssText = 'position:fixed;top:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
+    document.documentElement.appendChild(sonde);
+    var env = parseFloat(getComputedStyle(sonde).paddingTop) || 0;
+    sonde.remove();
+    var portrait = innerHeight > innerWidth, h = Math.max(screen.height, screen.width);
+    // île dynamique (≥ 852 pt) : 59 ; encoche : 47 ; anciens iPhone : 20 ; paysage : rien
+    var min = !portrait ? 0 : h >= 852 ? 59 : h >= 812 ? 47 : 20;
+    document.documentElement.style.setProperty('--sur-haut', (env >= min ? env : min) + 'px');
+  }
+  regler();
+  addEventListener('orientationchange', function () { setTimeout(regler, 300); });
+  addEventListener('resize', regler);
+})();
+</script>
 </head>
 <body>
 <div id="decor" aria-hidden="true"></div>
