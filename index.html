@@ -350,13 +350,14 @@
   .ch-lecteur { border-radius: 24px; background: var(--carte); border: 1px solid var(--bord); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
   .ch-lecteur[hidden] { display: none; }
   .ch-titre { font-weight: 800; font-size: 20px; }
-  .ch-paroles { max-height: 34vh; overflow-y: auto; padding: 6px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .ch-paroles { position: relative; max-height: 30vh; overflow-y: auto; padding: 6px 12px; display: flex; flex-direction: column; gap: 6px; }
   .ch-ligne { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.35; color: var(--doux); opacity: .55; transition: opacity .3s; }
   .ch-ligne.active { opacity: 1; color: var(--texte, #fff); }
   .ch-mot { display: inline-block; transition: transform .15s, color .15s; border-radius: 8px; }
   .ch-mot.on { color: var(--soleil); transform: translateY(-4px) scale(1.15); text-shadow: 0 0 14px rgba(255,209,102,.6); }
-  [data-ecran="chansons"] .scene { max-height: 26vh; }
-  [data-ecran="chansons"] .carte .emoji { display: none; }
+  [data-ecran="chansons"] .scene { max-height: 30vh; }
+  #decor .note-vole { position: fixed; font-size: 30px; font-weight: 900; pointer-events: none; text-shadow: 0 0 12px currentColor; z-index: 5; }
+  [data-ecran="chansons"] .carte { display: none; }
   .ch-commandes { display: grid; grid-template-columns: 72px 1fr 1fr; gap: 10px; }
   .ch-commandes button { height: 60px; border-radius: 18px; background: rgba(255,255,255,.08); border: 2px solid var(--bord); font-size: 18px; font-weight: 800; }
   .ch-commandes #ch-lecture { background: linear-gradient(135deg, var(--menthe), var(--soleil)); color: #1b1030; border: none; font-size: 28px; }
@@ -1889,7 +1890,7 @@ const Ambiance = (() => {
         boite(moi, GAMMES[gamme], min, max, vol);
         if (courante === 'mer') boucle(moi, 3, 8, bulle);
       } else RECETTES[courante]?.(moi);
-      maitre.gain.setTargetAtTime(.9, ctx.currentTime, .8);
+      maitre.gain.setTargetAtTime(muet ? 0 : .9, ctx.currentTime, .8);
     }), 450);
   }
   function jouer(nom) {
@@ -1904,7 +1905,10 @@ const Ambiance = (() => {
     return actif;
   }
   // la voix passe au-dessus de l'ambiance
-  function baisser(oui) { if (ctx && actif && gen) maitre.gain.setTargetAtTime(oui ? .3 : .9, ctx.currentTime, .2); }
+  function baisser(oui) { if (ctx && actif && gen) maitre.gain.setTargetAtTime(muet ? 0 : oui ? .3 : .9, ctx.currentTime, .2); }
+  // silence complet (pendant les comptines)
+  let muet = false;
+  function silence(oui) { muet = oui; if (ctx && actif && gen) maitre.gain.setTargetAtTime(oui ? 0 : .9, ctx.currentTime, oui ? .08 : .6); }
   // le navigateur n'autorise le son qu'après un premier geste
   const lancer = () => { if (actif && !gen) { debloquerAudio(); init(); ctx.resume?.(); demarrer(); } };
   ['touchend', 'click', 'keydown'].forEach((n) => document.addEventListener(n, lancer, true));
@@ -1912,7 +1916,7 @@ const Ambiance = (() => {
     if (!ctx) return;
     if (document.hidden) ctx.suspend?.(); else if (actif) ctx.resume?.();
   });
-  return { jouer, basculer, baisser, get actif() { return actif; } };
+  return { jouer, basculer, baisser, silence, get actif() { return actif; } };
 })();
 
 // Pas de zoom (pincement, double-tap) : c'est une app pour les petits doigts
@@ -2296,67 +2300,131 @@ function construireColoriage(k) {
 // françaises et anglaises sont anciennes (XVIIIe–XIXe siècle, domaine
 // public) ; les paroles arabes sont écrites pour Lumi (libres).
 // Pour ajouter une comptine : une entrée { id, langue, emoji, titre, tempo, lignes }.
-//  - chaque ligne = [paroles, notes]
+//  - chaque ligne = [paroles, notes, emoji que la poussière dessine pendant la ligne]
+//  - palette = couleurs de la poussière (or, galaxie, mer, ferme, jardin, bonbon, arcenciel…)
 //  - dans les paroles, « - » coupe un mot en syllabes : une syllabe = une note
 //    (un vrai trait d'union s'écrit « -- » : « dor-mez--vous »)
 //  - notes : C4 D4 E4… (do ré mi), « :2 » = deux temps, « :.5 » = un demi-temps
 // =====================================================================
 const CHANSONS = [
-  { id: 'frere-jacques', langue: 'fr', emoji: '🔔', titre: 'Frère Jacques', tempo: 112, lignes: [
-    ['Frè-re Jac-ques, frè-re Jac-ques,', 'C4 D4 E4 C4 C4 D4 E4 C4'],
-    ['dor-mez--vous ? dor-mez--vous ?', 'E4 F4 G4:2 E4 F4 G4:2'],
-    ['Son-nez les ma-ti-nes, son-nez les ma-ti-nes,', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4'],
-    ['Ding, ding, dong ! Ding, ding, dong !', 'C4 G3 C4:2 C4 G3 C4:2'],
+  // ----- Français -----
+  { id: 'frere-jacques', langue: 'fr', emoji: '🔔', palette: 'or', titre: 'Frère Jacques', tempo: 112, lignes: [
+    ['Frè-re Jac-ques, frè-re Jac-ques,', 'C4 D4 E4 C4 C4 D4 E4 C4', '👦'],
+    ['dor-mez--vous ? dor-mez--vous ?', 'E4 F4 G4:2 E4 F4 G4:2', '😴'],
+    ['Son-nez les ma-ti-nes, son-nez les ma-ti-nes,', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4', '🔔'],
+    ['Ding, ding, dong ! Ding, ding, dong !', 'C4 G3 C4:2 C4 G3 C4:2', '⏰'],
   ] },
-  { id: 'clair-lune', langue: 'fr', emoji: '🌙', titre: 'Au clair de la lune', tempo: 104, lignes: [
-    ['Au clair de la lu-ne, mon a-mi Pier-rot,', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
-    ['Prê-te--moi ta plu-me pour é-crire un mot.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
-    ['Ma chan-delle est mor-te, je n’ai plus de feu.', 'D4 D4 D4 D4 A3:2 A3:2 D4 C4 B3 A3 G3:4'],
-    ['Ou-vre--moi ta por-te pour l’a-mour de Dieu.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4'],
+  { id: 'clair-lune', langue: 'fr', emoji: '🌙', palette: 'galaxie', titre: 'Au clair de la lune', tempo: 104, lignes: [
+    ['Au clair de la lu-ne, mon a-mi Pier-rot,', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4', '🌙'],
+    ['Prê-te--moi ta plu-me pour é-crire un mot.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4', '🪶'],
+    ['Ma chan-delle est mor-te, je n’ai plus de feu.', 'D4 D4 D4 D4 A3:2 A3:2 D4 C4 B3 A3 G3:4', '🕯️'],
+    ['Ou-vre--moi ta por-te pour l’a-mour de Dieu.', 'C4 C4 C4 D4 E4:2 D4:2 C4 E4 D4 D4 C4:4', '🚪'],
   ] },
-  { id: 'dirai-je', langue: 'fr', emoji: '🍬', titre: 'Ah ! vous dirai-je, maman', tempo: 112, lignes: [
-    ['Ah ! vous di-rai--je, ma-man,', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['ce qui cau-se mon tour-ment ?', 'F4 F4 E4 E4 D4 D4 C4:2'],
-    ['Pa-pa veut que je rai-sonne', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['comme u-ne gran-de per-sonne.', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['Moi, je dis que les bon-bons', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['va-lent mieux que la rai-son !', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  { id: 'dirai-je', langue: 'fr', emoji: '🍬', palette: 'bonbon', titre: 'Ah ! vous dirai-je, maman', tempo: 112, lignes: [
+    ['Ah ! vous di-rai--je, ma-man,', 'C4 C4 G4 G4 A4 A4 G4:2', '👩'],
+    ['ce qui cau-se mon tour-ment ?', 'F4 F4 E4 E4 D4 D4 C4:2', '🥺'],
+    ['Pa-pa veut que je rai-sonne', 'G4 G4 F4 F4 E4 E4 D4:2', '👨'],
+    ['comme u-ne gran-de per-sonne.', 'G4 G4 F4 F4 E4 E4 D4:2', '🧑'],
+    ['Moi, je dis que les bon-bons', 'C4 C4 G4 G4 A4 A4 G4:2', '🍬'],
+    ['va-lent mieux que la rai-son !', 'F4 F4 E4 E4 D4 D4 C4:2', '🍭'],
   ] },
-  { id: 'twinkle', langue: 'en', emoji: '⭐', titre: 'Twinkle, Twinkle, Little Star', tempo: 108, lignes: [
-    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2'],
-    ['Up a-bove the world so high,', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['like a dia-mond in the sky.', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  { id: 'poule-mur', langue: 'fr', emoji: '🐔', palette: 'ferme', titre: 'Une poule sur un mur', tempo: 120, lignes: [
+    ['U-ne pou-le sur un mur', 'G4 G4 E4 G4 G4 E4 C4:2', '🐔'],
+    ['qui pi-co-re du pain dur,', 'A4 A4 G4 E4 G4 G4 C5:2', '🍞'],
+    ['pi-co-ti, pi-co-ta,', 'G4 E4 G4:2 G4 E4 C4:2', '🌾'],
+    ['lè-ve la queue et puis s’en va !', 'F4 F4 E4 E4 D4 D4 E4 C4:2', '🐓'],
   ] },
-  { id: 'row-boat', langue: 'en', emoji: '🚣', titre: 'Row, Row, Row Your Boat', tempo: 230, lignes: [
-    ['Row, row, row your boat,', 'C4:3 C4:3 C4:2 D4 E4:3'],
-    ['gent-ly down the stream.', 'E4:2 D4 E4:2 F4 G4:6'],
-    ['Mer-ri-ly, mer-ri-ly, mer-ri-ly, mer-ri-ly,', 'C5 C5 C5 G4 G4 G4 E4 E4 E4 C4 C4 C4'],
-    ['life is but a dream!', 'G4:2 F4 E4:2 D4 C4:6'],
+  { id: 'anniversaire-fr', langue: 'fr', emoji: '🎂', palette: 'arcenciel', titre: 'Joyeux anniversaire', tempo: 100, lignes: [
+    ['Jo-yeux an-ni-ver-saire,', 'G4:.75 G4:.25 A4 G4 C5 B4:2', '🎂'],
+    ['jo-yeux an-ni-ver-saire,', 'G4:.75 G4:.25 A4 G4 D5 C5:2', '🎁'],
+    ['jo-yeux an-ni-ver-sai-re,', 'G4:.75 G4:.25 G5 E5 C5 B4 A4:2', '🎈'],
+    ['jo-yeux an-ni-ver-saire !', 'F5:.75 F5:.25 E5 C5 D5 C5:2', '🎉'],
   ] },
-  { id: 'macdonald', langue: 'en', emoji: '🐄', titre: 'Old MacDonald', tempo: 128, lignes: [
-    ['Old Mac-Don-ald had a farm,', 'G4 G4 G4 D4 E4 E4 D4:2'],
-    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
-    ['And on that farm he had a cow,', 'D4 G4 G4 G4 D4 E4 E4 D4:2'],
-    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
-    ['Old Mac-Don-ald had a farm,', 'G4 G4 G4 D4 E4 E4 D4:2'],
-    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3'],
+  // ----- English -----
+  { id: 'twinkle', langue: 'en', emoji: '⭐', palette: 'galaxie', titre: 'Twinkle, Twinkle, Little Star', tempo: 108, lignes: [
+    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2', '⭐'],
+    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2', '🤔'],
+    ['Up a-bove the world so high,', 'G4 G4 F4 F4 E4 E4 D4:2', '🌍'],
+    ['like a dia-mond in the sky.', 'G4 G4 F4 F4 E4 E4 D4:2', '💎'],
+    ['Twin-kle, twin-kle, lit-tle star,', 'C4 C4 G4 G4 A4 A4 G4:2', '🌟'],
+    ['how I won-der what you are!', 'F4 F4 E4 E4 D4 D4 C4:2', '✨'],
   ] },
-  { id: 'najma', langue: 'ar', emoji: '⭐', titre: 'لمعي يا نجمة', tempo: 104, lignes: [
-    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2'],
-    ['تل-م-ع مث-ل الما-سة', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['في ال-سما-ء ال-صا-فية', 'G4 G4 F4 F4 E4 E4 D4:2'],
-    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2'],
-    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2'],
+  { id: 'abc', langue: 'en', emoji: '🔤', palette: 'arcenciel', titre: 'The ABC Song', tempo: 112, lignes: [
+    ['A B C D E F G,', 'C4 C4 G4 G4 A4 A4 G4:2', 'A'],
+    ['H I J K L M N O P,', 'F4 F4 E4 E4 D4:.5 D4:.5 D4:.5 D4:.5 C4:2', 'H'],
+    ['Q R S, T U V,', 'G4 G4 F4:2 E4 E4 D4:2', 'Q'],
+    ['dub-ya, X, Y and Z.', 'G4 G4 F4 E4 E4 D4:2', 'Z'],
+    ['Now I know my A B Cs,', 'C4 C4 G4 G4 A4 A4 G4:2', '🔤'],
+    ['next time won’t you sing with me?', 'F4 F4 E4 E4 D4 D4 C4:2', '🎤'],
   ] },
-  { id: 'qum-akhi', langue: 'ar', emoji: '🔔', titre: 'قم يا أخي', tempo: 112, lignes: [
-    ['قم يا أ-خي، قم يا أ-خي', 'C4 D4 E4 C4 C4 D4 E4 C4'],
-    ['هل ت-نام؟ هل ت-نام؟', 'E4 F4 G4:2 E4 F4 G4:2'],
-    ['ال-شم-س ط-لع-ت، ال-شم-س ط-لع-ت', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4'],
-    ['دن، دن، دان! دن، دن، دان!', 'C4 G3 C4:2 C4 G3 C4:2'],
+  { id: 'row-boat', langue: 'en', emoji: '🚣', palette: 'mer', titre: 'Row, Row, Row Your Boat', tempo: 230, lignes: [
+    ['Row, row, row your boat,', 'C4:3 C4:3 C4:2 D4 E4:3', '🚣'],
+    ['gent-ly down the stream.', 'E4:2 D4 E4:2 F4 G4:6', '🌊'],
+    ['Mer-ri-ly, mer-ri-ly, mer-ri-ly, mer-ri-ly,', 'C5 C5 C5 G4 G4 G4 E4 E4 E4 C4 C4 C4', '😄'],
+    ['life is but a dream!', 'G4:2 F4 E4:2 D4 C4:6', '💭'],
+  ] },
+  { id: 'macdonald', langue: 'en', emoji: '🐄', palette: 'ferme', titre: 'Old MacDonald', tempo: 128, lignes: [
+    ['Old Mac-Don-ald had a farm,', 'G4 G4 G4 D4 E4 E4 D4:2', '👴'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3', '🚜'],
+    ['And on that farm he had a cow,', 'D4 G4 G4 G4 D4 E4 E4 D4:2', '🐄'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3', '🐮'],
+    ['And on that farm he had a pig,', 'D4 G4 G4 G4 D4 E4 E4 D4:2', '🐷'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3', '🐖'],
+    ['And on that farm he had a duck,', 'D4 G4 G4 G4 D4 E4 E4 D4:2', '🦆'],
+    ['E, I, E, I, O!', 'B4 B4 A4 A4 G4:3', '🐥'],
+  ] },
+  { id: 'mary-lamb', langue: 'en', emoji: '🐑', palette: 'jardin', titre: 'Mary Had a Little Lamb', tempo: 120, lignes: [
+    ['Ma-ry had a lit-tle lamb,', 'E4 D4 C4 D4 E4 E4 E4:2', '👧'],
+    ['lit-tle lamb, lit-tle lamb,', 'D4 D4 D4:2 E4 G4 G4:2', '🐑'],
+    ['Ma-ry had a lit-tle lamb, its', 'E4 D4 C4 D4 E4 E4 E4 E4', '👧'],
+    ['fleece was white as snow.', 'D4 D4 E4 D4 C4:4', '❄️'],
+  ] },
+  { id: 'london-bridge', langue: 'en', emoji: '🌉', palette: 'ecole', titre: 'London Bridge', tempo: 120, lignes: [
+    ['Lon-don Bridge is fal-ling down,', 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2', '🌉'],
+    ['fal-ling down, fal-ling down.', 'D4 E4 F4:2 E4 F4 G4:2', '🧱'],
+    ['Lon-don Bridge is fal-ling down,', 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2', '🌉'],
+    ['my fair la-dy!', 'D4:2 G4:2 E4 C4:3', '👸'],
+  ] },
+  { id: 'brother-john', langue: 'en', emoji: '🔔', palette: 'or', titre: 'Are You Sleeping, Brother John?', tempo: 112, lignes: [
+    ['Are you sleep-ing, are you sleep-ing,', 'C4 D4 E4 C4 C4 D4 E4 C4', '😴'],
+    ['Bro-ther John? Bro-ther John?', 'E4 F4 G4:2 E4 F4 G4:2', '👦'],
+    ['Mor-ning bells are ring-ing, mor-ning bells are ring-ing,', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4', '🔔'],
+    ['Ding, dang, dong! Ding, dang, dong!', 'C4 G3 C4:2 C4 G3 C4:2', '⏰'],
+  ] },
+  { id: 'birthday-en', langue: 'en', emoji: '🎂', palette: 'arcenciel', titre: 'Happy Birthday', tempo: 100, lignes: [
+    ['Hap-py birth-day to you,', 'G4:.75 G4:.25 A4 G4 C5 B4:2', '🎂'],
+    ['hap-py birth-day to you,', 'G4:.75 G4:.25 A4 G4 D5 C5:2', '🎁'],
+    ['hap-py birth-day dear Lu-mi,', 'G4:.75 G4:.25 G5 E5 C5 B4 A4:2', '🎈'],
+    ['hap-py birth-day to you!', 'F5:.75 F5:.25 E5 C5 D5 C5:2', '🎉'],
+  ] },
+  // ----- العربية (paroles écrites pour Lumi) -----
+  { id: 'najma', langue: 'ar', emoji: '⭐', palette: 'galaxie', titre: 'لمعي يا نجمة', tempo: 104, lignes: [
+    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2', '⭐'],
+    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2', '🌍'],
+    ['تل-م-ع مث-ل الما-سة', 'G4 G4 F4 F4 E4 E4 D4:2', '💎'],
+    ['في ال-سما-ء ال-صا-فية', 'G4 G4 F4 F4 E4 E4 D4:2', '🌌'],
+    ['لم-عي لم-عي يا نج-مة', 'C4 C4 G4 G4 A4 A4 G4:2', '🌟'],
+    ['فو-ق الد-نيا عا-لي-ة', 'F4 F4 E4 E4 D4 D4 C4:2', '✨'],
+  ] },
+  { id: 'huruf', langue: 'ar', emoji: '🔤', palette: 'arcenciel', titre: 'أغنية الحروف', tempo: 108, lignes: [
+    ['أ ب ت ث ج ح خ', 'C4 C4 G4 G4 A4 A4 G4:2', 'أ'],
+    ['د ذ ر ز س ش ص', 'F4 F4 E4 E4 D4 D4 C4:2', 'د'],
+    ['ض ط ظ ع غ ف ق', 'G4 G4 F4 F4 E4 E4 D4:2', 'ض'],
+    ['ك ل م ن ه و ي', 'G4 G4 F4 F4 E4 E4 D4:2', 'ي'],
+    ['هي-ا ن-غ-ني مع-ا', 'C4 C4 G4 G4 A4 A4 G4:2', '🎤'],
+    ['ح-رو-في ال-ع-ر-بية', 'F4 F4 E4 E4 D4 D4 C4:2', '📖'],
+  ] },
+  { id: 'qum-akhi', langue: 'ar', emoji: '🔔', palette: 'or', titre: 'قم يا أخي', tempo: 112, lignes: [
+    ['قم يا أ-خي، قم يا أ-خي', 'C4 D4 E4 C4 C4 D4 E4 C4', '👦'],
+    ['هل ت-نام؟ هل ت-نام؟', 'E4 F4 G4:2 E4 F4 G4:2', '😴'],
+    ['ال-شم-س ط-لع-ت، ال-شم-س ط-لع-ت', 'G4:.5 A4:.5 G4:.5 F4:.5 E4 C4 G4:.5 A4:.5 G4:.5 F4:.5 E4 C4', '☀️'],
+    ['دن، دن، دان! دن، دن، دان!', 'C4 G3 C4:2 C4 G3 C4:2', '🔔'],
+  ] },
+  { id: 'eid-milad', langue: 'ar', emoji: '🎂', palette: 'arcenciel', titre: 'عيد ميلاد سعيد', tempo: 100, lignes: [
+    ['عيد مي-لاد س-عيد لك', 'G4:.75 G4:.25 A4 G4 C5 B4:2', '🎂'],
+    ['عيد مي-لاد س-عيد لك', 'G4:.75 G4:.25 A4 G4 D5 C5:2', '🎁'],
+    ['عيد مي-لاد س-عيد يا حلو', 'G4:.75 G4:.25 G5 E5 C5 B4 A4:2', '🎈'],
+    ['عيد مي-لاد س-عيد لك', 'F5:.75 F5:.25 E5 C5 D5 C5:2', '🎉'],
   ] },
 ];
 const DRAPEAU = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦' };
@@ -2393,26 +2461,47 @@ function preparerChanson(c) {
     return { mots, notes: n };
   });
 }
-// Une note de boîte à musique
-function noteBoite(f, t, duree) {
+// Une note de boîte à musique, envoyée dans le « bus » de la chanson (qu'on coupe d'un coup)
+function noteBoite(bus, f, t, duree) {
   const o = audio.createOscillator(), o2 = audio.createOscillator(), g = audio.createGain(), g2 = audio.createGain();
   o.type = 'sine'; o2.type = 'sine'; o.frequency.value = f; o2.frequency.value = f * 2;
-  g2.gain.value = .25; o2.connect(g2); g2.connect(g); o.connect(g); g.connect(audio.destination);
+  g2.gain.value = .25; o2.connect(g2); g2.connect(g); o.connect(g); g.connect(bus);
   const fin = t + Math.max(.5, duree * 1.4);
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32, t + .015); g.gain.exponentialRampToValueAtTime(.0001, fin);
   o.start(t); o2.start(t); o.stop(fin + .05); o2.stop(fin + .05);
 }
-let chant = null; // { id, jeton, minuteurs }
-function arreterChanson() {
+// Des petites notes de musique s'envolent de Lumi
+function noteVole() {
+  const sc = $('scene').getBoundingClientRect();
+  if (sc.bottom < 0 || sc.height < 10) return;
+  const e = document.createElement('span');
+  e.className = 'note-vole'; e.textContent = hasardDe(['♪', '♫', '♩', '♬']);
+  e.style.color = hasardDe(['#ffd166', '#7de2c3', '#ff8fab', '#7cc6fe', '#c3a6ff']);
+  e.style.left = (sc.left + sc.width * (.3 + Math.random() * .4)) + 'px'; e.style.top = (sc.top + sc.height * .55) + 'px';
+  $('decor').appendChild(e);
+  const dx = (Math.random() - .5) * sc.width * .8, dy = -(sc.height * (.35 + Math.random() * .3));
+  e.animate([{ transform: 'translate(-50%, 0) scale(.6)', opacity: 0 }, { opacity: 1, offset: .2 },
+    { transform: `translate(calc(-50% + ${dx | 0}px), ${dy | 0}px) scale(1.3) rotate(${(Math.random() * 40 - 20) | 0}deg)`, opacity: 0 }],
+    { duration: 1600 + Math.random() * 800, easing: 'ease-out' }).onfinish = () => e.remove();
+}
+let chant = null; // { id, bus, minuteurs }
+function arreterChanson(finir = true) {
   if (!chant) return;
-  chant.minuteurs.forEach(clearTimeout); chant = null;
-  avatar?.parle(false); Ambiance.baisser(false); revenirAuNuage(800);
+  const { bus, minuteurs } = chant;
+  minuteurs.forEach(clearTimeout); chant = null;
+  // on coupe tout de suite les notes déjà programmées
+  try { bus.gain.setTargetAtTime(0, audio.currentTime, .03); setTimeout(() => bus.disconnect(), 200); } catch {}
+  avatar?.parle(false);
   const b = $('ch-lecture'); if (b) b.textContent = '▶';
   document.querySelectorAll('.ch-mot.on').forEach((m) => m.classList.remove('on'));
+  document.querySelectorAll('.ch-tuile.joue').forEach((x) => x.classList.remove('joue'));
+  if (finir) { avatar?.mode('attente'); revenirAuNuage(800); }
 }
 function chanter(c) {
-  arreterChanson();
+  arreterChanson(false);
   debloquerAudio();
+  clearTimeout(retourNuage);
+  Ambiance.silence(true);
   const lignes = preparerChanson(c), r = ReglesChant.get(), temps = 60 / c.tempo * (r.lent ? 1.35 : 1);
   const bloc = $('ch-paroles');
   bloc.innerHTML = ''; bloc.dir = c.langue === 'ar' ? 'rtl' : 'ltr';
@@ -2421,27 +2510,36 @@ function chanter(c) {
     const s = l.mots.map((m) => { const e = document.createElement('span'); e.className = 'ch-mot'; e.textContent = m.texte; p.append(e, ' '); return e; });
     bloc.appendChild(p); return s;
   });
+  $('ch-lecteur').hidden = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   $('ch-titre').textContent = `${c.emoji} ${c.titre}`;
   $('ch-lecture').textContent = '⏸';
-  chant = { id: c.id, minuteurs: [] };
+  document.querySelectorAll('.ch-tuile').forEach((x) => x.classList.toggle('joue', x.dataset.id === c.id));
+  dernier = c;
+  const bus = audio.createGain(); bus.gain.value = 1; bus.connect(audio.destination);
+  chant = { id: c.id, bus, minuteurs: [] };
   const moi = chant, t0 = audio.currentTime + .25;
-  let t = 0;
-  avatar?.forme(c.emoji); avatar?.mode('heureux'); avatar?.parle(true); Ambiance.baisser(true);
+  let t = 0, compte = 0;
+  avatar?.mode(c.palette || 'heureux'); avatar?.forme(c.emoji); avatar?.parle(true);
   const plus = (ms, fn) => moi.minuteurs.push(setTimeout(() => { if (chant === moi) fn(); }, ms));
   lignes.forEach((l, i) => {
-    plus((t + .25) * 1000 - 50, () => {
+    const dessin = c.lignes[i][2] || c.emoji;
+    plus((t + .25) * 1000 - 60, () => {
       bloc.querySelectorAll('.ch-ligne').forEach((p, k) => p.classList.toggle('active', k === i));
-      bloc.children[i].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      avatar?.forme(i % 2 ? null : c.emoji);
+      const li = bloc.children[i]; // défiler dans les paroles seulement, Lumi reste visible
+      bloc.scrollTo({ top: li.offsetTop - bloc.clientHeight / 2 + li.offsetHeight / 2, behavior: 'smooth' });
+      avatar?.forme(dessin);
     });
     let k = 0;
     l.mots.forEach((m, j) => {
       for (let s = 0; s < m.syl; s++, k++) {
         const n = l.notes[k]; if (!n) continue;
-        noteBoite(n.f, t0 + t, n.d * temps);
+        noteBoite(bus, n.f, t0 + t, n.d * temps);
+        const n0 = compte++;
         plus((t + .25) * 1000, () => {
           document.querySelectorAll('.ch-mot.on').forEach((e) => e.classList.remove('on'));
-          spans[i][j].classList.add('on', 'chante'); avatar?.syllabe();
+          spans[i][j].classList.add('on'); avatar?.syllabe();
+          if (n0 % 2 === 0) noteVole();
         });
         t += n.d * temps;
       }
@@ -2450,9 +2548,10 @@ function chanter(c) {
   });
   plus((t + .6) * 1000, () => {
     const boucle = ReglesChant.get().boucle;
-    arreterChanson();
+    arreterChanson(!boucle);
     Progres.gagner(null); son('juste');
     if (boucle && pile[pile.length - 1] === 'chansons') chanter(c);
+    else { avatar?.forme(c.emoji); revenirAuNuage(2500); }
   });
 }
 function construireChansons() {
@@ -2473,7 +2572,8 @@ function construireChansons() {
     b.innerHTML = '<span class="e"></span><span class="n"></span><span class="l"></span>';
     b.querySelector('.e').textContent = c.emoji; b.querySelector('.n').textContent = c.titre; b.querySelector('.l').textContent = DRAPEAU[c.langue];
     b.dir = c.langue === 'ar' ? 'rtl' : 'ltr';
-    b.onclick = () => { $('ch-lecteur').hidden = false; chanter(c); dernier = c; liste.querySelectorAll('.joue').forEach((x) => x.classList.remove('joue')); b.classList.add('joue'); };
+    b.dataset.id = c.id;
+    b.onclick = () => chanter(c);
     liste.appendChild(b);
   });
   $('ch-lent').textContent = r.lent ? '🐢 ' + TXT_CH.lent[langue] : '🐇 ' + TXT_CH.vite[langue];
@@ -2496,6 +2596,7 @@ function afficher() {
   if (id === 'accueil') $('titre').textContent = 'Lumi ✦';
   else { $('titre').innerHTML = '<span class="e"></span><span></span>'; $('titre').firstChild.textContent = n.emoji + ' '; $('titre').lastChild.textContent = n.nom[langue]; }
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
+  Ambiance.silence(ecran === 'chansons');
   if (ecran === 'accueil') construireAccueil();
   else if (ecran === 'parler') construireParler();
   else if (ecran === 'coloriage') construireColoriage(n.dessin);
