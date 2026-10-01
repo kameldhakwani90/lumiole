@@ -444,6 +444,15 @@
   .fa-enfant.plus .e { font-size: 34px; } .fa-enfant.plus .n { font-size: 14px; color: var(--doux); }
   .fa-pied { text-align: center !important; margin-top: 14px !important; }
   .fa-pied a { color: var(--doux); }
+  /* Grand écran couché : histoires et comptines au milieu, en grand (pas en deux colonnes) */
+  @media (min-width: 900px) and (orientation: landscape) {
+    [data-ecran="histoires"] .corps, [data-ecran="chansons"] .corps { grid-template-columns: 1fr; max-width: 980px; width: 100%; margin-inline: auto; }
+    [data-ecran="histoires"] .cote-lumi, [data-ecran="chansons"] .cote-lumi { position: static; }
+    [data-ecran="histoires"] .scene, [data-ecran="chansons"] .scene { max-height: 48vh; }
+    .hi-texte { font-size: 31px; min-height: 4.6em; }
+    .hi-lecteur .ch-titre { font-size: 21px; }
+    .ch-liste { grid-template-columns: repeat(5, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -1516,8 +1525,9 @@ async function parlerNatif(texte, l, o) {
   clearInterval(pouls);
   if (moi === paroleNative) { avatar?.parle(false); Ambiance.baisser(false); }
 }
+let dernierSilence = 0, dernierEnonce = null; // Chrome oublie un speak() lancé juste après cancel()
 function taireVoix() {
-  paroleNative++;
+  paroleNative++; dernierSilence = performance.now();
   try { PLUGINS.TextToSpeech?.stop(); } catch {}
   try { speechSynthesis.cancel(); } catch {}
 }
@@ -1525,20 +1535,25 @@ function parler(texte, l = langue, o = {}) {
   if (PLUGINS.TextToSpeech) return parlerNatif(texte, l, o);
   return new Promise((ok) => {
     if (!('speechSynthesis' in window)) return ok();
-    const occupe = speechSynthesis.speaking || speechSynthesis.pending;
-    speechSynthesis.cancel();
+    const occupe = speechSynthesis.speaking || speechSynthesis.pending || performance.now() - dernierSilence < 250;
+    speechSynthesis.cancel(); dernierSilence = performance.now();
     const u = new SpeechSynthesisUtterance(texte), code = LANGUES[l].voix.slice(0, 2);
     u.lang = LANGUES[l].voix; u.rate = o.vitesse || .92; u.pitch = o.ton || 1.12;
     const v = voixDe(code);
     if (v) { u.voice = v; u.lang = v.lang; }
     let fini = false;
     const fin = () => { if (fini) return; fini = true; avatar?.parle(false); Ambiance.baisser(false); ok(); };
-    u.onstart = () => { avatar?.parle(true); Ambiance.baisser(true); };
+    let parti = false, relance = false;
+    dernierEnonce = u; // garder une référence : sinon Chrome peut l'effacer avant la fin
+    u.onstart = () => { parti = true; avatar?.parle(true); Ambiance.baisser(true); };
+    // si la voix n'a pas démarré (Chrome/Mac capricieux), on relance une fois
+    setTimeout(() => { if (!parti && !fini && dernierEnonce === u) { relance = true; speechSynthesis.cancel(); setTimeout(() => { relance = false; if (!fini) speechSynthesis.speak(u); }, 150); } }, 1600);
     u.onboundary = () => avatar?.syllabe();
-    u.onend = u.onerror = fin;
-    setTimeout(fin, 1500 + texte.length * 120); // filet si la voix ne répond pas
+    u.onend = fin;
+    u.onerror = () => { if (!relance) fin(); };
+    setTimeout(fin, 3200 + texte.length * 120); // filet si la voix ne répond pas
     // Safari avale parfois un speak() lancé juste après cancel() : on laisse un souffle
-    if (occupe) setTimeout(() => speechSynthesis.speak(u), 90); else speechSynthesis.speak(u);
+    if (occupe) setTimeout(() => speechSynthesis.speak(u), 140); else speechSynthesis.speak(u);
     speechSynthesis.resume?.();
   });
 }
