@@ -359,9 +359,11 @@
   .ch-filtres { display: flex; gap: 6px; }
   .puce { flex: 1; padding: 8px 4px; border-radius: 99px; background: var(--carte); border: 2px solid var(--bord); font-weight: 800; font-size: 15px; white-space: nowrap; }
   .puce.on { background: var(--soleil); color: #2a1f00; border-color: var(--soleil); }
-  .ch-liste { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 10px; margin-inline: -2px; scrollbar-width: none; }
+  /* toutes les histoires / chansons visibles d'un coup : une grille, pas un carrousel caché */
+  .ch-liste { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 4px 0 10px; }
+  .ch-compte { margin: 4px 2px 0; font-weight: 800; font-size: 15px; color: var(--doux); }
   .ch-liste::-webkit-scrollbar { display: none; }
-  .ch-tuile { flex: none; width: 128px; height: 116px; scroll-snap-align: start; position: relative; border-radius: 22px; padding: 10px; display: flex; flex-direction: column;
+  .ch-tuile { min-width: 0; height: 112px; position: relative; border-radius: 22px; padding: 10px; display: flex; flex-direction: column;
               align-items: flex-start; justify-content: space-between; text-align: start; color: #1b1030; font-weight: 800; font-size: 15px; line-height: 1.15;
               box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
   .ch-tuile .e { font-size: 34px; line-height: 1; }
@@ -373,7 +375,7 @@
   .ch-tuile.joue .e { animation: respire 1s ease-in-out infinite; }
   #effets .note-vole { position: fixed; font-size: 30px; font-weight: 900; pointer-events: none; text-shadow: 0 0 12px currentColor; z-index: 5; }
   @media (min-width: 600px) and (min-height: 900px) { [data-ecran="chansons"] .scene, [data-ecran="histoires"] .scene { max-height: 48vh; } }
-  @media (min-width: 600px) { .ch-ligne.active { font-size: 32px; } .ch-ligne.suivante { font-size: 21px; } .ch-tuile { width: 150px; height: 130px; } }
+  @media (min-width: 600px) { .ch-ligne.active { font-size: 32px; } .ch-ligne.suivante { font-size: 21px; } .ch-tuile { height: 130px; } .ch-liste { grid-template-columns: repeat(4, 1fr); } }
   /* ---------- Histoires du soir ---------- */
   .hi-lecteur .ch-titre { font-size: 17px; }
   .hi-lecteur.vide .hi-texte, .hi-lecteur.vide .hi-points { display: none; }
@@ -540,6 +542,7 @@
           </div>
           <label class="hi-reglage-voix" id="hi-reglage-voix"><span id="hi-voix-nom"></span><select id="hi-voix"></select></label>
           <div class="ch-filtres" id="hi-filtres"></div>
+          <p class="ch-compte" id="hi-compte"></p>
           <div class="ch-liste" id="hi-liste"></div>
         </div>
       </section>
@@ -557,6 +560,7 @@
             <div class="ch-paroles" id="ch-paroles"></div>
           </div>
           <div class="ch-filtres" id="ch-filtres"></div>
+          <p class="ch-compte" id="ch-compte"></p>
           <div class="ch-liste" id="ch-liste"></div>
         </div>
       </section>
@@ -2911,6 +2915,7 @@ function construireChansons() {
     b.onclick = () => (ok ? chanter(c) : proposerAchat());
     liste.appendChild(b);
   });
+  $('ch-compte').textContent = '🎵 ' + liste.children.length + ' ' + { fr: 'comptines', en: 'songs', ar: 'أنشودة' }[langue];
   $('ch-lent').textContent = r.lent ? '🐢' : '🐇';
   $('ch-lent').setAttribute('aria-label', r.lent ? TXT_CH.lent[langue] : TXT_CH.vite[langue]);
   $('ch-lent').classList.toggle('on', r.lent);
@@ -3286,6 +3291,7 @@ function construireHistoires() {
     b.onclick = () => (ok ? ouvrirHistoire(h) : proposerAchat());
     liste.appendChild(b);
   });
+  $('hi-compte').textContent = '📚 ' + liste.children.length + ' ' + { fr: 'histoires', en: 'stories', ar: 'حكاية' }[langue];
   modeHistoire(); remplirVoix();
   if (!conte) { $('hi-lecteur').classList.add('vide'); $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; }
 }
