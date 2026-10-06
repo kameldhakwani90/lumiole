@@ -223,6 +223,8 @@
   #decor { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; opacity: .7; }
   #effets { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
   #effets > * { position: absolute; }
+  #effets .eclat-joie { font-size: 28px; pointer-events: none; }
+  .objet.faux, .bulle.faux, .fo-ciel.faux { animation: non .4s; }
   #decor span { position: absolute; left: var(--x); top: var(--y); opacity: 0; will-change: transform, opacity; }
   .d-etoile { width: 3px; height: 3px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff;
               animation: scintille var(--d) ease-in-out var(--r) infinite; }
@@ -466,6 +468,25 @@
   .fo-ciel { width: 100%; height: 64vh; border-radius: 28px; touch-action: none; display: block;
              background: radial-gradient(ellipse at 50% 0%, rgba(124,198,254,.18), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.08)); border: 1px solid var(--bord); }
   @media (min-width: 900px) and (orientation: landscape) { [data-ecran="formes"] .corps { grid-template-columns: 1fr; max-width: 1100px; width: 100%; margin-inline: auto; } .fo-ciel { height: 70vh; } }
+  /* ---------- Compte avec Lumi ---------- */
+  [data-ecran="compter"] .cote-lumi { display: none; }
+  .compter { display: flex; flex-direction: column; gap: 12px; }
+  .co-nombre { margin-inline-start: auto; font-size: 44px; font-weight: 900; color: var(--soleil); min-width: 1.2em; text-align: center; text-shadow: 0 0 18px rgba(255,209,102,.5); }
+  .co-zone { position: relative; height: 54vh; border-radius: 28px; border: 1px solid var(--bord);
+             background: radial-gradient(ellipse at 50% 100%, rgba(125,226,195,.16), transparent 60%), rgba(255,255,255,.04); }
+  .co-objet { position: absolute; width: 18%; aspect-ratio: 1; max-width: 110px; font-size: clamp(40px, 11vw, 78px); background: none; border: none;
+              display: grid; place-items: center; animation: arrive .5s cubic-bezier(.2,1.4,.4,1) both; transition: transform .2s, filter .2s; }
+  .co-objet.compte { transform: scale(1.15); filter: drop-shadow(0 0 14px rgba(255,209,102,.8)); }
+  .co-objet.compte::after { content: attr(data-n); position: absolute; top: -6px; inset-inline-end: -6px; width: 34px; height: 34px; border-radius: 50%;
+              background: var(--soleil); color: #2a1f00; font-size: 19px; font-weight: 900; display: grid; place-items: center; }
+  @keyframes arrive { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
+  .co-choix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .co-choix[hidden] { display: none; }
+  .co-chiffre { height: 96px; border-radius: 26px; background: var(--carte); border: 2px solid var(--bord); font-size: 54px; font-weight: 900; }
+  .co-chiffre.juste { background: #17403a; border-color: var(--menthe); }
+  .co-chiffre.faux { animation: non .4s; }
+  .fa-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+  @media (min-width: 900px) and (orientation: landscape) { [data-ecran="compter"] .corps { grid-template-columns: 1fr; max-width: 1100px; width: 100%; margin-inline: auto; } .co-zone { height: 60vh; } }
 </style>
 </head>
 <body>
@@ -540,6 +561,13 @@
           </div>
           <div class="choix" id="choix"></div>
           <div class="aire-bulles" id="aire-bulles" hidden></div>
+        </div>
+      </section>
+      <section id="ecran-compter" hidden>
+        <div class="compter">
+          <div class="col-bulle" id="co-bulle"><span class="lumi"></span><span class="txt"></span><span class="co-nombre" id="co-nombre"></span></div>
+          <div class="co-zone" id="co-zone"></div>
+          <div class="co-choix" id="co-choix" hidden></div>
         </div>
       </section>
       <section id="ecran-formes" hidden>
@@ -1242,7 +1270,7 @@ const PAR_EMOJI = new Map(MOTS.map((m) => [m.emoji, m]));
 // ---------- L'arbre des activités : accueil → univers → thèmes ----------
 const NOEUDS = {
   accueil:   { emoji: '✦', nom: { fr: 'Lumi', en: 'Lumi', ar: 'لومي' },
-               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'formes', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'histoires', 'jeux', 'parler'] },
+               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'formes', 'compter', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'histoires', 'jeux', 'parler'] },
   animaux:   { emoji: '🐾', nom: { fr: 'Les animaux', en: 'Animals', ar: 'الحيوانات' }, desc: { fr: 'Ferme, mer, oiseaux…', en: 'Farm, sea, birds…', ar: 'المزرعة، البحر، الطيور…' },
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
@@ -1269,7 +1297,8 @@ const NOEUDS = {
   nombres:   { emoji: '🔢', nom: { fr: 'Les nombres', en: 'Numbers', ar: 'الأرقام' }, desc: { fr: 'Compter jusqu’à 10', en: 'Count to 10', ar: 'العد حتى ١٠' }, type: 'nombres' },
   dessin:    { emoji: '✍️', nom: { fr: 'Dessine', en: 'Draw', ar: 'ارسم' }, desc: { fr: 'Trace les lettres', en: 'Trace the letters', ar: 'ارسم الحروف' }, type: 'dessin' },
   jeux:      { emoji: '🎮', nom: { fr: 'Les jeux', en: 'Games', ar: 'الألعاب' }, desc: { fr: 'Devine, écoute, range…', en: 'Guess, listen, sort…', ar: 'خمّن، استمع، رتّب…' },
-               enfants: ['formes', 'bulles', 'devine', 'ecoute', 'range', 'intrus'] },
+               enfants: ['formes', 'compter', 'bulles', 'devine', 'ecoute', 'range', 'intrus'] },
+  compter:   { emoji: '🔢', nom: { fr: 'Compte avec Lumi', en: 'Count with Lumi', ar: 'عُدّ مع لومي' }, desc: { fr: 'Touche et compte : 1, 2, 3…', en: 'Tap and count: 1, 2, 3…', ar: 'المس وعُدّ: ١، ٢، ٣…' }, type: 'compter' },
   formes:    { emoji: '🔷', nom: { fr: 'Pluie de formes', en: 'Shape rain', ar: 'مطر الأشكال' }, desc: { fr: 'Tranche les formes, compte avec Lumi !', en: 'Slice the shapes, count with Lumi!', ar: 'اقطع الأشكال وعُدّ مع لومي!' }, type: 'formes' },
   bulles:    { emoji: '🫧', nom: { fr: 'Attrape les bulles', en: 'Catch the bubbles', ar: 'التقط الفقاعات' }, desc: { fr: 'Vite, éclate les bonnes !', en: 'Quick, pop the right ones!', ar: 'بسرعة، فرقع الصحيحة!' }, type: 'jeu', jeu: 'bulles' },
   coloriage: { emoji: '🖍️', nom: { fr: 'Colorie !', en: 'Coloring', ar: 'لوّن' }, desc: { fr: 'De vrais dessins à colorier', en: 'Real pictures to color', ar: 'رسومات حقيقية للتلوين' },
@@ -1609,6 +1638,70 @@ function son(type = 'pop') {
     });
   } catch {}
 }
+// ---------- Félicitations SANS mots : une petite musique et des éclats qui changent à chaque fois ----------
+// (si Lumi disait « Bravo chameau », l'enfant pourrait croire que le mot est « bravo »)
+const JINGLES = [
+  [[523, 0], [659, .09], [784, .18], [1047, .27]],                 // arpège qui monte
+  [[784, 0], [1047, .12], [1319, .24], [1047, .36], [1568, .48]],  // ta-da !
+  [[1175, 0], [1397, .07], [1568, .14], [1760, .21], [2093, .28]], // gouttes de lumière
+  [[659, 0], [784, .1], [988, .2], [1319, .3]],                    // clochettes
+  [[523, 0], [784, 0], [1047, .16], [1319, .16], [1568, .32]],     // accords joyeux
+];
+const ECLATS = [['✨', '⭐', '💫'], ['🌟', '✨', '💖'], ['🎉', '✨', '⭐'], ['💫', '🌈', '✨'], ['⭐', '💛', '✨']];
+let dernierJingle = -1;
+function jingle() {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === 'suspended') audio.resume();
+    let i; do { i = (Math.random() * JINGLES.length) | 0; } while (i === dernierJingle && JINGLES.length > 1);
+    dernierJingle = i;
+    const t = audio.currentTime;
+    JINGLES[i].forEach(([f, d]) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = 'triangle'; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.14, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .45);
+      o.connect(g).connect(audio.destination); o.start(t + d); o.stop(t + d + .5);
+    });
+  } catch {}
+}
+// Un doux « oups » (deux notes qui descendent), sans gronder
+function oups(el) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const t = audio.currentTime;
+    [[440, 0], [370, .12]].forEach(([f, d]) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.09, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .22);
+      o.connect(g).connect(audio.destination); o.start(t + d); o.stop(t + d + .25);
+    });
+  } catch {}
+  if (el) { el.classList.remove('faux'); void el.offsetWidth; el.classList.add('faux'); }
+}
+function celebrer(cible) {
+  jingle();
+  avatar?.mode('heureux'); avatar?.approche?.();
+  const r = (cible || $('carte-emoji'))?.getBoundingClientRect?.(), set = hasardDe(ECLATS);
+  const cx = r ? r.left + r.width / 2 : innerWidth / 2, cy = r ? r.top + r.height / 2 : innerHeight / 2;
+  for (let i = 0; i < 14; i++) {
+    const e = document.createElement('span');
+    e.className = 'eclat-joie'; e.textContent = hasardDe(set);
+    e.style.left = cx + 'px'; e.style.top = cy + 'px';
+    $('effets').appendChild(e);
+    const a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 110;
+    e.animate([{ transform: 'translate(-50%, -50%) scale(.4)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${(Math.cos(a) * d) | 0}px), calc(-50% + ${(Math.sin(a) * d) | 0}px)) scale(1.2)`, opacity: 0 }],
+      { duration: 800 + Math.random() * 400, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => e.remove();
+  }
+}
+// La bonne réponse : la musique d'abord, puis le mot, tout seul, bien clair
+async function bonneReponse(entree, j, cible) {
+  celebrer(cible);
+  carteMot(entree, '');
+  await pause(750, j);
+  await parler(nomComplet(entree));
+}
+
 // iPhone / iPad : le son n'est autorisé qu'au moment où le doigt se RELÈVE (touchend, click),
 // pas quand il touche. On déverrouille donc l'audio sur ces gestes-là, et on demande le mode « lecture »
 // pour que le bouton silencieux du téléphone ne coupe pas la musique (Safari 16.4 et plus).
@@ -1948,8 +2041,7 @@ async function tracer(lettre) {
   parler(LANGUES[langue].tracer);
   Trace.ouvrir('lettre', lettre, async () => {
     const j = ++jeton;
-    parler(LANGUES[langue].bravo);
-    avatar?.mode('heureux');
+    celebrer();
     try { await pause(1800, j); } catch { return; }
     Trace.fermer();
     montrerLettre(lettre);
@@ -2279,23 +2371,23 @@ async function repondreQuiz(m, t) {
   const L = LANGUES[langue], bon = quiz.liste[quiz.i];
   if (quiz.pause) return;
   if (m !== bon) {
-    t.classList.remove('faux'); void t.offsetWidth; t.classList.add('faux'); son('faux');
-    parler(L.pasCa(nomComplet(m), nomComplet(bon)));
+    // pas de phrase : un doux « oups », puis Lumi redit seulement le mot cherché
+    oups(t);
+    parler(nomComplet(bon) + (langue === 'fr' ? ' ?' : '?'));
     return;
   }
   const j = ++jeton;
   quiz.pause = true;
-  t.classList.add('juste'); son('juste'); Progres.gagner(bon);
-  avatar?.mode('heureux'); avatar?.forme(bon.emoji);
-  carteMot(bon, L.bravo);
-  try { await parler(`${L.bravo} ${majuscule(nomComplet(bon))} !`); await epeler(j); await pause(500, j); } catch { return; }
+  t.classList.add('juste'); Progres.gagner(bon);
+  avatar?.forme(bon.emoji);
+  try { await bonneReponse(bon, j, t); await epeler(j); await pause(500, j); } catch { return; }
   if (!quiz) return;
   if (++quiz.i < quiz.liste.length) return questionQuiz();
   // fin : une pluie d'étoiles
   quiz = null;
   fete(); avatar?.forme('⭐');
-  carte('🌟', L.super, '⭐ ⭐ ⭐ ⭐ ⭐', false);
-  try { await parler(L.super); } catch {}
+  carte('🌟', '⭐ ⭐ ⭐', '', false);
+  jingle();
   revenirAuNuage(5000);
 }
 
@@ -3431,13 +3523,12 @@ function foToucher(o) {
     foCompteur();
     if (fo.compte >= fo.objectif) {
       fo.pause = true; fete(); Progres.gagner(null);
-      setTimeout(() => { if (!fo) return; parler(FO_TXT.bravo[langue]); }, 900);
+      setTimeout(() => { if (fo) jingle(); }, 900);
       setTimeout(() => { if (!fo) return; fo.manche++; fo.objets = []; fo.pause = false; foConsigne(); }, 2600);
     }
   } else {
-    son('faux');
-    // pas de punition : Lumi dit simplement ce que c'était
-    parler(majusculeSimple(foNom({ forme: o.forme, couleur: o.couleur }, false)));
+    // pas de punition ni de phrase : un doux « oups »
+    oups();
   }
 }
 function foBoucle(t) {
@@ -3493,8 +3584,8 @@ function arreterFormes() {
 
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : n.type === 'compter' ? 'compter' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes', 'compter'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
   $('btn-maison').hidden = pile.length < 3;
@@ -3510,13 +3601,14 @@ function afficher() {
   else if (ecran === 'chansons') construireChansons();
   else if (ecran === 'histoires') construireHistoires();
   else if (ecran === 'formes') setTimeout(demarrerFormes, 50);
+  else if (ecran === 'compter') setTimeout(demarrerCompter, 50);
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
 }
 
 function aller(id, montrerCarte = true) {
   if (!libre(id)) return proposerAchat();
-  arreterChanson(); arreterHistoire(); arreterFormes();
+  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
   pile.push(id);
@@ -3534,7 +3626,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
-  arreterChanson(); arreterHistoire(); arreterFormes();
+  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles); ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
@@ -3670,8 +3762,7 @@ function toucherBulle(m, b) {
   const L = LANGUES[langue];
   if (!bulles || b.classList.contains('eclate')) return;
   if (!bulles.cibles.includes(m)) {
-    b.classList.remove('faux'); void b.offsetWidth; b.classList.add('faux'); son('faux');
-    parler(majuscule(L.pasUn(nomComplet(m), bulles.theme.un[langue])));
+    oups(b);
     return;
   }
   b.classList.add('eclate'); son('pop'); son('juste');
@@ -3684,7 +3775,7 @@ function toucherBulle(m, b) {
   if (bulles.attrapes >= bulles.but) {
     clearInterval(minuteurBulles);
     const fini = bulles; bulles = null;
-    setTimeout(() => { fete(); carte('🏆', L.super, '', false); parler(L.super); }, 400);
+    setTimeout(() => { fete(); carte('🏆', '⭐ ⭐ ⭐', '', false); jingle(); }, 400);
     setTimeout(() => { if (jeuEnCours && jeuType === 'bulles' && !bulles) { $('aire-bulles').innerHTML = ''; lancerBulles(); } }, 4200);
   }
 }
@@ -3693,37 +3784,36 @@ async function gagne(texte, j) {
   $('score').textContent = '⭐ ' + Progres.etoiles;
   [...$('choix').children].forEach((x) => { x.disabled = true; });
   avatar?.mode('heureux');
-  try { await parler(texte); if ($('tuiles').children.length) await epeler(j); await pause(900, j); } catch { return; }
+  try { await pause(750, j); await parler(texte); if ($('tuiles').children.length) await epeler(j); await pause(900, j); } catch { return; }
   if (jeuEnCours) nouvelleManche();
 }
 
 function repondre(m, b) {
   const L = LANGUES[langue];
-  if (m !== bonne) { secouer(b); son('faux'); parler(L.encore); return; }
-  son('juste');
+  if (m !== bonne) { oups(b); return; }
   const j = ++jeton;
   b.classList.add('juste'); Progres.gagner(bonne);
   avatar?.forme(bonne.emoji);
+  celebrer(b);
   const phrase = jeuType === 'intrus' ? majuscule(L.pasUn(nomComplet(bonne), bonne.un[langue])) : nomComplet(bonne);
-  carteMot(bonne, jeuType === 'intrus' ? phrase : L.bravo);
-  gagne(`${L.bravo} ${phrase}`, j);
+  carteMot(bonne, jeuType === 'intrus' ? phrase : '');
+  gagne(phrase, j);
 }
 
 function ranger(m, b, bons) {
   const L = LANGUES[langue];
   if (b.classList.contains('juste')) return;
   if (!bons.includes(m)) {
-    secouer(b); son('faux');
-    const chez = LIEUX.find((l) => l.mots.includes(m.emoji));
-    parler(chez ? L.pasIci(nomComplet(m), chez.dans[langue]) : L.encore);
+    oups(b);
     return;
   }
   b.classList.add('juste'); b.disabled = true;
   avatar?.syllabe(); son('juste'); Progres.gagner(m);
   if (--aTrouver > 0) { parler(nomComplet(m)); return; }
   const j = ++jeton;
-  carte(bonne.emoji, L.bravo, bons.map((x) => nomComplet(x)).join(' · '), false);
-  gagne(L.bravo, j);
+  carte(bonne.emoji, '⭐ ⭐ ⭐', bons.map((x) => nomComplet(x)).join(' · '), false);
+  celebrer(b);
+  gagne(bonne.dans ? bonne.dans[langue] : '', j);
 }
 $('btn-reecouter').onclick = () => { if (jeuType === 'ecoute' && bonne) parler(LANGUES[langue].ouEst(nomComplet(bonne))); };
 
@@ -3805,7 +3895,7 @@ $('ecrire').addEventListener('submit', (e) => {
 // =====================================================================
 // Ce qui reste gratuit sans achat (le reste s'ouvre avec l'achat unique « Lumiole complet »)
 const GRATUIT = new Set(['accueil', 'animaux', 'ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes', 'couleurs', 'lettres', 'nombres',
-  'dessin', 'parler', 'jeux', 'formes', 'bulles', 'devine', 'album', 'coloriage', 'col-maison', 'col-poisson', 'chansons', 'histoires']);
+  'dessin', 'parler', 'jeux', 'formes', 'compter', 'bulles', 'devine', 'album', 'coloriage', 'col-maison', 'col-poisson', 'chansons', 'histoires']);
 const CHANSONS_LIBRES = new Set(['frere-jacques', 'twinkle', 'najma', 'berceuse-fr', 'lullaby-en']);
 const HISTOIRES_LIBRES = new Set(['chaperon', 'three-pigs', 'jha-himar']);
 
@@ -4036,10 +4126,11 @@ function espaceParents(section) {
   f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>👨‍👩‍👧 ${tf('parents')}</h2>
     <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-enfants"></section>
     <section class="fa-bloc" id="fa-verrou"></section>
+    <section class="fa-bloc" id="fa-pause"></section>
     <section class="fa-bloc" id="fa-compte"></section><p class="fa-pied"><a target="_blank" rel="noopener"></a></p>`;
   f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); construireAccueil?.(); };
   f.querySelector('.fa-pied a').href = CONFIG_APP.confidentialite; f.querySelector('.fa-pied a').textContent = tf('confidentialite');
-  blocAchat(); blocEnfants(); blocVerrou(); blocCompte();
+  blocAchat(); blocEnfants(); blocVerrou(); blocPause(); blocCompte();
   if (section) f.querySelector('#fa-' + section)?.scrollIntoView({ block: 'start' });
 }
 function blocAchat() {
@@ -4175,6 +4266,126 @@ async function demarrerFamille() {
   await Famille.init();
   await Achat.init(Famille.id);
   if (Profils.liste.length > 1 && !sessionStorage.getItem('lumi-qui')) { try { sessionStorage.setItem('lumi-qui', '1'); } catch {} choisirEnfant(); }
+}
+
+// =====================================================================
+// ---------- Compte avec Lumi : toucher chaque objet (Lumi compte), puis « Combien ? » ----------
+// =====================================================================
+const CO_TXT = {
+  compte: { fr: 'Compte avec Lumi !', en: 'Count with Lumi!', ar: 'عُدّ مع لومي!' },
+  combien: { fr: 'Combien ?', en: 'How many?', ar: 'كم؟' },
+};
+let co = null; // { niveau, n, compte, emoji }
+function demarrerCompter() { co = { niveau: 1, reussites: 0 }; coManche(); }
+function arreterCompter() { co = null; }
+function coManche() {
+  if (!co) return;
+  const max = Math.min(10, 2 + co.niveau);
+  co.n = 1 + ((Math.random() * max) | 0); co.compte = 0;
+  co.emoji = hasardDe(A_COMPTER.filter((e) => e !== co.emoji));
+  const zone = $('co-zone'), choix = $('co-choix');
+  zone.innerHTML = ''; choix.innerHTML = ''; choix.hidden = true;
+  $('co-bulle').querySelector('.txt').textContent = CO_TXT.compte[langue];
+  $('co-nombre').textContent = '';
+  // les objets, éparpillés sans se chevaucher
+  const places = [];
+  for (let i = 0; i < co.n; i++) {
+    let x, y, essai = 0;
+    do { x = 8 + Math.random() * 74; y = 8 + Math.random() * 70; essai++; } while (essai < 60 && places.some(([a, b]) => Math.hypot(a - x, (b - y) * .8) < 19));
+    places.push([x, y]);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'co-objet'; b.textContent = co.emoji;
+    b.style.left = x + '%'; b.style.top = y + '%'; b.style.animationDelay = (i * .08) + 's';
+    b.onclick = () => coToucher(b);
+    zone.appendChild(b);
+  }
+  parler(CO_TXT.compte[langue]);
+}
+function coToucher(b) {
+  if (!co || b.classList.contains('compte')) return;
+  co.compte++;
+  b.classList.add('compte'); b.dataset.n = LANGUES[langue].chiffre(co.compte);
+  son('pop'); avatar?.syllabe();
+  $('co-nombre').textContent = LANGUES[langue].chiffre(co.compte);
+  parler(LANGUES[langue].nombres[co.compte - 1] || String(co.compte));
+  if (co.compte === co.n) setTimeout(coCombien, 1100);
+}
+// « Combien ? » : trois chiffres au choix
+function coCombien() {
+  if (!co) return;
+  const L = LANGUES[langue], n = co.n, propositions = new Set([n]);
+  while (propositions.size < 3) { const p = Math.max(1, Math.min(10, n + ((Math.random() * 5) | 0) - 2)); propositions.add(p); }
+  const choix = $('co-choix');
+  choix.innerHTML = ''; choix.hidden = false;
+  $('co-bulle').querySelector('.txt').textContent = CO_TXT.combien[langue];
+  melanger([...propositions]).forEach((p) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'co-chiffre'; b.textContent = L.chiffre(p);
+    b.onclick = async () => {
+      if (!co) return;
+      if (p !== n) { oups(b); return; }
+      b.classList.add('juste'); Progres.gagner(null);
+      celebrer(b);
+      const j = ++jeton;
+      try { await pause(700, j); await parler(L.nombres[n - 1]); await pause(1300, j); } catch { return; }
+      co.reussites++; if (co.reussites % 2 === 0) co.niveau++;
+      coManche();
+    };
+    choix.appendChild(b);
+  });
+  parler(CO_TXT.combien[langue]);
+}
+
+// =====================================================================
+// ---------- Pause douce : après X minutes de jeu, Lumi baille et propose une pause ----------
+// =====================================================================
+const PAUSE_TXT = {
+  titre: { fr: 'Lumi est un peu fatigué…', en: 'Lumi is a little tired…', ar: 'لومي متعب قليلًا…' },
+  dit: { fr: 'On fait une pause ? Tu peux écouter une histoire, ou ranger la tablette.', en: 'Shall we take a break? You can listen to a story, or put the tablet away.', ar: 'هل نستريح قليلًا؟ يمكنك سماع حكاية أو وضع اللوح جانبًا.' },
+  histoire: { fr: '🌙 Une histoire', en: '🌙 A story', ar: '🌙 حكاية' },
+  reglage: { fr: 'Pause douce après', en: 'Gentle break after', ar: 'استراحة لطيفة بعد' },
+  jamais: { fr: 'jamais', en: 'never', ar: 'أبدًا' },
+  min: { fr: 'min', en: 'min', ar: 'دقيقة' },
+};
+const PauseDouce = (() => {
+  let reglage = 0, joue = 0, ouverte = false;
+  try { reglage = +localStorage.getItem('lumi-pause') || 0; } catch {}
+  setInterval(() => {
+    if (!reglage || document.hidden || ouverte) return;
+    joue += 5;
+    if (joue >= reglage * 60) montrer();
+  }, 5000);
+  function montrer() {
+    ouverte = true;
+    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+    const f = fenetre('pause');
+    f.innerHTML = `<div class="fa-cadenas">😴🌙</div><h2></h2><p class="fa-grand"></p><button class="fa-bouton fa-principal" data-a="h"></button><button class="fa-lien" data-a="p">👨‍👩‍👧 ${tf('parents')}</button>`;
+    f.querySelector('h2').textContent = PAUSE_TXT.titre[langue];
+    f.querySelector('.fa-grand').textContent = PAUSE_TXT.dit[langue];
+    f.querySelector('[data-a=h]').textContent = PAUSE_TXT.histoire[langue];
+    // seule une histoire reste possible sans les parents
+    f.querySelector('[data-a=h]').onclick = () => { fermer(); while (pile.length > 1) pile.pop(); aller('histoires'); joue = reglage * 60 - 8 * 60; };
+    f.querySelector('[data-a=p]').onclick = () => porteParents(() => { fermer(); joue = 0; });
+    $('fa-fond').onclick = null; // on ne ferme pas en touchant à côté
+    avatar?.forme('🌙'); avatar?.mode('fin');
+    parler(PAUSE_TXT.titre[langue] + ' ' + PAUSE_TXT.dit[langue]);
+  }
+  function fermer() { ouverte = false; fermerFenetre(); }
+  return {
+    get reglage() { return reglage; },
+    regler(m) { reglage = m; joue = 0; try { localStorage.setItem('lumi-pause', String(m)); } catch {} },
+  };
+})();
+function blocPause() {
+  const b = $('fa-pause'); if (!b) return;
+  b.innerHTML = `<h3>😴 ${PAUSE_TXT.reglage[langue]}</h3><div class="fa-puces"></div>`;
+  [0, 10, 15, 20, 30].forEach((m) => {
+    const x = document.createElement('button');
+    x.className = 'puce' + (PauseDouce.reglage === m ? ' on' : '');
+    x.textContent = m ? `${m} ${PAUSE_TXT.min[langue]}` : PAUSE_TXT.jamais[langue];
+    x.onclick = () => { PauseDouce.regler(m); blocPause(); };
+    b.querySelector('.fa-puces').appendChild(x);
+  });
 }
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
