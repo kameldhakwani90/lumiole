@@ -420,6 +420,7 @@
   .fa-consigne { font-size: 20px; font-weight: 800; color: var(--texte) !important; text-align: center !important; }
   .fa-saisie { height: 28px; font-size: 20px; letter-spacing: 4px; color: var(--soleil); }
   .fa-pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 8px auto 0; }
+  .fa-aide { font-size: 14px; }
   .fa-pave button { height: 64px; border-radius: 18px; background: rgba(255,255,255,.08); border: 1px solid var(--bord); font-size: 26px; font-weight: 800; }
   .fa-cadenas { font-size: 64px; }
   .fa-grand { font-size: 22px; font-weight: 800; color: var(--texte) !important; text-align: center !important; }
@@ -3768,25 +3769,118 @@ function rafraichirVerrous() {
   if (typeof afficher === 'function' && pile.length) afficher();
 }
 
-// ----- Porte parents : une consigne écrite en lettres, qu'un petit ne sait pas lire -----
-function porteParents(ensuite) {
-  const suite = Array.from({ length: 3 }, () => 1 + ((Math.random() * 9) | 0));
+// ----- Code parent (4 chiffres) : remplace la consigne en lettres une fois choisi -----
+const CodeParent = (() => {
+  const empreinte = async (c) => {
+    if (!window.crypto?.subtle) return 'x' + c;
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('lumiole:' + c));
+    return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
+  };
+  let e = null;
+  try { e = localStorage.getItem('lumi-code'); } catch {}
+  return {
+    get existe() { return !!e; },
+    async verifier(c) { return e === await empreinte(c); },
+    async definir(c) { e = c ? await empreinte(c) : null; try { if (e) localStorage.setItem('lumi-code', e); else localStorage.removeItem('lumi-code'); } catch {} },
+  };
+})();
+const TXT_VE = {
+  code: { fr: 'Code parent', en: 'Parent code', ar: 'رمز الولي' },
+  oublie: { fr: 'Code oublié ?', en: 'Forgot the code?', ar: 'نسيت الرمز؟' },
+  titre: { fr: 'Verrou enfant', en: 'Child lock', ar: 'قفل الطفل' },
+  txt: { fr: 'Un code à 4 chiffres protège l’Espace parents, et l’enfant ne peut plus sortir de Lumiole.', en: 'A 4-digit code protects the Parents area, and your child can’t leave Lumiole.', ar: 'رمز من 4 أرقام يحمي ركن الأولياء، ولا يستطيع الطفل الخروج من لوميول.' },
+  nouveau: { fr: 'Nouveau code (4 chiffres)', en: 'New code (4 digits)', ar: 'رمز جديد (4 أرقام)' },
+  encore: { fr: 'Encore une fois', en: 'Once more', ar: 'مرة أخرى' },
+  garder: { fr: 'Enregistrer le code', en: 'Save the code', ar: 'احفظ الرمز' },
+  enlever: { fr: 'Supprimer le code', en: 'Remove the code', ar: 'احذف الرمز' },
+  pareil: { fr: 'Les deux codes ne sont pas pareils.', en: 'The two codes don’t match.', ar: 'الرمزان غير متطابقين.' },
+  ok: { fr: '✅ Code enregistré', en: '✅ Code saved', ar: '✅ تم حفظ الرمز' },
+  activer: { fr: '🔒 Garder l’enfant dans l’app', en: '🔒 Keep my child in the app', ar: '🔒 أبقِ الطفل داخل التطبيق' },
+  desactiver: { fr: '🔓 Libérer l’écran', en: '🔓 Unlock the screen', ar: '🔓 حرّر الشاشة' },
+  dabord: { fr: 'Choisis d’abord un code parent.', en: 'Choose a parent code first.', ar: 'اختر رمز الولي أولًا.' },
+  android: { fr: 'Android te demandera de confirmer l’« épinglage » : l’app reste à l’écran. Pour sortir : Espace parents → code → Libérer l’écran.', en: 'Android will ask you to confirm “pinning”: the app stays on screen. To leave: Parents → code → Unlock the screen.', ar: 'سيطلب أندرويد تأكيد «التثبيت»: يبقى التطبيق على الشاشة. للخروج: ركن الأولياء ← الرمز ← حرّر الشاشة.' },
+  ios: { fr: 'Sur iPhone et iPad, Apple ne laisse pas une app se verrouiller seule. Utilise « Accès guidé » (une fois) : Réglages → Accessibilité → Accès guidé → activer et choisir un code. Ensuite, dans Lumiole, appuie 3 fois sur le bouton latéral (ou d’accueil) → Démarrer. Pour sortir : 3 fois de nouveau + ton code.', en: 'On iPhone and iPad, Apple doesn’t let an app lock itself. Use “Guided Access” (once): Settings → Accessibility → Guided Access → turn on and set a passcode. Then, in Lumiole, triple-click the side (or Home) button → Start. To leave: triple-click again + your passcode.', ar: 'على آيفون وآيباد، لا تسمح آبل للتطبيق بقفل نفسه. استعمل «الوصول الموجّه» (مرة واحدة): الإعدادات ← تسهيلات الاستخدام ← الوصول الموجّه ← فعّله واختر رمزًا. ثم في لوميول اضغط 3 مرات على الزر الجانبي ← ابدأ. للخروج: 3 مرات + رمزك.' },
+  web: { fr: 'Sur le site web, le verrou complet n’existe pas : utilise l’app. Tu peux au moins passer en plein écran.', en: 'The full lock isn’t available on the website: use the app. You can still go full screen.', ar: 'القفل الكامل غير متاح على الموقع: استعمل التطبيق. يمكنك على الأقل استعمال ملء الشاشة.' },
+  plein: { fr: '⛶ Plein écran', en: '⛶ Full screen', ar: '⛶ ملء الشاشة' },
+};
+const tv = (k) => TXT_VE[k][langue] ?? TXT_VE[k].fr;
+// Pavé à chiffres réutilisable (porte, code)
+function pave(f, longueur, fini) {
   let tape = [];
+  const zone = f.querySelector('.fa-pave'), saisie = f.querySelector('.fa-saisie');
+  zone.innerHTML = '';
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].forEach((t) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = t;
+    if (!t) { b.disabled = true; b.style.visibility = 'hidden'; }
+    b.onclick = async () => {
+      if (t === '⌫') tape.pop(); else tape.push(t);
+      saisie.textContent = '● '.repeat(tape.length);
+      if (tape.length < longueur) return;
+      const essai = tape.join(''); tape = [];
+      if (!(await fini(essai))) { saisie.textContent = ''; trembler(zone); }
+    };
+    zone.appendChild(b);
+  });
+}
+// Porte parents : le code s'il existe, sinon des chiffres écrits en lettres (qu'un petit ne sait pas lire)
+function porteParents(ensuite, sansCode = false) {
   const f = fenetre('porte');
   f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>🔒 ${tf('parents')}</h2>
     <p class="fa-consigne"></p><div class="fa-saisie"></div><div class="fa-pave"></div>`;
-  f.querySelector('.fa-consigne').textContent = `${tf('porte')} ${suite.map((n) => TXT_FA.chiffres[langue][n]).join(', ')}`;
-  const pave = f.querySelector('.fa-pave');
-  for (let n = 1; n <= 9; n++) {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
-    b.onclick = () => {
-      tape.push(n); f.querySelector('.fa-saisie').textContent = '● '.repeat(tape.length);
-      if (tape.length < 3) return;
-      if (tape.join() === suite.join()) { fermerFenetre(); ensuite(); } else { tape = []; f.querySelector('.fa-saisie').textContent = ''; trembler(pave); }
-    };
-    pave.appendChild(b);
-  }
   f.querySelector('.fa-fermer').onclick = fermerFenetre;
+  if (CodeParent.existe && !sansCode) {
+    f.querySelector('.fa-consigne').textContent = tv('code');
+    pave(f, 4, async (c) => { if (await CodeParent.verifier(c)) { fermerFenetre(); ensuite(); return true; } return false; });
+    const oubli = document.createElement('button'); oubli.className = 'fa-lien'; oubli.textContent = tv('oublie');
+    // code oublié : la consigne en lettres, puis on peut choisir un nouveau code
+    oubli.onclick = () => porteParents(() => espaceParents('verrou'), true);
+    f.appendChild(oubli);
+    return;
+  }
+  const suite = Array.from({ length: 3 }, () => 1 + ((Math.random() * 9) | 0));
+  f.querySelector('.fa-consigne').textContent = `${tf('porte')} ${suite.map((n) => TXT_FA.chiffres[langue][n]).join(', ')}`;
+  pave(f, 3, async (c) => { if (c === suite.join('')) { fermerFenetre(); ensuite(); return true; } return false; });
+}
+// Bloc « Verrou enfant » de l'Espace parents
+async function blocVerrou() {
+  const b = $('fa-verrou'); if (!b) return;
+  b.innerHTML = `<h3>🔐 ${tv('titre')}</h3><p></p><div class="fa-form"></div><div class="fa-actions"></div><p class="fa-aide"></p><p class="fa-msg"></p>`;
+  b.querySelector('p').textContent = tv('txt');
+  const form = b.querySelector('.fa-form'), act = b.querySelector('.fa-actions'), aide = b.querySelector('.fa-aide'), msg = b.querySelector('.fa-msg');
+  form.innerHTML = '<input type="password" inputmode="numeric" maxlength="4" autocomplete="off"><input type="password" inputmode="numeric" maxlength="4" autocomplete="off"><button class="fa-bouton fa-principal" data-a="garder"></button>';
+  const [c1, c2] = form.querySelectorAll('input');
+  c1.placeholder = tv('nouveau'); c2.placeholder = tv('encore');
+  form.querySelector('[data-a=garder]').textContent = tv('garder');
+  form.querySelector('[data-a=garder]').onclick = async () => {
+    if (!/^\d{4}$/.test(c1.value) || c1.value !== c2.value) { msg.textContent = tv('pareil'); return; }
+    await CodeParent.definir(c1.value); son('juste'); blocVerrou().then(() => { $('fa-verrou').querySelector('.fa-msg').textContent = tv('ok'); });
+  };
+  if (CodeParent.existe) {
+    const enl = document.createElement('button'); enl.className = 'fa-lien'; enl.textContent = tv('enlever');
+    enl.onclick = async () => { await CodeParent.definir(null); blocVerrou(); };
+    form.appendChild(enl);
+  }
+  if (PLATEFORME === 'android' && PLUGINS.Verrou) {
+    let actif = false;
+    try { actif = (await PLUGINS.Verrou.etat()).actif; } catch {}
+    const v = document.createElement('button'); v.className = 'fa-bouton fa-principal';
+    v.textContent = actif ? tv('desactiver') : tv('activer');
+    v.onclick = async () => {
+      if (!actif && !CodeParent.existe) { msg.textContent = tv('dabord'); return; }
+      try { await (actif ? PLUGINS.Verrou.desactiver() : PLUGINS.Verrou.activer()); } catch {}
+      if (!actif) fermerFenetre(); else blocVerrou();
+    };
+    act.appendChild(v); aide.textContent = tv('android');
+  } else if (PLATEFORME === 'ios') {
+    aide.textContent = tv('ios');
+  } else {
+    aide.textContent = tv('web');
+    if (document.fullscreenEnabled) {
+      const p = document.createElement('button'); p.className = 'fa-bouton'; p.textContent = tv('plein');
+      p.onclick = () => { fermerFenetre(); document.documentElement.requestFullscreen?.().catch(() => {}); };
+      act.appendChild(p);
+    }
+  }
 }
 function trembler(el) { el.animate([{ transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); }
 function fenetre(type) {
@@ -3834,10 +3928,11 @@ function espaceParents(section) {
   const f = fenetre('parents');
   f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>👨‍👩‍👧 ${tf('parents')}</h2>
     <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-enfants"></section>
+    <section class="fa-bloc" id="fa-verrou"></section>
     <section class="fa-bloc" id="fa-compte"></section><p class="fa-pied"><a target="_blank" rel="noopener"></a></p>`;
   f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); construireAccueil?.(); };
   f.querySelector('.fa-pied a').href = CONFIG_APP.confidentialite; f.querySelector('.fa-pied a').textContent = tf('confidentialite');
-  blocAchat(); blocEnfants(); blocCompte();
+  blocAchat(); blocEnfants(); blocVerrou(); blocCompte();
   if (section) f.querySelector('#fa-' + section)?.scrollIntoView({ block: 'start' });
 }
 function blocAchat() {
