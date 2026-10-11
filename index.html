@@ -510,6 +510,7 @@
   /* ---------- Télé : interface « à 3 mètres », tout tient dans l'écran sans défiler ---------- */
   .tele body { overflow: hidden; background: rgb(var(--fond-rgb)); }
   .tele #decor { display: none; }
+  .tele .bandeau:focus, .tele .fa-acces:focus { transform: none; }
   .tele .app { max-width: none; height: 100vh; box-sizing: border-box; padding: 2.5vh 3.5vw 2vh; gap: 1.5vh; display: flex; flex-direction: column; }
   .tele .haut { position: static; margin: 0; padding: 0 0 1.2vh; min-height: 0; background: transparent; border-bottom-color: rgba(255,255,255,.08); }
   .tele .haut h1 { font-size: 4.2vh; }
