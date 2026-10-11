@@ -507,6 +507,37 @@
   .duo-touches { display: flex; gap: 10px; }
   .duo-camera-ici { position: fixed; right: 12px; bottom: 12px; width: 220px; z-index: 70; background: rgba(13,16,38,.9); padding: 8px; border-radius: 20px; border: 1px solid var(--bord); }
   .duo-camera-ici .fa-aide { font-size: 12px; color: var(--doux); margin: 6px 0; }
+  /* ---------- Télé : interface « à 3 mètres », tout tient dans l'écran sans défiler ---------- */
+  .tele body { overflow: hidden; background: rgb(var(--fond-rgb)); }
+  .tele #decor { display: none; }
+  .tele .app { max-width: none; height: 100vh; box-sizing: border-box; padding: 2.5vh 3.5vw 2vh; gap: 1.5vh; display: flex; flex-direction: column; }
+  .tele .haut { position: static; margin: 0; padding: 0 0 1.2vh; min-height: 0; background: transparent; border-bottom-color: rgba(255,255,255,.08); }
+  .tele .haut h1 { font-size: 4.2vh; }
+  .tele .retour, .tele .bouton-son, .tele .bouton-langue { height: 7vh; min-width: 7vh; width: auto; font-size: 3.4vh; }
+  .tele :is([data-ecran="accueil"], [data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .corps {
+    flex: 1; min-height: 0; display: grid; grid-template-columns: 40% 1fr; gap: 3vw; align-items: stretch; }
+  .tele :is([data-ecran="accueil"], [data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .cote-lumi {
+    position: relative; top: auto; height: 100%; justify-content: center; gap: 1vh; }
+  .tele :is([data-ecran="accueil"], [data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .scene { max-height: none; height: 46vh; width: auto; }
+  .tele [data-ecran="accueil"] .scene { height: 56vh; }
+  .tele .tuiles span, .tele #tuiles > * { font-size: 3.6vh; min-width: 5.4vh; height: 6.4vh; }
+  .tele :is([data-ecran="accueil"], [data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .cote-activite {
+    min-height: 0; overflow-y: auto; padding: 1.5vh 1.2vw 4vh; scrollbar-width: none; }
+  .tele .cote-activite::-webkit-scrollbar { display: none; }
+  .tele .carte .emoji { font-size: 6.5vh; }
+  .tele .carte .mot { font-size: 6vh; }
+  .tele .carte .sous, .tele .carte p { font-size: 2.6vh; }
+  .tele .grille { grid-template-columns: repeat(3, 1fr); gap: 2vh; }
+  .tele .univers { min-height: 19vh; border-radius: 3vh; padding: 2vh 1.6vh; }
+  .tele .univers .e { font-size: 6vh; }
+  .tele .univers .n { font-size: 3vh; }
+  .tele .univers .d { font-size: 1.9vh; }
+  .tele .panneau { grid-template-columns: repeat(4, 1fr); gap: 1.6vh; }
+  .tele .objet .e { font-size: 6vh; }
+  .tele .objet .n { font-size: 2.3vh; }
+  .tele .choix button { font-size: 10vh; }
+  .tele .bandeau { font-size: 2.6vh; }
+  .tele .carte-jour .grand { font-size: 7vh; }
 </style>
 </head>
 <body>
@@ -3618,7 +3649,7 @@ function afficher() {
   else { $('titre').innerHTML = '<span class="e"></span><span></span>'; $('titre').firstChild.textContent = n.emoji + ' '; $('titre').lastChild.textContent = n.nom[langue]; }
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
   Ambiance.silence(ecran === 'chansons');
-  window.LUMI_ZOOM = ecran === 'chansons' || ecran === 'histoires' ? 1.45 : 1;
+  window.LUMI_ZOOM = ecran === 'chansons' || ecran === 'histoires' ? 1.45 : (typeof modeTele !== 'undefined' && modeTele ? 1.25 : 1);
   if (ecran === 'accueil') construireAccueil();
   else if (ecran === 'parler') construireParler();
   else if (ecran === 'coloriage') construireColoriage(n.dessin);
