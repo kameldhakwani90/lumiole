@@ -4515,7 +4515,9 @@ const DUO_TXT = {
   erreur: { fr: 'La liaison n’a pas marché (connexion internet ?).', en: 'Couldn’t connect (internet connection?).', ar: 'تعذّر الربط (الاتصال بالإنترنت؟).' },
 };
 const td = (k) => DUO_TXT[k][langue] ?? DUO_TXT[k].fr;
-let clientSupa = null;
+let clientSupa = null, verrouEcran = null;
+// garder l'écran allumé pendant le jeu à deux écrans (sinon le téléphone ou la télé se met en veille)
+async function resterAllume() { try { verrouEcran = await navigator.wakeLock?.request('screen'); } catch {} }
 async function supa() {
   if (clientSupa) return clientSupa;
   if (!window.supabase) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
@@ -4553,7 +4555,7 @@ const DuoEcran = (() => {
       canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
       canal.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d))
         .on('broadcast', { event: 'k' }, ({ payload }) => { if (payload.k === 'retour') { if ($('fa-fond')) fermerFenetre(); else retour(); } else if (payload.k === 'maison') { while (pile.length > 2) pile.pop(); retour(); } })
-        .on('broadcast', { event: 'bonjour' }, () => { fermerFenetre(); jingle(); canal.send({ type: 'broadcast', event: 'ok', payload: {} }); })
+        .on('broadcast', { event: 'bonjour' }, () => { fermerFenetre(); jingle(); resterAllume(); canal.send({ type: 'broadcast', event: 'ok', payload: {} }); })
         .subscribe();
     } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
   }
@@ -4576,6 +4578,7 @@ const DuoManette = (() => {
     canal.on('broadcast', { event: 'ok' }, () => { f.querySelector('.fa-msg').textContent = td('relie'); son('juste'); });
     await new Promise((ok, ko) => { canal.subscribe((s) => { if (s === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
     canal.send({ type: 'broadcast', event: 'bonjour', payload: {} });
+    resterAllume();
   }
   function ouvrir() {
     const f = fenetre('manette');
