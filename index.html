@@ -492,9 +492,71 @@
   .tele .co-objet:focus { position: absolute; }
   .tele .app { max-width: 1400px; }
   /* ---------- Deux écrans ---------- */
-  #duo-curseur { position: fixed; left: -28px; top: -28px; width: 56px; height: 56px; border-radius: 50%; z-index: 80; pointer-events: none;
-                 border: 5px solid var(--soleil); box-shadow: 0 0 30px rgba(255,209,102,.7), inset 0 0 18px rgba(255,209,102,.5); transition: transform .05s linear; }
-  #duo-curseur.appui { background: rgba(255,209,102,.45); }
+  /* la main de chaque joueur, en direct sur le grand écran */
+  .duo-curseur { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; width: 0; height: 0; transition: transform .06s linear, opacity .4s; }
+  .duo-curseur::before { content: ''; position: absolute; left: -34px; top: -34px; width: 68px; height: 68px; border-radius: 50%;
+    border: 5px solid var(--c); box-shadow: 0 0 30px var(--c), inset 0 0 18px var(--c); transition: all .12s; }
+  .duo-curseur .main { position: absolute; left: -6px; top: -4px; font-size: 54px; line-height: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); transform-origin: 20% 10%; transition: transform .12s; }
+  .duo-curseur .num { position: absolute; left: -48px; top: -52px; width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: #1b1030; font: 900 18px/30px system-ui; text-align: center; }
+  .duo-curseur.appui::before { transform: scale(.7); background: color-mix(in srgb, var(--c) 55%, transparent); }
+  .duo-curseur.appui .main { transform: scale(.82) rotate(-12deg); }
+  .duo-curseur.cache { opacity: 0; }
+  .duo-onde { position: absolute; width: 20px; height: 20px; margin: -10px; border-radius: 50%; border: 6px solid var(--c); pointer-events: none; animation: duo-onde .6s ease-out forwards; }
+  @keyframes duo-onde { to { transform: scale(7); opacity: 0; border-width: 1px; } }
+  .duo-qr { width: min(60vw, 300px); aspect-ratio: 1; margin: 8px auto; background: #fff; border-radius: 22px; padding: 10px; display: grid; place-items: center; }
+  .duo-qr svg { width: 100%; height: 100%; }
+  .duo-scan { font-size: 20px; font-weight: 800; text-align: center; margin: 4px 0; }
+  .fa-t-duo { text-align: center; }
+  #duo-petit-qr { position: fixed; right: 14px; bottom: 14px; z-index: 85; width: 130px; padding: 8px; border-radius: 18px; background: #fff; border: none; display: grid; gap: 2px; box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+  #duo-petit-qr svg { width: 100%; height: auto; }
+  #duo-petit-qr span { color: #1b1030; font-weight: 900; font-size: 15px; }
+  .bouton-duo { display: none; }
+  .tele .bouton-duo { display: inline-block; }
+  @media (min-width: 1000px) { .bouton-duo { display: inline-block; } }
+  .mode-manette .duo-pave { aspect-ratio: auto; height: 58vh; max-height: none; }
+  .mode-manette .fa-t-manette { width: 100%; min-height: 92vh; }
+  /* à deux dans « Pluie de formes » */
+  .fo-joueurs { display: flex; justify-content: center; align-items: center; gap: 14px; font-weight: 900; font-size: 24px; }
+  .fo-joueurs span { padding: 4px 16px; border-radius: 99px; border: 3px solid var(--c); color: var(--c); background: rgba(0,0,0,.25); }
+  .fo-joueurs i { font-style: normal; }
+  /* ---------- Théâtre du soir ---------- */
+  #theatre { display: none; }
+  .theatre #effets { z-index: 75; }
+  .theatre #theatre { display: block; position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; }
+  .theatre body { overflow: hidden; background: radial-gradient(ellipse at 50% 30%, #2a1a3e 0%, #0b0614 70%) fixed; }
+  .theatre .haut, .theatre .carte, .theatre #hi-mode, .theatre #hi-reglage-voix, .theatre #hi-filtres, .theatre #hi-compte, .theatre #hi-liste, .theatre #decor, .theatre #duo-petit-qr { display: none !important; }
+  .theatre #scene { position: fixed; left: 0; right: 0; top: 9vh; bottom: 24vh; width: 100%; max-height: none !important; height: auto; aspect-ratio: auto; z-index: 55;
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at center, #000 60%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at center, #000 60%, transparent 100%); }
+  .theatre #hi-lecteur { position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(94vw, 1200px); z-index: 70; margin: 0;
+    background: rgba(8,4,16,.72); border: 1px solid rgba(255,209,102,.25); backdrop-filter: blur(6px); }
+  .theatre .hi-texte { font-size: clamp(20px, 3.4vh, 40px); text-align: center; line-height: 1.4; }
+  .theatre .ch-haut { transition: opacity .6s, max-height .6s; max-height: 120px; overflow: hidden; }
+  .th-calme .ch-haut, .th-calme .th-quitter { opacity: 0; }
+  .th-calme .theatre .ch-haut, .th-calme.theatre .ch-haut { max-height: 0; }
+  .th-calme, .th-calme * { cursor: none; }
+  .theatre #hi-lecteur { transition: opacity .8s; }
+  .th-ferme #hi-lecteur { opacity: 0; }
+  #hi-theatre.on { background: var(--soleil); }
+  .th-rideau { position: absolute; top: 0; bottom: 0; width: 51%; z-index: 2;
+    background: repeating-linear-gradient(90deg, #5e0b16 0, #a3192b 4%, #c62a3c 6%, #8a1222 9%, #5e0b16 12%);
+    box-shadow: inset 0 -60px 80px rgba(0,0,0,.55), 0 0 40px rgba(0,0,0,.7); transition: transform 1.8s cubic-bezier(.65,0,.35,1); }
+  .th-rideau.g { left: 0; transform-origin: left; border-radius: 0 0 40% 0; }
+  .th-rideau.d { right: 0; transform-origin: right; border-radius: 0 0 0 40%; }
+  .ouvert .th-rideau.g { transform: translateX(-80%) scaleX(.9); }
+  .ouvert .th-rideau.d { transform: translateX(80%) scaleX(.9); }
+  .th-lambrequin { position: absolute; left: 0; right: 0; top: 0; height: 9vh; z-index: 3;
+    background: radial-gradient(circle at 50% 0, #c62a3c 0 60%, transparent 61%) 0 100% / 12vh 5vh repeat-x, linear-gradient(#7a0f1e, #b0202f);
+    border-bottom: 4px solid #e2b04a; box-shadow: 0 8px 26px rgba(0,0,0,.6); }
+  .th-lambrequin::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4.5vh; height: 4.5vh;
+    background: radial-gradient(circle at 50% 0, #b0202f 0 70%, #e2b04a 71% 76%, transparent 77%) 0 0 / 9vh 9vh repeat-x; }
+  .th-projecteur { position: absolute; left: 50%; top: -10vh; width: 90vh; height: 120vh; transform: translateX(-50%); z-index: 1;
+    background: radial-gradient(ellipse at 50% 0, rgba(255,240,200,.16), transparent 65%); opacity: 0; transition: opacity 2s 1s; }
+  .ouvert .th-projecteur { opacity: 1; }
+  .th-sol { position: absolute; left: 0; right: 0; bottom: 0; height: 26vh; z-index: 0; background: linear-gradient(transparent, rgba(120,70,30,.28)); }
+  .th-fin { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; font: 900 clamp(40px, 10vh, 120px) Georgia, serif; color: #ffd166;
+    text-shadow: 0 0 30px rgba(255,209,102,.7); opacity: 0; transition: opacity 1s 1.2s; }
+  #theatre:not(.ouvert) .th-fin:not(:empty) { opacity: 1; }
+  .th-quitter { position: absolute; right: 18px; top: 12vh; z-index: 5; pointer-events: auto; width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-size: 24px; transition: opacity .6s; }
   .duo-code { font-size: 64px; font-weight: 900; letter-spacing: 12px; color: var(--soleil); margin: 10px 0; }
   .duo-modes { display: flex; gap: 8px; margin-top: 10px; }
   .duo-modes .puce { flex: 1; }
@@ -549,6 +611,7 @@
     <button class="retour" id="btn-retour" type="button" hidden aria-label="Retour"><span>←</span></button>
     <button class="retour maison" id="btn-maison" type="button" hidden aria-label="Accueil">🏠</button>
     <h1 id="titre">Lumi ✦</h1>
+    <button class="bouton-son bouton-duo" id="btn-duo" type="button" aria-label="Jouer avec le téléphone">📱</button>
     <button class="bouton-son" id="btn-son" type="button" aria-label="Son de fond" aria-pressed="true">🔊</button>
     <button class="bouton-langue" id="btn-langue" type="button" aria-label="Changer de langue">FR</button>
   </header>
@@ -626,6 +689,7 @@
         <div class="formes">
           <div class="col-bulle fo-bulle" id="fo-bulle"><span class="lumi"></span><span class="txt"></span><canvas id="fo-modele" width="64" height="68" hidden></canvas></div>
           <div class="fo-compte" id="fo-compte"></div>
+          <div class="fo-joueurs" id="fo-joueurs" hidden></div>
           <canvas class="fo-ciel" id="fo-ciel"></canvas>
         </div>
       </section>
@@ -639,6 +703,7 @@
                 <button type="button" id="hi-prec" aria-label="Page précédente">⏮</button>
                 <button type="button" id="hi-lecture" aria-label="Lecture">▶</button>
                 <button type="button" id="hi-suiv" aria-label="Page suivante">⏭</button>
+                <button type="button" id="hi-theatre" aria-label="Théâtre plein écran">🎭</button>
               </div>
             </div>
             <p class="hi-texte" id="hi-texte"></p>
@@ -3299,6 +3364,7 @@ function taireHistoire() {
 let conte = null, jetonConte = 0; // { h, page, auto, fini }
 function arreterHistoire() {
   arreterEnregistrement(false);
+  if (typeof Theatre !== 'undefined') Theatre.quitter();
   if (!conte) return;
   conte = null; taireHistoire();
 }
@@ -3307,7 +3373,7 @@ function pageHistoire() {
   const t = $('hi-texte');
   t.textContent = texte; t.dir = RTL(h.langue) ? 'rtl' : 'ltr';
   t.classList.remove('entre'); void t.offsetWidth; t.classList.add('entre');
-  avatar?.forme(dessin);
+  clearTimeout(retourNuage); avatar?.forme(dessin);
   $('hi-points').innerHTML = h.pages.map((_, i) => `<span class="${[i === page ? 'on' : i < page ? 'lu' : '', VoixParent.a(clePage(conte, i)) ? 'rec' : ''].join(' ')}"></span>`).join('');
   $('hi-prec').disabled = page === 0;
   $('hi-suiv').disabled = page === h.pages.length - 1;
@@ -3346,6 +3412,7 @@ function ouvrirHistoire(h) {
   document.querySelectorAll('#hi-liste .ch-tuile').forEach((x) => x.classList.toggle('joue', x.dataset.id === h.id));
   window.scrollTo({ top: 0, behavior: 'smooth' });
   remplirVoix();
+  if (modeTele && lumiLit) return Theatre.entrer();
   if (lumiLit) lireHistoire(); else pageHistoire();
 }
 // Choix de la voix de synthèse (par langue), gardé pour la prochaine fois
@@ -3399,6 +3466,7 @@ function finHistoire() {
   if (!conte || conte.fini) return;
   conte.fini = true;
   Progres.gagner(null); fete(); setTimeout(() => avatar?.forme('🌙'), 1500);
+  Theatre.rideauFin();
 }
 const tournerPage = (d) => {
   if (!conte) return;
@@ -3411,6 +3479,65 @@ const tournerPage = (d) => {
   pageHistoire();
   if (p === conte.h.pages.length - 1) finHistoire();
 };
+// ----- Théâtre du soir : plein écran, rideaux rouges, Lumi sur scène, le texte en sous-titres -----
+const Theatre = (() => {
+  let actif = false, minuteur = 0;
+  function scene() {
+    let r = $('theatre');
+    if (r) return r;
+    r = document.createElement('div'); r.id = 'theatre';
+    r.innerHTML = `<div class="th-projecteur"></div><div class="th-sol"></div>
+      <div class="th-rideau g"></div><div class="th-rideau d"></div><div class="th-lambrequin"></div>
+      <div class="th-fin"></div><button type="button" class="th-quitter" aria-label="Quitter le théâtre">✕</button>`;
+    document.body.appendChild(r);
+    r.querySelector('.th-quitter').onclick = quitter;
+    return r;
+  }
+  // les commandes se cachent quand on ne touche plus à rien, et reviennent au moindre geste
+  function reveil() {
+    if (!actif) return;
+    document.documentElement.classList.remove('th-calme');
+    clearTimeout(minuteur); minuteur = setTimeout(() => document.documentElement.classList.add('th-calme'), 3500);
+  }
+  function entrer() {
+    if (actif) return;
+    actif = true;
+    const r = scene();
+    r.classList.remove('ouvert'); r.querySelector('.th-fin').textContent = '';
+    document.documentElement.classList.add('theatre', 'th-ferme');
+    try { document.documentElement.requestFullscreen?.({ navigationUI: 'hide' })?.catch?.(() => {}); } catch {}
+    ['pointermove', 'pointerdown', 'keydown'].forEach((t) => addEventListener(t, reveil, true));
+    reveil();
+    // les rideaux s'ouvrent, puis l'histoire commence
+    if (conte) { conte.auto = false; taireHistoire(); pageHistoire(); }
+    setTimeout(() => { if (!actif) return; r.classList.add('ouvert'); document.documentElement.classList.remove('th-ferme'); son('juste'); }, 700);
+    setTimeout(() => { if (!actif || !conte) return; conte.auto = true; conte.page = conte.fini ? 0 : conte.page; conte.fini = false; lireHistoire(); }, 2400);
+    $('hi-theatre').classList.add('on');
+  }
+  function quitter() {
+    if (!actif) return;
+    actif = false; clearTimeout(minuteur);
+    ['pointermove', 'pointerdown', 'keydown'].forEach((t) => removeEventListener(t, reveil, true));
+    document.documentElement.classList.remove('theatre', 'th-calme', 'th-ferme');
+    $('theatre')?.classList.remove('ouvert');
+    if (document.fullscreenElement) document.exitFullscreen?.().catch?.(() => {});
+    $('hi-theatre')?.classList.remove('on');
+  }
+  // à la fin : les rideaux se referment sur « Fin »
+  function rideauFin() {
+    if (!actif) return;
+    const r = scene();
+    setTimeout(() => {
+      if (!actif) return;
+      r.querySelector('.th-fin').textContent = { fr: '✨ Fin ✨', en: '✨ The End ✨', ar: '✨ النهاية ✨' }[langue] || '✨';
+      r.classList.remove('ouvert'); document.documentElement.classList.add('th-ferme'); jingle();
+    }, 2200);
+  }
+  // Échap du navigateur sort du plein écran : on sort du théâtre avec lui
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && actif) quitter(); });
+  return { entrer, quitter, rideauFin, get actif() { return actif; } };
+})();
+$('hi-theatre').onclick = () => (Theatre.actif ? Theatre.quitter() : Theatre.entrer());
 // ----- Enregistrer sa voix, page par page -----
 let enreg = null; // { rec, flux, cle }
 async function commencerEnregistrement() {
@@ -3544,7 +3671,7 @@ function foConsigne() {
   g.clearRect(0, 0, ex.width, ex.height);
   if (genre !== 'libre') dessinerForme(g, fo.but.forme || 'rond', 32, 34, 22, fo.but.couleur ? FO_COULEURS[fo.but.couleur][0] : '#e5e7eb', 0);
   ex.hidden = genre === 'libre';
-  foCompteur();
+  foCompteur(); foJoueurs();
   parler(texte);
 }
 function foCompteur() {
@@ -3565,10 +3692,17 @@ function foEclat(x, y, couleur) {
     fo.grains.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, vie: 1, couleur, t: 2 + Math.random() * 4 });
   }
 }
-function foToucher(o) {
+// à deux : chaque joueur a sa couleur et son petit score, mais l'objectif est commun (on joue ensemble)
+function foJoueurs() {
+  const b = $('fo-joueurs'); if (!b) return;
+  const n = DuoEcran.nbJoueurs;
+  b.hidden = n < 2 && !fo.scores[1] && !fo.scores[2];
+  if (!b.hidden) b.innerHTML = [1, 2].map((j) => `<span style="--c:${DuoEcran.couleurJoueur(j)}">${JOUEURS_STYLE[j - 1].main} ${fo.scores[j]}</span>`).join('<i>🤝</i>');
+}
+function foToucher(o, joueur = 0) {
   o.mort = true; foEclat(o.x, o.y, FO_COULEURS[o.couleur][0]);
   if (foBon(o)) {
-    fo.compte++; son('pop'); avatar?.syllabe();
+    fo.compte++; fo.scores[joueur]++; if (joueur) foJoueurs(); son('pop'); avatar?.syllabe();
     const L = LANGUES[langue];
     // Lumi compte : « un ! deux ! trois ! » ; en manche libre il nomme la forme
     parler(fo.manche === 0 ? majusculeSimple(foNom({ forme: o.forme, couleur: o.couleur }, false)) + foPoint() : `${L.nombres[fo.compte - 1] || fo.compte}${foPoint()}`);
@@ -3601,10 +3735,13 @@ function foBoucle(t) {
   fo.grains.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; p.vie -= dt * 1.3; g.globalAlpha = Math.max(0, p.vie); g.fillStyle = p.couleur; g.beginPath(); g.arc(p.x, p.y, p.t, 0, 7); g.fill(); });
   fo.grains = fo.grains.filter((p) => p.vie > 0);
   // traînée du doigt
-  if (fo.trace.length > 1) {
-    g.globalAlpha = 1; g.strokeStyle = 'rgba(255,240,200,.9)'; g.lineCap = 'round'; g.lineJoin = 'round';
-    for (let i = 1; i < fo.trace.length; i++) { const a = fo.trace[i - 1], b = fo.trace[i]; g.lineWidth = 2 + i * .9; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
-  }
+  const trainee = (pts, couleur) => {
+    if (pts.length < 2) return;
+    g.globalAlpha = 1; g.strokeStyle = couleur || 'rgba(255,240,200,.9)'; g.lineCap = 'round'; g.lineJoin = 'round';
+    for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i]; g.lineWidth = 2 + i * .9; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
+  };
+  trainee(fo.trace);
+  fo.traces.forEach((tr) => { tr.pts = tr.pts.filter((p) => t - p.t < 160); trainee(tr.pts, tr.couleur); });
   if (fo.viseur) { // viseur de la télécommande
     g.globalAlpha = .9; g.strokeStyle = '#ffd166'; g.lineWidth = 5; g.shadowColor = '#ffd166'; g.shadowBlur = 18;
     g.beginPath(); g.arc(fo.viseur.x, fo.viseur.y, 34 + Math.sin(t / 180) * 4, 0, Math.PI * 2); g.stroke(); g.shadowBlur = 0;
@@ -3621,14 +3758,19 @@ function foTaille() {
 function demarrerFormes() {
   arreterFormes();
   const c = $('fo-ciel');
-  fo = { c, g: c.getContext('2d'), objets: [], grains: [], trace: [], manche: 0, prochaine: .3, pause: false, dpr: 1 };
+  fo = { c, g: c.getContext('2d'), objets: [], grains: [], trace: [], traces: new Map(), scores: [0, 0, 0], manche: 0, prochaine: .3, pause: false, dpr: 1 };
   foTaille();
   const point = (e) => { const r = c.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; };
-  const essayer = (p) => { for (const o of fo.objets) if (!o.mort && Math.hypot(o.x - p.x, o.y - p.y) < o.r * 1.15) foToucher(o); };
-  let appui = false;
-  c.onpointerdown = (e) => { e.preventDefault(); appui = true; const p = point(e); fo.trace = [p]; essayer(p); };
-  c.onpointermove = (e) => { if (!appui || !fo) return; const p = point(e); fo.trace.push(p); essayer(p); };
-  c.onpointerup = c.onpointercancel = () => { appui = false; };
+  const essayer = (p, joueur) => { for (const o of fo.objets) if (!o.mort && Math.hypot(o.x - p.x, o.y - p.y) < o.r * 1.15) foToucher(o, joueur); };
+  // plusieurs doigts à la fois : deux enfants sur la tablette, ou deux téléphones sur la télé
+  const joueurDe = (e) => { const n = DuoEcran.joueurDuPointeur(e.pointerId); return n === 1 || n === 2 ? n : 0; };
+  c.onpointerdown = (e) => {
+    e.preventDefault(); if (!fo) return;
+    const p = point(e), j = joueurDe(e);
+    fo.traces.set(e.pointerId, { pts: [p], couleur: j ? DuoEcran.couleurJoueur(j) : null }); essayer(p, j);
+  };
+  c.onpointermove = (e) => { const tr = fo?.traces.get(e.pointerId); if (!tr) return; const p = point(e); tr.pts.push(p); essayer(p, joueurDe(e)); };
+  c.onpointerup = c.onpointercancel = (e) => { fo?.traces.delete(e.pointerId); };
   window.addEventListener('resize', foTaille);
   foConsigne();
   fo.raf = requestAnimationFrame(foBoucle);
@@ -4481,6 +4623,7 @@ function deplacerFocus(dx, dy) {
 document.addEventListener('keydown', (e) => {
   const d = DIRECTIONS[e.key];
   if (e.key === 'Escape' || e.key === 'GoBack' || e.key === 'BrowserBack') {
+    if (Theatre.actif) { Theatre.quitter(); e.preventDefault(); return; }
     if ($('fa-fond')) { fermerFenetre(); e.preventDefault(); return; }
     if (pile.length > 1) { retour(); e.preventDefault(); }
     return;
@@ -4500,6 +4643,7 @@ document.addEventListener('keydown', (e) => {
 if (modeTele) document.documentElement.classList.add('tele');
 // Bouton Retour d'Android (téléphone et télé)
 PLUGINS.App?.addListener?.('backButton', () => {
+  if (Theatre.actif) return Theatre.quitter();
   if ($('fa-fond')) return fermerFenetre();
   if (pile.length > 1) return retour();
   PLUGINS.App.minimizeApp?.();
@@ -4543,6 +4687,8 @@ const DUO_TXT = {
   pave: { fr: '👆 Pavé tactile', en: '👆 Touchpad', ar: '👆 لوحة لمس' },
   camera: { fr: '📷 Caméra', en: '📷 Camera', ar: '📷 الكاميرا' },
   aide: { fr: 'Montre ton doigt à la caméra. Pince le pouce et l’index pour toucher.', en: 'Show your finger to the camera. Pinch thumb and index to tap.', ar: 'أرِ إصبعك للكاميرا. اجمع الإبهام والسبابة للّمس.' },
+  scan: { fr: 'Scanne avec le téléphone pour jouer (jusqu’à 2 joueurs)', en: 'Scan with the phone to play (up to 2 players)', ar: 'امسح بالهاتف للّعب (حتى لاعبَين)' },
+  joueur: { fr: 'Tu es le joueur', en: 'You are player', ar: 'أنت اللاعب' },
   attente: { fr: 'En attente du téléphone…', en: 'Waiting for the phone…', ar: 'في انتظار الهاتف…' },
   erreur: { fr: 'La liaison n’a pas marché (connexion internet ?).', en: 'Couldn’t connect (internet connection?).', ar: 'تعذّر الربط (الاتصال بالإنترنت؟).' },
 };
@@ -4556,63 +4702,115 @@ async function supa() {
   clientSupa = window.supabase.createClient(CONFIG_APP.supabase.url, CONFIG_APP.supabase.cle);
   return clientSupa;
 }
-// ----- Grand écran : reçoit le doigt et le transforme en vrais touchers -----
+// ----- Grand écran : reçoit les doigts (jusqu'à 2 joueurs) et les transforme en vrais touchers -----
+const LIEN_WEB = 'https://kameldhakwani90.github.io/lumiole/';
+const JOUEURS_STYLE = [{ couleur: '#ffd166', main: '✋' }, { couleur: '#7de2c3', main: '🖐️' }];
+async function qrSvg(texte, taille = 220) {
+  if (!window.qrcode) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+  const q = window.qrcode(0, 'M'); q.addData(texte); q.make();
+  return q.createSvgTag({ cellSize: Math.max(2, Math.floor(taille / (q.getModuleCount() + 8))), margin: 4, scalable: true });
+}
 const DuoEcran = (() => {
-  let canal = null, etat = { appui: false }, curseur = null;
-  function pointeur(nx, ny, appui) {
+  let canal = null, code = null;
+  const joueurs = new Map(); // id → { n, couleur, curseur, appui, x0, y0 }
+  function joueurDe(id) {
+    if (!joueurs.has(id)) {
+      if (joueurs.size >= 2) return null;
+      const n = joueurs.size + 1, st = JOUEURS_STYLE[n - 1], curseur = document.createElement('div');
+      curseur.className = 'duo-curseur'; curseur.style.setProperty('--c', st.couleur);
+      curseur.innerHTML = `<span class="main">${st.main}</span><span class="num">${n}</span>`;
+      document.body.appendChild(curseur);
+      joueurs.set(id, { n, couleur: st.couleur, curseur, appui: false });
+      majPetitQr();
+    }
+    return joueurs.get(id);
+  }
+  // un toucher visible : une onde de la couleur du joueur
+  function onde(x, y, couleur) {
+    const o = document.createElement('span'); o.className = 'duo-onde'; o.style.left = x + 'px'; o.style.top = y + 'px'; o.style.setProperty('--c', couleur);
+    $('effets').appendChild(o); setTimeout(() => o.remove(), 600);
+  }
+  function pointeur(nx, ny, appui, id = 'local') {
+    const j = joueurDe(id); if (!j) return;
     const x = nx * innerWidth, y = ny * innerHeight;
-    if (!curseur) { curseur = document.createElement('div'); curseur.id = 'duo-curseur'; document.body.appendChild(curseur); }
-    curseur.style.transform = `translate(${x}px, ${y}px)`;
-    curseur.classList.toggle('appui', appui);
+    j.curseur.style.transform = `translate(${x}px, ${y}px)`;
+    j.curseur.classList.toggle('appui', appui);
+    clearTimeout(j.cache); j.curseur.classList.remove('cache');
+    j.cache = setTimeout(() => j.curseur.classList.add('cache'), 4000); // disparaît si la main n'est plus vue
     const el = document.elementFromPoint(x, y);
-    const o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 77, pointerType: 'touch', isPrimary: true };
-    if (appui && !etat.appui) { etat = { appui: true, x0: x, y0: y }; el?.dispatchEvent(new PointerEvent('pointerdown', o)); }
+    const o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 70 + j.n, pointerType: 'touch', isPrimary: j.n === 1 };
+    if (appui && !j.appui) { j.appui = true; j.x0 = x; j.y0 = y; onde(x, y, j.couleur); el?.dispatchEvent(new PointerEvent('pointerdown', o)); }
     else if (appui) el?.dispatchEvent(new PointerEvent('pointermove', o));
-    else if (etat.appui) {
+    else if (j.appui) {
       el?.dispatchEvent(new PointerEvent('pointerup', o));
-      if (Math.hypot(x - etat.x0, y - etat.y0) < 30) (el?.closest('button, a, [tabindex], input, select') || null)?.click();
-      etat = { appui: false };
+      if (Math.hypot(x - j.x0, y - j.y0) < 30) (el?.closest('button, a, [tabindex], input, select') || null)?.click();
+      j.appui = false;
     }
   }
+  // petit QR dans un coin tant qu'un 2e joueur peut rejoindre
+  async function majPetitQr() {
+    let p = $('duo-petit-qr');
+    if (!canal || joueurs.size >= 2 || $('fa-fond')) { p?.remove(); return; }
+    if (!p) { p = document.createElement('button'); p.id = 'duo-petit-qr'; p.type = 'button'; document.body.appendChild(p); p.onclick = () => p.remove(); }
+    try { p.innerHTML = (await qrSvg(LIEN_WEB + '?manette=' + code, 120)) + '<span>+1 🖐️</span>'; } catch { p.remove(); }
+  }
   async function demarrer() {
-    const code = String(1000 + ((Math.random() * 9000) | 0));
+    arreter();
+    code = String(1000 + ((Math.random() * 9000) | 0));
     const f = fenetre('duo');
-    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📺 ${td('titre')}</h2><p></p><div class="duo-code"></div><p class="fa-msg"></p>`;
-    f.querySelector('p').textContent = td('code'); f.querySelector('.duo-code').textContent = code;
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📺 ${td('titre')}</h2>
+      <div class="duo-qr"></div><p class="duo-scan"></p><div class="duo-code"></div><p class="fa-msg"></p>`;
+    f.querySelector('.duo-scan').textContent = td('scan');
+    f.querySelector('.duo-code').textContent = code;
     f.querySelector('.fa-msg').textContent = td('attente');
     f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); arreter(); };
+    qrSvg(LIEN_WEB + '?manette=' + code, 240).then((svg) => { f.querySelector('.duo-qr').innerHTML = svg; }).catch(() => {});
     try {
       const c = await supa();
-      arreter();
       canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
-      canal.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d))
+      canal.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d, payload.id))
         .on('broadcast', { event: 'k' }, ({ payload }) => { if (payload.k === 'retour') { if ($('fa-fond')) fermerFenetre(); else retour(); } else if (payload.k === 'maison') { while (pile.length > 2) pile.pop(); retour(); } })
-        .on('broadcast', { event: 'bonjour' }, () => { fermerFenetre(); jingle(); resterAllume(); canal.send({ type: 'broadcast', event: 'ok', payload: {} }); })
+        .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
+          const j = joueurDe(payload?.id || 'x');
+          if ($('fa-fond')?.querySelector('.fa-t-duo')) fermerFenetre();
+          jingle(); resterAllume(); majPetitQr();
+          canal.send({ type: 'broadcast', event: 'ok', payload: { id: payload?.id, n: j?.n || 0, couleur: j?.couleur } });
+        })
         .subscribe();
     } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
   }
-  function arreter() { if (canal) { clientSupa?.removeChannel(canal); canal = null; } curseur?.remove(); curseur = null; }
-  return { demarrer, arreter, pointeur };
+  function arreter() {
+    if (canal) { clientSupa?.removeChannel(canal); canal = null; }
+    joueurs.forEach((j) => j.curseur.remove()); joueurs.clear(); $('duo-petit-qr')?.remove();
+  }
+  return { demarrer, arreter, pointeur, get nbJoueurs() { return joueurs.size; }, joueurDuPointeur: (pid) => pid - 70, couleurJoueur: (n) => JOUEURS_STYLE[n - 1]?.couleur };
 })();
 // ----- Manette : pavé tactile ou caméra qui suit le doigt -----
 const DuoManette = (() => {
   let canal = null, envoi = 0, dernier = null, camera = null;
+  const monId = Math.random().toString(36).slice(2, 9);
   const envoyer = (x, y, d) => {
     dernier = { x, y, d };
     const t = performance.now();
     if (t - envoi < 33 && d === (envoyer.d ?? d)) return; // ~30 messages par seconde
     envoi = t; envoyer.d = d;
-    canal?.send({ type: 'broadcast', event: 'p', payload: { x: +x.toFixed(4), y: +y.toFixed(4), d } });
+    canal?.send({ type: 'broadcast', event: 'p', payload: { id: monId, x: +x.toFixed(4), y: +y.toFixed(4), d } });
   };
   async function relier(code, f) {
     const c = await supa();
     canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
-    canal.on('broadcast', { event: 'ok' }, () => { f.querySelector('.fa-msg').textContent = td('relie'); son('juste'); });
+    canal.on('broadcast', { event: 'ok' }, ({ payload }) => {
+      if (payload?.id && payload.id !== monId) return;
+      const m = f.querySelector('.fa-msg');
+      m.textContent = td('relie') + (payload?.n ? ` — ${td('joueur')} ${payload.n} ${JOUEURS_STYLE[payload.n - 1].main}` : '');
+      if (payload?.couleur) { m.style.color = payload.couleur; f.querySelector('.duo-pave')?.style.setProperty('border-color', payload.couleur); }
+      son('juste');
+    });
     await new Promise((ok, ko) => { canal.subscribe((s) => { if (s === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
-    canal.send({ type: 'broadcast', event: 'bonjour', payload: {} });
+    canal.send({ type: 'broadcast', event: 'bonjour', payload: { id: monId } });
     resterAllume();
   }
-  function ouvrir() {
+  function ouvrir(codeQr) {
     const f = fenetre('manette');
     f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📱 ${td('titre')}</h2>
       <div class="fa-form duo-relier"><input inputmode="numeric" maxlength="4" autocomplete="off"><button class="fa-bouton fa-principal"></button></div>
@@ -4648,6 +4846,7 @@ const DuoManette = (() => {
       };
     });
     f.querySelectorAll('.duo-touches button').forEach((b) => { b.onclick = () => canal?.send({ type: 'broadcast', event: 'k', payload: { k: b.dataset.k } }); });
+    if (codeQr) { champ.value = codeQr; f.querySelector('.duo-relier button').click(); }
   }
   function arreterCamera() { camera?.stop(); camera = null; }
   function arreter() { arreterCamera(); if (canal) { clientSupa?.removeChannel(canal); canal = null; } }
@@ -4696,7 +4895,7 @@ function cameraIci() {
   boite.querySelector('.fa-aide').textContent = td('aide');
   document.body.appendChild(boite);
   boite.querySelector('button').onclick = () => { DuoManette.arreter(); boite.remove(); DuoEcran.arreter(); };
-  suivreDoigt(boite, (x, y, d) => DuoEcran.pointeur(x, y, d));
+  suivreDoigt(boite, (x, y, d) => DuoEcran.pointeur(x, y, d, 'camera'));
 }
 function blocDuo() {
   const b = $('fa-duo'); if (!b) return;
@@ -4711,6 +4910,11 @@ function blocDuo() {
 choisirLangue(langue);
 accueillir();
 demarrerFamille();
+// le téléphone a scanné le QR de la télé : il devient tout de suite une manette
+const codeManette = new URLSearchParams(location.search).get('manette');
+if (/^\d{4}$/.test(codeManette || '')) { document.documentElement.classList.add('mode-manette'); setTimeout(() => DuoManette.ouvrir(codeManette), 300); }
+// à la télé et sur grand écran : un bouton « téléphone » pour jouer sans passer par l'espace parents
+$('btn-duo').onclick = () => DuoEcran.demarrer();
 setTimeout(() => { avatar?.mode(paletteAmb); avatar?.forme(duJour().mot.emoji); revenirAuNuage(8000); }, 600);
 
 </script>
