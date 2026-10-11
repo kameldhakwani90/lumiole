@@ -1,0 +1,11 @@
+{
+  "appId": "com.lumiole.app",
+  "appName": "Lumiole",
+  "webDir": "www",
+  "backgroundColor": "#0d1026",
+  "ios": { "contentInset": "never", "backgroundColor": "#0d1026" },
+  "android": { "backgroundColor": "#0d1026" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#0d1026", "showSpinner": false }
+  }
+}
