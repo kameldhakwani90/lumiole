@@ -491,6 +491,22 @@
   .tele button:focus, .tele [tabindex]:focus, .tele a:focus, .tele select:focus { outline: 5px solid var(--soleil); outline-offset: 4px; transform: scale(1.06); z-index: 2; position: relative; box-shadow: 0 0 28px rgba(255,209,102,.55); }
   .tele .co-objet:focus { position: absolute; }
   .tele .app { max-width: 1400px; }
+  /* ---------- Deux écrans ---------- */
+  #duo-curseur { position: fixed; left: -28px; top: -28px; width: 56px; height: 56px; border-radius: 50%; z-index: 80; pointer-events: none;
+                 border: 5px solid var(--soleil); box-shadow: 0 0 30px rgba(255,209,102,.7), inset 0 0 18px rgba(255,209,102,.5); transition: transform .05s linear; }
+  #duo-curseur.appui { background: rgba(255,209,102,.45); }
+  .duo-code { font-size: 64px; font-weight: 900; letter-spacing: 12px; color: var(--soleil); margin: 10px 0; }
+  .duo-modes { display: flex; gap: 8px; margin-top: 10px; }
+  .duo-modes .puce { flex: 1; }
+  .fa-t-manette { width: min(100%, 980px); }
+  .duo-pave { margin-top: 10px; aspect-ratio: 16 / 9; max-height: 62vh; margin-inline: auto; border-radius: 22px; border: 2px dashed var(--bord); background: rgba(255,255,255,.05); touch-action: none; }
+  .duo-camera { position: relative; margin-top: 10px; }
+  .duo-camera video { width: 100%; border-radius: 18px; transform: scaleX(-1); background: #000; }
+  .duo-point { position: absolute; width: 22px; height: 22px; margin: -11px; border-radius: 50%; background: var(--soleil); box-shadow: 0 0 18px var(--soleil); pointer-events: none; }
+  .duo-point.appui { background: #ef4444; box-shadow: 0 0 18px #ef4444; }
+  .duo-touches { display: flex; gap: 10px; }
+  .duo-camera-ici { position: fixed; right: 12px; bottom: 12px; width: 220px; z-index: 70; background: rgba(13,16,38,.9); padding: 8px; border-radius: 20px; border: 1px solid var(--bord); }
+  .duo-camera-ici .fa-aide { font-size: 12px; color: var(--doux); margin: 6px 0; }
 </style>
 </head>
 <body>
@@ -1435,7 +1451,7 @@ const CONFIG_APP = {
   revenuecat: { ios: '', android: '' },
   droit: 'complet',                  // « entitlement » RevenueCat qui débloque tout
   // Compte parent (optionnel) : projet Supabase, clé publique « anon »
-  supabase: { url: '', cle: '' },
+  supabase: { url: 'https://paxkqwkuztsgsnzmeskp.supabase.co', cle: 'sb_publishable_cINA5PHkblwM2P38bKbmyg_O7IEdvVs' },
   webToutOuvert: true,               // sur le site web (démo), tout reste ouvert
   confidentialite: 'https://kameldhakwani90.github.io/lumiole/confidentialite.html',
 };
@@ -4136,10 +4152,11 @@ function espaceParents(section) {
     <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-enfants"></section>
     <section class="fa-bloc" id="fa-verrou"></section>
     <section class="fa-bloc" id="fa-pause"></section>
+    <section class="fa-bloc" id="fa-duo"></section>
     <section class="fa-bloc" id="fa-compte"></section><p class="fa-pied"><a target="_blank" rel="noopener"></a></p>`;
   f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); construireAccueil?.(); };
   f.querySelector('.fa-pied a').href = CONFIG_APP.confidentialite; f.querySelector('.fa-pied a').textContent = tf('confidentialite');
-  blocAchat(); blocEnfants(); blocVerrou(); blocPause(); blocCompte();
+  blocAchat(); blocEnfants(); blocVerrou(); blocPause(); blocDuo(); blocCompte();
   if (section) f.querySelector('#fa-' + section)?.scrollIntoView({ block: 'start' });
 }
 function blocAchat() {
@@ -4474,6 +4491,185 @@ function foTrancher() {
   const v = fo.viseur; if (!v) return;
   for (const o of fo.objets) if (!o.mort && Math.hypot(o.x - v.x, o.y - v.y) < o.r * 1.6) { foToucher(o); break; }
   fo.trace = [{ x: v.x - 30, y: v.y + 15, t: performance.now() }, { x: v.x + 30, y: v.y - 15, t: performance.now() }];
+}
+
+// =====================================================================
+// ---------- Deux écrans : la télé (ou une tablette) = grand écran, le téléphone = manette ----------
+// Le téléphone sert de pavé tactile, ou de caméra qui suit le doigt de l'enfant (repérage de la main
+// sur le téléphone, rien n'est envoyé à part la position du doigt). Liaison en direct par Supabase Realtime.
+// =====================================================================
+const DUO_TXT = {
+  titre: { fr: 'Deux écrans', en: 'Two screens', ar: 'شاشتان' },
+  txt: { fr: 'La télé ou la tablette affiche Lumi en grand, le téléphone sert de manette ou de caméra qui suit le doigt.', en: 'The TV or tablet shows Lumi big, the phone is the controller or a camera that follows the finger.', ar: 'التلفاز أو اللوح يعرض لومي كبيرًا، والهاتف جهاز تحكّم أو كاميرا تتبع الإصبع.' },
+  ecran: { fr: '📺 Cet appareil est le grand écran', en: '📺 This device is the big screen', ar: '📺 هذا الجهاز هو الشاشة الكبيرة' },
+  manette: { fr: '📱 Cet appareil est la manette', en: '📱 This device is the controller', ar: '📱 هذا الجهاز هو جهاز التحكّم' },
+  camIci: { fr: '📷 Jouer avec la caméra de cet appareil', en: '📷 Play with this device’s camera', ar: '📷 العب بكاميرا هذا الجهاز' },
+  code: { fr: 'Sur le téléphone : Espace parents → Deux écrans → Manette, puis tape ce code', en: 'On the phone: Parents → Two screens → Controller, then type this code', ar: 'على الهاتف: ركن الأولياء ← شاشتان ← جهاز التحكّم، ثم اكتب هذا الرمز' },
+  taper: { fr: 'Le code affiché sur la télé', en: 'The code shown on the TV', ar: 'الرمز الظاهر على التلفاز' },
+  relier: { fr: 'Relier', en: 'Connect', ar: 'اربط' },
+  relie: { fr: '✅ Relié ! Joue sur le grand écran', en: '✅ Connected! Play on the big screen', ar: '✅ تم الربط! العب على الشاشة الكبيرة' },
+  pave: { fr: '👆 Pavé tactile', en: '👆 Touchpad', ar: '👆 لوحة لمس' },
+  camera: { fr: '📷 Caméra', en: '📷 Camera', ar: '📷 الكاميرا' },
+  aide: { fr: 'Montre ton doigt à la caméra. Pince le pouce et l’index pour toucher.', en: 'Show your finger to the camera. Pinch thumb and index to tap.', ar: 'أرِ إصبعك للكاميرا. اجمع الإبهام والسبابة للّمس.' },
+  attente: { fr: 'En attente du téléphone…', en: 'Waiting for the phone…', ar: 'في انتظار الهاتف…' },
+  erreur: { fr: 'La liaison n’a pas marché (connexion internet ?).', en: 'Couldn’t connect (internet connection?).', ar: 'تعذّر الربط (الاتصال بالإنترنت؟).' },
+};
+const td = (k) => DUO_TXT[k][langue] ?? DUO_TXT[k].fr;
+let clientSupa = null;
+async function supa() {
+  if (clientSupa) return clientSupa;
+  if (!window.supabase) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+  clientSupa = window.supabase.createClient(CONFIG_APP.supabase.url, CONFIG_APP.supabase.cle);
+  return clientSupa;
+}
+// ----- Grand écran : reçoit le doigt et le transforme en vrais touchers -----
+const DuoEcran = (() => {
+  let canal = null, etat = { appui: false }, curseur = null;
+  function pointeur(nx, ny, appui) {
+    const x = nx * innerWidth, y = ny * innerHeight;
+    if (!curseur) { curseur = document.createElement('div'); curseur.id = 'duo-curseur'; document.body.appendChild(curseur); }
+    curseur.style.transform = `translate(${x}px, ${y}px)`;
+    curseur.classList.toggle('appui', appui);
+    const el = document.elementFromPoint(x, y);
+    const o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 77, pointerType: 'touch', isPrimary: true };
+    if (appui && !etat.appui) { etat = { appui: true, x0: x, y0: y }; el?.dispatchEvent(new PointerEvent('pointerdown', o)); }
+    else if (appui) el?.dispatchEvent(new PointerEvent('pointermove', o));
+    else if (etat.appui) {
+      el?.dispatchEvent(new PointerEvent('pointerup', o));
+      if (Math.hypot(x - etat.x0, y - etat.y0) < 30) (el?.closest('button, a, [tabindex], input, select') || null)?.click();
+      etat = { appui: false };
+    }
+  }
+  async function demarrer() {
+    const code = String(1000 + ((Math.random() * 9000) | 0));
+    const f = fenetre('duo');
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📺 ${td('titre')}</h2><p></p><div class="duo-code"></div><p class="fa-msg"></p>`;
+    f.querySelector('p').textContent = td('code'); f.querySelector('.duo-code').textContent = code;
+    f.querySelector('.fa-msg').textContent = td('attente');
+    f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); arreter(); };
+    try {
+      const c = await supa();
+      arreter();
+      canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
+      canal.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d))
+        .on('broadcast', { event: 'k' }, ({ payload }) => { if (payload.k === 'retour') { if ($('fa-fond')) fermerFenetre(); else retour(); } else if (payload.k === 'maison') { while (pile.length > 2) pile.pop(); retour(); } })
+        .on('broadcast', { event: 'bonjour' }, () => { fermerFenetre(); jingle(); canal.send({ type: 'broadcast', event: 'ok', payload: {} }); })
+        .subscribe();
+    } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
+  }
+  function arreter() { if (canal) { clientSupa?.removeChannel(canal); canal = null; } curseur?.remove(); curseur = null; }
+  return { demarrer, arreter, pointeur };
+})();
+// ----- Manette : pavé tactile ou caméra qui suit le doigt -----
+const DuoManette = (() => {
+  let canal = null, envoi = 0, dernier = null, camera = null;
+  const envoyer = (x, y, d) => {
+    dernier = { x, y, d };
+    const t = performance.now();
+    if (t - envoi < 33 && d === (envoyer.d ?? d)) return; // ~30 messages par seconde
+    envoi = t; envoyer.d = d;
+    canal?.send({ type: 'broadcast', event: 'p', payload: { x: +x.toFixed(4), y: +y.toFixed(4), d } });
+  };
+  async function relier(code, f) {
+    const c = await supa();
+    canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
+    canal.on('broadcast', { event: 'ok' }, () => { f.querySelector('.fa-msg').textContent = td('relie'); son('juste'); });
+    await new Promise((ok, ko) => { canal.subscribe((s) => { if (s === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
+    canal.send({ type: 'broadcast', event: 'bonjour', payload: {} });
+  }
+  function ouvrir() {
+    const f = fenetre('manette');
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📱 ${td('titre')}</h2>
+      <div class="fa-form duo-relier"><input inputmode="numeric" maxlength="4" autocomplete="off"><button class="fa-bouton fa-principal"></button></div>
+      <p class="fa-msg"></p>
+      <div class="duo-modes" hidden><button class="puce on" data-m="pave"></button><button class="puce" data-m="camera"></button></div>
+      <div class="duo-pave" hidden></div>
+      <div class="duo-camera" hidden><video playsinline muted></video><span class="duo-point"></span><p class="fa-aide"></p></div>
+      <div class="duo-touches" hidden><button class="fa-bouton" data-k="retour">⬅</button><button class="fa-bouton" data-k="maison">🏠</button></div>`;
+    const champ = f.querySelector('input'); champ.placeholder = td('taper');
+    f.querySelector('.duo-relier button').textContent = td('relier');
+    f.querySelector('[data-m=pave]').textContent = td('pave'); f.querySelector('[data-m=camera]').textContent = td('camera');
+    f.querySelector('.duo-camera .fa-aide').textContent = td('aide');
+    $('fa-fond').onclick = null;
+    f.querySelector('.fa-fermer').onclick = () => { arreter(); fermerFenetre(); };
+    f.querySelector('.duo-relier button').onclick = async () => {
+      if (!/^\d{4}$/.test(champ.value)) return;
+      try { await relier(champ.value, f); } catch { f.querySelector('.fa-msg').textContent = td('erreur'); return; }
+      f.querySelector('.duo-relier').hidden = true;
+      ['.duo-modes', '.duo-pave', '.duo-touches'].forEach((s) => { f.querySelector(s).hidden = false; });
+    };
+    // pavé : la position du doigt sur le téléphone = la position sur le grand écran
+    const pave = f.querySelector('.duo-pave');
+    const pos = (e) => { const r = pave.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+    pave.onpointerdown = (e) => { pave.setPointerCapture(e.pointerId); envoyer(...pos(e), true); };
+    pave.onpointermove = (e) => { if (e.buttons || e.pressure) envoyer(...pos(e), true); };
+    pave.onpointerup = pave.onpointercancel = (e) => { envoi = 0; envoyer(...pos(e), false); };
+    f.querySelectorAll('.duo-modes .puce').forEach((b) => {
+      b.onclick = () => {
+        f.querySelectorAll('.duo-modes .puce').forEach((x) => x.classList.toggle('on', x === b));
+        const cam = b.dataset.m === 'camera';
+        pave.hidden = cam; f.querySelector('.duo-camera').hidden = !cam;
+        if (cam) suivreDoigt(f.querySelector('.duo-camera'), envoyer); else arreterCamera();
+      };
+    });
+    f.querySelectorAll('.duo-touches button').forEach((b) => { b.onclick = () => canal?.send({ type: 'broadcast', event: 'k', payload: { k: b.dataset.k } }); });
+  }
+  function arreterCamera() { camera?.stop(); camera = null; }
+  function arreter() { arreterCamera(); if (canal) { clientSupa?.removeChannel(canal); canal = null; } }
+  return { ouvrir, arreter, set camera(c) { camera = c; } };
+})();
+// ----- Suivre le doigt avec la caméra (MediaPipe, sur l'appareil) -----
+let repereMain = null;
+async function suivreDoigt(boite, rappel) {
+  const video = boite.querySelector('video'), point = boite.querySelector('.duo-point');
+  try {
+    if (!repereMain) {
+      const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+      const fichiers = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+      repereMain = await vision.HandLandmarker.createFromOptions(fichiers, {
+        baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
+        runningMode: 'VIDEO', numHands: 1,
+      });
+    }
+    const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+    video.srcObject = flux; await video.play();
+    let actif = true, lisse = null;
+    DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
+    const boucle = () => {
+      if (!actif) return;
+      const r = repereMain.detectForVideo(video, performance.now());
+      const m = r.landmarks?.[0];
+      if (m) {
+        const bout = m[8], pouce = m[4];
+        // image en miroir, et on « agrandit » le centre pour atteindre les bords sans tendre le bras
+        let x = Math.min(1, Math.max(0, ((1 - bout.x) - .5) * 1.5 + .5)), y = Math.min(1, Math.max(0, (bout.y - .5) * 1.5 + .5));
+        lisse = lisse ? { x: lisse.x * .6 + x * .4, y: lisse.y * .6 + y * .4 } : { x, y };
+        const pince = Math.hypot(bout.x - pouce.x, bout.y - pouce.y) < .06;
+        point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.classList.toggle('appui', pince);
+        rappel(lisse.x, lisse.y, pince);
+      }
+      requestAnimationFrame(boucle);
+    };
+    boucle();
+  } catch (e) { boite.querySelector('.fa-aide').textContent = td('erreur'); console.warn(e); }
+}
+// ----- La caméra sur le grand écran lui-même (webcam branchée sur la télé ou tablette) -----
+function cameraIci() {
+  fermerFenetre();
+  const boite = document.createElement('div'); boite.className = 'duo-camera duo-camera-ici';
+  boite.innerHTML = '<video playsinline muted></video><span class="duo-point"></span><p class="fa-aide"></p><button class="fa-bouton">✕</button>';
+  boite.querySelector('.fa-aide').textContent = td('aide');
+  document.body.appendChild(boite);
+  boite.querySelector('button').onclick = () => { DuoManette.arreter(); boite.remove(); DuoEcran.arreter(); };
+  suivreDoigt(boite, (x, y, d) => DuoEcran.pointeur(x, y, d));
+}
+function blocDuo() {
+  const b = $('fa-duo'); if (!b) return;
+  b.innerHTML = `<h3>📺📱 ${td('titre')}</h3><p></p>`;
+  b.querySelector('p').textContent = td('txt');
+  [['ecran', () => DuoEcran.demarrer()], ['manette', () => DuoManette.ouvrir()], ['camIci', cameraIci]].forEach(([k, fn]) => {
+    const x = document.createElement('button'); x.className = 'fa-bouton'; x.textContent = td(k); x.onclick = fn; b.appendChild(x);
+  });
 }
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
