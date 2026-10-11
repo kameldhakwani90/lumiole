@@ -487,6 +487,10 @@
   .co-chiffre.faux { animation: non .4s; }
   .fa-puces { display: flex; flex-wrap: wrap; gap: 8px; }
   @media (min-width: 900px) and (orientation: landscape) { [data-ecran="compter"] .corps { grid-template-columns: 1fr; max-width: 1100px; width: 100%; margin-inline: auto; } .co-zone { height: 60vh; } }
+  /* ---------- Télé : sélection bien visible de loin ---------- */
+  .tele button:focus, .tele [tabindex]:focus, .tele a:focus, .tele select:focus { outline: 5px solid var(--soleil); outline-offset: 4px; transform: scale(1.06); z-index: 2; position: relative; box-shadow: 0 0 28px rgba(255,209,102,.55); }
+  .tele .co-objet:focus { position: absolute; }
+  .tele .app { max-width: 1400px; }
 </style>
 </head>
 <body>
@@ -3505,7 +3509,7 @@ function foNouvelle() {
   let forme = hasardDe(types), couleur = hasardDe(coul);
   if (Math.random() < .55) { forme = fo.but.forme || forme; couleur = fo.but.couleur || couleur; }
   const r = Math.min(W, 700) * (.085 + Math.random() * .03);
-  fo.objets.push({ forme, couleur, x: r + Math.random() * (W - 2 * r), y: -r, r, vy: 38 + fo.manche * 6 + Math.random() * 20, rot: Math.random() * 6, vr: (Math.random() - .5) * 1.2, vx: (Math.random() - .5) * 20 });
+  fo.objets.push({ forme, couleur, x: r + Math.random() * (W - 2 * r), y: -r, r, vy: (38 + fo.manche * 6 + Math.random() * 20) * (modeTele ? .65 : 1), rot: Math.random() * 6, vr: (Math.random() - .5) * 1.2, vx: (Math.random() - .5) * 20 });
 }
 function foEclat(x, y, couleur) {
   for (let i = 0; i < 26; i++) {
@@ -3552,6 +3556,10 @@ function foBoucle(t) {
   if (fo.trace.length > 1) {
     g.globalAlpha = 1; g.strokeStyle = 'rgba(255,240,200,.9)'; g.lineCap = 'round'; g.lineJoin = 'round';
     for (let i = 1; i < fo.trace.length; i++) { const a = fo.trace[i - 1], b = fo.trace[i]; g.lineWidth = 2 + i * .9; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
+  }
+  if (fo.viseur) { // viseur de la télécommande
+    g.globalAlpha = .9; g.strokeStyle = '#ffd166'; g.lineWidth = 5; g.shadowColor = '#ffd166'; g.shadowBlur = 18;
+    g.beginPath(); g.arc(fo.viseur.x, fo.viseur.y, 34 + Math.sin(t / 180) * 4, 0, Math.PI * 2); g.stroke(); g.shadowBlur = 0;
   }
   g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   fo.trace = fo.trace.filter((p) => t - p.t < 160);
@@ -3604,6 +3612,7 @@ function afficher() {
   else if (ecran === 'compter') setTimeout(demarrerCompter, 50);
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
+  focusTele();
 }
 
 function aller(id, montrerCarte = true) {
@@ -4386,6 +4395,85 @@ function blocPause() {
     x.onclick = () => { PauseDouce.regler(m); blocPause(); };
     b.querySelector('.fa-puces').appendChild(x);
   });
+}
+
+// =====================================================================
+// ---------- Télé (Android TV, NVIDIA Shield) : jouer avec la télécommande ----------
+// Les flèches déplacent la sélection vers le bouton le plus proche dans cette direction,
+// OK l'active, Retour revient en arrière. Dans « Pluie de formes », les flèches déplacent un viseur.
+// =====================================================================
+let modeTele = /Android TV|AFT|SHIELD|BRAVIA|GoogleTV|Chromecast/i.test(navigator.userAgent) || matchMedia('(pointer: none)').matches;
+const DIRECTIONS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+function focusables() {
+  const racine = $('fa-fond') || document;
+  return [...racine.querySelectorAll('button, a[href], input, select, [tabindex]:not([tabindex="-1"])')].filter((e) => {
+    if (e.disabled || e.closest('[hidden]')) return false;
+    const r = e.getBoundingClientRect();
+    return r.width > 4 && r.height > 4 && getComputedStyle(e).visibility !== 'hidden';
+  });
+}
+function deplacerFocus(dx, dy) {
+  const liste = focusables(); if (!liste.length) return;
+  const actuel = document.activeElement;
+  if (!liste.includes(actuel)) { liste[0].focus(); return; }
+  const a = actuel.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+  let meilleur = null, score = Infinity;
+  for (const e of liste) {
+    if (e === actuel) continue;
+    const r = e.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const avance = (x - ax) * dx + (y - ay) * dy; // distance dans la bonne direction
+    if (avance <= 4) continue;
+    const cote = Math.abs((x - ax) * dy) + Math.abs((y - ay) * dx); // écart sur le côté
+    const s = avance + cote * 2.2;
+    if (s < score) { score = s; meilleur = e; }
+  }
+  if (meilleur) { meilleur.focus({ preventScroll: true }); meilleur.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }
+}
+document.addEventListener('keydown', (e) => {
+  const d = DIRECTIONS[e.key];
+  if (e.key === 'Escape' || e.key === 'GoBack' || e.key === 'BrowserBack') {
+    if ($('fa-fond')) { fermerFenetre(); e.preventDefault(); return; }
+    if (pile.length > 1) { retour(); e.preventDefault(); }
+    return;
+  }
+  if (!d) return;
+  const champ = document.activeElement?.matches?.('input, select, textarea');
+  if (champ && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+  if (!modeTele) { modeTele = true; document.documentElement.classList.add('tele'); }
+  // Pluie de formes : un viseur lumineux qu'on déplace, OK pour trancher
+  if (fo && !$('fa-fond')) { foViseur(d[0], d[1]); e.preventDefault(); return; }
+  deplacerFocus(d[0], d[1]);
+  e.preventDefault();
+});
+document.addEventListener('keydown', (e) => {
+  if ((e.key === 'Enter' || e.key === ' ') && fo && !$('fa-fond') && fo.viseur) { foTrancher(); e.preventDefault(); }
+});
+if (modeTele) document.documentElement.classList.add('tele');
+// Bouton Retour d'Android (téléphone et télé)
+PLUGINS.App?.addListener?.('backButton', () => {
+  if ($('fa-fond')) return fermerFenetre();
+  if (pile.length > 1) return retour();
+  PLUGINS.App.minimizeApp?.();
+});
+// après chaque changement d'écran, à la télé, on met la sélection sur le premier bouton utile
+function focusTele() {
+  if (!modeTele) return;
+  setTimeout(() => {
+    if (focusables().includes(document.activeElement)) return;
+    const premier = document.querySelector('.cote-activite section:not([hidden]) button, .cote-activite section:not([hidden]) [tabindex]');
+    (premier || focusables()[0])?.focus({ preventScroll: true });
+  }, 120);
+}
+function foViseur(dx, dy) {
+  const W = fo.c.width / fo.dpr, H = fo.c.height / fo.dpr;
+  fo.viseur = fo.viseur || { x: W / 2, y: H * .6 };
+  fo.viseur.x = Math.max(20, Math.min(W - 20, fo.viseur.x + dx * W * .09));
+  fo.viseur.y = Math.max(20, Math.min(H - 20, fo.viseur.y + dy * H * .09));
+}
+function foTrancher() {
+  const v = fo.viseur; if (!v) return;
+  for (const o of fo.objets) if (!o.mort && Math.hypot(o.x - v.x, o.y - v.y) < o.r * 1.6) { foToucher(o); break; }
+  fo.trace = [{ x: v.x - 30, y: v.y + 15, t: performance.now() }, { x: v.x + 30, y: v.y - 15, t: performance.now() }];
 }
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
