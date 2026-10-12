@@ -2037,6 +2037,14 @@
   .pw-liens a[hidden] { display: none; }
   .vt-ico.vt-famille { color: #2EE6C5; font-size: calc(var(--vu) * 28); }
   .avis-google { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 200; width: min(92vw, 520px); padding: 14px 18px; border-radius: 16px; background: #131A3D; color: #F4FBF8; border: 1px solid rgba(46,230,197,.5); box-shadow: 0 12px 40px rgba(0,0,0,.5); font: 700 15px/1.4 system-ui, sans-serif; text-align: center; }
+
+  /* dessin sur iPhone : la hauteur visible réelle (barre d'adresse comprise) et la zone sûre du bas */
+  @supports (height: 100dvh) { .atelier #scene { height: 100dvh !important; } }
+  @media (max-width: 700px) {
+    .atelier .at-outils { bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); }
+    .atelier canvas#trace { top: 13vh; height: calc(100vh - 13vh - 150px - env(safe-area-inset-bottom, 0px)); }
+    @supports (height: 100dvh) { .atelier canvas#trace { top: 13dvh; height: calc(100dvh - 13dvh - 150px - env(safe-area-inset-bottom, 0px)); } }
+  }
 </style>
 </head>
 <body>
