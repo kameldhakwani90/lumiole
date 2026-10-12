@@ -2374,6 +2374,11 @@
   .dc-neige i { position: absolute; top: -12px; width: var(--s); height: var(--s); border-radius: 50%; background: #fff; opacity: .8; will-change: transform; animation: dc-tombe var(--t) linear infinite; }
   @keyframes dc-tombe { to { transform: translate3d(40px, 105vh, 0); } }
   @media (prefers-reduced-motion: reduce) { .dc-neige { display: none; } }
+  /* cibles posées dans un décor peint : des citrouilles éteintes qu'on allume */
+  .av-cible.pose { width: clamp(52px, 9vh, 110px); height: clamp(52px, 9vh, 110px); font-size: clamp(30px, 6.4vh, 76px); transform: translate(-50%, -88%); background: none;
+    filter: grayscale(.85) brightness(.55); animation: av-appel 1.8s ease-in-out infinite; transition: filter .4s; }
+  .av-cible.pose.allumee { filter: none; animation: none; background: radial-gradient(circle, rgba(255,200,110,.75), rgba(255,140,60,0) 70%); }
+  @keyframes av-appel { 50% { transform: translate(-50%, -88%) scale(1.12); filter: grayscale(.6) brightness(.8); } }
 </style>
 </head>
 <body>
@@ -10832,6 +10837,23 @@ MODULES.aventure = (() => {
     if (d.type === 'tap') {
       let reste = d.n; boite.innerHTML = '<div class="av-cibles"></div>';
       const zone = boite.querySelector('.av-cibles');
+      // décor peint avec des emplacements : les cibles sont posées dans le décor (éteintes), on les allume en les touchant
+      const spots = f.decors[decorId]?.cibles, sol = z.querySelectorAll('.ci-couche')[2]?.querySelector('svg');
+      if (spots && sol) {
+        camera('large');
+        setTimeout(() => {
+          if (fini || !z) return;
+          const m = sol.getScreenCTM(), zr = zone.getBoundingClientRect();
+          spots.slice(0, d.n).forEach(([x, y], i) => {
+            const pt = new DOMPoint(x, y).matrixTransform(m);
+            const b = bouton(d.cible, () => { if (b.classList.contains('allumee')) return; b.classList.add('allumee'); bruitage('pop'); if (--reste <= 0) reussi(); }, 'av-cible pose');
+            b.style.left = ((pt.x - zr.left) / zr.width * 100).toFixed(2) + '%'; b.style.top = ((pt.y - zr.top) / zr.height * 100).toFixed(2) + '%';
+            b.style.animationDelay = (i * .25) + 's'; zone.appendChild(b);
+          });
+          if (modeTele) zone.querySelector('button')?.focus({ preventScroll: true });
+        }, 1450);
+        return;
+      }
       const placer = () => {
         if (fini) return;
         const b = bouton(d.cible, () => { b.classList.add('pris'); bruitage('pop'); setTimeout(() => b.remove(), 300); if (--reste <= 0) reussi(); else placer(); }, 'av-cible' + (d.bouge ? ' bouge' : ''));
@@ -10990,7 +11012,6 @@ const CINE = (() => {
   const maison = (x, y, s, i) => {
     const teinte = ['#3a2a63', '#41306b', '#352659'][i % 3];
     return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-44" y="-70" width="88" height="70" fill="${teinte}"/><path d="M-54 -68 L0 -118 L54 -68 Z" fill="#2a1d4d"/><rect x="18" y="-126" width="14" height="34" fill="#2a1d4d"/>
-      <ellipse cx="28" cy="-140" rx="10" ry="7" fill="#b9a3cf" opacity=".22"/><ellipse cx="36" cy="-162" rx="14" ry="9" fill="#b9a3cf" opacity=".12"/>
       <g filter="url(#cn-lueur)"><rect class="cn-fenetre" x="-30" y="-52" width="18" height="20" rx="3" fill="#ffc46b" style="animation-delay:${-i * .7}s"/>${i % 2 ? `<rect class="cn-fenetre" x="12" y="-52" width="18" height="20" rx="3" fill="#ffb050" style="animation-delay:${-i * .4}s"/>` : ''}</g>
       <rect x="-8" y="-30" width="16" height="30" rx="3" fill="#1a1236"/></g>`;
   };
@@ -10998,7 +11019,7 @@ const CINE = (() => {
   const sapin = (x, y, s, c) => `<path d="M${x} ${y - 200 * s} L${x + 60 * s} ${y - 60 * s} L${x + 30 * s} ${y - 60 * s} L${x + 75 * s} ${y} L${x - 75 * s} ${y} L${x - 30 * s} ${y - 60 * s} L${x - 60 * s} ${y - 60 * s} Z" fill="${c}"/>`;
   const arbreNu = (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})" fill="none" stroke="${c}" stroke-linecap="round"><path d="M0 0 C 4 -60, -6 -120, 0 -180" stroke-width="22"/><path d="M0 -110 C 30 -130, 60 -150, 90 -190" stroke-width="10"/><path d="M0 -140 C -30 -160, -60 -170, -80 -210" stroke-width="9"/><path d="M60 -160 C 70 -180, 80 -200, 76 -224" stroke-width="5"/><path d="M-50 -180 C -60 -200, -54 -220, -40 -236" stroke-width="5"/></g>`;
   const herbes = (n, y, c) => coll(n, (i) => { const x = -100 + i * (1800 / n) + h() * 20, ht = 70 + h() * 110; return `<path d="M${x.toFixed(0)} ${y} Q${(x + 8).toFixed(0)} ${(y - ht / 2).toFixed(0)} ${(x + 18 - h() * 40).toFixed(0)} ${(y - ht).toFixed(0)} Q${(x + 14).toFixed(0)} ${(y - ht / 2).toFixed(0)} ${(x + 22).toFixed(0)} ${y} Z" fill="${c}"/>`; });
-  const chateauLoin = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#2a1d55"><rect x="20" y="70" width="140" height="90"/><rect x="0" y="40" width="40" height="120"/><path d="M-6 42 L20 -10 L46 42 Z" fill="#3a2766"/><rect x="140" y="30" width="44" height="130"/><path d="M134 32 L162 -26 L190 32 Z" fill="#3a2766"/><rect x="70" y="20" width="44" height="80"/><path d="M64 22 L92 -40 L120 22 Z" fill="#3a2766"/><g filter="url(#cn-lueur)"><rect x="86" y="46" width="12" height="18" rx="6" fill="#ffc46b" class="cn-clignote"/></g></g>`;
+  const chateauLoin = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#2a1d55"><path d="M-60 158 C -20 140, 200 140, 250 158 C 300 200, 340 260, 360 320 L-170 320 C -140 250, -100 190, -60 158 Z" fill="#3a2a66"/><rect x="20" y="70" width="140" height="90"/><rect x="0" y="40" width="40" height="120"/><path d="M-6 42 L20 -10 L46 42 Z" fill="#3a2766"/><rect x="140" y="30" width="44" height="130"/><path d="M134 32 L162 -26 L190 32 Z" fill="#3a2766"/><rect x="70" y="20" width="44" height="80"/><path d="M64 22 L92 -40 L120 22 Z" fill="#3a2766"/><g filter="url(#cn-lueur)"><rect x="86" y="46" width="12" height="18" rx="6" fill="#ffc46b" class="cn-clignote"/></g></g>`;
 
   // ---------- les décors ----------
   const DECORS = {
@@ -11016,7 +11037,7 @@ const CINE = (() => {
       milieu: svg(`${coll(9, (i) => `<rect x="${60 + i * 52}" y="${742 - (70 - i * 3)}" width="10" height="${70 - i * 3}" rx="3" fill="#1a1236"/>`)}<rect x="50" y="694" width="430" height="8" fill="#1a1236"/><rect x="50" y="720" width="430" height="8" fill="#1a1236"/>
         <g transform="translate(560 560)"><circle cx="0" cy="40" r="110" fill="url(#cn-chaud)" opacity=".5"/><rect x="-4" y="40" width="8" height="160" fill="#120c28"/><rect x="-14" y="22" width="28" height="34" rx="6" fill="#ffcf7a" filter="url(#cn-lueur)"/><path d="M-18 24 L0 6 L18 24 Z" fill="#120c28"/></g>
         ${arbreNu(1570, 770, 1.3, '#140e2a')}${citrouille(250, 800, 1.1, true)}${citrouille(1240, 790, .9, true)}`, DEFS),
-      avant: svg(`<g opacity=".92"><path class="cn-branche" d="M-200 -40 C 60 40, 160 90, 300 110 C 230 130, 140 140, 40 200 C 140 170, 220 175, 300 190" stroke="#07050f" stroke-width="26" fill="none" stroke-linecap="round"/>${coll(16, () => `<ellipse cx="${(-60 + h() * 340).toFixed(0)}" cy="${(20 + h() * 170).toFixed(0)}" rx="26" ry="12" fill="#0a0716" transform="rotate(${(h() * 180).toFixed(0)})"/>`)}${herbes(46, 960, '#06040d')}</g>`, DEFS),
+      avant: svg(`<g opacity=".92">${herbes(46, 960, '#06040d')}</g>`, DEFS),
     }; },
     // le carrefour dans les bois : deux chemins, un vieux panneau
     carrefour: () => { graine = 29; return {
@@ -11099,7 +11120,7 @@ FILMS.push({
   },
   // décors : [emoji, x, y, taille en vh, couche (loin | milieu | avant)]
   decors: {
-    village: { peint: 'village', ciel: ['#2A1E68', '#0B0A26'], astre: ['🌕', .8, .16, 14], part: 'etoiles', sol: ['#2A1B45', '#120B22'],
+    village: { peint: 'village', cibles: [[186, 574], [468, 580], [626, 600], [1330, 674], [1160, 748], [330, 744]], ciel: ['#2A1E68', '#0B0A26'], astre: ['🌕', .8, .16, 14], part: 'etoiles', sol: ['#2A1B45', '#120B22'],
       el: [['🏠', .08, .58, 13, 'loin'], ['🏡', .22, .56, 15, 'loin'], ['⛪', .38, .5, 18, 'loin'], ['🏠', .56, .58, 12, 'loin'], ['🏡', .7, .56, 14, 'loin'], ['🏠', .92, .58, 13, 'loin'],
         ['🎃', .15, .74, 7, 'milieu'], ['🏮', .33, .62, 6, 'milieu'], ['🎃', .47, .76, 6, 'milieu'], ['🌳', .86, .66, 16, 'milieu'], ['🍂', .05, .93, 9, 'avant'], ['🌿', .95, .92, 11, 'avant']] },
     carrefour: { peint: 'carrefour', ciel: ['#26205A', '#0A0822'], astre: ['🌕', .2, .15, 11], part: 'feuilles', sol: ['#2B2240', '#100A1C'],
