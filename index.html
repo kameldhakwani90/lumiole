@@ -2172,6 +2172,14 @@
   .vitrine[dir="rtl"] .vt-titre, .vitrine[dir="rtl"] .vt-desc { text-align: right; }
   .vt-rtl.vitrine-grand #scene { right: auto; left: calc(var(--vu) * 20); }
   .vitrine[dir="rtl"]:not(.vt-grand) .vt-ligne-r h3 { padding: 0 16px; }
+  /* en arabe, la lueur du fond passe à gauche (sous l'image), sinon on voit une cassure nette à côté du texte */
+  .vitrine[dir="rtl"] { background: radial-gradient(ellipse at 30% 0%, #1E2A6B 0%, #0A0E26 62%); }
+  .vitrine[dir="rtl"] .vt-art-heros::after { background: linear-gradient(270deg, #0A0E26 0%, rgba(10,14,38,.85) 26%, rgba(10,14,38,0) 62%), linear-gradient(0deg, #0A0E26 0%, rgba(10,14,38,0) 38%); }
+  .vitrine[dir="rtl"] .vt-texte { width: calc(var(--vu) * 720); }
+  /* l'image de l'affiche se fond dans le fond de la page (masque), au lieu d'un dégradé de couleur qui laissait une cassure nette */
+  .vt-art-heros { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); mask-composite: intersect; }
+  .vitrine[dir="rtl"] .vt-art-heros { -webkit-mask-image: linear-gradient(270deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); mask-image: linear-gradient(270deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); }
+  .vt-art-heros::after, .vitrine[dir="rtl"] .vt-art-heros::after { background: none; }
 </style>
 </head>
 <body>
