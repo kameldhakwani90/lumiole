@@ -2118,6 +2118,33 @@
   .vi-d-choix .vi-forme { width: 96px; }
   .vi-sinon { margin: 4px 0 0; color: #A9BCD0; font-weight: 700; font-size: 14px; }
   .tele .vi-d-txt { font-size: 3vh; } .tele .vi-d-oui { height: 8vh; font-size: 3vh; } .tele .vi-sinon { font-size: 2vh; }
+
+  /* « Mon dessin prend vie » : j'apprends le mot */
+  .vi-mot { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); width: min(560px, calc(100% - 24px)); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 14px 14px 12px; border-radius: 22px; background: rgba(8,10,34,.72); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.14); color: #F4FBF8; animation: vi-mot-entre .5s ease-out; }
+  .vi-mot[hidden] { display: none; }
+  @keyframes vi-mot-entre { from { opacity: 0; transform: translate(-50%, -12px); } }
+  .vi-mot-x { position: absolute; top: 6px; right: 8px; width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,.1); color: #fff; font: 900 18px system-ui; cursor: pointer; }
+  .vi-tuiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 0 30px; }
+  .vi-t { min-width: 40px; height: 50px; padding: 0 6px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.14); font: 800 30px/1 'Baloo 2', system-ui, sans-serif; color: rgba(244,251,248,.45); transition: transform .2s, background .2s, color .2s; }
+  .vi-t.espace { min-width: 14px; background: none; border: none; }
+  .vi-t.allumee { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; transform: translateY(-5px) scale(1.12); }
+  .vi-t.vue { color: #F4FBF8; }
+  .vi-art { margin: 0; font: 800 22px/1.2 'Baloo 2', system-ui, sans-serif; }
+  .vi-infos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
+  .vi-infos > span { padding: 5px 12px; border-radius: 16px; background: rgba(255,255,255,.08); }
+  .vi-infos b { color: #A9BCD0; font-weight: 700; }
+  .vi-langues { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .vi-lg { padding: 7px 14px; border-radius: 18px; border: 1px solid rgba(46,230,197,.4); background: rgba(46,230,197,.08); color: #F4FBF8; font: 700 15px system-ui, sans-serif; cursor: pointer; }
+  .vi-mot-b { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .vi-mot-b .mod-b { height: 40px; font-size: 14px; padding: 0 14px; }
+  .vi-mot.petit { width: auto; padding: 8px 46px 8px 12px; gap: 0; }
+  .vi-mot.petit > :not(.vi-tuiles):not(.vi-mot-x) { display: none; }
+  .vi-mot.petit .vi-tuiles { padding: 0; cursor: pointer; } .vi-mot.petit .vi-t { min-width: 26px; height: 32px; font-size: 18px; border-radius: 8px; }
+  @media (max-width: 420px) { .vi-t { min-width: 32px; height: 42px; font-size: 24px; } .vi-art { font-size: 19px; } }
+  .tele .vi-mot { width: 46vw; top: 3vh; padding: 2.4vh 2vw; gap: 1.4vh; } .tele .vi-t { min-width: 6vh; height: 7.4vh; font-size: 4.4vh; } .tele .vi-art { font-size: 3.6vh; }
+  .tele .vi-infos { font-size: 2vh; } .tele .vi-lg { font-size: 2.2vh; } .tele .vi-mot-b .mod-b { height: 6vh; font-size: 2.2vh; }
+  .vi-mot.petit .vi-tuiles { flex-wrap: nowrap; }
 </style>
 </head>
 <body>
@@ -8936,6 +8963,11 @@ const JX = {
   abracadabra: { fr: 'Abracadabra ! Ton dessin devient', en: 'Abracadabra! Your drawing becomes', ar: 'أبرا كادابرا! رسمك يصبح' },
   transformer: { fr: 'Transformer', en: 'Transform', ar: 'حوّل' },
   monDessin: { fr: 'Mon dessin', en: 'My drawing', ar: 'رسمي' },
+  ecouter: { fr: '🔊 Écouter', en: '🔊 Listen', ar: '🔊 استمع' },
+  ecrire: { fr: '✍️ Écrire la 1re lettre', en: '✍️ Write the first letter', ar: '✍️ اكتب الحرف الأول' },
+  couleur: { fr: 'Sa couleur', en: 'Its color', ar: 'لونه' },
+  ailleurs: { fr: 'Dans les autres langues', en: 'In other languages', ar: 'بلغات أخرى' },
+  lettres: { fr: 'lettres', en: 'letters', ar: 'حروف' },
   reflechit: { fr: 'Lumi regarde ton dessin…', en: 'Lumi is looking at your drawing…', ar: 'لومي ينظر إلى رسمك…' },
   jeCrois: { fr: 'Je crois que c’est', en: 'I think it’s', ar: 'أظن أنه' },
   peutEtre: { fr: 'Ou peut-être', en: 'Or maybe', ar: 'أو ربما' },
@@ -9714,6 +9746,26 @@ function pointsDe(cv, n = 520) {
   if (!l.length) l.push([0, 0, '#fff']);
   return Array.from({ length: n }, () => l[(Math.random() * l.length) | 0]);
 }
+// le mot de ce que l'enfant a dessiné : épelé, dit, sa couleur, et dans les autres langues
+['soucoupe volante', 'montgolfière', 'sirène', 'chauve-souris', 'étoile', 'lune', 'lanterne', 'araignée', 'voiture', 'camionnette', 'voiture de police', 'ambulance', 'moto', 'fourmi', 'fleur', 'maison',
+  'glace', 'pizza', 'sucette', 'couronne', 'bougie', 'fusée', 'tortue', 'méduse', 'pieuvre', 'baleine', 'abeille', 'grenouille', 'souris', 'vache', 'girafe', 'guitare', 'pomme', 'banane', 'fraise', 'licorne'].forEach((m) => FEMININ.add(m));
+const COULEURS_NOMS = { rouge: '🔴', orange: '🟠', jaune: '🟡', vert: '🟢', bleu: '🔵', violet: '🟣', rose: '🩷', marron: '🟤', noir: '⚫', blanc: '⚪' };
+function couleurDe(cv) {
+  const d = cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, cv.width, cv.height).data, h = {};
+  for (let i = 0; i < d.length; i += 16) {
+    if (d[i + 3] < 128) continue;
+    const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
+    let k;
+    if (mx < .2) k = 'noir'; else if (sat < .18) k = mx > .75 ? 'blanc' : 'noir';
+    else {
+      let t = mx === r ? ((g - b) / (mx - mn)) % 6 : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4; t = (t * 60 + 360) % 360;
+      k = t < 15 || t >= 340 ? 'rouge' : t < 42 ? (mx < .6 ? 'marron' : 'orange') : t < 68 ? 'jaune' : t < 165 ? 'vert' : t < 255 ? 'bleu' : t < 290 ? 'violet' : 'rose';
+    }
+    h[k] = (h[k] || 0) + (k === 'noir' || k === 'blanc' ? .4 : 1);
+  }
+  return Object.entries(h).sort((a, b) => b[1] - a[1])[0]?.[0] || 'blanc';
+}
+const DRAPEAUX = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦' };
 const MOUVEMENTS = {
   nage: { e: '🐟', nom: nom3('Il nage', 'Swim', 'يسبح'), fond: ['#0B4F7C', '#06223F'], deco: ['🫧', '🐚', '🌿'] },
   vole: { e: '🐦', nom: nom3('Il vole', 'Fly', 'يطير'), fond: ['#6EC6FF', '#2C7BD6'], deco: ['☁️', '☁️', '🌈'] },
@@ -9761,6 +9813,37 @@ const Vivant = (() => {
     focusPremier(g);
   }
   let dessinOriginal = null, morph = null;
+  // la carte du mot : les lettres s'allument une à une, Lumi le dit, puis sa couleur et le mot dans les autres langues
+  async function apprendre(entree) {
+    const c = z?.querySelector('.vi-mot'); if (!c) return;
+    const l = langue, mot = motDans(entree, l), lettres = Array.from(mot), coul = couleurDe(sprite), ce = PAR_EMOJI.get(COULEURS_NOMS[coul]);
+    c.hidden = false; c.dir = LANGUES[l].dir; c.classList.remove('petit');
+    c.innerHTML = `<button type="button" class="vi-mot-x" aria-label="${tf('fermer')}">–</button><div class="vi-tuiles"></div><p class="vi-art"></p>
+      <div class="vi-infos"><span class="vi-coul"></span><span class="vi-nb"></span></div><div class="vi-langues"></div>
+      <div class="vi-mot-b"><button type="button" class="mod-b" data-a="ec"></button><button type="button" class="mod-b" data-a="tr"></button></div>`;
+    const tu = c.querySelector('.vi-tuiles');
+    lettres.forEach((x) => { const t = document.createElement('span'); t.className = 'vi-t' + (x === ' ' ? ' espace' : ''); t.textContent = x === ' ' ? '' : (l === 'ar' ? x : x.toUpperCase()); tu.appendChild(t); });
+    c.querySelector('.vi-art').textContent = majuscule(nomComplet(entree, l)) + ' ' + entree.emoji;
+    c.querySelector('.vi-coul').innerHTML = `<b></b> ${COULEURS_NOMS[coul]} <span></span>`; c.querySelector('.vi-coul b').textContent = jx('couleur') + ' :'; c.querySelector('.vi-coul span').textContent = ce ? motDans(ce, l) : coul;
+    c.querySelector('.vi-nb').textContent = `${lettres.filter((x) => x !== ' ').length} ${jx('lettres')}`;
+    const la = c.querySelector('.vi-langues');
+    ['fr', 'en', 'ar'].filter((x) => x !== l).forEach((x) => { const b = bouton('', () => parler(nomComplet(entree, x), x), 'vi-lg'); b.textContent = `${DRAPEAUX[x]} ${nomComplet(entree, x)}`; b.dir = LANGUES[x].dir; la.appendChild(b); });
+    const ec = c.querySelector('[data-a=ec]'); ec.textContent = jx('ecouter');
+    const tr = c.querySelector('[data-a=tr]'); tr.textContent = jx('ecrire');
+    const lire = async () => {
+      const tuiles = [...tu.children].filter((t) => !t.classList.contains('espace'));
+      tuiles.forEach((t) => t.classList.remove('allumee', 'vue'));
+      for (const t of tuiles) { if (!c.isConnected) return; t.classList.add('allumee'); avatar?.syllabe(); son('tic'); await attendre(360); t.classList.remove('allumee'); t.classList.add('vue'); }
+      await parler(majuscule(nomComplet(entree, l)));
+      if (ce) await parler(`${jx('couleur')} : ${motDans(ce, l)}`);
+    };
+    ec.onclick = lire;
+    tr.onclick = () => { const p = lettres.find((x) => x !== ' '); if (p) tracer(l === 'ar' ? p : p.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')); };
+    c.querySelector('.vi-mot-x').onclick = () => { c.classList.toggle('petit'); };
+    tu.onclick = () => { if (c.classList.contains('petit')) c.classList.remove('petit'); };
+    // après la première lecture, la carte se range en petit pour laisser voir l'animation (on la rouvre en touchant le mot)
+    await attendre(600); await lire(); await attendre(3500); if (c.isConnected) c.classList.add('petit');
+  }
   function choisirForme() {
     if (!z?.isConnected) return;
     cancelAnimationFrame(raf); Musiquette.arreter();
@@ -9770,7 +9853,7 @@ const Vivant = (() => {
     s.corps.querySelector('img').src = sprite.toDataURL();
     const g = s.corps.querySelector('.vi-formes');
     FORMES_VIVANT.forEach(([e, m]) => { const b = bouton(`<span class="e">${e}</span><span class="n"></span>`, () => transformer(e, m), 'vi-forme'); b.querySelector('.n').textContent = nomEmoji(e); g.appendChild(b); });
-    s.bas.appendChild(bouton(jx('garderDessin'), () => { morph = null; scene(); }, 'mod-b'));
+    s.bas.appendChild(bouton(jx('garderDessin'), () => { morph = null; motCourant = null; scene(); }, 'mod-b'));
     s.corps.querySelector('.vi-sinon').textContent = jx('sinon');
     const dv = s.corps.querySelector('.vi-devine'), txt = dv.querySelector('.vi-d-txt'), ch = dv.querySelector('.vi-d-choix');
     txt.textContent = '🔎 ' + jx('reflechit'); dv.classList.add('cherche');
@@ -9790,7 +9873,15 @@ const Vivant = (() => {
       setTimeout(() => oui.focus({ preventScroll: true }), 50);
     });
   }
+  let motCourant = null;
+  function entreeDe(e, nom) {
+    const m = PAR_EMOJI.get(e); if (m) return m;
+    const d = Object.values(DOODLE_EMOJI).find((x) => x[0] === e);
+    if (d) return { emoji: e, fr: [d[2].fr], en: [d[2].en], ar: [d[2].ar] };
+    return nom ? { emoji: e, fr: [nom], en: [nom], ar: [nom] } : null;
+  }
   function transformer(e, m, nom) {
+    motCourant = entreeDe(e, nom);
     const cible = document.createElement('canvas'); cible.width = cible.height = 300; dessinerEmoji(cible.getContext('2d'), e, 150, 150, 290);
     morph = { de: dessinOriginal || sprite, vers: cible, a: pointsDe(dessinOriginal || sprite), b: pointsDe(cible), t0: 0 };
     sprite = cible; mvt = m; son('juste');
@@ -9800,7 +9891,7 @@ const Vivant = (() => {
   function scene() {
     if (!z?.isConnected) return;
     cancelAnimationFrame(raf); amis = 1;
-    z.innerHTML = `<div class="vi-scene"><canvas></canvas><div class="vi-cmd"><div class="mod-puces vi-mvts"></div><button class="mod-b" data-a="magie"></button><button class="mod-b" data-a="ami"></button><button class="mod-b" data-a="autre"></button></div></div>`;
+    z.innerHTML = `<div class="vi-scene"><canvas></canvas><div class="vi-mot" hidden></div><div class="vi-cmd"><div class="mod-puces vi-mvts"></div><button class="mod-b" data-a="magie"></button><button class="mod-b" data-a="ami"></button><button class="mod-b" data-a="autre"></button></div></div>`;
     const p = z.querySelector('.vi-mvts');
     Object.entries(MOUVEMENTS).forEach(([k, m]) => p.appendChild(bouton(`${m.e} ${t3(m.nom)}`, () => { mvt = k; p.querySelectorAll('.puce').forEach((x) => x.classList.toggle('on', x.dataset.k === k)); son('tic'); avatar?.forme(m.e); }, 'puce' + (k === mvt ? ' on' : ''))).dataset.k = k);
     const mg = z.querySelector('[data-a=magie]'); mg.textContent = '✨ ' + jx('transformer'); mg.hidden = !dessinOriginal; mg.onclick = () => { sprite = dessinOriginal; choisirForme(); };
@@ -9840,7 +9931,7 @@ const Vivant = (() => {
         });
         g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
         if (p > .75) { const v = morph.vers, k3 = taille / Math.max(v.width, v.height), s3 = .85 + .15 * ease((p - .75) / .25); g.globalAlpha = (p - .75) / .25; g.drawImage(v, cx - v.width * k3 * s3 / 2, cy - v.height * k3 * s3 / 2, v.width * k3 * s3, v.height * k3 * s3); g.globalAlpha = 1; }
-        if (p >= 1) { morph = null; fete(); }
+        if (p >= 1) { morph = null; fete(); if (motCourant) apprendre(motCourant); }
         raf = requestAnimationFrame(boucle); return;
       }
       for (let a = 0; a < amis; a++) {
@@ -12078,6 +12169,7 @@ const AIDES = {
   vivant: A(nom3('Ton dessin prend vie : il nage, vole, saute ou danse !', 'Your drawing comes to life: it swims, flies, jumps or dances!', 'رسمك يصبح حيًّا: يسبح أو يطير أو يقفز أو يرقص!'),
     [nom3('Choisis un de tes dessins, ou dessines-en un nouveau.', 'Pick one of your drawings, or draw a new one.', 'اختر أحد رسوماتك أو ارسم رسمًا جديدًا.'),
      nom3('Lumi devine ce que c’est (« Je crois que c’est… un poisson ! »). Dis oui, ou choisis dans la liste : ton dessin se transforme en vrai !', 'Lumi guesses what it is (“I think it’s… a fish!”). Say yes, or pick from the list: your drawing turns into the real thing!', 'لومي يخمّن ما هو («أظن أنه… سمكة!»). قل نعم أو اختر من القائمة: يتحوّل رسمك إلى الحقيقي!'),
+     nom3('Lumi épelle le mot, le dit, donne sa couleur et le mot en anglais et en arabe. Touche le mot pour le réécouter.', 'Lumi spells the word, says it, gives its color and the word in other languages. Tap the word to hear it again.', 'لومي يتهجّى الكلمة ويقولها ويذكر لونها وبلغات أخرى. المس الكلمة لتسمعها من جديد.'),
      nom3('En bas : choisis comment il bouge, ajoute des amis, ou change d’image.', 'At the bottom: choose how it moves, add friends, or change picture.', 'في الأسفل: اختر كيف يتحرك، أضف أصدقاء، أو غيّر الصورة.')], ['doigt']),
   coffre: A(nom3('Le coffre aux trésors : tes étoiles débloquent des surprises.', 'The treasure chest: your stars unlock surprises.', 'صندوق الكنوز: نجومك تفتح المفاجآت.'),
     [nom3('Chaque jeu gagné te donne des étoiles ⭐.', 'Every game you win gives you stars ⭐.', 'كل لعبة تربحها تعطيك نجومًا ⭐.'),
