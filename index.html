@@ -1170,6 +1170,115 @@
   .mn-cote .mn-retour { width: auto; min-width: 96px; padding: 0 16px; }
   .at-aide { left: 38vw; text-align: left; }
   .mn-cote .mn-retour { display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+  /* =================== Photomaton, album famille, galerie de dessins =================== */
+  .fa-t-photo { position: fixed; inset: 0; width: auto; max-width: none; max-height: none; border-radius: 0; border: none; padding: 2.4vh 3vw; display: grid; grid-template-rows: 1fr auto auto auto; gap: 1.6vh; justify-items: center;
+    background: radial-gradient(60vw 50vh at 50% 30%, rgba(34,216,196,.12), transparent 70%), linear-gradient(180deg, #0D1336, #080B22); }
+  .ph-scene { position: relative; width: min(100%, calc((100vh - 26vh) * 16 / 9)); aspect-ratio: 16 / 9; max-height: 100%; border-radius: 22px; overflow: hidden; background: #050716; border: 1px solid rgba(255,255,255,.12); box-shadow: 0 20px 60px rgba(0,0,0,.4); align-self: center; }
+  .ph-scene video, .ph-deco { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ph-scene video { transform: scaleX(-1); }
+  .ph-deco { pointer-events: none; }
+  .ph-compte { position: absolute; inset: 0; display: grid; place-items: center; font: 800 min(30vh, 40vw) 'Baloo 2', system-ui; color: #fff; text-shadow: 0 0 40px rgba(46,230,197,.8); pointer-events: none; }
+  .ph-compte.pop { animation: ph-pop .8s ease-out; }
+  @keyframes ph-pop { from { transform: scale(1.6); opacity: 0; } 30% { opacity: 1; } to { transform: scale(.8); opacity: .2; } }
+  .ph-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .ph-flash.on { animation: ph-flash .5s ease-out; }
+  @keyframes ph-flash { from { opacity: .95; } to { opacity: 0; } }
+  .ph-info { position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); margin: 0; padding: 10px 18px; border-radius: 99px; background: rgba(5,8,25,.75); font: 700 15px system-ui; color: #BFFBEA; text-align: center; max-width: 90%; }
+  .ph-info:empty { display: none; }
+  .ph-cadres { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .ph-bas { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; width: min(100%, 700px); }
+  .ph-fichier { justify-self: end; cursor: pointer; }
+  .tele .ph-fichier, .via-tel .ph-declencheur, .via-tel .ph-fichier { display: none; }
+  .ph-declencheur { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #fff; background: transparent; padding: 6px; box-shadow: 0 0 30px rgba(46,230,197,.4); }
+  .ph-declencheur span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--degrade); }
+  .ph-declencheur:active span { transform: scale(.9); }
+  .ph-b { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px; border-radius: 99px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #EEF6FF; font: 700 15px system-ui; text-decoration: none; }
+  .ph-b.principal { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; }
+  .ph-prive { margin: 0; font: 600 12px system-ui; color: #6F7F9E; }
+  .tele .ph-declencheur:focus, .tele .ph-b:focus { outline: none; box-shadow: 0 0 0 4px #fff, 0 0 30px rgba(255,255,255,.4); transform: scale(1.06); }
+  #ecran-photo .album-photos { display: flex; flex-direction: column; gap: 16px; }
+  .alb-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .alb-haut h2 { margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; }
+  .alb-nouvelle { height: 50px; padding: 0 22px; border-radius: 99px; border: none; background: var(--degrade); color: var(--primaire-encre); font: 800 16px system-ui; box-shadow: 0 8px 24px rgba(46,230,197,.3); }
+  .alb-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .alb-photo { padding: 0; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; overflow: hidden; aspect-ratio: 4 / 3; background: #050716; }
+  .alb-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .alb-vide, .alb-prive { color: var(--doux); margin: 0; }
+  .tele #ecran-photo .album-photos { position: fixed; inset: 0; z-index: 30; padding: 9vh 5vw 4vh; background: radial-gradient(60vw 50vh at 50% 30%, rgba(34,216,196,.12), transparent 70%), linear-gradient(180deg, #0D1336, #080B22); }
+  .tele .alb-grille { grid-template-columns: repeat(5, 1fr); gap: 1.4vw; }
+  .tele .alb-photo:focus, .tele .alb-nouvelle:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 .5vh #fff, 0 0 30px rgba(255,255,255,.4); }
+  .fa-t-vue-photo { width: min(100%, 980px); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .vp-img { max-width: 100%; max-height: 62vh; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+  .vp-msg { margin: 0; color: #7FF3CB; font-weight: 800; } .vp-msg:empty { display: none; }
+  .vp-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .gal-carte { position: relative; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; overflow: hidden; background: #070A1F; }
+  .gal-carte img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+  .gal-carte .l { position: absolute; left: 8px; top: 6px; font: 800 18px 'Baloo 2', system-ui; color: #fff; text-shadow: 0 1px 6px #000; }
+  .gal-actions { display: flex; gap: 6px; padding: 8px; }
+  .gal-b { display: inline-grid; place-items: center; height: 36px; min-width: 36px; padding: 0 10px; border-radius: 99px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #EEF6FF; font: 700 13px system-ui; text-decoration: none; }
+  .gal-b.principal { flex: 1; background: var(--degrade); color: var(--primaire-encre); border-color: transparent; }
+  .mn-declencheur { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: 76px; height: 76px; border-radius: 50%; border: 4px solid #fff; background: var(--degrade); background-clip: content-box; padding: 5px; box-shadow: 0 0 24px rgba(46,230,197,.5); }
+  .fa-t-manette.photo .duo-camera { position: relative; height: 100%; min-height: 0; }
+  .fa-t-manette.photo .duo-camera video { height: 100%; object-fit: cover; }
+
+  /* ===== Photo de famille v2 : album en tuiles, aperçu du téléphone en direct, mobile ===== */
+  .ph-direct { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .ph-attente { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.4vh; text-align: center; color: #EEF6FF;
+    background: radial-gradient(40vw 40vh at 50% 45%, rgba(46,230,197,.16), transparent 70%); }
+  .ph-attente .ph-tel { font-size: 12vh; animation: ph-respire 2.2s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(46,230,197,.5)); }
+  .ph-attente b { font: 800 4.4vh 'Baloo 2', system-ui; } .ph-attente small { font: 600 2.2vh system-ui; color: #9FB3D1; max-width: 70%; }
+  @keyframes ph-respire { 50% { transform: translateY(-1.2vh) rotate(-6deg); } }
+  .via-tel .ph-attente { display: flex; } .via-tel video { display: none; }
+  .via-tel.en-direct .ph-direct { display: block; } .via-tel.en-direct .ph-attente { display: none; }
+  .via-tel .ph-info { display: none; } .via-tel.en-direct .ph-info { display: block; }
+  .tele .fa-t-photo .ph-cadres .puce { height: 5.4vh; padding: 0 2vw; font-size: 2.2vh; }
+  .tele .fa-t-photo .ph-cadres .puce:focus { outline: none; box-shadow: 0 0 0 .5vh #fff, 0 0 30px rgba(255,255,255,.4); transform: scale(1.08); }
+  .tele .ph-info { font-size: 2.2vh; padding: 1.2vh 2vw; }
+  .tele .ph-prive { font-size: 1.7vh; }
+  /* album */
+  .alb-haut { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .alb-haut h2 { font-size: 30px; line-height: 1.1; }
+  .alb-sous { margin: 0; color: var(--doux); font-size: 15px; max-width: 60ch; }
+  .alb-nouvelle.alb-photo { height: auto; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+    background: linear-gradient(160deg, rgba(91,240,184,.22), rgba(23,181,217,.14)); border: 1.5px dashed rgba(46,230,197,.6); color: #EEF6FF; box-shadow: none; border-radius: 18px; }
+  .alb-nouvelle .ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--degrade); box-shadow: 0 8px 24px rgba(46,230,197,.35); }
+  .alb-nouvelle .ic svg { width: 26px; height: 26px; fill: none; stroke: var(--primaire-encre); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .alb-nouvelle b { font: 800 17px 'Baloo 2', system-ui; } .alb-nouvelle small { font: 600 12px system-ui; color: #A9C4DA; }
+  .alb-photo { transition: transform .15s, box-shadow .15s; }
+  .tele #ecran-photo .album-photos { padding: 12vh 4.4vw 4vh; gap: 3.4vh; }
+  html:not(.tele) .alb-haut h2 { display: none; }
+  .tele .alb-haut h2 { font-size: 7vh; } .tele .alb-sous { font-size: 2.4vh; max-width: 60vw; }
+  .tele .alb-grille { grid-template-columns: repeat(4, 1fr); gap: 2vw; }
+  .tele .alb-photo { border-radius: 2.4vh; }
+  .tele .alb-nouvelle .ic { width: 9vh; height: 9vh; } .tele .alb-nouvelle .ic svg { width: 4.4vh; height: 4.4vh; }
+  .tele .alb-nouvelle b { font-size: 3vh; } .tele .alb-nouvelle small { font-size: 1.9vh; }
+  .tele .alb-prive { font-size: 1.8vh; margin-top: auto; }
+  .tele .alb-photo:focus { transform: scale(1.08); }
+  /* grande photo et galerie à la télé : en grand */
+  .tele .fa-t-vue-photo { width: 84vw; max-width: none; padding: 3vh 3vw; gap: 2.4vh; }
+  .tele .vp-img { max-height: 66vh; border-radius: 2.4vh; }
+  .tele .vp-msg { font-size: 2.4vh; }
+  .tele .ph-b { height: 6vh; padding: 0 2.4vw; font-size: 2.2vh; }
+  .tele .fa-t-galerie { width: 84vw; max-width: none; padding: 3vh 3vw; }
+  .tele .fa-t-galerie h2 { font-size: 4.4vh; }
+  .tele .gal-grille { grid-template-columns: repeat(4, 1fr); gap: 1.6vw; max-height: 70vh; overflow: auto; padding: 1vh; }
+  .tele .gal-b { height: 5vh; min-width: 5vh; font-size: 1.9vh; white-space: nowrap; }
+  .gal-b { white-space: nowrap; }
+  .tele .gal-b:focus { outline: none; box-shadow: 0 0 0 .4vh #fff, 0 0 20px rgba(255,255,255,.4); transform: scale(1.06); }
+  /* mobile : la photo prend la place, les cadres sur une ligne, la barre d'outils du dessin défile */
+  @media (max-width: 700px) {
+    .fa-t-photo { padding: 56px 12px 14px; grid-template-rows: 1fr auto auto auto; }
+    .ph-scene { width: 100%; height: 100%; aspect-ratio: auto; }
+    .ph-cadres { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; width: 100%; padding: 2px; scrollbar-width: none; }
+    .ph-cadres .puce { flex: none; height: 38px; padding: 0 11px; font-size: 13px; }
+    .ph-cadres { justify-content: safe center; gap: 6px; }
+    .ph-bas { width: 100%; }
+    .ph-fichier { font-size: 13px; padding: 0 12px; height: 40px; }
+    .atelier .at-outils { width: max-content; max-width: calc(100vw - 24px); flex-wrap: wrap; justify-content: center; gap: 8px 10px; border-radius: 26px; }
+    .atelier .at-outils::-webkit-scrollbar, .ph-cadres::-webkit-scrollbar { display: none; }
+    .atelier .at-couleur { flex: none; width: 34px; height: 34px; min-width: 0; min-height: 0; }
+    .atelier .at-outils .at-b { flex: none; width: 40px; height: 40px; }
+  }
 </style>
 </head>
 <body>
@@ -1255,6 +1364,7 @@
           <div class="co-choix" id="co-choix" hidden></div>
         </div>
       </section>
+      <section id="ecran-photo" hidden><div class="album-photos" id="album-photos"></div></section>
       <section id="ecran-chasse" hidden><div class="chasse" id="chasse"></div></section>
       <section id="ecran-formes" hidden>
         <div class="formes">
@@ -1959,7 +2069,7 @@ const PAR_EMOJI = new Map(MOTS.map((m) => [m.emoji, m]));
 // ---------- L'arbre des activités : accueil → univers → thèmes ----------
 const NOEUDS = {
   accueil:   { emoji: '✦', nom: { fr: 'Lumi', en: 'Lumi', ar: 'لومي' },
-               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'formes', 'compter', 'lettres', 'nombres', 'dessin', 'coloriage', 'chansons', 'histoires', 'jeux', 'parler'] },
+               enfants: ['animaux', 'manger', 'monde', 'couleurs', 'formes', 'compter', 'lettres', 'nombres', 'dessin', 'coloriage', 'photo', 'chansons', 'histoires', 'jeux', 'parler'] },
   animaux:   { emoji: '🐾', nom: { fr: 'Les animaux', en: 'Animals', ar: 'الحيوانات' }, desc: { fr: 'Ferme, mer, oiseaux…', en: 'Farm, sea, birds…', ar: 'المزرعة، البحر، الطيور…' },
                enfants: ['ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes'] },
   manger:    { emoji: '🍽️', nom: { fr: 'À manger', en: 'Food', ar: 'الطعام' }, desc: { fr: 'Fruits et légumes', en: 'Fruits and vegetables', ar: 'فواكه وخضروات' },
@@ -1989,6 +2099,7 @@ const NOEUDS = {
                enfants: ['chasse', 'formes', 'compter', 'bulles', 'devine', 'ecoute', 'range', 'intrus'] },
   compter:   { emoji: '🔢', nom: { fr: 'Compte avec Lumi', en: 'Count with Lumi', ar: 'عُدّ مع لومي' }, desc: { fr: 'Touche et compte : 1, 2, 3…', en: 'Tap and count: 1, 2, 3…', ar: 'المس وعُدّ: ١، ٢، ٣…' }, type: 'compter' },
   formes:    { emoji: '🔷', nom: { fr: 'Pluie de formes', en: 'Shape rain', ar: 'مطر الأشكال' }, desc: { fr: 'Tranche les formes, compte avec Lumi !', en: 'Slice the shapes, count with Lumi!', ar: 'اقطع الأشكال وعُدّ مع لومي!' }, type: 'formes' },
+  photo:     { emoji: '📸', nom: { fr: 'Photo de famille', en: 'Family photo', ar: 'صورة العائلة' }, desc: { fr: 'Des couronnes sur vos têtes, et Lumi redessine la photo !', en: 'Crowns on your heads, and Lumi redraws the photo!', ar: 'تيجان على رؤوسكم، ولومي يعيد رسم الصورة!' }, type: 'photo' },
   chasse:    { emoji: '🔎', nom: { fr: 'Cache-cache des objets', en: 'Hide-and-seek objects', ar: 'غميضة الأشياء' }, desc: { fr: 'Lumi demande un objet : trouve-le dans la maison et montre-le à la caméra !', en: 'Lumi asks for an object: find it at home and show it to the camera!', ar: 'لومي يطلب شيئًا: ابحث عنه في البيت وأرِه للكاميرا!' }, type: 'chasse' },
   bulles:    { emoji: '🫧', nom: { fr: 'Attrape les bulles', en: 'Catch the bubbles', ar: 'التقط الفقاعات' }, desc: { fr: 'Vite, éclate les bonnes !', en: 'Quick, pop the right ones!', ar: 'بسرعة، فرقع الصحيحة!' }, type: 'jeu', jeu: 'bulles' },
   coloriage: { emoji: '🖍️', nom: { fr: 'Colorie !', en: 'Coloring', ar: 'لوّن' }, desc: { fr: 'De vrais dessins à colorier', en: 'Real pictures to color', ar: 'رسومات حقيقية للتلوين' },
@@ -2605,7 +2716,7 @@ const Trace = (() => {
     x.fillStyle = d; x.fillRect(0, 0, 32, 32); return c;
   });
   let actif = false, mode = 'lettre', grains = [], rayon = 20, guide = null, lettre = '', fini = false, appui = false;
-  let particules = [], dessin = [], W = 0, H = 0, raf = 0, apresReussite = null, teinte = 1;
+  let particules = [], dessin = [], W = 0, H = 0, raf = 0, apresReussite = null, teinte = 1, fond = null, fondAlpha = 1, aDessiner = [];
 
   function dimensionner() {
     const r = cv.getBoundingClientRect(), k = Math.min(devicePixelRatio, 2);
@@ -2674,6 +2785,10 @@ const Trace = (() => {
   function dessiner() {
     const t = performance.now() / 1000;
     g.clearRect(0, 0, W, H);
+    if (fond) { // une photo ou un dessin rouvert, sous la poussière
+      const k = Math.min(W / fond.width, H / fond.height), w = fond.width * k, h = fond.height * k;
+      g.globalAlpha = fondAlpha; g.globalCompositeOperation = 'source-over'; g.drawImage(fond, (W - w) / 2, (H - h) / 2, w, h); g.globalAlpha = 1;
+    }
     g.globalCompositeOperation = 'lighter';
     if (mode === 'lettre') {
       for (const p of grains) {
@@ -2684,6 +2799,7 @@ const Trace = (() => {
         grain(p.x + dx, p.y + dy, p.t * (1.6 + p.on * 1.2), (.36 + .64 * p.on) * scint, p.on > .5 ? p.s : 0);
       }
     }
+    if (aDessiner.length) dessin.push(...aDessiner.splice(0, 260)); // Lumi redessine la photo, petit à petit
     for (const d of dessin) grain(d.x, d.y, d.t * 2.2, .75 + .25 * Math.sin(t * 3 + d.ph), d.s);
     particules = particules.filter((p) => (p.vie -= .018) > 0);
     for (const p of particules) {
@@ -2725,6 +2841,10 @@ const Trace = (() => {
     garder: { fr: 'Garder', en: 'Save', ar: 'احفظ' },
     garde: { fr: 'Gardé dans « Mes dessins » ✓', en: 'Saved in “My drawings” ✓', ar: 'حُفظ في «رسوماتي» ✓' },
     galerie: { fr: 'Mes dessins', en: 'My drawings', ar: 'رسوماتي' },
+    photo: { fr: 'Photo magique', en: 'Magic photo', ar: 'صورة سحرية' },
+    continuer: { fr: 'Continuer', en: 'Continue', ar: 'تابع' },
+    telecharger: { fr: 'Enregistrer', en: 'Save', ar: 'احفظ' },
+    suppr: { fr: 'Supprimer', en: 'Delete', ar: 'احذف' },
     vide: { fr: 'Pas encore de dessin gardé.', en: 'No saved drawing yet.', ar: 'لا رسومات محفوظة بعد.' },
     tel: { fr: 'dessine sur le téléphone', en: 'draws on the phone', ar: 'يرسم على الهاتف' },
     encore: { fr: 'Encore', en: 'Again', ar: 'مرة أخرى' },
@@ -2732,11 +2852,11 @@ const Trace = (() => {
     main: { fr: '☝️ Un doigt pour dessiner · ✋ main ouverte pour lever le crayon', en: '☝️ One finger to draw · ✋ open hand to lift the pen', ar: '☝️ إصبع للرسم · ✋ يد مفتوحة لرفع القلم' },
   };
   const ta = (k) => AT_TXT[k][langue] ?? AT_TXT[k].fr;
-  let ui = null;
+  let ui = null, garderFond = false;
   function construireUI() {
     ui = document.createElement('div'); ui.className = 'atelier-ui';
     ui.innerHTML = `<div class="at-haut"><span class="at-titre"></span><div class="at-barre"><span></span></div></div>
-      <div class="at-outils"><div class="at-couleurs"></div><button type="button" class="at-b" data-a="effacer" aria-label="Effacer"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span></span></button><button type="button" class="at-b" data-a="garder" aria-label="Garder"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h8V4M8 20v-6h8v6"/></svg><span></span></button><button type="button" class="at-b" data-a="galerie" aria-label="Mes dessins"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><span></span></button></div>
+      <div class="at-outils"><div class="at-couleurs"></div><button type="button" class="at-b" data-a="effacer" aria-label="Effacer"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span></span></button><button type="button" class="at-b" data-a="garder" aria-label="Garder"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h8V4M8 20v-6h8v6"/></svg><span></span></button><button type="button" class="at-b" data-a="photo" aria-label="Photo magique"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/><path d="M19 3l.6 1.4L21 5l-1.4.6L19 7l-.6-1.4L17 5l1.4-.6z"/></svg><span></span></button><button type="button" class="at-b" data-a="galerie" aria-label="Mes dessins"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><span></span></button></div>
       <div class="at-joueurs"></div><div class="at-toast" hidden></div>
       <div class="at-fin" hidden><button type="button" class="at-b" data-a="encore"></button><button type="button" class="at-b principal" data-a="suivante"></button></div>
       <p class="at-aide"></p>`;
@@ -2749,6 +2869,7 @@ const Trace = (() => {
     ui.querySelector('[data-a=encore]').onclick = () => ouvrir('lettre', lettre, apresReussite);
     ui.querySelector('[data-a=garder]').onclick = garder;
     ui.querySelector('[data-a=galerie]').onclick = () => galerie();
+    ui.querySelector('[data-a=photo]').onclick = () => Photo.prendre((img) => redessinerPhoto(img));
     ui.querySelector('[data-a=suivante]').onclick = () => { const L = LANGUES[langue].alphabet.split(' ').map((x) => x.split(':')[0]); const n = L[(L.indexOf(lettre) + 1) % L.length]; tracer(n); };
     $('scene').appendChild(ui);
   }
@@ -2771,8 +2892,22 @@ const Trace = (() => {
     f.querySelector('.fa-fermer').onclick = fermerFenetre;
     const g = f.querySelector('.gal-grille');
     if (!liste.length) g.innerHTML = `<p class="st-aide">${ta('vide')}</p>`;
-    liste.forEach((d) => { const b = document.createElement('button'); b.className = 'gal-img'; b.innerHTML = `<img alt="" src="${d.img}">${d.l ? `<span>${d.l}</span>` : ''}`; b.onclick = () => b.classList.toggle('grand'); g.appendChild(b); });
+    const cle = Profils.cle('lumi-dessins', Profils.actif.id);
+    liste.forEach((d, i) => {
+      const c = document.createElement('div'); c.className = 'gal-carte';
+      c.innerHTML = `<img alt="" src="${d.img}">${d.l ? `<span class="l">${d.l}</span>` : ''}<div class="gal-actions"><button class="gal-b principal" data-a="c">✏️ ${ta('continuer')}</button><a class="gal-b" data-a="t" download="lumiole-${d.t}.jpg" href="${d.img}">⬇</a><button class="gal-b" data-a="s" aria-label="${ta('suppr')}">🗑</button></div>`;
+      c.querySelector('[data-a=c]').onclick = () => { const im = new Image(); im.onload = () => { fermerFenetre(); fond = im; fondAlpha = 1; garderFond = true; ouvrir('libre'); }; im.src = d.img; };
+      c.querySelector('[data-a=s]').onclick = () => { if (!confirm(ta('suppr') + ' ?')) return; liste.splice(i, 1); try { localStorage.setItem(cle, JSON.stringify(liste)); } catch {} galerie(); };
+      g.appendChild(c);
+    });
     setTimeout(() => g.querySelector('button')?.focus({ preventScroll: true }), 60);
+  }
+  function redessinerPhoto(img) {
+    fond = img; fondAlpha = .16; garderFond = true; ouvrir('libre');
+    const pts = contours(img, 2400);
+    const k = Math.min(W / img.width, H / img.height), ox = (W - img.width * k) / 2, oy = (H - img.height * k) / 2;
+    aDessiner = melanger(pts.map(([x, y], i) => ({ x: ox + x * k, y: oy + y * k, t: .5 + Math.random() * 1.1, s: [1, 3, 4, 2, 0][i % 5], ph: Math.random() * 6 })));
+    poussiere(W / 2, H / 2, 60, 2.5); jingle();
   }
   function joueursTel() {
     if (!ui) return;
@@ -2784,14 +2919,15 @@ const Trace = (() => {
 
   function ouvrir(nouveauMode, l, quandReussi) {
     mode = nouveauMode; lettre = l || ''; apresReussite = quandReussi; fini = false;
-    particules = []; dessin = []; teinte = 1;
+    particules = []; dessin = []; teinte = 1; aDessiner = []; if (!garderFond) fond = null; garderFond = false;
     document.documentElement.classList.add('atelier');
     if (!ui) construireUI();
     ui.dataset.mode = mode;
     ui.querySelector('.at-titre').textContent = mode === 'lettre' ? `${ta('trace')} ${lettre}` : ta('libre');
     ui.querySelector('[data-a=effacer] span').textContent = ta('effacer');
     ui.querySelector('[data-a=garder] span').textContent = ta('garder'); ui.querySelector('[data-a=galerie] span').textContent = ta('galerie');
-    ui.querySelector('[data-a=garder]').hidden = mode !== 'libre'; joueursTel(); crayons.clear();
+    ui.querySelector('[data-a=garder]').hidden = mode !== 'libre'; ui.querySelector('[data-a=photo]').hidden = mode !== 'libre';
+    ui.querySelector('[data-a=photo] span').textContent = ta('photo'); joueursTel(); crayons.clear();
     ui.querySelector('[data-a=encore]').textContent = '↻ ' + ta('encore'); ui.querySelector('[data-a=suivante]').textContent = ta('suivante') + ' →';
     ui.querySelector('.at-aide').textContent = DuoEcran.nbJoueurs ? ta('main') : '';
     ui.querySelector('.at-fin').hidden = true; marquer(); maj();
@@ -2810,9 +2946,29 @@ const Trace = (() => {
     ['trace', 'trace-fermer', 'trace-progres'].forEach((id) => { $(id).hidden = true; });
   }
   $('trace-fermer').onclick = fermer;
-  return { ouvrir, fermer, depuisTel, joueursTel, galerie, get actif() { return actif; } };
+  return { ouvrir, fermer, depuisTel, joueursTel, galerie, redessinerPhoto, get actif() { return actif; } };
 })();
 
+// les contours d'une photo (filtre de Sobel), pour que Lumi la redessine en poussière ; max points ≈ n
+function contours(img, n = 900) {
+  const L = 320, k = L / Math.max(img.width, img.height), w = Math.round(img.width * k), h = Math.round(img.height * k);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.filter = 'blur(1px) grayscale(1)'; g.drawImage(img, 0, 0, w, h);
+  const d = g.getImageData(0, 0, w, h).data, v = new Float32Array(w * h), m = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) v[i] = d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11;
+  let max = 0;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x;
+    const gx = -v[i - w - 1] - 2 * v[i - 1] - v[i + w - 1] + v[i - w + 1] + 2 * v[i + 1] + v[i + w + 1];
+    const gy = -v[i - w - 1] - 2 * v[i - w] - v[i - w + 1] + v[i + w - 1] + 2 * v[i + w] + v[i + w + 1];
+    m[i] = Math.hypot(gx, gy); if (m[i] > max) max = m[i];
+  }
+  const tri = [...m].sort((a, b) => b - a), seuil = Math.max(max * .18, tri[Math.min(tri.length - 1, Math.round(w * h * .09))]);
+  const pts = [];
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) if (m[y * w + x] >= seuil) pts.push([x / k, y / k]);
+  const pas = Math.max(1, Math.floor(pts.length / n));
+  return pts.filter((_, i) => i % pas === 0);
+}
 async function tracer(lettre) {
   diapo++; ++jeton;
   voirLumi();
@@ -4487,8 +4643,8 @@ function arreterFormes() {
 
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : n.type === 'compter' ? 'compter' : n.type === 'chasse' ? 'chasse' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes', 'compter', 'chasse'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : n.type === 'compter' ? 'compter' : n.type === 'chasse' ? 'chasse' : n.type === 'photo' ? 'photo' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes', 'compter', 'chasse', 'photo'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
   $('btn-maison').hidden = pile.length < 3;
@@ -4506,6 +4662,7 @@ function afficher() {
   else if (ecran === 'formes') setTimeout(demarrerFormes, 50);
   else if (ecran === 'compter') setTimeout(demarrerCompter, 50);
   else if (ecran === 'chasse') setTimeout(() => Chasse.demarrer(), 50);
+  else if (ecran === 'photo') Album.construire();
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
   const sansTV = SceneChant.actif || Theatre.actif || (ecran === 'liste' && n.type === 'album');
@@ -5124,6 +5281,163 @@ function blocAchat() {
 
 
 
+
+// =====================================================================
+// ---------- Photomaton : photo de famille avec couronnes, cadres, compte à rebours ----------
+// La photo reste sur l'appareil (album famille). À la télé, c'est le téléphone qui prend la photo.
+// =====================================================================
+const PH_TXT = {
+  titre: { fr: 'Photo de famille', en: 'Family photo', ar: 'صورة العائلة' },
+  souriez: { fr: 'Souriez !', en: 'Smile!', ar: 'ابتسموا!' },
+  prendre: { fr: 'Prendre la photo', en: 'Take the photo', ar: 'التقط الصورة' },
+  choisir: { fr: 'Choisir une photo', en: 'Pick a photo', ar: 'اختر صورة' },
+  tel: { fr: 'Le téléphone est l’appareil photo : appuie sur le gros bouton du téléphone', en: 'The phone is the camera: press the big button on the phone', ar: 'الهاتف هو الكاميرا: اضغط الزر الكبير على الهاتف' },
+  pasCam: { fr: 'Pas de caméra ici : relie un téléphone', en: 'No camera here: connect a phone', ar: 'لا كاميرا هنا: اربط هاتفًا' },
+  cadres: { aucun: { fr: 'Sans cadre', en: 'No frame', ar: 'بلا إطار' }, couronnes: { fr: 'Couronnes', en: 'Crowns', ar: 'تيجان' }, etoiles: { fr: 'Étoiles', en: 'Stars', ar: 'نجوم' }, lumi: { fr: 'Lumiole', en: 'Lumiole', ar: 'لوميول' } },
+  attente: { fr: 'Le téléphone arrive…', en: 'Waiting for the phone…', ar: 'ننتظر الهاتف…' },
+  sous: { fr: 'Une photo de la famille avec des couronnes, puis Lumi la redessine en poussière d’étoiles.', en: 'A family photo with crowns, then Lumi redraws it in stardust.', ar: 'صورة للعائلة بالتيجان، ثم يعيد لومي رسمها بغبار النجوم.' },
+  astuce: { fr: 'Couronnes, étoiles… 3, 2, 1 !', en: 'Crowns, stars… 3, 2, 1!', ar: 'تيجان، نجوم… ٣، ٢، ١!' },
+  album: { fr: 'Album de la famille', en: 'Family album', ar: 'ألبوم العائلة' },
+  nouvelle: { fr: 'Nouvelle photo', en: 'New photo', ar: 'صورة جديدة' },
+  redessine: { fr: 'Lumi la redessine', en: 'Lumi redraws it', ar: 'لومي يعيد رسمها' },
+  encore: { fr: 'Encore une', en: 'Another one', ar: 'واحدة أخرى' },
+  gardee: { fr: 'Gardée dans l’album ✓', en: 'Saved in the album ✓', ar: 'حُفظت في الألبوم ✓' },
+  vide: { fr: 'Pas encore de photo. Prenez la première !', en: 'No photo yet. Take the first one!', ar: 'لا صور بعد. التقطوا الأولى!' },
+  prive: { fr: 'Les photos restent sur cet appareil.', en: 'Photos stay on this device.', ar: 'تبقى الصور على هذا الجهاز.' },
+};
+const tph = (k) => PH_TXT[k][langue] ?? PH_TXT[k].fr;
+// dessiner couronnes et cadres sur une image (aperçu et photo finale)
+function decorer(g, w, h, cadre, visages) {
+  if (cadre === 'couronnes' || cadre === 'lumi') visages.forEach((v) => {
+    const t = v.w * 1.05; g.font = `${t}px "Apple Color Emoji","Noto Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'bottom';
+    g.fillText('👑', v.x + v.w / 2, v.y + v.h * .12);
+  });
+  if (cadre === 'etoiles') {
+    g.font = `${w * .06}px "Apple Color Emoji","Noto Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; g.fillText(i % 2 ? '⭐' : '✨', w / 2 + Math.cos(a) * w * .46, h / 2 + Math.sin(a) * h * .44); }
+  }
+  if (cadre === 'lumi') {
+    const e = Math.max(10, w * .025), gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#5BF0B8'); gr.addColorStop(.5, '#22D8C4'); gr.addColorStop(1, '#17B5D9');
+    g.lineWidth = e; g.strokeStyle = gr; g.strokeRect(e / 2, e / 2, w - e, h - e);
+    g.fillStyle = 'rgba(3,43,44,.75)'; g.fillRect(w * .32, h - e * 3.6, w * .36, e * 2.6);
+    g.fillStyle = '#fff'; g.font = `800 ${e * 1.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Lumiole ✦', w / 2, h - e * 2.3);
+  }
+}
+let detecteurVisages = null;
+async function suivreVisages(video, rappel) {
+  try {
+    if (!detecteurVisages) {
+      const { v, fichiers } = await vision();
+      detecteurVisages = await v.FaceDetector.createFromOptions(fichiers, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite', delegate: 'GPU' }, runningMode: 'VIDEO' });
+    }
+    let actif = true, dernier = 0;
+    const boucle = (t) => {
+      if (!actif) return;
+      if (t - dernier > 140 && video.readyState >= 2) { dernier = t; const r = detecteurVisages.detectForVideo(video, performance.now()); rappel((r.detections || []).map((d) => ({ x: d.boundingBox.originX, y: d.boundingBox.originY, w: d.boundingBox.width, h: d.boundingBox.height }))); }
+      requestAnimationFrame(boucle);
+    };
+    requestAnimationFrame(boucle);
+    return { stop() { actif = false; } };
+  } catch (e) { console.warn(e); return null; }
+}
+// prendre une photo (caméra de l'appareil, téléphone relié, ou fichier) → rappel(image)
+const Photo = (() => {
+  let flux = null, visages = null, offTel = null;
+  async function prendre(rappel) {
+    const f = fenetre('photo'); $('fa-fond').onclick = null;
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button>
+      <div class="ph-scene"><video playsinline muted></video><img class="ph-direct" alt=""><div class="ph-attente"><span class="ph-tel">📱</span><b></b><small></small></div><canvas class="ph-deco"></canvas><div class="ph-compte"></div><div class="ph-flash"></div><p class="ph-info"></p></div>
+      <div class="ph-cadres"></div>
+      <div class="ph-bas"><label class="ph-b ph-fichier"><input type="file" accept="image/*" hidden><span></span></label><button class="ph-declencheur" aria-label="Photo"><span></span></button><span class="ph-vide"></span></div>
+      <p class="ph-prive"></p>`;
+    const video = f.querySelector('video'), deco = f.querySelector('.ph-deco'), info = f.querySelector('.ph-info');
+    let cadre = 'couronnes', vus = [];
+    f.querySelector('.ph-fichier span').textContent = '🖼️ ' + tph('choisir');
+    f.querySelector('.ph-prive').textContent = '🔒 ' + tph('prive');
+    const cadres = f.querySelector('.ph-cadres');
+    Object.keys(PH_TXT.cadres).forEach((k) => { const b = document.createElement('button'); b.className = 'puce' + (k === cadre ? ' on' : ''); b.textContent = PH_TXT.cadres[k][langue] || PH_TXT.cadres[k].fr; b.onclick = () => { cadre = k; cadres.querySelectorAll('.puce').forEach((x) => x.classList.toggle('on', x === b)); DuoEcran.dire?.('cadre', { cadre }); }; cadres.appendChild(b); });
+    const fini = (img) => { arreter(); fermerFenetre(); rappel(img); };
+    const fermer = () => { arreter(); fermerFenetre(); };
+    f.querySelector('.fa-fermer').onclick = fermer;
+    f.querySelector('.ph-fichier input').onchange = (e) => { const fi = e.target.files?.[0]; if (!fi) return; const im = new Image(); im.onload = () => fini(im); im.src = URL.createObjectURL(fi); };
+    // aperçu : couronnes sur les visages
+    const dessinerDeco = () => { if (!f.isConnected) return; const r = video.getBoundingClientRect(); deco.width = video.videoWidth || 640; deco.height = video.videoHeight || 480; const g = deco.getContext('2d'); g.clearRect(0, 0, deco.width, deco.height); decorer(g, deco.width, deco.height, cadre, vus.map((v) => ({ ...v, x: deco.width - v.x - v.w }))); requestAnimationFrame(dessinerDeco); };
+    const declencher = async () => {
+      const c = f.querySelector('.ph-compte');
+      for (const n of ['3', '2', '1']) { c.textContent = n; c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); son('pop'); await new Promise((ok) => setTimeout(ok, 800)); if (!f.isConnected) return; }
+      c.textContent = ''; parler(tph('souriez'));
+      const fl = f.querySelector('.ph-flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+      const o = document.createElement('canvas'), w = video.videoWidth, h = video.videoHeight, k = Math.min(1, 720 / w);
+      o.width = Math.round(w * k); o.height = Math.round(h * k);
+      const g = o.getContext('2d'); g.translate(o.width, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, o.width, o.height); g.setTransform(1, 0, 0, 1, 0, 0);
+      decorer(g, o.width, o.height, cadre, vus.map((v) => ({ x: (w - v.x - v.w) * k, y: v.y * k, w: v.w * k, h: v.h * k })));
+      const im = new Image(); im.onload = () => setTimeout(() => fini(im), 450); im.src = o.toDataURL('image/jpeg', .82);
+    };
+    f.querySelector('.ph-declencheur').onclick = declencher;
+    // à la télé sans caméra : le téléphone prend la photo
+    const viaTel = modeTele && DuoEcran.nbJoueurs;
+    if (viaTel) {
+      f.classList.add('via-tel'); info.textContent = '📱 ' + tph('tel');
+      f.querySelector('.ph-attente b').textContent = tph('attente'); f.querySelector('.ph-attente small').textContent = tph('tel');
+      f.querySelector('.ph-declencheur').hidden = true; f.querySelector('.ph-fichier').hidden = true;
+      DuoEcran.dire('mode', { mode: 'photo' }); DuoEcran.dire('cadre', { cadre });
+      const direct = f.querySelector('.ph-direct');
+      offTel = [DuoEcran.sur('photo', (src) => { const im = new Image(); im.onload = () => fini(im); im.src = src; }),
+        DuoEcran.sur('apercu', (src) => { direct.src = src; f.classList.add('en-direct'); })];
+      offTel.push(DuoEcran.sur('decompte', (n) => { const c = f.querySelector('.ph-compte'); if (!c) return; c.textContent = n || ''; if (n) { c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); son('pop'); } else { const fl = f.querySelector('.ph-flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on'); parler(tph('souriez')); } }));
+      setTimeout(() => cadres.querySelector('.on')?.focus({ preventScroll: true }), 60);
+      return;
+    }
+    try {
+      flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+      video.srcObject = flux; await video.play();
+      visages = await suivreVisages(video, (v) => { vus = v; });
+      requestAnimationFrame(dessinerDeco);
+      setTimeout(() => f.querySelector('.ph-declencheur')?.focus({ preventScroll: true }), 60);
+    } catch { info.textContent = modeTele ? tph('pasCam') : '🖼️ ' + tph('choisir'); f.classList.add('sans-cam'); }
+  }
+  function arreter() {
+    flux?.getTracks().forEach((t) => t.stop()); flux = null; visages?.stop(); visages = null; [].concat(offTel || []).forEach((o) => o?.()); offTel = null;
+    if (DuoEcran.nbJoueurs) DuoEcran.dire('mode', { mode: 'manette' });
+  }
+  return { prendre };
+})();
+// ----- L'écran « Photo de famille » : l'album, et une grande photo avec ses boutons -----
+const Album = (() => {
+  const cle = 'lumi-album';
+  const lire = () => { try { return JSON.parse(localStorage.getItem(cle) || '[]'); } catch { return []; } };
+  function ajouter(img) {
+    const c = document.createElement('canvas'), k = Math.min(1, 640 / img.width); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const l = lire(); l.unshift({ img: c.toDataURL('image/jpeg', .78), t: Date.now() });
+    for (let n = 14; n > 0; n--) { try { localStorage.setItem(cle, JSON.stringify(l.slice(0, n))); break; } catch {} }
+  }
+  function construire() {
+    const r = $('album-photos'), l = lire();
+    r.innerHTML = `<div class="alb-haut"><h2></h2><p class="alb-sous"></p></div><div class="alb-grille"><button class="alb-photo alb-nouvelle"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg></span><b></b><small></small></button></div><p class="alb-prive"></p>`;
+    r.querySelector('h2').textContent = tph('album');
+    r.querySelector('.alb-sous').textContent = l.length ? tph('sous') : tph('vide');
+    r.querySelector('.alb-nouvelle b').textContent = tph('nouvelle');
+    r.querySelector('.alb-nouvelle small').textContent = modeTele && DuoEcran.nbJoueurs ? '📱 ' + tph('astuce') : tph('astuce');
+    r.querySelector('.alb-prive').textContent = '🔒 ' + tph('prive');
+    r.querySelector('.alb-nouvelle').onclick = nouvelle;
+    const g = r.querySelector('.alb-grille');
+    l.forEach((p) => { const b = document.createElement('button'); b.className = 'alb-photo'; b.innerHTML = `<img alt="" src="${p.img}">`; b.onclick = () => { const im = new Image(); im.onload = () => voir(im, p.img); im.src = p.img; }; g.appendChild(b); });
+    setTimeout(() => r.querySelector('.alb-nouvelle')?.focus({ preventScroll: true }), 80);
+  }
+  function nouvelle() { Photo.prendre((im) => { ajouter(im); construire(); voir(im, im.src, true); }); }
+  function voir(im, src, neuve) {
+    const f = fenetre('vue-photo');
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><img class="vp-img" alt="" src="${src}"><p class="vp-msg"></p>
+      <div class="vp-actions"><button class="ph-b principal" data-a="r">✨ ${tph('redessine')}</button><a class="ph-b" download="lumiole-famille.jpg" href="${src}">⬇ ${{ fr: 'Enregistrer', en: 'Save', ar: 'احفظ' }[langue] || 'Enregistrer'}</a><button class="ph-b" data-a="e">📸 ${tph('encore')}</button></div>`;
+    if (neuve) { f.querySelector('.vp-msg').textContent = tph('gardee'); fete(); jingle(); }
+    f.querySelector('.fa-fermer').onclick = fermerFenetre;
+    f.querySelector('[data-a=r]').onclick = () => { fermerFenetre(); aller('dessin'); setTimeout(() => Trace.redessinerPhoto(im), 60); };
+    f.querySelector('[data-a=e]').onclick = () => { fermerFenetre(); nouvelle(); };
+    setTimeout(() => f.querySelector('[data-a=r]')?.focus({ preventScroll: true }), 60);
+  }
+  return { construire, ajouter };
+})();
 // =====================================================================
 // ---------- Cache-cache des objets : Lumi, comme une grande sœur, demande un objet de la maison ----------
 // L'enfant va le chercher et le montre à la caméra (le téléphone, ou la caméra de cet appareil).
@@ -6070,6 +6384,9 @@ const DuoEcran = (() => {
           .on('broadcast', { event: 'orient' }, ({ payload }) => emettre('orient', payload))
           .on('broadcast', { event: 'squelette' }, ({ payload }) => emettre('squelette', payload))
           .on('broadcast', { event: 'objets' }, ({ payload }) => emettre('objets', payload.l || []))
+          .on('broadcast', { event: 'photo' }, ({ payload }) => emettre('photo', payload.img))
+          .on('broadcast', { event: 'decompte' }, ({ payload }) => emettre('decompte', payload.n))
+          .on('broadcast', { event: 'apercu' }, ({ payload }) => emettre('apercu', payload.img))
           .on('broadcast', { event: 'dessin' }, ({ payload }) => { const j = joueurDe(payload.id); if (j) Trace.depuisTel('j' + j.n, payload.x, payload.y, payload.d); })
           .on('broadcast', { event: 'r' }, ({ payload }) => relatif(payload.dx, payload.dy, payload.d, payload.id))
           .on('broadcast', { event: 'k' }, ({ payload }) => touche(payload.k))
@@ -6139,10 +6456,13 @@ const DuoManette = (() => {
       dire('orient', { paysage: paysage() });
     }).on('broadcast', { event: 'ecran' }, ({ payload }) => choisirMode(payload.dessin ? 'dessin' : payload.pointeur ? 'pave' : 'menu', f))
       .on('broadcast', { event: 'mode' }, ({ payload }) => {
+        if (payload.mode === 'photo') return basculerPhoto(f, true);
+        if (photoTel) basculerPhoto(f, false);
         if (payload.mode === 'objets') return basculerObjets(f, true);
         if (objets) basculerObjets(f, false);
         if (payload.mode === 'camera' && !camera) basculerCamera(f, true); else if (payload.mode === 'manette' && camera) basculerCamera(f, false);
       })
+      .on('broadcast', { event: 'cadre' }, ({ payload }) => { cadreTel = payload.cadre; })
       .on('broadcast', { event: 'compte-ok' }, ({ payload }) => { f.querySelector('.mn-compte').textContent = '✅ ' + (payload.email || ''); vibrer(60); })
       .on('broadcast', { event: 'compte-ko' }, () => { f.querySelector('.mn-compte').textContent = '❌ ' + td('erreur'); });
     await new Promise((ok, ko) => { canal.subscribe((st) => { if (st === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
@@ -6178,6 +6498,43 @@ const DuoManette = (() => {
     if (camera) return; // la caméra garde la main tant qu'elle est allumée
     f.querySelector('.mn-aide').textContent = m === 'dessin' ? td('aideDessin') : m === 'pave' ? td('aidePave') : td('aideMenu');
     if (m === 'dessin') ardoise(f, true);
+  }
+  // le téléphone est l'appareil photo de la télé : gros déclencheur, compte à rebours, couronnes, envoi
+  let photoTel = null, cadreTel = 'couronnes';
+  async function basculerPhoto(f, oui) {
+    if (camera) basculerCamera(f, false); objets?.stop(); objets = null;
+    photoTel?.stop(); photoTel = null;
+    f.classList.toggle('photo', oui);
+    f.querySelector('.mn-surface').hidden = oui; f.querySelector('.duo-camera').hidden = !oui;
+    let bouton = f.querySelector('.mn-declencheur');
+    if (!oui) { bouton?.remove(); return; }
+    const boite = f.querySelector('.duo-camera'), video = boite.querySelector('video');
+    boite.querySelector('.fa-aide').textContent = '📸 ' + tph('souriez');
+    if (!bouton) { bouton = document.createElement('button'); bouton.className = 'mn-declencheur'; bouton.setAttribute('aria-label', 'Photo'); boite.appendChild(bouton); }
+    try {
+      const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+      video.srcObject = flux; await video.play();
+      let vus = []; const vis = await suivreVisages(video, (v) => { vus = v; });
+      // aperçu en direct sur la télé (petite image, 3 par seconde) : on se voit en grand avant la photo
+      const pc = document.createElement('canvas');
+      const direct = setInterval(() => {
+        const w = video.videoWidth, h = video.videoHeight; if (!w) return;
+        const k = 360 / w; pc.width = 360; pc.height = Math.round(h * k);
+        const g = pc.getContext('2d'); g.translate(pc.width, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, pc.width, pc.height); g.setTransform(1, 0, 0, 1, 0, 0);
+        decorer(g, pc.width, pc.height, cadreTel, vus.map((v) => ({ x: (w - v.x - v.w) * k, y: v.y * k, w: v.w * k, h: v.h * k })));
+        dire('apercu', { img: pc.toDataURL('image/jpeg', .5) });
+      }, 330);
+      photoTel = { stop() { clearInterval(direct); flux.getTracks().forEach((t) => t.stop()); vis?.stop(); } };
+      bouton.onclick = async () => {
+        vibrer(30);
+        for (const n of [3, 2, 1]) { dire('decompte', { n }); await new Promise((ok) => setTimeout(ok, 800)); }
+        dire('decompte', { n: 0 });
+        const w = video.videoWidth, h = video.videoHeight, k = Math.min(1, 560 / w), o = document.createElement('canvas'); o.width = Math.round(w * k); o.height = Math.round(h * k);
+        const g = o.getContext('2d'); g.translate(o.width, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, o.width, o.height); g.setTransform(1, 0, 0, 1, 0, 0);
+        decorer(g, o.width, o.height, cadreTel, vus.map((v) => ({ x: (w - v.x - v.w) * k, y: v.y * k, w: v.w * k, h: v.h * k })));
+        dire('photo', { img: o.toDataURL('image/jpeg', .72) }); vibrer(80); son('juste');
+      };
+    } catch { boite.querySelector('.fa-aide').textContent = td('erreur'); }
   }
   // le téléphone devient « l'œil » du cache-cache : il dit à la télé quels objets il voit
   let objets = null;
@@ -6592,7 +6949,7 @@ const TV = (() => {
         { id: 'j-mot', emoji: dj.mot.emoji, nom: L.motJour, desc: nomComplet(dj.mot), action: () => montrerEntree(dj.mot) },
         item('histoires'), item('chansons'),
       ] },
-      { titre: '👫 ' + tt('aDeux'), items: [item('chasse', { tel: true }), ...['formes', 'compter', 'bulles'].map((e) => item(e, { deux: true }))] },
+      { titre: '👫 ' + tt('aDeux'), items: [item('chasse', { tel: true }), item('photo', { tel: true }), ...['formes', 'compter', 'bulles'].map((e) => item(e, { deux: true }))] },
       { titre: '🌍 ' + tt('decouvrir'), items: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage'].map((e) => item(e, e === 'dessin' || e === 'coloriage' ? { tel: true } : {})) },
       { titre: '🌙 ' + tt('soir'), items: [...contes, item('chansons')] },
       { titre: '🎲 ' + tt('jeux'), items: ['devine', 'ecoute', 'range', 'intrus'].map((e) => item(e)) },
