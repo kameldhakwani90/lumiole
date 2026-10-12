@@ -1151,6 +1151,25 @@
   .chs-video p { margin: 0; padding: 6px 8px; font: 700 11px system-ui; color: #BFFBEA; background: rgba(4,20,30,.8); }
   .fa-t-manette.objets .duo-camera video { object-fit: cover; }
   .tele #ecran-compter .col-bulle { justify-content: center; text-align: center; } .tele #ecran-compter .col-bulle .lumi { display: none; }
+  /* ardoise du téléphone, et dessins gardés */
+  .mn-trait { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; border-radius: inherit; }
+  [data-mode="dessin"] .mn-trait { display: block; }
+  [data-mode="dessin"] .mn-surface .mn-main { display: none; }
+  .at-joueurs { position: absolute; left: 4vw; bottom: 1.6vh; display: flex; gap: 10px; }
+  .at-joueurs span { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 99px; border: 1px solid var(--c); color: var(--c); background: rgba(0,0,0,.25); font: 700 13px system-ui; }
+  .at-toast { position: absolute; left: 50%; top: 11vh; transform: translateX(-50%); padding: 10px 18px; border-radius: 99px; background: var(--degrade); color: var(--primaire-encre); font: 800 15px system-ui; box-shadow: 0 10px 30px rgba(46,230,197,.35); }
+  .at-toast[hidden] { display: none; }
+  .fa-t-galerie { width: min(100%, 980px); }
+  .gal-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 10px; }
+  .gal-img { position: relative; padding: 0; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; overflow: hidden; background: #070A1F; aspect-ratio: 16 / 10; }
+  .gal-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gal-img span { position: absolute; left: 8px; bottom: 6px; font: 800 16px 'Baloo 2', system-ui; color: #fff; text-shadow: 0 1px 6px #000; }
+  .gal-img.grand { grid-column: 1 / -1; aspect-ratio: auto; }
+  .gal-img.grand img { height: auto; }
+  .tele .gal-img:focus { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 20px rgba(255,255,255,.35); }
+  .mn-cote .mn-retour { width: auto; min-width: 96px; padding: 0 16px; }
+  .at-aide { left: 38vw; text-align: left; }
+  .mn-cote .mn-retour { display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -2630,10 +2649,10 @@ const Trace = (() => {
     }
   }
 
-  function toucher(x, y) {
+  function toucher(x, y, s = teinte) {
     poussiere(x, y, 3, .5);
     if (mode === 'libre') {
-      for (let i = 0; i < 6; i++) dessin.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14, t: .5 + Math.random() * 1.3, s: teinte, ph: Math.random() * 6 });
+      for (let i = 0; i < 6; i++) dessin.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14, t: .5 + Math.random() * 1.3, s, ph: Math.random() * 6 });
       if (dessin.length > 6000) dessin.splice(0, 4);
       return;
     }
@@ -2676,22 +2695,38 @@ const Trace = (() => {
   }
 
   const point = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  let dernierPt = null;
-  const versPoint = (x, y) => {
-    if (dernierPt) { const [a, b] = dernierPt, d = Math.hypot(x - a, y - b), n = Math.min(40, Math.floor(d / 7)); for (let k = 1; k < n; k++) toucher(a + (x - a) * k / n, b + (y - b) * k / n); }
-    toucher(x, y); dernierPt = [x, y];
-  };
-  cv.addEventListener('pointerdown', (e) => { appui = true; dernierPt = null; cv.setPointerCapture?.(e.pointerId); versPoint(...point(e)); });
+  // plusieurs crayons à la fois (deux enfants, deux doigts, deux téléphones) : chacun son trait et sa couleur
+  const crayons = new Map(); // id → { pt, s }
+  // couleur d'un crayon : joueur 1 turquoise, joueur 2 rose, sinon la couleur choisie
+  const couleurDe = (id) => (id === 71 || id === 'j1' ? 1 : id === 72 || id === 'j2' ? 2 : teinte);
+  function versPoint(id, x, y) {
+    const c = crayons.get(id) || { pt: null, s: couleurDe(id) }; crayons.set(id, c);
+    if (c.pt) { const [a, b] = c.pt, d = Math.hypot(x - a, y - b), n = Math.min(40, Math.floor(d / 7)); for (let k = 1; k < n; k++) toucher(a + (x - a) * k / n, b + (y - b) * k / n, c.s); }
+    toucher(x, y, c.s); c.pt = [x, y];
+  }
+  const lever = (id) => crayons.delete(id);
+  cv.addEventListener('pointerdown', (e) => { cv.setPointerCapture?.(e.pointerId); crayons.delete(e.pointerId); versPoint(e.pointerId, ...point(e)); });
   cv.addEventListener('pointermove', (e) => {
-    if (!appui) return;
-    for (const ev of e.getCoalescedEvents?.() || [e]) versPoint(...point(ev));
+    if (!crayons.has(e.pointerId)) return;
+    for (const ev of (e.getCoalescedEvents?.() || []).concat([]).length ? e.getCoalescedEvents() : [e]) versPoint(e.pointerId, ...point(ev));
   });
-  ['pointerup', 'pointercancel'].forEach((n) => cv.addEventListener(n, () => { appui = false; dernierPt = null; }));
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((n) => cv.addEventListener(n, (e) => lever(e.pointerId)));
+  // le téléphone dessine : coordonnées 0..1 de la feuille, en direct
+  function depuisTel(id, nx, ny, d) {
+    if (!actif) return;
+    if (!d) return lever(id);
+    versPoint(id, nx * W, ny * H);
+  }
   // ----- l'atelier : plein écran, couleurs, gomme, lettre suivante (doigt, téléphone ou main devant la caméra) -----
   const AT_TXT = {
     trace: { fr: 'Trace la lettre', en: 'Trace the letter', ar: 'ارسم الحرف' },
     libre: { fr: 'Dessin libre', en: 'Free drawing', ar: 'رسم حر' },
     effacer: { fr: 'Effacer', en: 'Clear', ar: 'امسح' },
+    garder: { fr: 'Garder', en: 'Save', ar: 'احفظ' },
+    garde: { fr: 'Gardé dans « Mes dessins » ✓', en: 'Saved in “My drawings” ✓', ar: 'حُفظ في «رسوماتي» ✓' },
+    galerie: { fr: 'Mes dessins', en: 'My drawings', ar: 'رسوماتي' },
+    vide: { fr: 'Pas encore de dessin gardé.', en: 'No saved drawing yet.', ar: 'لا رسومات محفوظة بعد.' },
+    tel: { fr: 'dessine sur le téléphone', en: 'draws on the phone', ar: 'يرسم على الهاتف' },
     encore: { fr: 'Encore', en: 'Again', ar: 'مرة أخرى' },
     suivante: { fr: 'Lettre suivante', en: 'Next letter', ar: 'الحرف التالي' },
     main: { fr: '☝️ Un doigt pour dessiner · ✋ main ouverte pour lever le crayon', en: '☝️ One finger to draw · ✋ open hand to lift the pen', ar: '☝️ إصبع للرسم · ✋ يد مفتوحة لرفع القلم' },
@@ -2701,7 +2736,8 @@ const Trace = (() => {
   function construireUI() {
     ui = document.createElement('div'); ui.className = 'atelier-ui';
     ui.innerHTML = `<div class="at-haut"><span class="at-titre"></span><div class="at-barre"><span></span></div></div>
-      <div class="at-outils"><div class="at-couleurs"></div><button type="button" class="at-b" data-a="effacer"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span></span></button></div>
+      <div class="at-outils"><div class="at-couleurs"></div><button type="button" class="at-b" data-a="effacer" aria-label="Effacer"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span></span></button><button type="button" class="at-b" data-a="garder" aria-label="Garder"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h8V4M8 20v-6h8v6"/></svg><span></span></button><button type="button" class="at-b" data-a="galerie" aria-label="Mes dessins"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><span></span></button></div>
+      <div class="at-joueurs"></div><div class="at-toast" hidden></div>
       <div class="at-fin" hidden><button type="button" class="at-b" data-a="encore"></button><button type="button" class="at-b principal" data-a="suivante"></button></div>
       <p class="at-aide"></p>`;
     TEINTES.forEach((c, i) => {
@@ -2711,8 +2747,37 @@ const Trace = (() => {
     });
     ui.querySelector('[data-a=effacer]').onclick = () => { dessin = []; particules = []; if (mode === 'lettre') { grains.forEach((p) => { p.allume = false; }); fini = false; maj(); } son('pop'); };
     ui.querySelector('[data-a=encore]').onclick = () => ouvrir('lettre', lettre, apresReussite);
+    ui.querySelector('[data-a=garder]').onclick = garder;
+    ui.querySelector('[data-a=galerie]').onclick = () => galerie();
     ui.querySelector('[data-a=suivante]').onclick = () => { const L = LANGUES[langue].alphabet.split(' ').map((x) => x.split(':')[0]); const n = L[(L.indexOf(lettre) + 1) % L.length]; tracer(n); };
     $('scene').appendChild(ui);
+  }
+  // garder le dessin (image sur fond de nuit) dans « Mes dessins », sur l'appareil
+  function garder() {
+    const o = document.createElement('canvas'); o.width = 640; o.height = Math.round(640 * H / W);
+    const c = o.getContext('2d'), gr = c.createRadialGradient(o.width / 2, o.height / 2, 0, o.width / 2, o.height / 2, o.width * .7);
+    gr.addColorStop(0, '#182358'); gr.addColorStop(1, '#070A1F'); c.fillStyle = gr; c.fillRect(0, 0, o.width, o.height);
+    c.globalCompositeOperation = 'lighter'; c.drawImage(cv, 0, 0, o.width, o.height);
+    let liste = []; try { liste = JSON.parse(localStorage.getItem(Profils.cle('lumi-dessins', Profils.actif.id)) || '[]'); } catch {}
+    liste.unshift({ img: o.toDataURL('image/jpeg', .82), t: Date.now(), l: mode === 'lettre' ? lettre : '' });
+    try { localStorage.setItem(Profils.cle('lumi-dessins', Profils.actif.id), JSON.stringify(liste.slice(0, 24))); } catch { liste.pop(); }
+    son('juste'); jingle(); poussiere(W / 2, H / 2, 40, 2.4);
+    const t = ui.querySelector('.at-toast'); t.textContent = ta('garde'); t.hidden = false; clearTimeout(t._m); t._m = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+  function galerie() {
+    let liste = []; try { liste = JSON.parse(localStorage.getItem(Profils.cle('lumi-dessins', Profils.actif.id)) || '[]'); } catch {}
+    const f = fenetre('galerie');
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>🖼️ ${ta('galerie')}</h2><div class="gal-grille"></div>`;
+    f.querySelector('.fa-fermer').onclick = fermerFenetre;
+    const g = f.querySelector('.gal-grille');
+    if (!liste.length) g.innerHTML = `<p class="st-aide">${ta('vide')}</p>`;
+    liste.forEach((d) => { const b = document.createElement('button'); b.className = 'gal-img'; b.innerHTML = `<img alt="" src="${d.img}">${d.l ? `<span>${d.l}</span>` : ''}`; b.onclick = () => b.classList.toggle('grand'); g.appendChild(b); });
+    setTimeout(() => g.querySelector('button')?.focus({ preventScroll: true }), 60);
+  }
+  function joueursTel() {
+    if (!ui) return;
+    const n = DuoEcran.nbJoueurs;
+    ui.querySelector('.at-joueurs').innerHTML = n ? [1, 2].slice(0, n).map((k) => `<span style="--c:${JOUEURS_STYLE[k - 1].couleur}">${JOUEURS_STYLE[k - 1].main} ${ta('tel')}</span>`).join('') : '';
   }
   function marquer() { ui.querySelectorAll('.at-couleur').forEach((b, i) => b.classList.toggle('on', i === teinte)); }
   function maj() { const faites = grains.length ? grains.filter((p) => p.allume).length / grains.length : 0; ui.querySelector('.at-barre span').style.width = Math.round(faites * 100) + '%'; }
@@ -2725,6 +2790,8 @@ const Trace = (() => {
     ui.dataset.mode = mode;
     ui.querySelector('.at-titre').textContent = mode === 'lettre' ? `${ta('trace')} ${lettre}` : ta('libre');
     ui.querySelector('[data-a=effacer] span').textContent = ta('effacer');
+    ui.querySelector('[data-a=garder] span').textContent = ta('garder'); ui.querySelector('[data-a=galerie] span').textContent = ta('galerie');
+    ui.querySelector('[data-a=garder]').hidden = mode !== 'libre'; joueursTel(); crayons.clear();
     ui.querySelector('[data-a=encore]').textContent = '↻ ' + ta('encore'); ui.querySelector('[data-a=suivante]').textContent = ta('suivante') + ' →';
     ui.querySelector('.at-aide').textContent = DuoEcran.nbJoueurs ? ta('main') : '';
     ui.querySelector('.at-fin').hidden = true; marquer(); maj();
@@ -2734,14 +2801,16 @@ const Trace = (() => {
     if (mode === 'lettre') preparerLettre(lettre); else { grains = []; guide = null; }
     avatar?.forme(null); avatar?.mode('fin'); // la poussière de Lumi se fait discrète pendant le dessin
     if (!actif) { actif = true; dessiner(); }
+    setTimeout(() => DuoEcran.signaler?.(), 50);
   }
   function fermer() {
     actif = false; cancelAnimationFrame(raf);
     document.documentElement.classList.remove('atelier');
+    setTimeout(() => DuoEcran.signaler?.(), 50);
     ['trace', 'trace-fermer', 'trace-progres'].forEach((id) => { $(id).hidden = true; });
   }
   $('trace-fermer').onclick = fermer;
-  return { ouvrir, fermer, get actif() { return actif; } };
+  return { ouvrir, fermer, depuisTel, joueursTel, galerie, get actif() { return actif; } };
 })();
 
 async function tracer(lettre) {
@@ -3172,6 +3241,7 @@ function construireListe(id) {
   const lettres = L.alphabet.split(' ').map((x) => x.split(':')[0]);
   if (n.type === 'dessin') {
     p.appendChild(tuile('✨', L.libre, dessinLibre, 'tout'));
+    p.appendChild(tuile('🖼️', { fr: 'Mes dessins', en: 'My drawings', ar: 'رسوماتي' }[langue] || 'Mes dessins', () => Trace.galerie(), 'tout'));
     lettres.forEach((l, i) => p.appendChild(tuile(l, '✍️', () => tracer(l), 'lettre c' + (i % 4))));
     return;
   }
@@ -5828,6 +5898,7 @@ const DUO_TXT = {
   aide: { fr: 'Montre ton doigt à la caméra. Pince le pouce et l’index pour toucher.', en: 'Show your finger to the camera. Pinch thumb and index to tap.', ar: 'أرِ إصبعك للكاميرا. اجمع الإبهام والسبابة للّمس.' },
   scan: { fr: 'Scanne avec le téléphone pour jouer (jusqu’à 2 joueurs)', en: 'Scan with the phone to play (up to 2 players)', ar: 'امسح بالهاتف للّعب (حتى لاعبَين)' },
   aideMenu: { fr: 'Glisse pour choisir, tape pour lancer', en: 'Swipe to choose, tap to start', ar: 'اسحب للاختيار، والمس للبدء' },
+  aideDessin: { fr: 'Dessine ici : ton dessin apparaît sur la télé !', en: 'Draw here: your drawing appears on the TV!', ar: 'ارسم هنا: يظهر رسمك على التلفاز!' },
   aidePave: { fr: 'Bouge ton doigt : la main bouge sur la télé', en: 'Move your finger: the hand moves on the TV', ar: 'حرّك إصبعك: اليد تتحرك على التلفاز' },
   tourne: { fr: 'Tourne ton téléphone à l’horizontale', en: 'Turn your phone sideways', ar: 'أدِر هاتفك أفقيًا' },
   poser: { fr: 'Pose le téléphone debout contre un objet, écran vers toi, à 1 mètre. Ta main pilote la télé.', en: 'Stand the phone up against something, screen facing you, about 1 m away. Your hand drives the TV.', ar: 'ضع الهاتف واقفًا مستندًا إلى شيء، والشاشة نحوك، على بعد متر. يدك تتحكم في التلفاز.' },
@@ -5976,8 +6047,9 @@ const DuoEcran = (() => {
   // dire au téléphone ce qu'il doit montrer : glisser (menus) ou pavé (jeux)
   function signaler() {
     const e = $('app').dataset.ecran;
-    const pointeurUtile = ['formes', 'compter', 'coloriage', 'jeu'].includes(e) || (typeof Trace !== 'undefined' && Trace.actif);
-    canaux.forEach((ch) => ch.send({ type: 'broadcast', event: 'ecran', payload: { pointeur: pointeurUtile } }));
+    const dessin = typeof Trace !== 'undefined' && Trace.actif;
+    const pointeurUtile = dessin || ['formes', 'compter', 'coloriage', 'jeu'].includes(e);
+    canaux.forEach((ch) => ch.send({ type: 'broadcast', event: 'ecran', payload: { pointeur: pointeurUtile, dessin } }));
   }
   // petit QR dans un coin tant qu'un 2e joueur peut rejoindre (hors accueil télé, qui a le sien)
   async function majPetitQr() {
@@ -5998,12 +6070,13 @@ const DuoEcran = (() => {
           .on('broadcast', { event: 'orient' }, ({ payload }) => emettre('orient', payload))
           .on('broadcast', { event: 'squelette' }, ({ payload }) => emettre('squelette', payload))
           .on('broadcast', { event: 'objets' }, ({ payload }) => emettre('objets', payload.l || []))
+          .on('broadcast', { event: 'dessin' }, ({ payload }) => { const j = joueurDe(payload.id); if (j) Trace.depuisTel('j' + j.n, payload.x, payload.y, payload.d); })
           .on('broadcast', { event: 'r' }, ({ payload }) => relatif(payload.dx, payload.dy, payload.d, payload.id))
           .on('broadcast', { event: 'k' }, ({ payload }) => touche(payload.k))
           .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
             const j = joueurDe(payload?.id || 'x');
             if ($('fa-fond')?.querySelector('.fa-t-duo')) fermerFenetre();
-            jingle(); resterAllume(); majPetitQr();
+            jingle(); resterAllume(); majPetitQr(); Trace.joueursTel?.();
             ch.send({ type: 'broadcast', event: 'ok', payload: { id: payload?.id, n: j?.n || 0, couleur: j?.couleur, prive } });
             setTimeout(signaler, 200);
           })
@@ -6064,7 +6137,7 @@ const DuoManette = (() => {
       if (payload?.couleur) f.style.setProperty('--c', payload.couleur);
       vibrer(60); son('juste');
       dire('orient', { paysage: paysage() });
-    }).on('broadcast', { event: 'ecran' }, ({ payload }) => choisirMode(payload.pointeur ? 'pave' : 'menu', f))
+    }).on('broadcast', { event: 'ecran' }, ({ payload }) => choisirMode(payload.dessin ? 'dessin' : payload.pointeur ? 'pave' : 'menu', f))
       .on('broadcast', { event: 'mode' }, ({ payload }) => {
         if (payload.mode === 'objets') return basculerObjets(f, true);
         if (objets) basculerObjets(f, false);
@@ -6079,10 +6152,32 @@ const DuoManette = (() => {
     matchMedia('(orientation: landscape)').addEventListener?.('change', () => dire('orient', { paysage: paysage() }));
     resterAllume();
   }
+  // ardoise : on voit son trait sur le téléphone, et il part en direct sur la télé
+  function ardoise(f, effacer) {
+    const cv = f.querySelector('.mn-trait'), r = cv.getBoundingClientRect(), k = Math.min(devicePixelRatio, 2);
+    if (effacer || cv.width !== Math.round(r.width * k)) { cv.width = Math.round(r.width * k); cv.height = Math.round(r.height * k); }
+    const g = cv.getContext('2d'); g.setTransform(k, 0, 0, k, 0, 0); g.lineCap = g.lineJoin = 'round';
+    return g;
+  }
+  let traitPrec = null, envoiTrait = 0;
+  function trait(f, e, d) {
+    const surf = f.querySelector('.mn-surface'), r = surf.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    const g = ardoise(f);
+    if (d && traitPrec) {
+      const c = getComputedStyle(f).getPropertyValue('--c').trim() || '#2EE6C5';
+      g.strokeStyle = c; g.lineWidth = 6; g.shadowColor = c; g.shadowBlur = 12;
+      g.beginPath(); g.moveTo(traitPrec[0] * r.width, traitPrec[1] * r.height); g.lineTo(x * r.width, y * r.height); g.stroke();
+    }
+    traitPrec = d ? [x, y] : null;
+    const t = performance.now(); if (d && t - envoiTrait < 25) return; envoiTrait = t;
+    dire('dessin', { x: +x.toFixed(4), y: +y.toFixed(4), d });
+  }
   function choisirMode(m, f) {
     mode = m; f.dataset.mode = m;
     if (camera) return; // la caméra garde la main tant qu'elle est allumée
-    f.querySelector('.mn-aide').textContent = m === 'pave' ? td('aidePave') : td('aideMenu');
+    f.querySelector('.mn-aide').textContent = m === 'dessin' ? td('aideDessin') : m === 'pave' ? td('aidePave') : td('aideMenu');
+    if (m === 'dessin') ardoise(f, true);
   }
   // le téléphone devient « l'œil » du cache-cache : il dit à la télé quels objets il voit
   let objets = null;
@@ -6106,7 +6201,7 @@ const DuoManette = (() => {
     f.innerHTML = `<div class="mn-haut"><span class="mn-etat"></span><button class="fa-fermer" aria-label="${tf('fermer')}">✕</button></div>
       <div class="fa-form duo-relier"><input inputmode="numeric" maxlength="4" autocomplete="off"><button class="fa-bouton fa-principal"></button></div>
       <div class="mn-jeu" hidden>
-        <div class="mn-surface"><svg class="mn-main" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10h.5V3.5a1.5 1.5 0 0 1 3 0V10h.5V5.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6.5 7-3 0-4.5-1.5-6-4l-2.3-4a1.4 1.4 0 0 1 2.3-1.6L9 13z"/></svg><p class="mn-aide"></p></div>
+        <div class="mn-surface"><canvas class="mn-trait"></canvas><svg class="mn-main" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10h.5V3.5a1.5 1.5 0 0 1 3 0V10h.5V5.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6.5 7-3 0-4.5-1.5-6-4l-2.3-4a1.4 1.4 0 0 1 2.3-1.6L9 13z"/></svg><p class="mn-aide"></p></div>
         <div class="duo-camera" hidden><video playsinline muted></video><span class="duo-point"></span><p class="fa-aide"></p></div>
         <div class="mn-cote">
           <div class="mn-petits"><button class="mn-b" data-k="maison" aria-label="Accueil">🏠</button><button class="mn-b" data-a="camera" aria-label="Caméra">📷</button></div>
@@ -6143,12 +6238,15 @@ const DuoManette = (() => {
     // la surface : glisser = flèches, taper = OK (menus) ; ou pavé relatif (jeux)
     let depart = null, prec = null, cumul = { x: 0, y: 0 };
     surface.onpointerdown = (e) => {
-      surface.setPointerCapture(e.pointerId); depart = prec = { x: e.clientX, y: e.clientY, t: performance.now() }; cumul = { x: 0, y: 0 };
+      try { surface.setPointerCapture(e.pointerId); } catch {}
+      if (mode === 'dessin') { traitPrec = null; trait(f, e, true); depart = { dessin: true }; return; }
+      depart = prec = { x: e.clientX, y: e.clientY, t: performance.now() }; cumul = { x: 0, y: 0 };
       surface.classList.add('appui');
       if (mode === 'pave') dire('r', { dx: 0, dy: 0, d: true });
     };
     surface.onpointermove = (e) => {
       if (!depart) return;
+      if (depart.dessin) { for (const ev of (e.getCoalescedEvents?.() || []).concat([]).length ? e.getCoalescedEvents() : [e]) trait(f, ev, true); return; }
       const dx = e.clientX - prec.x, dy = e.clientY - prec.y; prec = { x: e.clientX, y: e.clientY };
       cumul.x += dx; cumul.y += dy;
       if (mode === 'pave') {
@@ -6164,6 +6262,7 @@ const DuoManette = (() => {
     };
     surface.onpointerup = surface.onpointercancel = (e) => {
       if (!depart) return;
+      if (depart.dessin) { trait(f, e, false); depart = null; return; }
       surface.classList.remove('appui');
       const dist = Math.hypot(e.clientX - depart.x, e.clientY - depart.y), court = performance.now() - depart.t < 350;
       if (mode === 'pave') {
@@ -6469,7 +6568,7 @@ const TV = (() => {
       const motDe = Object.fromEntries(L.alphabet.split(' ').map((x) => x.split(':')));
       if (n.type === 'lettres') return [{ titre: nomDe(n), items: lettres.map((l) => ({ id: 'l-' + l, emoji: l, nom: motDe[l] ? `${l} · ${motDe[l]}` : l, texte: true, action: () => montrerLettre(l) })) }];
       if (n.type === 'nombres') return [{ titre: nomDe(n), items: L.nombres.map((nom, i) => ({ id: 'n-' + i, emoji: L.chiffre(i + 1), nom, texte: true, action: () => montrerNombre(i + 1) })) }];
-      if (n.type === 'dessin') return [{ titre: nomDe(n) + ' · 📱', items: [{ id: 'libre', emoji: '✨', nom: L.libre, tel: true, action: () => dessinLibre() }, ...lettres.map((l) => ({ id: 'd-' + l, emoji: l, nom: '✍️ ' + l, texte: true, tel: true, action: () => tracer(l) }))] }];
+      if (n.type === 'dessin') return [{ titre: nomDe(n) + ' · 📱', items: [{ id: 'libre', emoji: '✨', nom: L.libre, tel: true, action: () => dessinLibre() }, { id: 'galerie', emoji: '🖼️', nom: { fr: 'Mes dessins', en: 'My drawings', ar: 'رسوماتي' }[langue] || 'Mes dessins', action: () => Trace.galerie() }, ...lettres.map((l) => ({ id: 'd-' + l, emoji: l, nom: '✍️ ' + l, texte: true, tel: true, action: () => tracer(l) }))] }];
       if (n.mots) {
         const mots = n.mots.split(' ').map((e) => PAR_EMOJI.get(e)).filter(Boolean);
         const actions = mots.map((m) => () => montrerEntree(m, true, id));
