@@ -2293,6 +2293,43 @@
   @media (orientation: landscape) {
     html:not(.tele) #ch-lecteur:not(.vide) { min-height: min(calc(100dvh - 110px), 520px); justify-content: center; gap: 12px; }
   }
+  /* ----- Théâtre : le texte en sous-titre ajusté (plus de grand cadre vide), pas de « ? » sur la scène ----- */
+  .theatre .aide-q, .theatre .aide-haut { display: none !important; }
+  .theatre #hi-lecteur { width: fit-content; min-width: min(60vw, 520px); max-width: min(94vw, 1100px); padding: 12px 22px 10px; gap: 4px; border-radius: 22px; }
+  .theatre .hi-texte { min-height: 0; margin: 0; padding: 2px 4px; }
+  .theatre .hi-points { margin: 4px 0 0; }
+  .theatre .hi-info:empty { display: none; }
+  .th-calme .theatre #hi-lecteur, .th-calme.theatre #hi-lecteur { gap: 0; }
+  /* ----- Théâtre des histoires : décor peint en couches derrière Lumi ----- */
+  .dc-decor { display: none; position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .theatre .dc-decor { display: block; }
+  .dc-decor svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .dc-couche { transition: transform 2.8s cubic-bezier(.45,.05,.25,1); }
+  .dc-voile { position: absolute; inset: 0; background: radial-gradient(ellipse 38% 42% at 50% 42%, rgba(8,6,24,.42), rgba(8,6,24,0) 100%), linear-gradient(rgba(8,6,24,.18), rgba(8,6,24,.32)); }
+  .dc-decor.dc-entre { animation: dcEntre 1.4s ease both; }
+  @keyframes dcEntre { from { opacity: 0; } }
+  .dc-etoile { animation: dcScintille 4s ease-in-out infinite; }
+  @keyframes dcScintille { 50% { opacity: .25; } }
+  .dc-nuage { animation: dcDerive 26s ease-in-out infinite alternate; }
+  @keyframes dcDerive { from { transform: translateX(-60px); } to { transform: translateX(60px); } }
+  .dc-vague { animation: dcVague 5s ease-in-out infinite alternate; }
+  @keyframes dcVague { from { transform: translateX(-50px); } to { transform: translateX(10px); } }
+  .dc-flocon { animation: dcNeige 12s linear infinite; }
+  @keyframes dcNeige { to { transform: translate(60px, 1100px); } }
+  .dc-luciole { animation: dcLuciole 6s ease-in-out infinite; }
+  @keyframes dcLuciole { 0%, 100% { opacity: 0; transform: translate(0, 0); } 30%, 70% { opacity: 1; } 50% { transform: translate(30px, -30px); } }
+  .dc-fenetre { animation: dcRespire 3.5s ease-in-out infinite; }
+  @keyframes dcRespire { 50% { opacity: .65; } }
+  .dc-balance { transform-box: fill-box; transform-origin: 50% 0%; animation: dcBalance 4s ease-in-out infinite; }
+  @keyframes dcBalance { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+  @media (prefers-reduced-motion: reduce) { .dc-decor * { animation: none !important; } .dc-couche { transition: none; } }
+  .theatre #hi-lecteur .ch-titre { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (orientation: landscape) and (max-height: 520px) {
+    html:not(.tele).theatre #hi-lecteur { min-width: min(86vw, 900px); bottom: 2vh; padding: 8px 18px 6px; }
+    html:not(.tele).theatre .hi-texte { font-size: clamp(16px, 4.4vh, 22px); line-height: 1.35; }
+    html:not(.tele).theatre .ch-commandes button { width: 40px; height: 40px; font-size: 18px; }
+    html:not(.tele).theatre .ch-commandes #hi-lecture { width: 46px; height: 46px; }
+  }
 </style>
 </head>
 <body>
@@ -3404,7 +3441,10 @@ function taireVoix() {
   try { PLUGINS.TextToSpeech?.stop(); } catch {}
   try { speechSynthesis.cancel(); } catch {}
 }
+// la voix ne doit pas lire la ponctuation ni les émojis (« guillemets ouvrants », « tiret »…)
+const pourVoix = (t) => String(t ?? '').replace(/[«»“”„‟"‹›]/g, '').replace(/\s[—–]\s/g, ', ').replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '').replace(/\s{2,}/g, ' ').trim();
 function parler(texte, l = langue, o = {}) {
+  texte = pourVoix(texte);
   if (PLUGINS.TextToSpeech) return parlerNatif(texte, l, o);
   return new Promise((ok) => {
     if (!('speechSynthesis' in window)) return ok();
@@ -12521,6 +12561,125 @@ dessinLibre = function (...a) { // eslint-disable-line no-func-assign
   if (!Aide.vu('atelier')) return Aide.montrer('atelier', () => dessinLibreAvantAide(...a));
   return dessinLibreAvantAide(...a);
 };
+
+// ---------- Décors peints du théâtre des histoires ----------
+// Chaque histoire a un vrai décor en couches (ciel, lointain, milieu, premier plan) dessiné en SVG, selon son ambiance.
+// À chaque page, la caméra glisse doucement : les couches bougent à des vitesses différentes (profondeur).
+const DecorConte = (() => {
+  let racine = null, typeCourant = null;
+  let graine = 1; const hasard = () => (graine = (graine * 16807) % 2147483647) / 2147483647;
+  const coll = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join('');
+  // quel décor pour quelle histoire
+  const TYPE = { foret: 'foret', jardin: 'prairie', ferme: 'ferme', mer: 'mer', ete: 'plage', maison: 'maison', ecole: 'ecole', ciel: 'nuit', soir: 'nuit',
+    halloween: 'halloween', noel: 'noel', ramadan: 'ramadan' };
+  const typeDe = (h) => TYPE[h.amb] || ({ ferme: 'ferme', foret: 'foret', jardin: 'prairie', mer: 'mer', halloween: 'halloween', noel: 'noel', ramadan: 'ramadan', ecole: 'ecole', ete: 'plage', maison: 'maison' })[h.palette] || 'nuit';
+
+  // ----- petits éléments dessinés -----
+  const etoiles = (n, h = 520) => coll(n, () => `<circle class="dc-etoile" cx="${(hasard() * 1800 - 100).toFixed(0)}" cy="${(hasard() * h).toFixed(0)}" r="${hasard() < .15 ? 2.4 : 1.2}" fill="#fff" style="animation-delay:${(-hasard() * 4).toFixed(1)}s"/>`);
+  const nuage = (x, y, s, c = '#fff', o = .85) => `<g class="dc-nuage"><g transform="translate(${x} ${y}) scale(${s})" opacity="${o}"><ellipse cx="0" cy="0" rx="90" ry="34" fill="${c}"/><ellipse cx="-50" cy="8" rx="56" ry="26" fill="${c}"/><ellipse cx="55" cy="6" rx="60" ry="28" fill="${c}"/><ellipse cx="10" cy="-22" rx="52" ry="34" fill="${c}"/></g></g>`;
+  const sapin = (x, y, s, c) => `<path d="M${x} ${y - 200 * s} L${x + 60 * s} ${y - 60 * s} L${x + 30 * s} ${y - 60 * s} L${x + 75 * s} ${y} L${x - 75 * s} ${y} L${x - 30 * s} ${y - 60 * s} L${x - 60 * s} ${y - 60 * s} Z" fill="${c}"/>`;
+  const arbre = (x, y, s, c, t = '#3b2a1e') => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-10" y="-90" width="20" height="90" fill="${t}"/><circle cx="0" cy="-130" r="62" fill="${c}"/><circle cx="-44" cy="-104" r="42" fill="${c}"/><circle cx="46" cy="-100" r="44" fill="${c}"/></g>`;
+  const colline = (y, amp, c, graine2 = 0) => { let d = `M-300 ${y}`; for (let x = -300; x <= 1900; x += 200) d += ` Q${x + 100} ${y - amp * (0.6 + Math.sin(x * .013 + graine2) * .4)} ${x + 200} ${y}`; return `<path d="${d} L1900 1000 L-300 1000 Z" fill="${c}"/>`; };
+  const fleurs = (n, y0, y1) => coll(n, () => { const x = hasard() * 1700 - 50, y = y0 + hasard() * (y1 - y0), c = ['#ff8fb3', '#ffd34d', '#ffffff', '#b98cff'][Math.floor(hasard() * 4)]; return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(5 + hasard() * 5).toFixed(1)}" fill="${c}"/>`; });
+  const maison = (x, y, s, mur, toit, lum = '#ffc46b') => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-60" y="-90" width="120" height="90" fill="${mur}"/><path d="M-74 -88 L0 -150 L74 -88 Z" fill="${toit}"/><rect class="dc-fenetre" x="-40" y="-66" width="26" height="26" rx="4" fill="${lum}"/><rect class="dc-fenetre" x="14" y="-66" width="26" height="26" rx="4" fill="${lum}"/><rect x="-12" y="-40" width="24" height="40" rx="4" fill="rgba(0,0,0,.35)"/></g>`;
+  const citrouille = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="8" rx="80" ry="30" fill="url(#dc-chaud)" opacity=".6"/><ellipse rx="34" ry="26" fill="#d9661f"/><ellipse rx="17" ry="26" fill="#ef8a34"/><rect x="-4" y="-34" width="8" height="12" rx="3" fill="#2e4a1e"/><path d="M-16 -6 L-8 -14 L-2 -4 Z M16 -6 L8 -14 L2 -4 Z M-16 6 Q0 18 16 6 Q0 12 -16 6 Z" fill="#ffe08a"/></g>`;
+  const lanterne = (x, y, s, c = '#ffb347') => `<g transform="translate(${x} ${y}) scale(${s})"><g class="dc-balance"><line x1="0" y1="-200" x2="0" y2="-34" stroke="#2a1d1a" stroke-width="3"/><ellipse cx="0" cy="0" rx="70" ry="70" fill="url(#dc-chaud)" opacity=".55"/><rect x="-20" y="-34" width="40" height="56" rx="12" fill="${c}"/><rect x="-24" y="-38" width="48" height="8" rx="3" fill="#6b3d1e"/><rect x="-24" y="20" width="48" height="8" rx="3" fill="#6b3d1e"/></g></g>`;
+  const herbes = (n, y, c) => coll(n, (i) => { const x = -80 + i * (1760 / n) + hasard() * 20, h = 50 + hasard() * 90; return `<path d="M${x.toFixed(0)} ${y + 40} Q${(x + 8).toFixed(0)} ${(y + 40 - h / 2).toFixed(0)} ${(x + 18 - hasard() * 40).toFixed(0)} ${(y + 40 - h).toFixed(0)} Q${(x + 14).toFixed(0)} ${(y + 40 - h / 2).toFixed(0)} ${(x + 22).toFixed(0)} ${y + 40} Z" fill="${c}"/>`; });
+  const flocons = (n) => coll(n, () => `<circle class="dc-flocon" cx="${(hasard() * 1700 - 50).toFixed(0)}" cy="${(-hasard() * 900).toFixed(0)}" r="${(2 + hasard() * 4).toFixed(1)}" fill="#fff" opacity="${(.5 + hasard() * .5).toFixed(2)}" style="animation-delay:${(-hasard() * 12).toFixed(1)}s;animation-duration:${(9 + hasard() * 8).toFixed(1)}s"/>`);
+  const lucioles = (n, y0, y1, c = '#d9ffb0') => coll(n, () => `<circle class="dc-luciole" cx="${(hasard() * 1600).toFixed(0)}" cy="${(y0 + hasard() * (y1 - y0)).toFixed(0)}" r="3" fill="${c}" style="animation-delay:${(-hasard() * 6).toFixed(1)}s"/>`);
+
+  // ----- les décors : [ciel, lointain, milieu, premier plan] -----
+  function couches(type) {
+    graine = 7 + type.length * 13;
+    const ciel = (a, b, c) => `<rect x="-300" y="-200" width="2200" height="1300" fill="url(#dc-ciel)"/><linearGradient id="dc-ciel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".6" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
+    const lune = (x, y, r = 60, c = '#ffe7a3') => `<circle cx="${x}" cy="${y}" r="${r * 3.4}" fill="url(#dc-halo)"/><circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
+    const soleil = (x, y) => `<circle cx="${x}" cy="${y}" r="230" fill="url(#dc-halo)"/><circle cx="${x}" cy="${y}" r="70" fill="#fff1b8"/>`;
+    switch (type) {
+      case 'foret': return [
+        ciel('#1d2c4a', '#3c5a6e', '#9bb39a') + lune(1260, 170, 50, '#f4f0d0') + etoiles(40, 300),
+        colline(560, 60, '#3d5a55', 1) + coll(14, (i) => sapin(-100 + i * 130, 560 + (i % 3) * 8, .9, '#2f4a46')),
+        colline(700, 50, '#22392f', 2) + coll(9, (i) => sapin(-60 + i * 200 + hasard() * 60, 712, 1.5 + hasard() * .4, '#1a2e26')) + lucioles(14, 520, 780),
+        herbes(40, 880, '#0c1712') + `<g filter="url(#dc-flou)">${sapin(-40, 1000, 3.4, '#0a140f')}${sapin(1680, 1000, 3.2, '#0a140f')}</g>`,
+      ];
+      case 'prairie': case 'ferme': return [
+        ciel('#5ab7f0', '#a6dcf5', '#e8f6d8') + soleil(1300, 180) + nuage(300, 170, 1.1) + nuage(900, 110, .8) + nuage(1500, 260, .7, '#fff', .7),
+        colline(600, 90, '#9fd28a', 1),
+        colline(720, 70, '#6fbd5c', 2) + (type === 'ferme'
+          ? `<g transform="translate(1130 700)"><rect x="-120" y="-150" width="240" height="150" fill="#c8402f"/><path d="M-140 -146 L0 -250 L140 -146 Z" fill="#8f2a20"/><rect x="-40" y="-90" width="80" height="90" fill="#f3e2c0"/><path d="M-40 -90 L40 0 M40 -90 L-40 0" stroke="#c8402f" stroke-width="8"/><rect x="-26" y="-210" width="52" height="40" fill="#f3e2c0"/></g>` + coll(10, (i) => `<rect x="${200 + i * 50}" y="680" width="10" height="56" fill="#f3e2c0"/>`) + `<rect x="190" y="694" width="470" height="8" fill="#f3e2c0"/><rect x="190" y="716" width="470" height="8" fill="#f3e2c0"/>`
+          : arbre(260, 720, 1.2, '#4c9a45') + arbre(1340, 730, 1.4, '#3f8a3b')) + fleurs(40, 740, 880),
+        herbes(44, 880, '#2f7a32') + `<g filter="url(#dc-flou)">${arbre(-60, 1040, 3, '#2a6a2c')}</g>`,
+      ];
+      case 'mer': case 'plage': return [
+        ciel(type === 'mer' ? '#3d8fd6' : '#4fb0ef', '#8fd0f2', '#ffe2b0') + soleil(1200, 250) + nuage(380, 150, 1) + nuage(1000, 120, .7),
+        `<rect x="-300" y="520" width="2200" height="500" fill="#2f8fc4"/><rect x="-300" y="520" width="2200" height="14" fill="#9fe0f5" opacity=".6"/>` + coll(5, (i) => `<path class="dc-vague" d="M-300 ${580 + i * 50} ${coll(24, (k) => `q50 -14 100 0`)}" stroke="#bfefff" stroke-width="5" fill="none" opacity="${.5 - i * .07}" style="animation-delay:${-i * .8}s"/>`),
+        type === 'plage'
+          ? `<path d="M-300 760 Q400 700 900 740 T1900 730 L1900 1000 L-300 1000 Z" fill="#f2d39b"/><g transform="translate(1250 760)"><path d="M0 0 Q20 -160 -10 -300" stroke="#8a5a2b" stroke-width="18" fill="none"/>${coll(5, (k) => `<path d="M-10 -300 q${-160 + k * 80} ${-40 + Math.abs(k - 2) * 30} ${-200 + k * 100} ${60 + Math.abs(k - 2) * 20}" stroke="#2f8a4a" stroke-width="26" fill="none" stroke-linecap="round"/>`)}</g><g transform="translate(420 800)"><path d="M-70 0 L0 -90 L70 0 Z" fill="#d9a65a"/><rect x="-80" y="0" width="160" height="40" fill="#e6b871"/><rect x="-14" y="-130" width="28" height="44" fill="#d9a65a"/></g>`
+          : `<path d="M-300 800 Q300 760 800 790 T1900 780 L1900 1000 L-300 1000 Z" fill="#e8c98a"/>` + coll(6, () => `<ellipse cx="${(hasard() * 1600).toFixed(0)}" cy="${(830 + hasard() * 120).toFixed(0)}" rx="16" ry="9" fill="#f7e6c2"/>`),
+        `<g filter="url(#dc-flou)"><path d="M-200 1000 Q100 900 300 1000 Z" fill="#c9a46a"/><path d="M1400 1000 Q1600 880 1900 1000 Z" fill="#c9a46a"/></g>`,
+      ];
+      case 'maison': case 'ecole': return [
+        `<rect x="-300" y="-200" width="2200" height="1300" fill="${type === 'ecole' ? '#f2e3c4' : '#f4d7c4'}"/>` + coll(30, (i) => `<rect x="${-300 + i * 80}" y="-200" width="36" height="1300" fill="${type === 'ecole' ? '#ead7b2' : '#eecbb6'}"/>`),
+        type === 'ecole'
+          ? `<rect x="420" y="160" width="760" height="380" rx="14" fill="#7a4a2a"/><rect x="440" y="180" width="720" height="340" fill="#2f5a46"/><text x="800" y="380" text-anchor="middle" font-size="90" font-family="Baloo 2, system-ui" fill="#e9f2ea" opacity=".85">A B C</text>`
+          : `<g transform="translate(1180 330)"><rect x="-170" y="-180" width="340" height="300" rx="10" fill="#7a4a2a"/><rect x="-150" y="-160" width="300" height="260" fill="#8fd0f2"/>${nuage(-40, -80, .5)}<rect x="-4" y="-160" width="8" height="260" fill="#7a4a2a"/><rect x="-150" y="-34" width="300" height="8" fill="#7a4a2a"/></g><g transform="translate(330 540)"><rect x="-6" y="-260" width="12" height="260" fill="#5a3a22"/><path d="M-70 -260 L70 -260 L46 -330 L-46 -330 Z" fill="#ffd38a"/><ellipse cx="0" cy="-250" rx="160" ry="120" fill="url(#dc-chaud)" opacity=".5"/></g>`,
+        `<rect x="-300" y="640" width="2200" height="400" fill="#b07a4a"/>` + coll(12, (i) => `<rect x="${-300 + i * 190}" y="640" width="4" height="400" fill="#94633a"/>`) + `<ellipse cx="800" cy="800" rx="520" ry="90" fill="${type === 'ecole' ? '#4a7fc4' : '#c45a7a'}" opacity=".85"/>`,
+        type === 'ecole' ? `<g filter="url(#dc-flou)"><rect x="-120" y="760" width="420" height="40" fill="#8a5a32"/><rect x="1380" y="760" width="420" height="40" fill="#8a5a32"/></g>` : `<g filter="url(#dc-flou)"><rect x="1420" y="620" width="300" height="400" rx="20" fill="#5a7ac4"/></g>`,
+      ];
+      case 'halloween': return [
+        ciel('#140d33', '#3b2366', '#c26a5a') + lune(1230, 190, 74) + etoiles(90, 420),
+        colline(600, 70, '#3a2a66', 1) + `<g transform="translate(1140 330)" fill="#24184a"><rect x="20" y="70" width="140" height="90"/><rect x="0" y="40" width="40" height="120"/><path d="M-6 42 L20 -10 L46 42 Z"/><rect x="140" y="30" width="44" height="130"/><path d="M134 32 L162 -26 L190 32 Z"/><rect x="70" y="20" width="44" height="80"/><path d="M64 22 L92 -40 L120 22 Z"/><rect class="dc-fenetre" x="12" y="70" width="12" height="18" rx="6" fill="#ffc46b"/><rect class="dc-fenetre" x="155" y="62" width="12" height="18" rx="6" fill="#ffc46b"/><rect class="dc-fenetre" x="86" y="46" width="12" height="18" rx="6" fill="#ffc46b"/></g>`,
+        colline(720, 40, '#1d1440', 2) + maison(230, 730, .9, '#3a2a63', '#2a1d4d') + maison(470, 712, .7, '#41306b', '#2a1d4d') + citrouille(380, 820, 1.2) + citrouille(1100, 800, 1) + citrouille(1350, 840, 1.4) + lucioles(10, 600, 800, '#ffd38a'),
+        herbes(40, 900, '#07050f') + `<g filter="url(#dc-flou)"><path d="M-200 -40 C 60 40, 160 90, 300 110 C 230 130, 140 140, 40 200" stroke="#07050f" stroke-width="26" fill="none" stroke-linecap="round"/></g>`,
+      ];
+      case 'noel': return [
+        ciel('#0f1a3d', '#2a3f7a', '#6f86c4') + etoiles(70, 380) + lune(300, 160, 46, '#f4f6ff'),
+        colline(600, 60, '#d6e2f5', 1) + coll(10, (i) => sapin(-60 + i * 180, 600, .8, '#3d6a6a')),
+        colline(720, 40, '#eef4ff', 2) + maison(1150, 730, 1.1, '#a8473a', '#f4f8ff') + coll(5, (i) => sapin(150 + i * 170, 740, 1.3, '#2c5a4a') + `<path d="M${90 + i * 170} 700 L${150 + i * 170} 600 L${210 + i * 170} 700 Z" fill="#fff" opacity=".85"/>`),
+        flocons(80) + herbes(36, 920, '#dfe9f8'),
+      ];
+      case 'ramadan': return [
+        ciel('#0c1838', '#26336e', '#7a5a8a') + etoiles(90, 420) + `<path d="M1240 120 a90 90 0 1 0 60 160 a72 72 0 1 1 -60 -160 Z" fill="#ffe7a3"/><circle cx="1260" cy="200" r="260" fill="url(#dc-halo)"/>`,
+        `<path d="M-300 640 Q200 540 700 620 T1900 600 L1900 1000 L-300 1000 Z" fill="#6a4a6a"/>` + `<g transform="translate(980 560)" fill="#3a2a4a"><rect x="-120" y="-80" width="240" height="80"/><path d="M-80 -80 a80 80 0 0 1 160 0 Z"/><rect x="150" y="-220" width="26" height="220"/><path d="M146 -220 L163 -260 L180 -220 Z"/><rect x="-180" y="-170" width="22" height="170"/><path d="M-183 -170 L-169 -200 L-155 -170 Z"/></g>`,
+        `<path d="M-300 760 Q300 680 800 740 T1900 730 L1900 1000 L-300 1000 Z" fill="#c99a6a"/>` + lanterne(260, 330, 1.1, '#ffb347') + lanterne(560, 260, .8, '#ff7a6b') + lanterne(1420, 300, 1, '#7fd0ff'),
+        `<g filter="url(#dc-flou)"><path d="M-300 1000 Q0 860 300 1000 Z" fill="#a87a4a"/></g>`,
+      ];
+      default: return [
+        ciel('#0d1238', '#25307a', '#5a4a9a') + etoiles(110, 520) + lune(1240, 180, 58),
+        colline(620, 60, '#2c2f6a', 1) + nuage(400, 260, .9, '#8a8fd0', .25) + nuage(1100, 330, .7, '#8a8fd0', .2),
+        colline(740, 50, '#1b1d4a', 2) + maison(320, 750, .7, '#2a2c5a', '#1a1b40') + maison(1300, 760, .8, '#2a2c5a', '#1a1b40') + lucioles(10, 620, 820, '#fff3c0'),
+        herbes(40, 910, '#0a0b22'),
+      ];
+    }
+  }
+  function construire() {
+    racine = document.createElement('div'); racine.className = 'dc-decor'; racine.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(racine);
+  }
+  function dessiner(type) {
+    const c = couches(type), prof = [.08, .25, .55, 1.1];
+    racine.innerHTML = `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><defs>
+      <radialGradient id="dc-halo"><stop offset="0" stop-color="#fff3c4" stop-opacity=".5"/><stop offset=".4" stop-color="#ffd98a" stop-opacity=".14"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+      <radialGradient id="dc-chaud"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".9"/><stop offset="1" stop-color="#ff8a3c" stop-opacity="0"/></radialGradient>
+      <filter id="dc-flou" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="8"/></filter></defs>
+      ${c.map((x, i) => `<g class="dc-couche" data-p="${prof[i]}">${x}</g>`).join('')}</svg><div class="dc-voile"></div>`;
+    racine.dataset.type = type;
+  }
+  // la caméra : un léger travelling et un léger zoom à chaque page
+  function camera(page, n) {
+    const t = n > 1 ? page / (n - 1) : .5, x = (t - .5) * 260, z = 1.04 + (page % 3) * .03;
+    racine.querySelectorAll('.dc-couche').forEach((g) => { const p = +g.dataset.p, zz = 1 + (z - 1) * p; g.style.transform = `translate(800px, 500px) scale(${zz}) translate(${-800 - x * p}px, -500px)`; });
+  }
+  function montrer(h, page) {
+    if (!racine) construire();
+    const type = typeDe(h);
+    if (type !== typeCourant) { typeCourant = type; dessiner(type); racine.classList.remove('dc-entre'); void racine.offsetWidth; racine.classList.add('dc-entre'); }
+    camera(page, h.pages.length);
+  }
+  return { montrer, typeDe };
+})();
+// chaque page d'histoire met à jour le décor (il ne se voit qu'au théâtre)
+const pageHistoireAvantDecor = pageHistoire;
+pageHistoire = function () { pageHistoireAvantDecor(); if (conte) DecorConte.montrer(conte.h, conte.page); }; // eslint-disable-line no-func-assign
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
