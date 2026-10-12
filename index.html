@@ -3588,6 +3588,7 @@ const Trace = (() => {
     x.fillStyle = d; x.fillRect(0, 0, 32, 32); return c;
   });
   let actif = false, mode = 'lettre', grains = [], rayon = 20, guide = null, lettre = '', fini = false, appui = false;
+  let traits = []; // les traits du dessin libre (points bruts), pour que Lumi devine ce que c'est
   let particules = [], dessin = [], W = 0, H = 0, raf = 0, apresReussite = null, teinte = 1, fond = null, fondAlpha = 1, aDessiner = [];
 
   function dimensionner() {
@@ -3635,6 +3636,9 @@ const Trace = (() => {
   function toucher(x, y, s = teinte) {
     poussiere(x, y, 3, .5);
     if (mode === 'libre') {
+      const n = performance.now(), dt = traits.length ? traits[traits.length - 1] : null, der = dt?.[dt.length - 1];
+      if (!der || n - der[2] > 160 || Math.hypot(der[0] - x, der[1] - y) > 60) traits.push([[x, y, n]]); else if (Math.hypot(der[0] - x, der[1] - y) > 2) dt.push([x, y, n]);
+      if (traits.length > 400) traits.shift();
       for (let i = 0; i < 6; i++) dessin.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14, t: .5 + Math.random() * 1.3, s, ph: Math.random() * 6 });
       if (dessin.length > 6000) dessin.splice(0, 4);
       return;
@@ -3737,11 +3741,11 @@ const Trace = (() => {
       b.onclick = () => { teinte = i; marquer(); son('tic'); };
       ui.querySelector('.at-couleurs').appendChild(b);
     });
-    ui.querySelector('[data-a=effacer]').onclick = () => { dessin = []; particules = []; if (mode !== 'libre') { grains.forEach((p) => { p.allume = false; }); fini = false; maj(); } son('pop'); };
+    ui.querySelector('[data-a=effacer]').onclick = () => { dessin = []; particules = []; traits = []; if (mode !== 'libre') { grains.forEach((p) => { p.allume = false; }); fini = false; maj(); } son('pop'); };
     ui.querySelector('[data-a=encore]').onclick = () => (mode === 'portrait' ? ouvrir('portrait', '', apresReussite) : ouvrir('lettre', lettre, apresReussite));
     ui.querySelector('[data-a=garder]').onclick = garder;
     ui.querySelector('[data-a=galerie]').onclick = () => galerie();
-    ui.querySelector('[data-a=vivant]').onclick = () => { if (!dessin.length) { oups(ui.querySelector('[data-a=vivant]')); return; } Vivant.depuisAtelier(cv); };
+    ui.querySelector('[data-a=vivant]').onclick = () => { if (!dessin.length) { oups(ui.querySelector('[data-a=vivant]')); return; } Vivant.depuisAtelier(cv, traits.filter((t) => t.length > 1)); };
     ui.querySelector('[data-a=photo]').onclick = () => Photo.prendre((img) => redessinerPhoto(img));
     ui.querySelector('[data-a=suivante]').onclick = () => { const L = LANGUES[langue].alphabet.split(' ').map((x) => x.split(':')[0]); const n = L[(L.indexOf(lettre) + 1) % L.length]; tracer(n); };
     $('scene').appendChild(ui);
@@ -3800,7 +3804,7 @@ const Trace = (() => {
   }
   function ouvrir(nouveauMode, l, quandReussi) {
     mode = nouveauMode; lettre = l || ''; apresReussite = quandReussi; fini = false;
-    particules = []; dessin = []; teinte = 1; aDessiner = []; if (!garderFond) fond = null; garderFond = false;
+    particules = []; dessin = []; traits = []; teinte = 1; aDessiner = []; if (!garderFond) fond = null; garderFond = false;
     document.documentElement.classList.add('atelier');
     if (!ui) construireUI();
     ui.dataset.mode = mode;
@@ -6467,13 +6471,14 @@ const Chasse = (() => {
     if (t > 75) { r.querySelector('[data-a=autre]').click(); }
     majEtat();
   }
-  // ce que voit la caméra : il faut voir le bon objet 3 fois de suite (score ≥ 0,5)
+  // ce que voit la caméra : le bon objet, bien montré (assez grand dans l'image), 4 fois de suite avec un score ≥ 0,6
+  // (avant : 3 fois à 0,5, et un objet minuscule au fond de la pièce suffisait → « Trouvé ! » sans rien montrer)
   function voir(labels) {
     if (!etat || etat.pause) return;
     const o = etat.liste[etat.i];
-    const bon = labels.some(([c, sc]) => c === o.c && sc >= .5);
+    const bon = labels.some(([c, sc, aire]) => c === o.c && sc >= .6 && (aire === undefined || aire >= .025));
     etat.vus[o.c] = bon ? (etat.vus[o.c] || 0) + 1 : 0;
-    if (etat.vus[o.c] >= 3) trouve();
+    if (etat.vus[o.c] >= 4) trouve();
   }
   async function trouve() {
     if (!etat || etat.pause) return;
@@ -7646,7 +7651,8 @@ async function suivreObjets(boite, rappel) {
       if (t - dernier > 220) { // environ 4 à 5 fois par seconde
         dernier = t;
         const r = detecteur.detectForVideo(video, performance.now());
-        rappel((r.detections || []).map((d) => [d.categories[0].categoryName, +d.categories[0].score.toFixed(2)]));
+        const aire = (video.videoWidth * video.videoHeight) || 1; // taille de l'objet dans l'image : un objet montré à la caméra est grand
+        rappel((r.detections || []).map((d) => [d.categories[0].categoryName, +d.categories[0].score.toFixed(2), +((d.boundingBox.width * d.boundingBox.height) / aire).toFixed(3)]));
       }
       requestAnimationFrame(boucle);
     };
@@ -9708,6 +9714,20 @@ const Devin = (() => {
     return charge;
   }
   // le dessin → une image 28×28 comme celles de Quick, Draw! (traits noirs épais sur blanc, centrés)
+  // avec les traits : on les redessine comme Quick, Draw! (traits noirs fins sur blanc, dessin qui remplit le cadre)
+  function preparerTraits(traits) {
+    const pts = traits.flat(); let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    pts.forEach(([x, y]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; });
+    const T = 280, marge = 18, k = (T - 2 * marge) / Math.max(1, x1 - x0, y1 - y0), ox = (T - (x1 - x0) * k) / 2, oy = (T - (y1 - y0) * k) / 2;
+    const c = document.createElement('canvas'); c.width = c.height = T; const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, T, T); g.strokeStyle = '#000'; g.lineWidth = 16; g.lineCap = 'round'; g.lineJoin = 'round';
+    traits.forEach((t) => { g.beginPath(); t.forEach(([x, y], i) => { const X = ox + (x - x0) * k, Y = oy + (y - y0) * k; if (i) g.lineTo(X, Y); else g.moveTo(X, Y); }); g.stroke(); });
+    const p = document.createElement('canvas'); p.width = p.height = 28; const gp = p.getContext('2d', { willReadFrequently: true });
+    gp.imageSmoothingEnabled = true; gp.drawImage(c, 0, 0, 28, 28);
+    const d = gp.getImageData(0, 0, 28, 28).data, v = new Float32Array(784);
+    for (let i = 0; i < 784; i++) v[i] = 1 - d[i * 4] / 255 > .22 ? 1 : 0;
+    return v;
+  }
   function preparer(src) {
     const T = 280, noir = document.createElement('canvas'); noir.width = noir.height = T;
     const g = noir.getContext('2d'), k = (T * .82) / Math.max(src.width, src.height), w = src.width * k, h = src.height * k;
@@ -9723,16 +9743,16 @@ const Devin = (() => {
     return v;
   }
   // les 3 meilleures idées que Lumi sait transformer (ou [] si le modèle n'est pas disponible)
-  async function deviner(src, n = 3) {
+  async function deviner(src, traits, n = 3) {
     try {
       const m = await Promise.race([charger(), attendre(12000).then(() => { throw new Error('trop long'); })]);
-      const tf = window.tf, entree = tf.tensor4d(preparer(src), [1, 28, 28, 1]);
+      const tf = window.tf, entree = tf.tensor4d(traits?.length ? preparerTraits(traits) : preparer(src), [1, 28, 28, 1]);
       const sortie = m.predict(entree), p = await sortie.data(); entree.dispose(); sortie.dispose();
       return [...p].map((x, i) => [CLASSES_DOODLE[i], x]).sort((a, b) => b[1] - a[1]).filter(([c]) => DOODLE_EMOJI[c]).slice(0, n)
         .map(([c, x]) => ({ classe: c, e: DOODLE_EMOJI[c][0], mvt: DOODLE_EMOJI[c][1], nom: t3(DOODLE_EMOJI[c][2]), confiance: x }));
     } catch (e) { console.warn('Devin', e); return []; }
   }
-  return { deviner, charger, preparer };
+  return { deviner, charger, preparer, preparerTraits };
 })();
 // ce que l'enfant peut avoir dessiné : Lumi transforme le dessin en vrai, puis le fait bouger comme il faut
 const FORMES_VIVANT = [['🪼', 'nage'], ['🐟', 'nage'], ['🐙', 'nage'], ['🐢', 'nage'], ['🐬', 'nage'], ['🦀', 'nage'], ['🦋', 'vole'], ['🐦', 'vole'], ['🐝', 'vole'], ['⭐', 'vole'],
@@ -9803,16 +9823,16 @@ const Vivant = (() => {
   let z = null, sprite = null, prochain = null, mvt = 'nage', raf = 0, amis = 1;
   function demarrer(zone) {
     z = zone;
-    if (prochain) { sprite = prochain; prochain = null; return choisirForme(); }
+    if (prochain) { sprite = prochain; prochain = null; traitsCourants = prochainTraits; prochainTraits = null; return choisirForme(); }
     const s = salle(z, { titre: '🪄 ' + t3(NOEUDS.vivant.nom), sous: jx('vivantAide') });
     s.corps.innerHTML = '<div class="ci-grille"></div>';
     const g = s.corps.querySelector('.ci-grille'), l = lireJSON(Profils.cle('lumi-dessins', Profils.actif.id));
     g.appendChild(bouton(`<span class="ci-ic">✍️</span><b>${jx('dessinerMaintenant').replace('✍️ ', '')}</b>`, () => { aller('dessin'); dessinLibre(); }, 'ci-tuile ci-nouvelle principal'));
-    l.forEach((d) => g.appendChild(bouton(`<img alt="" src="${d.img}">`, () => chargerImage(d.img).then((im) => { sprite = detourer(im); choisirForme(); }), 'ci-tuile')));
+    l.forEach((d) => g.appendChild(bouton(`<img alt="" src="${d.img}">`, () => chargerImage(d.img).then((im) => { sprite = detourer(im); traitsCourants = null; choisirForme(); }), 'ci-tuile')));
     ['🐟', '🚀', '🦋', '🚗'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => { const c = document.createElement('canvas'); c.width = c.height = 300; dessinerEmoji(c.getContext('2d'), e, 150, 150, 280); sprite = c; mvt = { '🐟': 'nage', '🚀': 'fusee', '🦋': 'vole', '🚗': 'roule' }[e]; scene(); }, 'ci-tuile ci-lumi')));
     focusPremier(g);
   }
-  let dessinOriginal = null, morph = null;
+  let dessinOriginal = null, morph = null, prochainTraits = null, traitsCourants = null;
   // la carte du mot : les lettres s'allument une à une, Lumi le dit, puis sa couleur et le mot dans les autres langues
   async function apprendre(entree) {
     const c = z?.querySelector('.vi-mot'); if (!c) return;
@@ -9861,7 +9881,7 @@ const Vivant = (() => {
     focusPremier(g);
     // Lumi devine, sur l'appareil ; si le modèle n'est pas là (hors ligne), il reste la liste
     const moi = sprite;
-    Devin.deviner(sprite).then((idees) => {
+    Devin.deviner(sprite, traitsCourants).then((idees) => {
       if (!z?.isConnected || dessinOriginal !== moi) return;
       dv.classList.remove('cherche');
       if (!idees.length) { dv.hidden = true; parler(jx('cestQuoi')); return; }
@@ -9952,7 +9972,7 @@ const Vivant = (() => {
     raf = requestAnimationFrame(boucle);
     focusPremier(p);
   }
-  return { demarrer, arreter() { cancelAnimationFrame(raf); z = null; }, depuisAtelier(cv) { prochain = recadrer(cv); aller('vivant'); }, set prochain(c) { prochain = c; } };
+  return { demarrer, arreter() { cancelAnimationFrame(raf); z = null; }, depuisAtelier(cv, tr) { prochain = recadrer(cv); prochainTraits = tr?.length ? tr : null; aller('vivant'); }, set prochain(c) { prochain = c; } };
 })();
 MODULES.vivant = Vivant;
 
