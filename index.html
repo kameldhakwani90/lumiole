@@ -513,8 +513,6 @@
   .bouton-duo { display: none; }
   .tele .bouton-duo { display: inline-block; }
   @media (min-width: 1000px) { .bouton-duo { display: inline-block; } }
-  .mode-manette .duo-pave { aspect-ratio: auto; height: 58vh; max-height: none; }
-  .mode-manette .fa-t-manette { width: 100%; min-height: 92vh; }
   /* à deux dans « Pluie de formes » */
   .fo-joueurs { display: flex; justify-content: center; align-items: center; gap: 14px; font-weight: 900; font-size: 24px; }
   .fo-joueurs span { padding: 4px 16px; border-radius: 99px; border: 3px solid var(--c); color: var(--c); background: rgba(0,0,0,.25); }
@@ -560,8 +558,6 @@
   .duo-code { font-size: 64px; font-weight: 900; letter-spacing: 12px; color: var(--soleil); margin: 10px 0; }
   .duo-modes { display: flex; gap: 8px; margin-top: 10px; }
   .duo-modes .puce { flex: 1; }
-  .fa-t-manette { width: min(100%, 980px); }
-  .duo-pave { margin-top: 10px; aspect-ratio: 16 / 9; max-height: 62vh; margin-inline: auto; border-radius: 22px; border: 2px dashed var(--bord); background: rgba(255,255,255,.05); touch-action: none; }
   .duo-camera { position: relative; margin-top: 10px; }
   .duo-camera video { width: 100%; border-radius: 18px; transform: scaleX(-1); background: #000; }
   .duo-point { position: absolute; width: 22px; height: 22px; margin: -11px; border-radius: 50%; background: var(--soleil); box-shadow: 0 0 18px var(--soleil); pointer-events: none; }
@@ -569,6 +565,332 @@
   .duo-touches { display: flex; gap: 10px; }
   .duo-camera-ici { position: fixed; right: 12px; bottom: 12px; width: 220px; z-index: 70; background: rgba(13,16,38,.9); padding: 8px; border-radius: 20px; border: 1px solid var(--bord); }
   .duo-camera-ici .fa-aide { font-size: 12px; color: var(--doux); margin: 6px 0; }
+
+
+
+  /* ---------- Lumiole Famille (achat) ---------- */
+  .fa-t-achat { width: min(100%, 560px); padding: 26px 22px 18px; background: radial-gradient(ellipse at 50% 0%, #3A2A8A 0%, #18124A 45%, #0E0C2C 100%); text-align: center; }
+  .pw-haut { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pw-lumi { width: 86px; height: 86px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff 0%, #FFE7A3 25%, #C9B8FF 55%, rgba(140,110,255,0) 72%); animation: pw-flotte 3s ease-in-out infinite alternate; }
+  @keyframes pw-flotte { to { transform: translateY(-6px) scale(1.04); } }
+  .pw-marque { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: .02em; }
+  .pw-marque b { color: var(--soleil); }
+  .fa-t-achat h2 { margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-size: 27px; line-height: 1.15; }
+  .pw-sous { margin: 0; color: #DCD5FF; font-size: 15px; }
+  .pw-liste { list-style: none; margin: 18px 0; padding: 0; display: flex; flex-direction: column; gap: 10px; text-align: start; }
+  .pw-liste li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.06); font-weight: 700; font-size: 15px; }
+  .pw-liste .e { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: rgba(255,255,255,.1); }
+  .pw-offre { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px; border-radius: 22px; background: rgba(255,201,77,.1); border: 2px solid rgba(255,201,77,.5); }
+  .pw-offre[hidden] { display: none; }
+  .pw-unique { font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--soleil); }
+  .pw-prix { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 38px; line-height: 1; }
+  .pw-acheter { width: 100%; height: 58px; margin-top: 8px; border-radius: 29px; border: none; background: linear-gradient(135deg, #FFE08A, #FFB44D); color: #1b1030; font: 900 19px system-ui; box-shadow: 0 8px 24px rgba(255,180,77,.35); }
+  .pw-acheter:disabled { opacity: .5; }
+  .pw-legal { margin: 10px 0 0; font-size: 12px; color: var(--doux); }
+  .pw-liens { margin: 4px 0 0; font-size: 12px; }
+
+  /* ---------- Fin de partie ---------- */
+  .fa-t-fin { width: min(100%, 620px); text-align: center; padding: 30px 22px 24px; background: radial-gradient(ellipse at 50% 30%, #3A2A8A 0%, #18124A 60%, #0E0C2C 100%); }
+  .fin-etoiles { display: flex; justify-content: center; align-items: flex-end; gap: 10px; font-size: 54px; }
+  .fin-etoiles span { animation: fin-pop .5s cubic-bezier(.3,1.6,.6,1) both; }
+  .fin-etoiles span:nth-child(2) { font-size: 76px; animation-delay: .15s; } .fin-etoiles span:nth-child(3) { animation-delay: .3s; }
+  @keyframes fin-pop { from { transform: scale(0) rotate(-30deg); opacity: 0; } }
+  .fa-t-fin h2 { margin: 12px 0 4px; font-family: 'Baloo 2', system-ui, sans-serif; font-size: 34px; }
+  .fin-sous { margin: 0; color: #DCD5FF; text-align: center; }
+  .fin-joueurs { display: flex; justify-content: center; gap: 14px; margin-top: 16px; font-weight: 900; font-size: 24px; }
+  .fin-joueurs:empty { display: none; }
+  .fin-joueurs span { padding: 6px 18px; border-radius: 99px; border: 3px solid var(--c); color: var(--c); }
+  .fin-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+  .fin-b { height: 52px; padding: 0 22px; border-radius: 26px; border: 2px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; font: 800 17px system-ui; }
+  .fin-b.principal { background: #fff; color: #1b1030; border-color: #fff; }
+  .fin-b:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 4px rgba(255,255,255,.4), 0 0 26px rgba(255,255,255,.4); }
+  /* ---------- Mode coucher ---------- */
+  .fa-t-coucher, .fa-t-dodo { position: fixed; inset: 0; width: auto; max-width: none; max-height: none; border-radius: 0; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center;
+    background: linear-gradient(180deg, #05061A 0%, #0D0B2C 70%, #120E33 100%); color: #E7E3FF; }
+  .cou-lune { position: absolute; right: 12%; top: 9%; width: 80px; height: 80px; border-radius: 50%; box-shadow: -18px 10px 0 4px #E9E4C8; transform: rotate(-20deg); opacity: .9; }
+  .cou-lumi { position: relative; width: 150px; height: 70px; border-radius: 70px 70px 50px 50px; background: radial-gradient(ellipse at 50% 30%, #CFC4FF 0%, #8D7BE0 60%, #5B4BB0 100%); opacity: .75; display: flex; justify-content: center; gap: 34px; padding-top: 30px; box-sizing: border-box; box-shadow: 0 0 60px rgba(170,150,255,.35); animation: cou-souffle 4s ease-in-out infinite; }
+  .cou-lumi span { width: 22px; height: 8px; border-bottom: 3px solid #2A2160; border-radius: 0 0 12px 12px; }
+  .cou-lumi i { position: absolute; right: -6px; top: -18px; font: 700 22px system-ui; color: #BFB3FF; animation: cou-z 3s ease-in-out infinite; }
+  .cou-lumi i + i { right: -26px; top: -40px; font-size: 16px; animation-delay: 1.5s; }
+  @keyframes cou-souffle { 50% { transform: scale(1.04); } }
+  @keyframes cou-z { from { opacity: 0; transform: translateY(8px); } 50% { opacity: .8; } to { opacity: 0; transform: translateY(-10px); } }
+  .fa-t-coucher h2 { margin: 18px 0 0; font-family: 'Baloo 2', system-ui, sans-serif; font-size: clamp(30px, 5vh, 46px); font-weight: 700; }
+  .cou-sous { margin: 0; color: #B9B2E6; font-size: 18px; }
+  .cou-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 22px; }
+  .cou-b { height: 52px; padding: 0 22px; border-radius: 26px; border: 2px solid rgba(233,228,200,.3); background: rgba(255,255,255,.05); color: #E7E3FF; font: 800 17px system-ui; }
+  .cou-b.principal { background: #E9E4C8; color: #1B1640; border: none; }
+  .cou-b:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 4px rgba(233,228,200,.3); }
+  .cou-pied { position: absolute; bottom: 5%; margin: 0; color: #8F88BF; font-size: 15px; }
+  .fa-t-dodo { background: #020208; }
+  .cou-nuit { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 40px; color: #6E6894; margin: 0; }
+  .fa-t-dodo .fa-lien { position: absolute; bottom: 4%; color: #3D3858; }
+
+  /* ---------- Guide « Jouer avec mon téléphone » (télé) ---------- */
+  .fa-t-guide { position: fixed; inset: 0; width: auto; max-width: none; max-height: none; border-radius: 0; border: none; padding: 4vh 4vw; display: grid; grid-template-rows: auto 1fr auto; gap: 3vh;
+    background: radial-gradient(ellipse at 70% 40%, #2A2170 0%, #120F3A 60%, #0A0A22 100%); font-family: 'Baloo 2', system-ui, sans-serif; }
+  .gt-haut { display: flex; align-items: center; gap: 1.5vw; }
+  .gt-haut h2 { margin: 0; flex: 1; font-size: 4.4vh; }
+  .gt-haut .fa-fermer { position: static; }
+  .gt-joueurs { display: flex; gap: 1vw; }
+  .gt-joueurs span { display: flex; align-items: center; gap: .6vw; height: 5vh; padding: 0 1.2vw; border-radius: 99px; background: rgba(9,12,38,.5); font-weight: 800; font-size: 2vh; }
+  .gt-joueurs i { width: 1.6vh; height: 1.6vh; border-radius: 50%; }
+  .gt-corps { display: grid; grid-template-columns: 28vw 1fr; gap: 3vw; min-height: 0; }
+  .gt-etapes { display: flex; flex-direction: column; gap: 1.6vh; }
+  .gt-etape { display: flex; align-items: center; gap: 1.2vw; padding: 1.6vh 1.2vw; border-radius: 2.4vh; border: 2px solid transparent; opacity: .55; }
+  .gt-etape.on { opacity: 1; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.45); } .gt-etape.fait { opacity: .85; }
+  .gt-etape b { display: block; font-size: 2.6vh; } .gt-etape small { font-size: 1.8vh; opacity: .8; font-family: system-ui; font-weight: 700; }
+  .gt-num { flex: none; width: 5.4vh; height: 5.4vh; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 2.4vh; border: 2px solid rgba(255,255,255,.4); }
+  .gt-etape.on .gt-num, .gt-etape.fait .gt-num { background: var(--soleil); color: #1b1030; border-color: var(--soleil); }
+  .gt-zone { border-radius: 3.4vh; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; padding: 3vh 3vw; text-align: center; min-height: 0; }
+  .gt-zone h3 { margin: 0; font-size: 3.6vh; line-height: 1.15; }
+  .gt-zone p { margin: 0; font-size: 2.2vh; color: #D9D4FF; font-family: system-ui; font-weight: 700; }
+  .gt-zone:has(.gt-qr) { flex-direction: row; gap: 4vw; text-align: start; }
+  .gt-qr { width: 34vh; height: 34vh; background: #fff; border-radius: 3vh; padding: 2vh; box-sizing: border-box; display: grid; place-items: center; }
+  .gt-qr svg { width: 100%; height: 100%; }
+  .gt-txt { max-width: 26vw; display: flex; flex-direction: column; gap: 1.4vh; }
+  .gt-txt small { font: 800 1.9vh system-ui; color: #B9B2E6; margin-top: 1vh; }
+  .gt-txt .duo-code { font-size: 7vh; margin: 0; letter-spacing: 1.2vw; }
+  .gt-tourne { display: flex; align-items: center; gap: 3vw; }
+  .gt-tourne .t1 { width: 7vh; height: 13vh; border-radius: 1.6vh; border: .5vh solid rgba(255,255,255,.4); }
+  .gt-tourne .t2 { width: 22vh; height: 11vh; border-radius: 2vh; border: .5vh solid var(--soleil); box-shadow: 0 0 30px rgba(255,201,77,.35); animation: gt-tourne 2.4s ease-in-out infinite; }
+  .gt-tourne .fl { font-size: 7vh; color: var(--soleil); }
+  @keyframes gt-tourne { 0%, 20% { transform: rotate(-90deg) scale(.7); } 50%, 100% { transform: none; } }
+  .gt-choix { display: flex; gap: 2.4vw; }
+  .gt-carte { width: 24vw; padding: 3.4vh 2vw; border-radius: 3vh; border: 2px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; display: flex; flex-direction: column; align-items: flex-start; gap: 1vh; text-align: start; }
+  .gt-carte .e { font-size: 6vh; } .gt-carte b { font-size: 3.4vh; } .gt-carte small { font: 700 2vh system-ui; opacity: .85; }
+  .gt-carte:focus { outline: none; background: #fff; color: #1b1030; transform: scale(1.05); box-shadow: 0 0 0 .5vh rgba(255,255,255,.4), 0 0 40px rgba(255,255,255,.35); }
+  .gt-etoile { width: 26vh; height: 26vh; border: none; background: none; padding: 0; }
+  .gt-etoile svg { width: 100%; height: 100%; } .gt-etoile path { fill: var(--soleil); } .gt-etoile .fond { fill: rgba(255,201,77,.12); stroke: rgba(255,201,77,.5); stroke-width: 3; }
+  .gt-etoile:focus { outline: none; transform: scale(1.1); filter: drop-shadow(0 0 30px rgba(255,201,77,.7)); }
+  .gt-bas { display: flex; justify-content: flex-end; }
+  .gt-suiv { height: 6.4vh; padding: 0 2.4vw; border-radius: 99px; border: none; background: #fff; color: #1b1030; font: 800 2.4vh system-ui; }
+  .gt-suiv:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 .5vh rgba(255,255,255,.4); }
+  .gt-reglage { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2.4vw; width: 100%; height: 100%; align-items: center; text-align: start; }
+  .gt-cadre { position: relative; aspect-ratio: 4 / 3; border-radius: 2.4vh; background: #070818; overflow: hidden; border: 2px solid rgba(255,255,255,.15); }
+  .gt-cadre canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .gt-zonejeu { position: absolute; left: 15%; right: 15%; top: 12%; bottom: 12%; border: .4vh dashed rgba(255,201,77,.7); border-radius: 2vh; }
+  .gt-zonetxt { position: absolute; left: 16.5%; top: 13.5%; font: 800 1.7vh system-ui; color: #FFD978; }
+  .gt-conseil { position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); white-space: nowrap; padding: 1vh 1.6vw; border-radius: 99px; background: rgba(255,201,77,.95); color: #1b1030; font: 800 2.3vh system-ui; }
+  .gt-checks { display: flex; flex-direction: column; gap: 1.2vh; }
+  .gt-check { display: flex; align-items: center; gap: 1vw; padding: 1.2vh 1vw; border-radius: 2vh; background: rgba(255,201,77,.14); border: 2px solid rgba(255,201,77,.5); }
+  .gt-check.ok { background: rgba(255,255,255,.05); border-color: transparent; }
+  .gt-check > span:first-child { flex: none; width: 4.4vh; height: 4.4vh; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #1b1030; background: var(--soleil); }
+  .gt-check.ok > span:first-child { background: var(--menthe); }
+  .gt-check b { display: block; font-size: 2.2vh; } .gt-check small { font: 700 1.6vh system-ui; opacity: .8; }
+  .gt-label { margin: 1vh 0 0 !important; font-size: 1.8vh !important; }
+  .gt-jauge { position: relative; height: 1.8vh; border-radius: 1vh; background: linear-gradient(90deg, #FF7AA0 0%, #FFC94D 25%, #5FE0B5 45%, #5FE0B5 65%, #FFC94D 82%, #FF7AA0 100%); }
+  .gt-jauge span { position: absolute; top: -.8vh; width: .6vh; height: 3.4vh; margin-left: -.3vh; border-radius: .3vh; background: #fff; box-shadow: 0 0 10px rgba(255,255,255,.8); transition: left .2s; }
+  .gt-jtxt { display: flex; justify-content: space-between; font: 800 1.5vh system-ui; color: #C9C6F0; }
+  .gt-garde { font-size: 1.9vh !important; margin-top: 1vh !important; }
+  /* la main sur la télé : un cercle qui se remplit quand on la garde immobile (caméra) */
+  .duo-curseur .anneau-dwell { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%; pointer-events: none;
+    background: conic-gradient(var(--c) calc(var(--dwell, 0) * 360deg), transparent 0); -webkit-mask: radial-gradient(circle, transparent 36px, #000 37px); mask: radial-gradient(circle, transparent 36px, #000 37px); opacity: .95; }
+  /* ---------- Manette : à l'horizontale, une grande surface + OK + Retour ---------- */
+  .mn-jeu { flex: 1; display: grid; grid-template-columns: 1fr; gap: 12px; min-height: 0; }
+  .mn-jeu[hidden] { display: none; }
+  .mn-surface { min-height: 46vh; }
+  .mn-main { width: 90px; height: 90px; fill: #fff; opacity: .28; }
+  .mn-surface .mn-main { display: none; }
+  [data-mode="pave"] .mn-surface .mn-main { display: block; }
+  [data-mode="pave"] .mn-surface::before { content: none; }
+  .mn-cote { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; gap: 10px; }
+  .mn-petits { display: contents; }
+  .mn-ok { grid-column: 1 / -1; height: 84px; border-radius: 26px; border: none; background: var(--c); color: #1b1030; font: 800 38px 'Baloo 2', system-ui; box-shadow: 0 7px 0 rgba(0,0,0,.25); }
+  .mn-ok:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+  .mn-retour { grid-column: 1 / -1; }
+  .mn-tourne { display: none; }
+  @media (orientation: landscape) {
+    .mode-manette .fa-fond { padding: 8px; }
+    .mode-manette .fa-t-manette { min-height: 0; height: calc(100vh - 16px); max-height: none; padding: 10px 14px; gap: 8px; }
+    .mn-haut { min-height: 0; }
+    .mn-etat { font-size: 17px; }
+    .relie .mn-jeu { grid-template-columns: 1fr 210px; }
+    .mn-surface { min-height: 0; height: 100%; }
+    .mn-cote { grid-template-rows: 52px 1fr 64px; }
+    .mn-ok { height: auto; }
+    .relie .mn-lier, .relie .mn-compte:empty { display: none; }
+  }
+  @media (orientation: portrait) {
+    .mn-jeu { flex: 1 0 auto; }
+    .mn-haut { order: 0; } .relie .mn-tourne { order: 1; } .mn-jeu { order: 2; } .mn-lier, .mn-compte { order: 3; }
+    .relie .mn-tourne { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; border-radius: 18px; background: rgba(255,201,77,.12); }
+    .mn-tel { width: 34px; height: 60px; border-radius: 8px; border: 4px solid var(--soleil); animation: gt-tourne 2.4s ease-in-out infinite; }
+    .mn-tourne p { margin: 0; font-weight: 800; }
+  }
+  .cam .duo-camera { position: relative; height: 100%; min-height: 0; }
+  .cam .duo-camera video { height: 100%; object-fit: cover; }
+  /* ---------- Studio des voix ---------- */
+  .fa-t-studio { width: min(100%, 720px); min-height: min(92vh, 820px); }
+  .st-corps { display: flex; flex-direction: column; gap: 12px; }
+  .st-corps h2 { margin: 4px 0 0; }
+  .st-aide { color: var(--doux); margin: 0; font-size: 15px; }
+  .st-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .st-conte { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.06); border: 1px solid var(--bord); color: inherit; text-align: start; }
+  .st-conte .e { font-size: 34px; } .st-conte .n { font-weight: 800; font-size: 15px; line-height: 1.2; } .st-conte .v { font-size: 13px; color: var(--soleil); min-height: 16px; }
+  .st-voix { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .st-qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 10px; border-radius: 22px; background: rgba(255,255,255,.06); border: 2px solid var(--bord); color: inherit; }
+  .st-qui .e { font-size: 56px; } .st-qui .n { font-weight: 800; font-size: 18px; } .st-qui .v { color: var(--doux); font-size: 14px; }
+  .st-retour { align-self: flex-start; }
+  .st-entete { display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+  .st-qui-mini { color: var(--soleil); }
+  .st-num { color: var(--doux); font-size: 14px; }
+  .st-points { display: flex; gap: 6px; flex-wrap: wrap; }
+  .st-points span { width: 22px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.15); }
+  .st-points span.ok { background: var(--menthe); } .st-points span.on { outline: 2px solid var(--soleil); outline-offset: 2px; }
+  .st-texte { margin: 6px 0; padding: 22px 20px; border-radius: 20px; background: rgba(255,255,255,.05); border: 1px solid var(--bord); font-size: clamp(20px, 3.4vw, 28px); line-height: 1.5; font-weight: 700; min-height: 30vh; }
+  .st-etat { text-align: center; font-size: 22px; font-weight: 900; min-height: 30px; margin: 0; }
+  .st-commandes { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .st-nav { width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--bord); background: rgba(255,255,255,.06); color: inherit; font-size: 20px; }
+  .st-nav:disabled { opacity: .3; }
+  .st-rec { display: flex; align-items: center; gap: 12px; height: 70px; padding: 0 28px 0 16px; border-radius: 35px; border: none; background: #fff; color: #1b1030; font-weight: 900; font-size: 18px; }
+  .st-rec .rond { width: 38px; height: 38px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 0 5px rgba(239,68,68,.25); }
+  .st-rec.enreg { background: #ef4444; color: #fff; } .st-rec.enreg .rond { background: #fff; border-radius: 8px; width: 26px; height: 26px; animation: st-pulse 1s infinite alternate; }
+  @keyframes st-pulse { to { transform: scale(.8); } }
+  .st-second { display: flex; gap: 10px; justify-content: center; }
+
+  /* ======================= Lumiole TV : accueil « Netflix des petits » ======================= */
+  #tv { position: fixed; inset: 0; z-index: 4; overflow: hidden; color: #fff; }
+  #tv[hidden] { display: none; }
+  .tv-on .app > .haut, .tv-on .cote-activite, .tv-on .carte, .tv-on #decor { display: none !important; }
+  .tv-on body { overflow: hidden; }
+  .tv-on .app { position: relative; z-index: 6; pointer-events: none; }
+  .tv-on #scene { position: fixed; right: 3vw; top: 10vh; width: 46vw; height: 46vh; max-height: none !important; aspect-ratio: auto; z-index: 5; pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at center, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at center, #000 55%, transparent 100%); }
+  /* le ciel suit l'heure */
+  .tv-ciel { position: absolute; inset: 0; transition: background 1.5s; background: linear-gradient(180deg, #0a0c2c 0%, #1a1450 55%, #0b0a1e 100%); }
+  [data-moment="jour"] .tv-ciel { background: linear-gradient(180deg, #1f6fd1 0%, #3f9be8 45%, #1b3f8a 100%); }
+  [data-moment="soir"] .tv-ciel { background: linear-gradient(180deg, #3a1f6e 0%, #b04a6e 45%, #f08a4b 70%, #2a1640 100%); }
+  .tv-astre { position: absolute; left: 8vw; top: 10vh; width: 10vh; height: 10vh; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fffbe8, #ffe9a8 60%, #f6d36b); box-shadow: 0 0 60px 20px rgba(255,236,170,.35); opacity: .0; }
+  [data-moment="nuit"] .tv-astre { opacity: .9; box-shadow: 0 0 50px 10px rgba(220,230,255,.25); background: radial-gradient(circle at 60% 40%, transparent 40%, #f2f4ff 41%); }
+  [data-moment="jour"] .tv-astre { opacity: 1; left: 38vw; top: 2vh; width: 8vh; height: 8vh; }
+  [data-moment="soir"] .tv-astre { opacity: 1; top: 52vh; left: 12vw; background: radial-gradient(circle, #ffd27a, #ff8a4b); box-shadow: 0 0 80px 30px rgba(255,150,80,.45); }
+  .tv-etoiles { position: absolute; left: 0; top: 0; width: 1px; height: 1px; border-radius: 50%; opacity: 0; transition: opacity 1.5s; animation: tv-scintille 4s ease-in-out infinite alternate; }
+  [data-moment="nuit"] .tv-etoiles { opacity: 1; } [data-moment="soir"] .tv-etoiles { opacity: .35; }
+  @keyframes tv-scintille { to { filter: brightness(.55); } }
+  .tv-nuages { position: absolute; inset: 0 -50vw 0 0; opacity: 0; transition: opacity 1.5s;
+    background: radial-gradient(ellipse 9vw 3.2vh at 10% 22%, rgba(255,255,255,.85), transparent 70%), radial-gradient(ellipse 12vw 4vh at 32% 14%, rgba(255,255,255,.7), transparent 70%),
+      radial-gradient(ellipse 8vw 2.6vh at 58% 30%, rgba(255,255,255,.75), transparent 70%), radial-gradient(ellipse 11vw 3.6vh at 82% 18%, rgba(255,255,255,.65), transparent 70%);
+    animation: tv-nuages 90s linear infinite; }
+  [data-moment="jour"] .tv-nuages { opacity: 1; }
+  @keyframes tv-nuages { to { transform: translateX(-50vw); } }
+  /* barre du haut */
+  .tv-barre { position: absolute; left: 4vw; right: 4vw; top: 3vh; display: flex; align-items: center; gap: 1.2vw; z-index: 6; }
+  .tv-logo { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 3.8vh; letter-spacing: .02em; text-shadow: 0 2px 12px rgba(0,0,0,.4); }
+  .tv-logo b { color: var(--soleil); }
+  .tv-vide { flex: 1; }
+  .tv-pilule { height: 5.6vh; padding: 0 1.4vw; border-radius: 99px; border: 3px solid rgba(255,255,255,.25); background: rgba(0,0,0,.28); color: #fff; font: 800 2.3vh system-ui; display: inline-flex; align-items: center; gap: .6vw; transition: transform .15s, background .15s, border-color .15s; }
+  .tv-pilule.moi span:first-child { font-size: 3.4vh; }
+  .tv-pilule.f { transform: scale(1.1); background: #fff; color: #1b1030; border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,.5); }
+  /* bannière héro */
+  .tv-hero { position: absolute; left: 4.4vw; top: 15vh; width: 40vw; z-index: 6; text-shadow: 0 3px 18px rgba(0,0,0,.45); font-family: 'Baloo 2', system-ui, sans-serif; }
+  .tv-salut { font-size: 2.8vh; font-weight: 800; opacity: .9; margin: 0 0 1vh; }
+  .tv-titre { font-size: 7.4vh; line-height: 1; margin: 0; font-weight: 800; letter-spacing: -.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tv-desc { font-size: 2.6vh; line-height: 1.35; margin: 1.2vh 0 2vh; opacity: .92; max-width: 36vw; min-height: 3.6vh; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tv-badges { display: flex; gap: 1vw; flex-wrap: wrap; }
+  .tv-badges span { padding: .8vh 1.4vw; border-radius: 99px; background: rgba(0,0,0,.32); font-weight: 800; font-size: 2.2vh; text-shadow: none; }
+  .tv-badges .ok { background: #fff; color: #1b1030; }
+  .tv-hero.entre .tv-titre, .tv-hero.entre .tv-desc, .tv-hero.entre .tv-badges { animation: tv-entre .35s ease-out; }
+  @keyframes tv-entre { from { opacity: 0; transform: translateY(1.5vh); } }
+  .tv-qr { position: absolute; right: 4vw; top: 12vh; z-index: 7; background: #fff; color: #1b1030; border-radius: 2vh; padding: 1.2vh; width: 15vh; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+  .tv-qr .q svg { width: 100%; height: auto; display: block; }
+  .tv-qr span { display: block; font: 800 1.35vh/1.2 system-ui; margin-top: .6vh; }
+  .tv-qr[hidden] { display: none; }
+  /* rangées */
+  .tv-rangees { position: absolute; left: 0; right: 0; top: 58vh; bottom: 0; overflow: hidden; z-index: 6;
+    -webkit-mask-image: linear-gradient(180deg, #000 85%, transparent); mask-image: linear-gradient(180deg, #000 85%, transparent); }
+  .sous .tv-rangees { top: 52vh; }
+  .tv-piste { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+  .tv-rang { padding: 0 0 2.4vh 4vw; transition: opacity .3s; }
+  .tv-rang.loin { opacity: 0; }
+  .tv-rang h2 { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 3vh; margin: 0 0 1.4vh; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  .tv-tuiles { display: flex; gap: 1.6vw; transition: transform .35s cubic-bezier(.2,.8,.2,1); padding: 1.2vh .6vw; }
+  .tv-tuile { position: relative; flex: none; width: 18vw; height: 21vh; border-radius: 3vh; border: none; padding: 0; overflow: hidden; cursor: pointer;
+    display: grid; grid-template-rows: 1fr auto; place-items: center; color: #1b1030; transition: transform .2s cubic-bezier(.3,1.5,.6,1), box-shadow .2s, filter .2s; filter: saturate(.85) brightness(.9); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .tv-tuile.u0 { background: linear-gradient(150deg, #ffe08a, #ffb44d); } .tv-tuile.u1 { background: linear-gradient(150deg, #ffb3c7, #ff6f91); }
+  .tv-tuile.u2 { background: linear-gradient(150deg, #a8dcff, #4ea8f5); } .tv-tuile.u3 { background: linear-gradient(150deg, #a6f0d6, #3fcf9f); }
+  .tv-tuile.u4 { background: linear-gradient(150deg, #dccbff, #9b7bff); }
+  .tv-tuile.conte { background: linear-gradient(160deg, #3b2a7a, #171041); color: #fff; }
+  .tv-tuile .e { font-size: 9vh; line-height: 1; margin-top: 2vh; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); transition: transform .25s; }
+  .tv-tuile.texte .e { font-weight: 900; font-size: 12vh; font-family: system-ui; }
+  .tv-tuile .n { width: 100%; padding: 1vh 1vw; font: 800 2.3vh/1.15 'Baloo 2', system-ui; background: rgba(255,255,255,.55); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tv-tuile.conte .n { background: rgba(0,0,0,.35); }
+  .tv-tuile .badge { position: absolute; top: 1.2vh; right: 1.2vh; background: rgba(255,255,255,.9); border-radius: 99px; padding: .3vh .8vh; font-size: 2.4vh; }
+  .tv-tuile.ferme { filter: saturate(.4) brightness(.75); }
+  .tv-tuile.f { transform: scale(1.13); z-index: 2; filter: none; outline: none; box-shadow: 0 0 0 .6vh #fff, 0 0 40px 8px rgba(255,255,255,.45), 0 18px 40px rgba(0,0,0,.45); }
+  .tv-tuile.f .e { transform: scale(1.12) rotate(-4deg); animation: tv-respire 1.8s ease-in-out infinite; }
+  @keyframes tv-respire { 50% { transform: scale(1.18) rotate(3deg); } }
+  .tv-tuile.bute { animation: tv-bute .3s; }
+  @keyframes tv-bute { 30% { transform: scale(1.13) translateX(1vw); } 60% { transform: scale(1.13) translateX(-.6vw); } }
+
+  /* rangée « langue des histoires » : petites pastilles */
+  .tv-rang.petit .tv-tuile { width: 12vw; height: 10vh; grid-template-rows: 1fr; background: rgba(255,255,255,.12); color: #fff; }
+  .tv-rang.petit .tv-tuile .e { font-size: 3.6vh; margin: 0; }
+  .tv-rang.petit .tv-tuile .n { display: none; }
+  .tv-rang.petit .tv-tuile.choisi { background: var(--soleil); color: #1b1030; }
+  /* fiche d'une histoire */
+  .fiche-ouverte .tv-rangees, .fiche-ouverte .tv-hero, .fiche-ouverte .tv-barre { visibility: hidden; }
+  .tv-fiche { position: absolute; inset: 0; z-index: 9; font-family: 'Baloo 2', system-ui, sans-serif;
+    background: linear-gradient(90deg, #120C34 0%, #120C34 42%, rgba(18,12,52,.55) 70%, rgba(18,12,52,.2) 100%), linear-gradient(0deg, #0b0820 0%, rgba(11,8,32,0) 40%); }
+  .tf-texte { position: absolute; left: 4.4vw; top: 9vh; width: 42vw; display: flex; flex-direction: column; gap: 1.4vh; }
+  .tf-kicker { font-weight: 800; font-size: 1.9vh; letter-spacing: .08em; text-transform: uppercase; color: #FFB3C7; }
+  .tv-fiche h1 { margin: 0; font-size: 7vh; line-height: 1.02; font-weight: 800; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tf-resume { margin: 0; font-size: 2.3vh; line-height: 1.45; color: #E2DCFF; max-width: 38vw; }
+  .tf-label { margin-top: 1vh; font-weight: 800; font-size: 1.9vh; color: #CFC8F5; }
+  .tf-puces { display: flex; gap: .8vw; flex-wrap: wrap; }
+  .tf-puce { height: 5.2vh; padding: 0 1.4vw; border-radius: 99px; border: 2px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font: 800 2.1vh 'Baloo 2', system-ui; transition: transform .15s; }
+  .tf-puce.on { background: var(--soleil); border-color: var(--soleil); color: #1b1030; }
+  .tf-actions { display: flex; gap: 1vw; margin-top: 2vh; }
+  .tf-jouer { height: 6.6vh; padding: 0 2.2vw; border-radius: 99px; border: none; background: #fff; color: #1b1030; font: 800 2.5vh 'Baloo 2', system-ui; }
+  .tf-second { height: 6.6vh; padding: 0 1.8vw; border-radius: 99px; border: 2px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; font: 800 2.3vh 'Baloo 2', system-ui; }
+  .tf-pages { position: absolute; left: 4.4vw; right: 4vw; bottom: 5vh; display: flex; flex-direction: column; gap: 1.2vh; }
+  .tf-liste { display: flex; gap: 1vw; flex-wrap: wrap; }
+  .tf-page { width: 8vw; height: 8vh; border-radius: 1.8vh; border: none; background: rgba(255,255,255,.08); color: #CFC8F5; font: 800 2.8vh 'Baloo 2', system-ui; }
+  .tf-page.lu { background: rgba(255,179,199,.22); color: #FFE3EA; }
+  .tv-fiche button:focus { outline: none; transform: scale(1.08); box-shadow: 0 0 0 .5vh #fff, 0 0 30px 6px rgba(255,255,255,.4); }
+  /* Qui joue ? en plein écran à la télé */
+  .tele .fa-t-enfants { position: fixed; inset: 0; width: auto; max-width: none; max-height: none; border-radius: 0; border: none; padding: 10vh 6vw;
+    background: radial-gradient(ellipse at 50% 20%, #2A2170 0%, #120F3A 60%, #0A0A22 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .tele .fa-t-enfants h2 { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 7vh; margin: 0 0 6vh; }
+  .tele .fa-t-enfants .fa-enfants { display: flex; gap: 4vw; justify-content: center; }
+  .tele .fa-t-enfants .fa-enfant { background: none; border: none; padding: 0; gap: 2vh; }
+  .tele .fa-t-enfants .fa-enfant .e { width: 24vh; height: 24vh; border-radius: 50%; display: grid; place-items: center; font-size: 13vh; background: linear-gradient(150deg, #FFB3C7, #FF6F91); transition: transform .2s cubic-bezier(.3,1.5,.6,1), box-shadow .2s; }
+  .tele .fa-t-enfants .fa-enfant:nth-child(2n) .e { background: linear-gradient(150deg, #A6F0D6, #3FCF9F); }
+  .tele .fa-t-enfants .fa-enfant:nth-child(3n) .e { background: linear-gradient(150deg, #A8DCFF, #4EA8F5); }
+  .tele .fa-t-enfants .fa-enfant.plus .e { background: rgba(255,255,255,.1); border: .5vh dashed rgba(255,255,255,.45); font-size: 8vh; }
+  .tele .fa-t-enfants .fa-enfant .n { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 3.6vh; }
+  .tele .fa-t-enfants .fa-enfant:focus { outline: none; transform: none; box-shadow: none; }
+  .tele .fa-t-enfants .fa-enfant:focus .e { transform: scale(1.12); box-shadow: 0 0 0 1vh #fff, 0 0 60px 14px rgba(255,255,255,.4); }
+  .tv-on .tv-tuile:focus, .tv-on .tv-pilule:focus { outline: none; }
+  .tv .tv-tuile:focus:not(.f) { transform: none; }
+  .tv-on .duo-curseur { z-index: 95; }
+  .en-haut .tv-hero { opacity: .5; }
+  /* ======================= Jeux en plein écran à la télé ======================= */
+  .tele #ecran-formes .formes { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: auto auto auto 1fr; gap: 1vh; padding: 2vh 3vw; background: radial-gradient(ellipse at 50% 0, #26305e, #0b0d24 70%); max-width: none; }
+  .tele #ecran-formes .fo-ciel { width: 100%; height: 100%; min-height: 0; border-radius: 3vh; }
+  .tele #ecran-formes .fo-bulle { max-width: 70vw; margin: 0 auto; width: 100%; }
+  .tele #ecran-formes .fo-bulle .txt { font-size: 3.4vh; }
+  .tele #ecran-formes .fo-compte span { width: 5vh; height: 5vh; font-size: 2.6vh; }
+  .tele .fo-joueurs { font-size: 3.2vh; }
+  /* ======================= Manette (téléphone) ======================= */
+  .fa-t-manette { --c: var(--soleil); display: flex; flex-direction: column; gap: 12px; }
+  .mn-haut { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .mn-haut .fa-fermer { position: static; }
+  .mn-etat { font-weight: 900; font-size: 22px; color: var(--c); }
+  .mn-surface { position: relative; flex: 1; min-height: 56vh; border-radius: 28px; touch-action: none; user-select: none; -webkit-user-select: none;
+    background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 28%, transparent), rgba(255,255,255,.04) 70%); border: 3px solid color-mix(in srgb, var(--c) 60%, transparent);
+    display: grid; place-items: center; text-align: center; transition: transform .1s, background .2s; }
+  .mn-surface.appui { transform: scale(.985); background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 45%, transparent), rgba(255,255,255,.06) 70%); }
+  .mn-fleches { font-size: 34px; line-height: 1.4; opacity: .35; white-space: pre; }
+  [data-mode="pave"] .mn-fleches { opacity: 0; }
+  [data-mode="pave"] .mn-surface::before { content: '✋'; font-size: 90px; opacity: .35; position: absolute; }
+  .mn-aide { position: absolute; bottom: 14px; left: 0; right: 0; margin: 0; font-weight: 800; font-size: 17px; opacity: .8; }
+  .mn-bas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .mn-b { height: 70px; border-radius: 20px; border: 2px solid var(--bord); background: rgba(255,255,255,.07); font-size: 30px; color: #fff; }
+  .mn-b.on { background: var(--c); }
+  .mn-lier { width: 100%; }
+  .mode-manette .fa-t-manette { width: 100%; min-height: 94vh; }
+  .fa-google { width: 100%; background: #fff !important; color: #1f1f1f !important; margin-bottom: 8px; }
+  .fa-google b { color: #4285f4; font-size: 1.2em; margin-right: 6px; }
   /* ---------- Télé : interface « à 3 mètres », tout tient dans l'écran sans défiler ---------- */
   .tele body { overflow: hidden; background: rgb(var(--fond-rgb)); }
   .tele #decor { display: none; }
@@ -600,12 +922,132 @@
   .tele .objet .n { font-size: 2.3vh; }
   .tele .choix button { font-size: 10vh; }
   .tele .bandeau { font-size: 2.6vh; }
+  /* ===== Modules à la télé : Lumi au centre, le mot dessous, une rangée compacte en bas (maquette 3) ===== */
+  .tele .haut { padding-bottom: .8vh; }
+  .tele .haut h1 { font-size: 3.6vh; }
+  .tele .retour, .tele .bouton-son, .tele .bouton-langue { height: 5.6vh; min-width: 5.6vh; font-size: 2.6vh; border-radius: 99px; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .corps { display: flex; flex-direction: column; gap: 1vh; grid-template-columns: none; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .cote-lumi { flex: 1; min-height: 0; height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6vh; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .scene { height: 46vh; width: 46vh; aspect-ratio: 1; flex: none; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .carte { background: none; border: none; box-shadow: none; padding: 0; min-height: 0; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .carte .emoji { display: none; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .carte .mot { font-size: 6.4vh; line-height: 1.05; }
+  .tele :is([data-ecran="liste"], [data-ecran="parler"], [data-ecran="jeu"]) .cote-activite { flex: none; overflow: visible; padding: 1vh 0 .5vh; }
+  .tele [data-ecran="liste"] .panneau { display: flex; flex-wrap: nowrap; gap: 1vw; overflow-x: auto; overflow-y: visible; padding: 1.6vh 1vw; scrollbar-width: none; scroll-behavior: smooth; }
+  .tele [data-ecran="liste"] .panneau::-webkit-scrollbar { display: none; }
+  .tele [data-ecran="liste"] .panneau .objet { flex: none; width: 12vw; min-height: 0; height: 15vh; border-radius: 2.4vh; padding: 1vh .6vw; gap: .4vh; }
+  .tele [data-ecran="liste"] .panneau .objet .e { font-size: 6.4vh; }
+  .tele [data-ecran="liste"] .panneau .objet .n { font-size: 1.9vh; }
+  .tele [data-ecran="liste"] .panneau .objet.lettre .e { font-size: 7vh; }
+  .tele [data-ecran="liste"] .panneau .objet:focus { transform: scale(1.1); outline: none; box-shadow: 0 0 0 .5vh #fff, 0 0 30px 6px rgba(255,255,255,.4); }
+  .tele [data-ecran="jeu"] .choix { display: flex; justify-content: center; gap: 2vw; }
+  .tele [data-ecran="jeu"] .choix button { width: 20vh; height: 20vh; font-size: 11vh; border-radius: 3vh; }
+  .tele [data-ecran="jeu"] .jeu-haut { position: fixed; top: 2.4vh; left: 50%; transform: translateX(-50%); z-index: 3; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .scene { height: 18vh; width: 18vh; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .cote-lumi { flex: none; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .cote-activite { flex: 1; min-height: 0; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .aire-bulles { height: 54vh; }
+  .tele [data-ecran="parler"] .carte .sous, .tele [data-ecran="parler"] .carte p { display: none; }
+  .tele [data-ecran="parler"] .scene { height: 40vh; width: 40vh; }
+  .tele [data-ecran="parler"] .commandes .rond { width: 11vh; height: 11vh; }
+  .tele [data-ecran="parler"] .aide, .tele [data-ecran="parler"] .legende { font-size: 2.4vh; text-align: center; }
+  .tele [data-ecran="parler"] .ecrire { max-width: 60vw; margin: 0 auto; }
+  /* Comptines et histoires (liste) : Lumi à gauche, la liste à droite, rien ne déborde */
+  .tele :is([data-ecran="chansons"], [data-ecran="histoires"]) .corps { flex: 1; min-height: 0; display: grid; grid-template-columns: 36% 1fr; gap: 2.5vw; max-width: none; width: 100%; margin: 0; }
+  .tele :is([data-ecran="chansons"], [data-ecran="histoires"]) .cote-lumi { height: 100%; justify-content: center; }
+  .tele :is([data-ecran="chansons"], [data-ecran="histoires"]) .scene { width: 100%; height: auto; max-height: 60vh; aspect-ratio: 1; }
+  .tele :is([data-ecran="chansons"], [data-ecran="histoires"]) .carte { display: none; }
+  .tele :is([data-ecran="chansons"], [data-ecran="histoires"]) .cote-activite { min-height: 0; overflow-y: auto; padding: 1vh 1vw 4vh; scrollbar-width: none; }
+  .tele .ch-liste { grid-template-columns: repeat(3, 1fr); }
+  /* Compte avec Lumi en plein écran, comme la pluie de formes */
+  .tele #ecran-compter .compter { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: auto 1fr auto; gap: 1.5vh; padding: 2vh 3vw; background: radial-gradient(ellipse at 50% 0, #26305e, #0b0d24 70%); max-width: none; }
+  .tele #ecran-compter .co-zone { height: auto; min-height: 0; border-radius: 3vh; }
+  .tele #ecran-compter .col-bulle { max-width: 70vw; margin: 0 auto; width: 100%; }
+  .tele #ecran-compter .col-bulle .txt { font-size: 3.4vh; }
+  .tele #ecran-compter .co-objet { font-size: 9vh; }
+
+
   .tele .carte-jour .grand { font-size: 7vh; }
+  /* =================== Télé : règles communes (REGLES-TV.md) =================== */
+  .tv-retour { display: none; }
+  .tele .haut { display: none !important; }
+  .tele:not(.tv-on):not(.theatre):not(.chant-plein) .tv-retour { display: flex; align-items: center; gap: .6vw; position: fixed; left: 2.6vw; top: 2.6vh; z-index: 45; height: 5vh; padding: 0 1.2vw; border-radius: 99px;
+    border: 2px solid rgba(255,255,255,.2); background: rgba(9,12,38,.55); color: #fff; font: 800 2vh system-ui; }
+  .tele .tv-retour:focus { outline: none; background: #fff; color: #1b1030; }
+  .tele .app { padding-top: 2.6vh; }
+  .tv-tuile.juste { box-shadow: 0 0 0 .6vh #5FE0B5, 0 0 40px 10px rgba(95,224,181,.6) !important; }
+  /* ----- Salle de jeu : fond unique, plein écran, consigne en haut, zone de jeu, choix en bas ----- */
+  .tele :is([data-ecran="jeu"], [data-ecran="compter"], [data-ecran="formes"], [data-ecran="coloriage"]) { background: radial-gradient(ellipse at 50% 0%, #2B3A86 0%, #141B4D 50%, #090C26 100%); }
+  .tele[data-salle] body, .tele body:has([data-ecran="jeu"]), .tele body:has([data-ecran="compter"]), .tele body:has([data-ecran="coloriage"]) { background: #090C26; }
+  .tele [data-ecran="jeu"] .corps { height: 95vh; display: flex; flex-direction: column; justify-content: center; gap: 1vh; }
+  .tele [data-ecran="jeu"] .cote-lumi { flex: 1; }
+  .tele [data-ecran="jeu"] .scene { height: 38vh; width: 38vh; }
+  .tele [data-ecran="jeu"] .carte .mot { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 5vh; }
+  .tele [data-ecran="jeu"] .carte .sous { font-size: 2.2vh; }
+  .tele [data-ecran="jeu"] .tuiles { display: none; }
+  .tele [data-ecran="jeu"] .choix { display: flex; justify-content: center; gap: 2vw; padding-bottom: 3vh; }
+  .tele [data-ecran="jeu"] .choix button { width: 18vw; height: 24vh; border-radius: 3vh; border: none; font-size: 13vh; background: linear-gradient(150deg, #FFE08A, #FFB44D); box-shadow: 0 8px 24px rgba(0,0,0,.3); transition: transform .2s cubic-bezier(.3,1.5,.6,1); }
+  .tele [data-ecran="jeu"] .choix button:nth-child(2) { background: linear-gradient(150deg, #A8DCFF, #4EA8F5); }
+  .tele [data-ecran="jeu"] .choix button:nth-child(3) { background: linear-gradient(150deg, #A6F0D6, #3FCF9F); }
+  .tele [data-ecran="jeu"] .choix button:nth-child(4) { background: linear-gradient(150deg, #FFB3C7, #FF6F91); }
+  .tele [data-ecran="jeu"] .choix button:focus { outline: none; transform: scale(1.1); box-shadow: 0 0 0 .6vh #fff, 0 0 40px 8px rgba(255,255,255,.45); }
+  .tele [data-ecran="jeu"] .jeu-haut { position: fixed; top: 2.6vh; right: 2.6vw; left: auto; transform: none; z-index: 3; }
+  .tele [data-ecran="jeu"] .score { height: 5vh; padding: 0 1.4vw; border-radius: 99px; background: rgba(9,12,38,.55); font: 800 2.4vh system-ui; display: flex; align-items: center; }
+  .tele [data-ecran="jeu"] .reecouter { height: 5vh; border-radius: 99px; font-size: 2vh; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .scene { height: 16vh; width: 16vh; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .cote-lumi { flex: none; }
+  .tele [data-ecran="jeu"][data-jeu="bulles"] .aire-bulles { height: 64vh; border-radius: 3vh; }
+  /* compte avec Lumi */
+  .tele #ecran-compter .compter { grid-template-rows: auto 1fr auto; padding: 2.6vh 4vw 3vh; gap: 2vh; }
+  .tele #ecran-compter .col-bulle { max-width: 56vw; border-radius: 99px; padding: 1vh 2vw; background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.2); }
+  .tele #ecran-compter .col-bulle .txt { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 3.6vh; }
+  .tele #ecran-compter .co-nombre { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 6vh; }
+  .tele #ecran-compter .co-zone { background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.1); }
+  .tele #ecran-compter .co-objet { font-size: 12vh; }
+  .tele #ecran-compter .co-objet:focus { outline: none; filter: drop-shadow(0 0 22px #fff); transform: translate(-50%, -50%) scale(1.15); }
+  .tele #ecran-compter .co-choix { display: flex; justify-content: center; gap: 2vw; }
+  .tele #ecran-compter .co-choix[hidden] { display: none; }
+  .tele #ecran-compter .co-chiffre { width: 16vw; height: 20vh; border-radius: 3vh; border: none; font: 800 12vh 'Baloo 2', system-ui; color: #1b1030; background: linear-gradient(150deg, #FFE08A, #FFB44D); }
+  .tele #ecran-compter .co-chiffre:nth-child(2) { background: linear-gradient(150deg, #A8DCFF, #4EA8F5); }
+  .tele #ecran-compter .co-chiffre:nth-child(3) { background: linear-gradient(150deg, #A6F0D6, #3FCF9F); }
+  .tele #ecran-compter .co-chiffre:focus { outline: none; transform: scale(1.1); box-shadow: 0 0 0 .6vh #fff, 0 0 40px 8px rgba(255,255,255,.45); }
+  /* coloriage : la feuille à gauche, la palette en colonne à droite */
+  .tele #ecran-coloriage .coloriage { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-columns: 1fr 24vw; grid-template-rows: auto auto auto 1fr; gap: 2vh 2.4vw; padding: 9vh 4vw 3vh; background: radial-gradient(ellipse at 50% 0%, #2B3A86 0%, #141B4D 50%, #090C26 100%); }
+  .tele #ecran-coloriage .feuille { grid-column: 1; grid-row: 1 / -1; height: 86vh; width: auto; aspect-ratio: 1; justify-self: center; align-self: center; border-radius: 3vh; }
+  .tele #ecran-coloriage .col-bulle { grid-column: 2; }
+  .tele #ecran-coloriage .col-bulle .txt { font-size: 2.6vh; }
+  .tele #ecran-coloriage .palette { grid-column: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4vh; }
+  .tele #ecran-coloriage .palette button { width: 100%; aspect-ratio: 1; height: auto; }
+  .tele #ecran-coloriage .palette button:focus, .tele #ecran-coloriage .col-actions button:focus, .tele #ecran-coloriage .col-autres button:focus { outline: none; transform: scale(1.12); box-shadow: 0 0 0 .5vh #fff, 0 0 26px rgba(255,255,255,.5); }
+  .tele #ecran-coloriage .col-actions { grid-column: 2; display: grid; grid-template-columns: auto 1fr 1fr; gap: 1vh; }
+  .tele #ecran-coloriage .col-actions button { height: 6vh; font-size: 2.2vh; }
+  .tele #ecran-coloriage .col-autres { grid-column: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vh; align-content: start; }
+  .tele #ecran-coloriage .col-autres button { width: 100%; height: auto; aspect-ratio: 1; }
+  /* ----- Comptine en grand (karaoké) ----- */
+  .chant-plein body { overflow: hidden; background: radial-gradient(ellipse at 50% 30%, #3A1F6E 0%, #160E3A 60%, #08061A 100%) fixed; }
+  .chant-plein .haut, .chant-plein .carte, .chant-plein #ch-filtres, .chant-plein #ch-compte, .chant-plein #ch-liste, .chant-plein #decor, .chant-plein .tv-retour { display: none !important; }
+  .chant-plein #scene { position: fixed; left: 0; right: 0; top: 4vh; bottom: 30vh; width: 100%; max-height: none !important; height: auto; aspect-ratio: auto; z-index: 55; }
+  .chant-plein #ch-lecteur { position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); width: min(92vw, 1400px); z-index: 60; margin: 0; background: rgba(8,4,24,.55); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(6px); }
+  .chant-plein .ch-haut { transition: opacity .6s; }
+  .sc-calme .ch-haut { opacity: 0; }
+  .sc-calme, .sc-calme * { cursor: none; }
+  .chant-plein .ch-paroles { max-height: none; overflow: hidden; text-align: center; }
+  .chant-plein .ch-ligne { display: none; font-family: 'Baloo 2', system-ui, sans-serif; }
+  .chant-plein .ch-ligne.active { display: block; font-size: clamp(26px, 4.6vh, 56px); line-height: 1.25; }
+  .chant-plein .ch-ligne.suivante { display: block; font-size: clamp(18px, 2.6vh, 32px); opacity: .55; }
+  .chant-plein .ch-mot.on { color: var(--soleil); text-shadow: 0 0 18px rgba(255,209,102,.7); }
+  .chant-plein .ch-commandes button:focus { outline: none; transform: scale(1.12); box-shadow: 0 0 0 4px #fff; }
+  /* les salles de jeu plein écran : une seule colonne, quoi que disent les mises en page tablette */
+  .tele #ecran-compter .compter, .tele #ecran-formes .formes { grid-template-columns: 1fr !important; grid-template-areas: none !important; }
+  .tele #ecran-compter .compter > *, .tele #ecran-formes .formes > * { grid-column: 1 !important; grid-row: auto !important; }
+  .tele #ecran-formes .fo-ciel { min-height: 60vh; }
+  .tele #ecran-compter .co-objet:focus { outline: none !important; box-shadow: none !important; background: none !important; border: none !important; filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px rgba(255,209,102,.8)); }
 </style>
 </head>
 <body>
 <div id="decor" aria-hidden="true"></div>
 <div id="effets" aria-hidden="true"></div>
+<button type="button" id="tv-retour" class="tv-retour" aria-label="Retour">← <span>Retour</span></button>
 <div class="app" id="app" dir="ltr" data-ecran="accueil">
   <header class="haut">
     <button class="retour" id="btn-retour" type="button" hidden aria-label="Retour"><span>←</span></button>
@@ -758,7 +1200,7 @@
 <script>
 const avatar = (() => {
   const canvas = document.getElementById('rendu');
-  const gl = canvas.getContext('webgl', { alpha: false, antialias: false });
+  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
   if (!gl) { document.getElementById('scene').classList.add('sans3d'); return null; }
 
   const programme = (vs, fs) => {
@@ -783,8 +1225,8 @@ const avatar = (() => {
     float r = length(uv), ang = atan(uv.y, uv.x);
     float g = (exp(-r*r*16.) * (.34 + uAmp*.4 + uEnergie*.06) + exp(-r*r*4.5) * (.09 + uAmp*.06)) * (1. + uRespire*4. + uProche*.9);
     float rayons = pow(.5 + .5*sin(ang*7. + uT*.12), 6.) * pow(.5 + .5*sin(ang*4. - uT*.09 + 1.), 4.) * exp(-r*4.2) * (.1 + uAmp*.12);
-    vec3 c = uFond + (mix(uC2, uC3, .3)*g + uC3*rayons) * bord;
-    gl_FragColor = vec4(c, 1.);
+    vec3 c = (mix(uC2, uC3, .3)*g + uC3*rayons) * bord;
+    gl_FragColor = vec4(c, clamp(max(c.r, max(c.g, c.b)), 0., 1.));
   }`;
   // --- Grains ---
   const GRAINS_VS = `
@@ -851,7 +1293,8 @@ const avatar = (() => {
   void main(){
     vec2 c = gl_PointCoord - .5;
     float g = exp(-dot(c, c)*22.);
-    gl_FragColor = vec4(vCol * g * vA, 1.);
+    vec3 cg = vCol * g * vA;
+    gl_FragColor = vec4(cg, clamp(max(cg.r, max(cg.g, cg.b)), 0., 1.));
   }`;
 
   let pHalo, pGrains;
@@ -1741,14 +2184,14 @@ function son(type = 'pop') {
     audio = audio || new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === 'suspended') audio.resume();
     const t = audio.currentTime;
-    const notes = { pop: [[620, 0, .09]], juste: [[660, 0, .12], [990, .1, .2]], faux: [[200, 0, .2]] }[type];
+    const notes = { tic: [[1250, 0, .04]], pop: [[620, 0, .09]], juste: [[660, 0, .12], [990, .1, .2]], faux: [[200, 0, .2]] }[type];
     notes.forEach(([f, d, duree]) => {
       const o = audio.createOscillator(), g = audio.createGain();
       o.type = type === 'faux' ? 'triangle' : 'sine';
       o.frequency.setValueAtTime(f, t + d);
       if (type === 'pop') o.frequency.exponentialRampToValueAtTime(f * 1.7, t + d + duree);
       g.gain.setValueAtTime(.0001, t + d);
-      g.gain.exponentialRampToValueAtTime(.16, t + d + .015);
+      g.gain.exponentialRampToValueAtTime(type === 'tic' ? .05 : .16, t + d + .015);
       g.gain.exponentialRampToValueAtTime(.0001, t + d + duree);
       o.connect(g).connect(audio.destination);
       o.start(t + d); o.stop(t + d + duree + .03);
@@ -1854,6 +2297,7 @@ const pause = (ms, j) => new Promise((ok, ko) => setTimeout(() => (j === jeton ?
 
 // ---------- Carte du mot ----------
 function carte(emoji, mot, sous = '', tuiles = true, article = '') {
+  if (typeof TV !== 'undefined' && TV.actif) TV.message((article || '') + mot, sous);
   const e = $('carte-emoji'), m = $('carte-mot');
   e.textContent = emoji; m.textContent = ''; $('carte-sous').textContent = sous;
   if (article) { const a = document.createElement('span'); a.className = 'article'; a.textContent = article; m.append(a); }
@@ -2481,7 +2925,7 @@ function questionQuiz() {
   $('btn-tracer').hidden = true;
   avatar?.mode(paletteAmb); avatar?.forme('question');
   carte('🎯', L.touche1(nomComplet(m)), `${quiz.i + 1} / ${quiz.liste.length}`, false);
-  document.querySelectorAll('#panneau .objet').forEach((t) => t.classList.remove('juste', 'faux'));
+  document.querySelectorAll('#panneau .objet, .tv-tuile').forEach((t) => t.classList.remove('juste', 'faux'));
   parler(L.touche1(nomComplet(m)));
 }
 async function repondreQuiz(m, t) {
@@ -3121,9 +3565,35 @@ function chanter(c) {
     arreterChanson(!boucle);
     Progres.gagner(null); son('juste');
     if (boucle && pile[pile.length - 1] === 'chansons') chanter(c);
-    else { avatar?.forme(c.emoji); revenirAuNuage(2500); }
+    else { avatar?.forme(c.emoji); revenirAuNuage(2500); if (SceneChant.actif) setTimeout(() => SceneChant.quitter(), 2200); }
   });
 }
+
+// ----- Comptine en grand (télé) : Lumi au centre, les paroles en sous-titres, comme au karaoké -----
+const SceneChant = (() => {
+  let actif = false, minuteur = 0;
+  function reveil() {
+    if (!actif) return;
+    document.documentElement.classList.remove('sc-calme');
+    clearTimeout(minuteur); minuteur = setTimeout(() => document.documentElement.classList.add('sc-calme'), 3500);
+  }
+  function entrer(c) {
+    actif = true; TV.cacher();
+    document.documentElement.classList.add('chant-plein');
+    ['pointermove', 'pointerdown', 'keydown'].forEach((t) => addEventListener(t, reveil, true));
+    reveil(); chanter(c);
+    setTimeout(() => $('ch-lecture')?.focus({ preventScroll: true }), 80);
+  }
+  function quitter() {
+    if (!actif) return;
+    actif = false; clearTimeout(minuteur);
+    ['pointermove', 'pointerdown', 'keydown'].forEach((t) => removeEventListener(t, reveil, true));
+    document.documentElement.classList.remove('chant-plein', 'sc-calme');
+    arreterChanson();
+    if (modeTele && pile[pile.length - 1] === 'chansons') TV.montrer('chansons');
+  }
+  return { entrer, quitter, get actif() { return actif; } };
+})();
 function construireChansons() {
   const r = ReglesChant.get(), choix = ['toutes', 'fr', 'en', 'ar'].includes(r.langue) ? r.langue : langue;
   const filtres = $('ch-filtres');
@@ -3343,6 +3813,15 @@ const VoixParent = (() => {
   };
 })();
 const clePage = (c, p = c.page) => `${c.h.id}:${p}`;
+// voix de la famille : une piste par page et par voix (maman, papa) ; l'ancienne piste sans nom reste lue par défaut
+const VOIX_FAMILLE = {
+  maman: { e: '👩', fr: 'Voix de maman', en: 'Mum’s voice', ar: 'صوت ماما' },
+  papa: { e: '👨', fr: 'Voix de papa', en: 'Dad’s voice', ar: 'صوت بابا' },
+};
+const cleVoix = (id, p, qui) => (qui ? `${id}:${p}:${qui}` : `${id}:${p}`);
+const aVoix = (h, qui) => h.pages.some((_, p) => VoixParent.a(cleVoix(h.id, p, qui)));
+// où l'enfant s'est arrêté dans chaque histoire
+const PagesLues = (() => { let m = {}; try { m = JSON.parse(localStorage.getItem('lumi-conte-page') || '{}'); } catch {} return { get: (id) => m[id] || 0, set(id, p) { m[id] = p; try { localStorage.setItem('lumi-conte-page', JSON.stringify(m)); } catch {} } }; })();
 let lecteurAudio = null;
 function jouerVoixParent(blob, encore) {
   return new Promise((ok) => {
@@ -3373,7 +3852,7 @@ function pageHistoire() {
   const t = $('hi-texte');
   t.textContent = texte; t.dir = RTL(h.langue) ? 'rtl' : 'ltr';
   t.classList.remove('entre'); void t.offsetWidth; t.classList.add('entre');
-  clearTimeout(retourNuage); avatar?.forme(dessin);
+  clearTimeout(retourNuage); avatar?.forme(dessin); PagesLues.set(h.id, page);
   $('hi-points').innerHTML = h.pages.map((_, i) => `<span class="${[i === page ? 'on' : i < page ? 'lu' : '', VoixParent.a(clePage(conte, i)) ? 'rec' : ''].join(' ')}"></span>`).join('');
   $('hi-prec').disabled = page === 0;
   $('hi-suiv').disabled = page === h.pages.length - 1;
@@ -3381,8 +3860,8 @@ function pageHistoire() {
 }
 // Lire une page : la voix enregistrée du parent si elle existe, sinon la voix de synthèse
 async function direePage(c, encore) {
-  const cle = clePage(c);
-  if (VoixParent.a(cle)) { const b = await VoixParent.lire(cle); if (b && encore()) return jouerVoixParent(b, encore); }
+  const cle = c.voix === 'maman' || c.voix === 'papa' ? cleVoix(c.h.id, c.page, c.voix) : c.voix === 'lumi' ? null : clePage(c);
+  if (cle && VoixParent.a(cle)) { const b = await VoixParent.lire(cle); if (b && encore()) return jouerVoixParent(b, encore); }
   return raconter(c.h.pages[c.page][0], VOIX_LANGUE(c.h.langue), encore);
 }
 async function lireHistoire() {
@@ -3399,11 +3878,12 @@ async function lireHistoire() {
   if (c.page < c.h.pages.length - 1) { c.page++; lireHistoire(); }
   else { c.auto = false; pageHistoire(); finHistoire(); }
 }
-function ouvrirHistoire(h) {
+function ouvrirHistoire(h, opts = {}) {
   arreterHistoire();
   debloquerAudio();
   const lumiLit = ReglesConte.get().mode === 'lumi';
-  conte = { h, page: 0, auto: lumiLit, fini: false };
+  const pref = ReglesConte.get().voix;
+  conte = { h, page: opts.page || 0, auto: lumiLit, fini: false, voix: opts.voix ?? ((pref === 'maman' || pref === 'papa') && aVoix(h, pref) ? pref : undefined) };
   appliquerAmbiance(h.amb || 'soir');
   avatar?.mode(h.palette || 'galaxie');
   $('hi-lecteur').classList.remove('vide');
@@ -3412,7 +3892,7 @@ function ouvrirHistoire(h) {
   document.querySelectorAll('#hi-liste .ch-tuile').forEach((x) => x.classList.toggle('joue', x.dataset.id === h.id));
   window.scrollTo({ top: 0, behavior: 'smooth' });
   remplirVoix();
-  if (modeTele && lumiLit) return Theatre.entrer();
+  if (modeTele) return Theatre.entrer();
   if (lumiLit) lireHistoire(); else pageHistoire();
 }
 // Choix de la voix de synthèse (par langue), gardé pour la prochaine fois
@@ -3501,7 +3981,7 @@ const Theatre = (() => {
   }
   function entrer() {
     if (actif) return;
-    actif = true;
+    actif = true; TV.cacher();
     const r = scene();
     r.classList.remove('ouvert'); r.querySelector('.th-fin').textContent = '';
     document.documentElement.classList.add('theatre', 'th-ferme');
@@ -3511,7 +3991,12 @@ const Theatre = (() => {
     // les rideaux s'ouvrent, puis l'histoire commence
     if (conte) { conte.auto = false; taireHistoire(); pageHistoire(); }
     setTimeout(() => { if (!actif) return; r.classList.add('ouvert'); document.documentElement.classList.remove('th-ferme'); son('juste'); }, 700);
-    setTimeout(() => { if (!actif || !conte) return; conte.auto = true; conte.page = conte.fini ? 0 : conte.page; conte.fini = false; lireHistoire(); }, 2400);
+    setTimeout(() => {
+      if (!actif || !conte) return;
+      conte.page = conte.fini ? 0 : conte.page; conte.fini = false;
+      conte.auto = ReglesConte.get().mode !== 'moi' && conte.voix !== 'moi';
+      if (conte.auto) lireHistoire(); else pageHistoire();
+    }, 2400);
     $('hi-theatre').classList.add('on');
   }
   function quitter() {
@@ -3522,6 +4007,7 @@ const Theatre = (() => {
     $('theatre')?.classList.remove('ouvert');
     if (document.fullscreenElement) document.exitFullscreen?.().catch?.(() => {});
     $('hi-theatre')?.classList.remove('on');
+    if (modeTele && pile[pile.length - 1] === 'histoires') TV.montrer('histoires');
   }
   // à la fin : les rideaux se referment sur « Fin »
   function rideauFin() {
@@ -3710,7 +4196,12 @@ function foToucher(o, joueur = 0) {
     if (fo.compte >= fo.objectif) {
       fo.pause = true; fete(); Progres.gagner(null);
       setTimeout(() => { if (fo) jingle(); }, 900);
-      setTimeout(() => { if (!fo) return; fo.manche++; fo.objets = []; fo.pause = false; foConsigne(); }, 2600);
+      setTimeout(() => {
+        if (!fo) return;
+        // après 3 manches : l'écran de fin (rejouer, un autre jeu, l'accueil)
+        if (fo.manche >= 2) return finDePartie({ scores: fo.scores, rejouer: () => demarrerFormes() });
+        fo.manche++; fo.objets = []; fo.pause = false; foConsigne();
+      }, 2600);
     }
   } else {
     // pas de punition ni de phrase : un doux « oups »
@@ -3793,7 +4284,7 @@ function afficher() {
   appliquerAmbiance(AMB_THEME[id] || 'nuit');
   Ambiance.silence(ecran === 'chansons');
   window.LUMI_ZOOM = ecran === 'chansons' || ecran === 'histoires' ? 1.45 : (typeof modeTele !== 'undefined' && modeTele ? 1.25 : 1);
-  if (ecran === 'accueil') construireAccueil();
+  if (ecran === 'accueil') { construireAccueil(); setTimeout(() => Coucher.verifier(), 800); }
   else if (ecran === 'parler') construireParler();
   else if (ecran === 'coloriage') construireColoriage(n.dessin);
   else if (ecran === 'chansons') construireChansons();
@@ -3802,11 +4293,15 @@ function afficher() {
   else if (ecran === 'compter') setTimeout(demarrerCompter, 50);
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
+  const sansTV = SceneChant.actif || Theatre.actif || (ecran === 'liste' && n.type === 'album');
+  if (modeTele && !sansTV && ['accueil', 'histoires', 'chansons', 'liste'].includes(ecran)) TV.montrer(id); else TV.cacher();
+  DuoEcran.signaler?.();
   focusTele();
 }
 
 function aller(id, montrerCarte = true) {
   if (!libre(id)) return proposerAchat();
+  if (typeof SceneChant !== 'undefined' && SceneChant.actif) SceneChant.quitter();
   arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
@@ -3833,6 +4328,15 @@ function retour() {
   if (pile.length === 1) accueillir();
 }
 $('btn-retour').onclick = retour;
+['choix', 'co-choix'].forEach((id) => {
+  const el = $(id); if (!el) return;
+  new MutationObserver(() => {
+    if (!modeTele || $('fa-fond') || !el.children.length || el.closest('[hidden]') || el.contains(document.activeElement)) return;
+    setTimeout(() => el.querySelector('button:not(:disabled)')?.focus({ preventScroll: true }), 60);
+  }).observe(el, { childList: true });
+});
+// à la télé : un petit « ← Retour » discret (pour la main du téléphone ; la télécommande a sa touche Retour)
+$('tv-retour').onclick = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 $('btn-maison').onclick = () => { while (pile.length > 2) pile.pop(); retour(); };
 
 function accueillir() {
@@ -4291,12 +4795,70 @@ function fenetre(type) {
 function fermerFenetre() { $('fa-fond')?.remove(); }
 
 // Un enfant touche un contenu fermé : Lumi l'explique, un parent peut ouvrir
+// ----- Lumiole Famille : l'écran d'achat (achat unique via l'App Store ou Google Play) -----
+const PW_TXT = {
+  titre: { fr: 'Tout Lumiole, pour toute la famille', en: 'All of Lumiole, for the whole family', ar: 'كل لوميول، لكل العائلة' },
+  sous: { fr: 'Un seul achat. Pas d’abonnement, pas de pub, pour toujours.', en: 'One purchase. No subscription, no ads, forever.', ar: 'شراء واحد. بلا اشتراك ولا إعلانات، للأبد.' },
+  acheter: { fr: 'Débloquer', en: 'Unlock', ar: 'افتح الكل' },
+  unique: { fr: 'Achat unique', en: 'One-time purchase', ar: 'شراء لمرة واحدة' },
+  restaurer: { fr: 'Restaurer mes achats', en: 'Restore purchases', ar: 'استعادة المشتريات' },
+  legal: { fr: 'Paiement sécurisé par {store}. Valable sur tous vos appareils avec le même compte {store}.', en: 'Secure payment through {store}. Works on all your devices with the same {store} account.', ar: 'دفع آمن عبر {store}. صالح على كل أجهزتكم بنفس حساب {store}.' },
+  web: { fr: 'Lumiole s’achète dans l’application, sur l’App Store et Google Play.', en: 'Lumiole is bought in the app, on the App Store and Google Play.', ar: 'يُشترى لوميول داخل التطبيق، على App Store وGoogle Play.' },
+  merci: { fr: 'Merci ! Tout est débloqué ✨', en: 'Thank you! Everything is unlocked ✨', ar: 'شكرًا! كل شيء مفتوح ✨' },
+  charge: { fr: 'Connexion à la boutique…', en: 'Connecting to the store…', ar: 'جارٍ الاتصال بالمتجر…' },
+  confid: { fr: 'Confidentialité', en: 'Privacy', ar: 'الخصوصية' },
+};
+const tp = (k) => PW_TXT[k][langue] ?? PW_TXT[k].fr;
+const Paywall = (() => {
+  function avantages() {
+    const n = { h: HISTOIRES.length, c: CHANSONS.length, m: TOUS.length };
+    return [
+      ['🌙', { fr: `${n.h} histoires du soir en 3 langues, au théâtre`, en: `${n.h} bedtime stories in 3 languages, at the theatre`, ar: `${n.h} حكاية بثلاث لغات، في المسرح` }],
+      ['🎙️', { fr: 'Le studio : les histoires avec la voix de maman et papa', en: 'The studio: stories in Mum’s and Dad’s voice', ar: 'الاستوديو: الحكايات بصوت ماما وبابا' }],
+      ['👫', { fr: 'Tous les jeux, à deux sur la télé avec les téléphones', en: 'Every game, two players on the TV with phones', ar: 'كل الألعاب، لاعبان على التلفاز بالهواتف' }],
+      ['🎵', { fr: `${n.c} comptines et ${n.m} mots dessinés par Lumi`, en: `${n.c} songs and ${n.m} words drawn by Lumi`, ar: `${n.c} أنشودة و${n.m} كلمة يرسمها لومي` }],
+      ['🧒', { fr: 'Un profil par enfant, sur tous vos appareils', en: 'A profile per child, on all your devices', ar: 'ملف لكل طفل، على كل أجهزتكم' }],
+      ['🔒', { fr: 'Sans pub, sans traçage, données gardées pour la famille', en: 'No ads, no tracking, data kept for your family', ar: 'بلا إعلانات ولا تتبّع، والبيانات للعائلة فقط' }],
+    ];
+  }
+  async function ouvrir() {
+    const f = fenetre('achat');
+    const store = PLATEFORME === 'ios' ? 'l’App Store' : 'Google Play';
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button>
+      <div class="pw-haut"><div class="pw-lumi"></div><span class="pw-marque">Lumiole <b>Famille</b></span><h2></h2><p class="pw-sous"></p></div>
+      <ul class="pw-liste"></ul>
+      <div class="pw-offre"><span class="pw-unique"></span><span class="pw-prix"></span><button class="pw-acheter"></button><button class="fa-lien pw-restaurer"></button></div>
+      <p class="fa-msg pw-msg"></p><p class="pw-legal"></p><p class="pw-liens"><a target="_blank" rel="noopener"></a></p>`;
+    f.querySelector('h2').textContent = tp('titre');
+    f.querySelector('.pw-sous').textContent = tp('sous');
+    f.querySelector('.pw-liste').innerHTML = avantages().map(([e, t]) => `<li><span class="e">${e}</span><span></span></li>`).join('');
+    f.querySelectorAll('.pw-liste li span:last-child').forEach((x, i) => { x.textContent = avantages()[i][1][langue] || avantages()[i][1].fr; });
+    f.querySelector('.fa-fermer').onclick = fermerFenetre;
+    const lien = f.querySelector('.pw-liens a'); lien.href = CONFIG_APP.confidentialite; lien.textContent = tp('confid');
+    const msg = f.querySelector('.pw-msg'), btn = f.querySelector('.pw-acheter'), rest = f.querySelector('.pw-restaurer'), prix = f.querySelector('.pw-prix');
+    f.querySelector('.pw-unique').textContent = tp('unique');
+    rest.textContent = tp('restaurer');
+    if (Achat.ouvert && NATIF) { f.querySelector('.pw-offre').hidden = true; msg.textContent = tp('merci'); return; }
+    if (!NATIF) { prix.textContent = '2,99 €'; btn.textContent = tp('acheter'); btn.disabled = true; rest.hidden = true; f.querySelector('.pw-legal').textContent = tp('web'); return; }
+    f.querySelector('.pw-legal').textContent = tp('legal').replaceAll('{store}', store);
+    const maj = () => { prix.textContent = Achat.prix || '…'; btn.textContent = `${tp('acheter')}${Achat.prix ? ' · ' + Achat.prix : ''}`; btn.disabled = !Achat.dispo; };
+    if (!Achat.dispo) { msg.textContent = tp('charge'); try { await Achat.init(Famille.id); } catch {} msg.textContent = ''; }
+    maj();
+    const faire = async (fn) => {
+      try { msg.textContent = '…'; const ok = await fn(); msg.textContent = ok ? tp('merci') : ''; if (ok) { fete(); jingle(); setTimeout(() => { fermerFenetre(); afficher(); }, 1800); } }
+      catch (e) { msg.textContent = e?.userCancelled || /cancel/i.test(e?.message || '') ? '' : tf('erreur'); }
+    };
+    btn.onclick = () => faire(Achat.acheter); rest.onclick = () => faire(Achat.restaurer);
+    setTimeout(() => btn.focus({ preventScroll: true }), 50);
+  }
+  return { ouvrir };
+})();
 function proposerAchat() {
   son('faux');
   const f = fenetre('verrou');
   f.innerHTML = `<div class="fa-cadenas">🔒✨</div><p class="fa-grand"></p><button class="fa-bouton fa-principal">👨‍👩‍👧 ${tf('parents')}</button><button class="fa-lien">${tf('fermer')}</button>`;
   f.querySelector('.fa-grand').textContent = tf('verrou');
-  f.querySelector('.fa-principal').onclick = () => porteParents(() => espaceParents('achat'));
+  f.querySelector('.fa-principal').onclick = () => porteParents(() => Paywall.ouvrir());
   f.querySelector('.fa-lien').onclick = fermerFenetre;
   parler(tf('verrou'));
 }
@@ -4317,20 +4879,22 @@ function choisirEnfant() {
   plus.innerHTML = '<span class="e">⚙️</span><span class="n"></span>'; plus.querySelector('.n').textContent = tf('parents');
   plus.onclick = () => porteParents(() => espaceParents('enfants'));
   f.querySelector('.fa-enfants').appendChild(plus);
+  if (modeTele) setTimeout(() => f.querySelector('.fa-enfant.on')?.focus({ preventScroll: true }), 60);
 }
 
 // ----- Espace parents : enfants, achat, compte -----
 function espaceParents(section) {
   const f = fenetre('parents');
   f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>👨‍👩‍👧 ${tf('parents')}</h2>
-    <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-enfants"></section>
+    <section class="fa-bloc" id="fa-achat"></section><section class="fa-bloc" id="fa-studio"></section><section class="fa-bloc" id="fa-enfants"></section>
     <section class="fa-bloc" id="fa-verrou"></section>
     <section class="fa-bloc" id="fa-pause"></section>
+    <section class="fa-bloc" id="fa-coucher"></section>
     <section class="fa-bloc" id="fa-duo"></section>
     <section class="fa-bloc" id="fa-compte"></section><p class="fa-pied"><a target="_blank" rel="noopener"></a></p>`;
   f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); construireAccueil?.(); };
   f.querySelector('.fa-pied a').href = CONFIG_APP.confidentialite; f.querySelector('.fa-pied a').textContent = tf('confidentialite');
-  blocAchat(); blocEnfants(); blocVerrou(); blocPause(); blocDuo(); blocCompte();
+  blocAchat(); blocStudio(); blocEnfants(); blocVerrou(); blocPause(); blocCoucher(); blocDuo(); blocCompte();
   if (section) f.querySelector('#fa-' + section)?.scrollIntoView({ block: 'start' });
 }
 function blocAchat() {
@@ -4338,15 +4902,254 @@ function blocAchat() {
   b.innerHTML = `<h3>✨ ${tf('complet')}</h3><p></p><div class="fa-actions"></div><p class="fa-msg"></p>`;
   b.querySelector('p').textContent = tf('completTxt');
   const act = b.querySelector('.fa-actions'), msg = b.querySelector('.fa-msg');
-  if (Achat.ouvert) { msg.textContent = tf('debloque'); return; }
-  if (!NATIF) { msg.textContent = tf('webAchat'); return; }
-  const acheter = document.createElement('button'); acheter.className = 'fa-bouton fa-principal';
-  acheter.textContent = `${tf('acheter')}${Achat.prix ? ' · ' + Achat.prix : ''}`; acheter.disabled = !Achat.dispo;
-  const rest = document.createElement('button'); rest.className = 'fa-bouton'; rest.textContent = tf('restaurer');
-  const faire = async (fn) => { try { msg.textContent = '…'; const ok = await fn(); msg.textContent = ok ? tf('debloque') : ''; if (ok) { fete(); blocAchat(); } } catch (e) { msg.textContent = e?.userCancelled || /cancel/i.test(e?.message || '') ? '' : tf('erreur'); } };
-  acheter.onclick = () => faire(Achat.acheter); rest.onclick = () => faire(Achat.restaurer);
-  act.append(acheter, rest);
+  if (Achat.ouvert && NATIF) { msg.textContent = tf('debloque'); return; }
+  const voir = document.createElement('button'); voir.className = 'fa-bouton fa-principal'; voir.textContent = '✨ Lumiole Famille'; voir.onclick = () => Paywall.ouvrir(); act.append(voir);
+  if (!NATIF) msg.textContent = tf('webAchat');
 }
+
+
+// ----- Fin de partie : des étoiles, le score de chacun, et on choisit la suite -----
+const FIN_TXT = {
+  seul: { fr: 'Réussi !', en: 'You did it!', ar: 'نجحت!' },
+  deux: { fr: 'Réussi, ensemble !', en: 'You did it together!', ar: 'نجحتما معًا!' },
+  album: { fr: 'Une nouvelle étoile dans l’album', en: 'A new star in the album', ar: 'نجمة جديدة في الألبوم' },
+  rejouer: { fr: 'Rejouer', en: 'Play again', ar: 'العب مجددًا' },
+  autre: { fr: 'Un autre jeu', en: 'Another game', ar: 'لعبة أخرى' },
+  accueil: { fr: 'Accueil', en: 'Home', ar: 'الرئيسية' },
+};
+const tfin = (k) => FIN_TXT[k][langue] ?? FIN_TXT[k].fr;
+function finDePartie({ scores = [], rejouer }) {
+  const deux = (scores[1] || 0) > 0 && (scores[2] || 0) > 0;
+  const f = fenetre('fin');
+  f.innerHTML = `<div class="fin-etoiles"><span>⭐</span><span>⭐</span><span>⭐</span></div><h2></h2><p class="fin-sous"></p>
+    <div class="fin-joueurs"></div>
+    <div class="fin-actions"><button class="fin-b principal" data-a="r"></button><button class="fin-b" data-a="a"></button><button class="fin-b" data-a="h"></button></div>`;
+  f.querySelector('h2').textContent = tfin(deux ? 'deux' : 'seul');
+  f.querySelector('.fin-sous').textContent = tfin('album');
+  if (deux) f.querySelector('.fin-joueurs').innerHTML = [1, 2].map((j) => `<span style="--c:${JOUEURS_STYLE[j - 1].couleur}">${JOUEURS_STYLE[j - 1].main} ${scores[j]}</span>`).join('');
+  const [r, a, h] = f.querySelectorAll('.fin-b');
+  r.textContent = '↺ ' + tfin('rejouer'); a.textContent = tfin('autre'); h.textContent = tfin('accueil');
+  r.onclick = () => { fermerFenetre(); rejouer(); };
+  a.onclick = () => { fermerFenetre(); while (pile.length > 1) pile.pop(); afficher(); aller('jeux'); };
+  h.onclick = () => { fermerFenetre(); while (pile.length > 2) pile.pop(); retour(); };
+  $('fa-fond').onclick = null;
+  fete(); setTimeout(jingle, 300);
+  setTimeout(() => r.focus({ preventScroll: true }), 60);
+}
+
+// ----- Mode coucher : à l'heure choisie par les parents, Lumi s'endort -----
+const CO_TXT2 = {
+  titre: { fr: 'Lumi s’endort…', en: 'Lumi is falling asleep…', ar: 'لومي ينام…' },
+  sous: { fr: 'C’est l’heure de dormir. Une dernière petite chose ?', en: 'It’s bedtime. One last little thing?', ar: 'حان وقت النوم. شيء أخير صغير؟' },
+  berceuse: { fr: 'Une berceuse', en: 'A lullaby', ar: 'تهويدة' },
+  histoire: { fr: 'Une histoire courte', en: 'A short story', ar: 'حكاية قصيرة' },
+  nuit: { fr: 'Bonne nuit', en: 'Good night', ar: 'تصبح على خير' },
+  eteint: { fr: 'L’écran s’éteint doucement dans {n} minutes', en: 'The screen dims in {n} minutes', ar: 'تنطفئ الشاشة بهدوء بعد {n} دقائق' },
+  reglage: { fr: 'Heure du coucher', en: 'Bedtime', ar: 'وقت النوم' },
+  aucune: { fr: 'Aucune', en: 'None', ar: 'بدون' },
+  duree: { fr: 'Ensuite, l’écran s’éteint après', en: 'Then the screen dims after', ar: 'ثم تنطفئ الشاشة بعد' },
+};
+const tc = (k) => CO_TXT2[k][langue] ?? CO_TXT2[k].fr;
+const Coucher = (() => {
+  let r = { heure: '', duree: 10 }, debut = 0, dort = false;
+  try { r = { ...r, ...JSON.parse(localStorage.getItem('lumi-coucher') || '{}') }; } catch {}
+  const garder = () => { try { localStorage.setItem('lumi-coucher', JSON.stringify(r)); } catch {} };
+  function lHeure() {
+    if (!r.heure) return false;
+    const [H, M] = r.heure.split(':').map(Number), n = new Date(), m = n.getHours() * 60 + n.getMinutes();
+    return m >= H * 60 + M || m < 6 * 60;
+  }
+  function montrer() {
+    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+    if (!debut) debut = Date.now();
+    const reste = Math.max(1, Math.round(r.duree - (Date.now() - debut) / 60000));
+    const f = fenetre('coucher');
+    f.innerHTML = `<div class="cou-lune"></div><div class="cou-lumi"><span></span><span></span><i>z</i><i>z</i></div><h2></h2><p class="cou-sous"></p>
+      <div class="cou-actions"><button class="cou-b principal" data-a="b"></button><button class="cou-b" data-a="h"></button><button class="cou-b" data-a="n"></button></div><p class="cou-pied"></p>`;
+    f.querySelector('h2').textContent = tc('titre'); f.querySelector('.cou-sous').textContent = tc('sous');
+    f.querySelector('.cou-pied').textContent = '🕒 ' + tc('eteint').replace('{n}', reste);
+    const [b, h, n] = f.querySelectorAll('.cou-b');
+    b.textContent = '🎵 ' + tc('berceuse'); h.textContent = '🌙 ' + tc('histoire'); n.textContent = '😴 ' + tc('nuit');
+    $('fa-fond').onclick = null;
+    b.onclick = () => {
+      fermerFenetre();
+      const c = CHANSONS.find((x) => x.id === { fr: 'berceuse-fr', en: 'lullaby-en', ar: 'nami-ar' }[langue]) || CHANSONS.find((x) => x.id === 'berceuse-fr');
+      while (pile.length > 1) pile.pop(); aller('chansons'); if (c) setTimeout(() => chanter(c), 300);
+    };
+    h.onclick = () => {
+      fermerFenetre();
+      const l = ['fr', 'en', 'ar'].includes(langue) ? langue : 'fr';
+      const x = HISTOIRES.filter((y) => y.langue === l && (Achat.ouvert || HISTOIRES_LIBRES.has(y.id))).sort((p, q) => p.pages.join('').length - q.pages.join('').length)[0];
+      while (pile.length > 1) pile.pop(); aller('histoires'); if (x) setTimeout(() => ouvrirHistoire(x, {}), 300);
+    };
+    n.onclick = dodo;
+    setTimeout(() => b.focus({ preventScroll: true }), 60);
+    avatar?.mode('attente'); avatar?.forme('🌙');
+    parler(tc('titre'));
+  }
+  // l'écran s'assombrit : seule la porte des parents permet de revenir
+  function dodo() {
+    dort = true; fermerFenetre();
+    arreterChanson(); arreterHistoire(); taireVoix(); Ambiance.silence(true);
+    const f = fenetre('dodo');
+    f.innerHTML = `<div class="cou-lune"></div><p class="cou-nuit"></p><button class="fa-lien" data-a="p">👨‍👩‍👧 ${tf('parents')}</button>`;
+    f.querySelector('.cou-nuit').textContent = tc('nuit') + ' 🌙';
+    $('fa-fond').onclick = null;
+    f.querySelector('[data-a=p]').onclick = () => porteParents(() => { dort = false; debut = 0; try { sessionStorage.setItem('lumi-coucher-vu', new Date().toDateString()); } catch {} Ambiance.silence(false); espaceParents(); });
+  }
+  function verifier() {
+    if (dort || !lHeure()) return;
+    let vu = null; try { vu = sessionStorage.getItem('lumi-coucher-vu'); } catch {}
+    if (debut && (Date.now() - debut) / 60000 >= r.duree) return dodo();
+    if (vu === new Date().toDateString() && !debut) return;
+    if (!debut && !$('fa-fond') && !Theatre.actif) montrer();
+  }
+  setInterval(verifier, 60000);
+  return { verifier, montrer, get reglage() { return r; }, regler(k, v) { r[k] = v; debut = 0; garder(); } };
+})();
+function blocCoucher() {
+  const b = $('fa-coucher'); if (!b) return;
+  const R = Coucher.reglage;
+  b.innerHTML = `<h3>🌙 ${tc('reglage')}</h3><div class="fa-puces" data-k="heure"></div><p class="st-aide"></p><div class="fa-puces" data-k="duree"></div>`;
+  b.querySelector('.st-aide').textContent = tc('duree');
+  ['', '19:30', '20:00', '20:30', '21:00'].forEach((h) => { const x = document.createElement('button'); x.className = 'puce' + (R.heure === h ? ' on' : ''); x.textContent = h || tc('aucune'); x.onclick = () => { Coucher.regler('heure', h); blocCoucher(); }; b.querySelector('[data-k=heure]').appendChild(x); });
+  [5, 10, 15].forEach((m) => { const x = document.createElement('button'); x.className = 'puce' + (R.duree === m ? ' on' : ''); x.textContent = `${m} min`; x.onclick = () => { Coucher.regler('duree', m); blocCoucher(); }; b.querySelector('[data-k=duree]').appendChild(x); });
+}
+
+// ----- Studio des voix : maman et papa enregistrent les histoires, page par page -----
+const ST_TXT = {
+  titre: { fr: 'Studio des voix', en: 'Voice studio', ar: 'استوديو الأصوات' },
+  txt: { fr: 'Enregistrez les histoires avec votre voix : votre enfant les écoutera « avec la voix de maman » ou « de papa », même à la télé.', en: 'Record the stories in your own voice: your child will hear them “with Mum’s voice” or “Dad’s voice”, even on the TV.', ar: 'سجّلوا الحكايات بأصواتكم: سيستمع إليها طفلكم «بصوت ماما» أو «بصوت بابا»، حتى على التلفاز.' },
+  ouvrir: { fr: '🎙️ Ouvrir le studio', en: '🎙️ Open the studio', ar: '🎙️ افتح الاستوديو' },
+  choisir: { fr: 'Choisissez une histoire', en: 'Pick a story', ar: 'اختاروا حكاية' },
+  qui: { fr: 'Qui enregistre ?', en: 'Who is recording?', ar: 'من يسجّل؟' },
+  enreg: { fr: 'Enregistrer', en: 'Record', ar: 'سجّل' },
+  stop: { fr: 'Terminer la page', en: 'Finish the page', ar: 'أنهِ الصفحة' },
+  ecouter: { fr: 'Réécouter', en: 'Play back', ar: 'استمع' },
+  refaire: { fr: 'Refaire', en: 'Redo', ar: 'أعد' },
+  page: { fr: 'Page', en: 'Page', ar: 'صفحة' },
+  fini: { fr: 'Toutes les pages sont enregistrées !', en: 'All pages are recorded!', ar: 'تم تسجيل كل الصفحات!' },
+  nuage: { fr: '☁️ Sauvegardé pour la télé', en: '☁️ Saved for the TV', ar: '☁️ محفوظ للتلفاز' },
+  local: { fr: 'Connectez le compte parent pour retrouver ces voix sur la télé.', en: 'Sign in to the parent account to get these voices on the TV.', ar: 'سجّلوا الدخول إلى حساب الأولياء لسماع هذه الأصوات على التلفاز.' },
+  micro: { fr: 'Le micro n’est pas disponible.', en: 'The microphone isn’t available.', ar: 'الميكروفون غير متاح.' },
+  conseil: { fr: 'Lisez doucement, avec le ton. Lumi garde chaque page.', en: 'Read slowly, with feeling. Lumi keeps each page.', ar: 'اقرؤوا ببطء وبإحساس. لومي يحفظ كل صفحة.' },
+};
+const ts = (k) => ST_TXT[k][langue] ?? ST_TXT[k].fr;
+function blocStudio() {
+  const b = $('fa-studio'); if (!b) return;
+  b.innerHTML = `<h3>🎙️ ${ts('titre')}</h3><p></p><button class="fa-bouton fa-principal"></button>`;
+  b.querySelector('p').textContent = ts('txt');
+  b.querySelector('button').textContent = ts('ouvrir');
+  b.querySelector('button').onclick = () => Studio.ouvrir();
+}
+const Studio = (() => {
+  let f = null, h = null, qui = 'maman', page = 0, rec = null, filtre = null;
+  function ouvrir() {
+    f = fenetre('studio');
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><div class="st-corps"></div>`;
+    f.querySelector('.fa-fermer').onclick = () => { arreter(false); fermerFenetre(); espaceParents(); };
+    $('fa-fond').onclick = null;
+    liste();
+  }
+  const corps = () => f.querySelector('.st-corps');
+  function liste() {
+    arreter(false);
+    filtre = filtre || (['fr', 'en', 'ar'].includes(langue) ? langue : 'fr');
+    corps().innerHTML = `<h2>🎙️ ${ts('titre')}</h2><p class="st-aide"></p><div class="ch-filtres st-filtres"></div><div class="st-grille"></div>`;
+    corps().querySelector('.st-aide').textContent = ts('choisir');
+    const fl = corps().querySelector('.st-filtres');
+    [['fr', '🇫🇷 FR'], ['en', '🇬🇧 EN'], ['ar', 'ع AR']].forEach(([k, t]) => { const x = document.createElement('button'); x.className = 'puce' + (k === filtre ? ' on' : ''); x.textContent = t; x.onclick = () => { filtre = k; liste(); }; fl.appendChild(x); });
+    const g = corps().querySelector('.st-grille');
+    HISTOIRES.filter((x) => x.langue === filtre).forEach((x) => {
+      const t = document.createElement('button'); t.className = 'st-conte'; t.dir = RTL(x.langue) ? 'rtl' : 'ltr';
+      const m = x.pages.filter((_, p) => VoixParent.a(cleVoix(x.id, p, 'maman'))).length, pa = x.pages.filter((_, p) => VoixParent.a(cleVoix(x.id, p, 'papa'))).length;
+      t.innerHTML = '<span class="e"></span><span class="n"></span><span class="v"></span>';
+      t.querySelector('.e').textContent = x.emoji; t.querySelector('.n').textContent = x.titre;
+      t.querySelector('.v').textContent = [m ? `👩 ${m}/${x.pages.length}` : '', pa ? `👨 ${pa}/${x.pages.length}` : ''].filter(Boolean).join('  ');
+      t.onclick = () => { h = x; choisirVoix(); };
+      g.appendChild(t);
+    });
+  }
+  function choisirVoix() {
+    corps().innerHTML = `<button class="fa-lien st-retour">← ${ts('choisir')}</button><h2></h2><p class="st-aide"></p><div class="st-voix"></div>`;
+    corps().querySelector('h2').textContent = `${h.emoji} ${h.titre}`;
+    corps().querySelector('.st-aide').textContent = ts('qui');
+    corps().querySelector('.st-retour').onclick = liste;
+    Object.entries(VOIX_FAMILLE).forEach(([k, v]) => {
+      const b = document.createElement('button'); b.className = 'st-qui';
+      const n = h.pages.filter((_, p) => VoixParent.a(cleVoix(h.id, p, k))).length;
+      b.innerHTML = `<span class="e">${v.e}</span><span class="n"></span><span class="v">${n}/${h.pages.length}</span>`;
+      b.querySelector('.n').textContent = v[langue] || v.fr;
+      b.onclick = () => { qui = k; page = Math.max(0, h.pages.findIndex((_, p) => !VoixParent.a(cleVoix(h.id, p, k)))); prompteur(); };
+      corps().querySelector('.st-voix').appendChild(b);
+    });
+  }
+  function prompteur() {
+    arreter(false);
+    const cle = cleVoix(h.id, page, qui), a = VoixParent.a(cle);
+    corps().innerHTML = `<button class="fa-lien st-retour"></button>
+      <div class="st-entete"><span class="st-qui-mini"></span><span class="st-num"></span></div>
+      <div class="st-points"></div>
+      <p class="st-texte"></p>
+      <p class="st-etat fa-msg"></p>
+      <div class="st-commandes">
+        <button class="st-nav" data-a="prec" aria-label="Page précédente">◀</button>
+        <button class="st-rec"><span class="rond"></span><span class="t"></span></button>
+        <button class="st-nav" data-a="suiv" aria-label="Page suivante">▶</button>
+      </div>
+      <div class="st-second"><button class="fa-bouton" data-a="ecouter"></button><button class="fa-bouton" data-a="refaire"></button></div>
+      <p class="st-aide"></p>`;
+    corps().querySelector('.st-retour').textContent = `← ${h.titre}`;
+    corps().querySelector('.st-retour').onclick = choisirVoix;
+    corps().querySelector('.st-qui-mini').textContent = `${VOIX_FAMILLE[qui].e} ${VOIX_FAMILLE[qui][langue] || VOIX_FAMILLE[qui].fr}`;
+    corps().querySelector('.st-num').textContent = `${ts('page')} ${page + 1} / ${h.pages.length}`;
+    corps().querySelector('.st-points').innerHTML = h.pages.map((_, p) => `<span class="${p === page ? 'on' : ''} ${VoixParent.a(cleVoix(h.id, p, qui)) ? 'ok' : ''}"></span>`).join('');
+    const t = corps().querySelector('.st-texte'); t.textContent = h.pages[page][0]; t.dir = RTL(h.langue) ? 'rtl' : 'ltr';
+    corps().querySelector('.st-aide').textContent = Famille.id ? ts('conseil') : ts('conseil') + ' ' + ts('local');
+    const recB = corps().querySelector('.st-rec');
+    recB.querySelector('.t').textContent = a ? ts('refaire') : ts('enreg');
+    recB.onclick = () => (rec ? arreter(true) : demarrer());
+    const [ecouter, refaire] = corps().querySelectorAll('.st-second button');
+    ecouter.textContent = '▶ ' + ts('ecouter'); refaire.textContent = '↺ ' + ts('refaire');
+    ecouter.disabled = refaire.disabled = !a;
+    ecouter.onclick = async () => { const bl = await VoixParent.lire(cle); if (bl) jouerVoixParent(bl, () => true); };
+    refaire.onclick = demarrer;
+    corps().querySelector('[data-a=prec]').disabled = page === 0;
+    corps().querySelector('[data-a=suiv]').disabled = page === h.pages.length - 1;
+    corps().querySelector('[data-a=prec]').onclick = () => { page--; prompteur(); };
+    corps().querySelector('[data-a=suiv]').onclick = () => { page++; prompteur(); };
+  }
+  async function demarrer() {
+    if (rec) return;
+    const etat = corps().querySelector('.st-etat'), recB = corps().querySelector('.st-rec');
+    try {
+      const flux = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      // petit compte à rebours pour se préparer
+      for (const n of ['3', '2', '1']) { etat.textContent = n; son('pop'); await new Promise((ok) => setTimeout(ok, 650)); }
+      etat.textContent = '🔴';
+      const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find((x) => window.MediaRecorder?.isTypeSupported?.(x)) || '';
+      const r = new MediaRecorder(flux, type ? { mimeType: type } : undefined), morceaux = [], cle = cleVoix(h.id, page, qui), garde = { ok: true };
+      r.ondataavailable = (e) => { if (e.data.size) morceaux.push(e.data); };
+      r.onstop = async () => {
+        flux.getTracks().forEach((x) => x.stop());
+        if (!garde.ok || !morceaux.length) return;
+        const blob = new Blob(morceaux, { type: r.mimeType || type || 'audio/mp4' });
+        await VoixParent.ecrire(cle, blob); son('juste');
+        let nuage = false; try { if (Famille.id) { await Famille.voixEnvoyer(cle, blob); nuage = true; } } catch {}
+        const fin = h.pages.every((_, p) => VoixParent.a(cleVoix(h.id, p, qui)));
+        if (fin) { fete(); }
+        if (!fin && page < h.pages.length - 1) page++;
+        prompteur();
+        corps().querySelector('.st-etat').textContent = fin ? '🎉 ' + ts('fini') : nuage ? ts('nuage') : '✓';
+      };
+      rec = { r, garde };
+      r.start();
+      recB.classList.add('enreg'); recB.querySelector('.t').textContent = ts('stop');
+    } catch { etat.textContent = ts('micro'); rec = null; }
+  }
+  function arreter(garder) { if (!rec) return; rec.garde.ok = garder; rec.r.state !== 'inactive' && rec.r.stop(); rec = null; }
+  return { ouvrir };
+})();
 function blocEnfants() {
   const b = $('fa-enfants'); if (!b) return;
   b.innerHTML = `<h3>🧒 ${tf('enfants')}</h3><div class="fa-liste"></div>`;
@@ -4381,6 +5184,13 @@ function blocCompte() {
     msg.textContent = Famille.derniereSynchro ? tf('synchro') : '';
     return;
   }
+  // Google : seulement sur la page web pour l'instant (dans l'app il faudra la connexion native)
+  if (!PLUGINS.App) {
+    const g = document.createElement('button'); g.className = 'fa-bouton fa-google';
+    g.innerHTML = '<b>G</b> ' + ({ fr: 'Continuer avec Google', en: 'Continue with Google', ar: 'المتابعة مع Google' }[langue] || 'Google');
+    g.onclick = () => Famille.google();
+    b.insertBefore(g, form);
+  }
   form.innerHTML = `<input type="email" autocomplete="email" inputmode="email"><button class="fa-bouton fa-principal" data-a="code"></button>
     <input class="fa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" hidden><button class="fa-bouton" data-a="ok" hidden></button>`;
   const [mail, , code] = form.querySelectorAll('input, button');
@@ -4398,7 +5208,7 @@ function blocCompte() {
 
 // ----- Compte parent (Supabase, sans bibliothèque) : profils + progression sauvegardés -----
 Famille = (() => {
-  const { url, cle } = CONFIG_APP.supabase, dispo = !!(url && cle);
+  const { url, cle } = CONFIG_APP.supabase, cle_ = cle, dispo = !!(url && cle);
   let s = null, minuteur = null, derniere = 0;
   try { s = JSON.parse(localStorage.getItem('lumi-compte') || 'null'); } catch {}
   const garder = () => { try { localStorage.setItem('lumi-compte', JSON.stringify(s)); } catch {} };
@@ -4445,10 +5255,47 @@ Famille = (() => {
       s = await api('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'email', email, token }) }, false); garder();
       await recevoir(); await envoyer(); await Achat.init(s.user.id);
     },
+    // la télé reçoit un jeton à usage unique du téléphone et ouvre sa propre session
+    async depuisJeton(jeton) {
+      s = await api('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'magiclink', token_hash: jeton }) }, false); garder();
+      await recevoir(); await envoyer(); await Achat.init(s.user.id); this.voixRecevoir().catch(() => {});
+    },
+    jetonTele: () => api('/functions/v1/lier-tele', { method: 'POST', body: '{}' }),
+    // voix de la famille : sauvegardées dans le dossier privé du compte, pour les retrouver sur la télé
+    async voixEnvoyer(cle, blob) {
+      if (!s) return;
+      const nom = encodeURIComponent(cle.replace(/:/g, '__'));
+      const envoi = () => fetch(`${url}/storage/v1/object/voix/${s.user.id}/${nom}`, { method: 'POST', headers: { apikey: cle_, Authorization: 'Bearer ' + s.access_token, 'x-upsert': 'true', 'Content-Type': blob.type || 'audio/mp4' }, body: blob });
+      let r = await envoi(); if (r.status === 401 || r.status === 400) { await rafraichir(); r = await envoi(); }
+      if (!r.ok) throw new Error('voix ' + r.status);
+    },
+    async voixRecevoir() {
+      if (!s) return 0;
+      const liste = await api('/storage/v1/object/list/voix', { method: 'POST', body: JSON.stringify({ prefix: s.user.id + '/', limit: 1000 }) });
+      let n = 0;
+      for (const f of liste || []) {
+        const cle = decodeURIComponent(f.name).replace(/__/g, ':');
+        if (VoixParent.a(cle)) continue;
+        const r = await fetch(`${url}/storage/v1/object/authenticated/voix/${s.user.id}/${encodeURIComponent(f.name)}`, { headers: { apikey: cle_, Authorization: 'Bearer ' + s.access_token } });
+        if (r.ok) { await VoixParent.ecrire(cle, await r.blob()); n++; }
+      }
+      return n;
+    },
+    // connexion Google (page web) : Supabase renvoie ici avec les jetons dans l'adresse
+    google() { location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`; },
+    async retourOAuth() {
+      const h = new URLSearchParams(location.hash.slice(1));
+      if (!h.get('access_token') || !h.get('refresh_token')) return false;
+      history.replaceState(null, '', location.pathname + location.search);
+      s = { access_token: h.get('access_token'), refresh_token: h.get('refresh_token') };
+      s.user = await api('/auth/v1/user'); garder();
+      await recevoir(); await envoyer(); await Achat.init(s.user.id);
+      return true;
+    },
     sortir() { s = null; try { localStorage.removeItem('lumi-compte'); } catch {} },
     async supprimer() { await api('/functions/v1/supprimer-compte', { method: 'POST', body: '{}' }); this.sortir(); },
     changement() { if (!s) return; clearTimeout(minuteur); minuteur = setTimeout(() => envoyer().catch(() => {}), 4000); },
-    async init() { if (!dispo || !s) return; try { await rafraichir(); await recevoir(); } catch {} },
+    async init() { if (!dispo) return; try { if (await this.retourOAuth()) { this.voixRecevoir().catch(() => {}); return; } } catch {} if (!s) return; try { await rafraichir(); await recevoir(); this.voixRecevoir().catch(() => {}); } catch {} },
   };
 })();
 
@@ -4596,7 +5443,7 @@ function blocPause() {
 let modeTele = /Android TV|AFT|SHIELD|BRAVIA|GoogleTV|Chromecast/i.test(navigator.userAgent) || matchMedia('(pointer: none)').matches;
 const DIRECTIONS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
 function focusables() {
-  const racine = $('fa-fond') || document;
+  const racine = $('fa-fond') || $('tv-fiche') || document;
   return [...racine.querySelectorAll('button, a[href], input, select, [tabindex]:not([tabindex="-1"])')].filter((e) => {
     if (e.disabled || e.closest('[hidden]')) return false;
     const r = e.getBoundingClientRect();
@@ -4623,17 +5470,21 @@ function deplacerFocus(dx, dy) {
 document.addEventListener('keydown', (e) => {
   const d = DIRECTIONS[e.key];
   if (e.key === 'Escape' || e.key === 'GoBack' || e.key === 'BrowserBack') {
+    if ($('tv-fiche')) { Fiche.fermer(); e.preventDefault(); return; }
+    if (SceneChant.actif && !$('fa-fond')) { SceneChant.quitter(); e.preventDefault(); return; }
     if (Theatre.actif) { Theatre.quitter(); e.preventDefault(); return; }
     if ($('fa-fond')) { fermerFenetre(); e.preventDefault(); return; }
     if (pile.length > 1) { retour(); e.preventDefault(); }
     return;
   }
   if (!d) return;
+  if (Theatre.actif && !$('fa-fond') && d[0]) { tournerPage(d[0] * (document.dir === 'rtl' ? -1 : 1)); e.preventDefault(); return; }
   const champ = document.activeElement?.matches?.('input, select, textarea');
   if (champ && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
-  if (!modeTele) { modeTele = true; document.documentElement.classList.add('tele'); }
+  if (!modeTele) { modeTele = true; document.documentElement.classList.add('tele'); afficher(); e.preventDefault(); return; }
   // Pluie de formes : un viseur lumineux qu'on déplace, OK pour trancher
   if (fo && !$('fa-fond')) { foViseur(d[0], d[1]); e.preventDefault(); return; }
+  if (TV.actif && !$('fa-fond') && !Theatre.actif && !$('tv-fiche')) { TV.touche(d[0], d[1]); e.preventDefault(); return; }
   deplacerFocus(d[0], d[1]);
   e.preventDefault();
 });
@@ -4643,6 +5494,8 @@ document.addEventListener('keydown', (e) => {
 if (modeTele) document.documentElement.classList.add('tele');
 // Bouton Retour d'Android (téléphone et télé)
 PLUGINS.App?.addListener?.('backButton', () => {
+  if ($('tv-fiche')) return Fiche.fermer();
+  if (SceneChant.actif) return SceneChant.quitter();
   if (Theatre.actif) return Theatre.quitter();
   if ($('fa-fond')) return fermerFenetre();
   if (pile.length > 1) return retour();
@@ -4650,7 +5503,7 @@ PLUGINS.App?.addListener?.('backButton', () => {
 });
 // après chaque changement d'écran, à la télé, on met la sélection sur le premier bouton utile
 function focusTele() {
-  if (!modeTele) return;
+  if (!modeTele || TV.actif) return;
   setTimeout(() => {
     if (focusables().includes(document.activeElement)) return;
     const premier = document.querySelector('.cote-activite section:not([hidden]) button, .cote-activite section:not([hidden]) [tabindex]');
@@ -4688,7 +5541,12 @@ const DUO_TXT = {
   camera: { fr: '📷 Caméra', en: '📷 Camera', ar: '📷 الكاميرا' },
   aide: { fr: 'Montre ton doigt à la caméra. Pince le pouce et l’index pour toucher.', en: 'Show your finger to the camera. Pinch thumb and index to tap.', ar: 'أرِ إصبعك للكاميرا. اجمع الإبهام والسبابة للّمس.' },
   scan: { fr: 'Scanne avec le téléphone pour jouer (jusqu’à 2 joueurs)', en: 'Scan with the phone to play (up to 2 players)', ar: 'امسح بالهاتف للّعب (حتى لاعبَين)' },
-  joueur: { fr: 'Tu es le joueur', en: 'You are player', ar: 'أنت اللاعب' },
+  aideMenu: { fr: 'Glisse pour choisir, tape pour lancer', en: 'Swipe to choose, tap to start', ar: 'اسحب للاختيار، والمس للبدء' },
+  aidePave: { fr: 'Bouge ton doigt : la main bouge sur la télé', en: 'Move your finger: the hand moves on the TV', ar: 'حرّك إصبعك: اليد تتحرك على التلفاز' },
+  tourne: { fr: 'Tourne ton téléphone à l’horizontale', en: 'Turn your phone sideways', ar: 'أدِر هاتفك أفقيًا' },
+  poser: { fr: 'Pose le téléphone debout contre un objet, écran vers toi, à 1 mètre. Ta main pilote la télé.', en: 'Stand the phone up against something, screen facing you, about 1 m away. Your hand drives the TV.', ar: 'ضع الهاتف واقفًا مستندًا إلى شيء، والشاشة نحوك، على بعد متر. يدك تتحكم في التلفاز.' },
+  lier: { fr: 'Connecter la télé à mon compte', en: 'Sign the TV in to my account', ar: 'اربط التلفاز بحسابي' },
+  joueur: { fr: 'Joueur', en: 'Player', ar: 'اللاعب' },
   attente: { fr: 'En attente du téléphone…', en: 'Waiting for the phone…', ar: 'في انتظار الهاتف…' },
   erreur: { fr: 'La liaison n’a pas marché (connexion internet ?).', en: 'Couldn’t connect (internet connection?).', ar: 'تعذّر الربط (الاتصال بالإنترنت؟).' },
 };
@@ -4711,17 +5569,26 @@ async function qrSvg(texte, taille = 220) {
   return q.createSvgTag({ cellSize: Math.max(2, Math.floor(taille / (q.getModuleCount() + 8))), margin: 4, scalable: true });
 }
 const DuoEcran = (() => {
-  let canal = null, code = null;
-  const joueurs = new Map(); // id → { n, couleur, curseur, appui, x0, y0 }
+  let canaux = [], code = null, secret = null, branche = null;
+  const joueurs = new Map(); // id → { n, couleur, curseur, appui, x, y }
+  const ecouteurs = {}; const emettre = (e, ...a) => (ecouteurs[e] || []).forEach((fn) => fn(...a));
+  // un code fixe par télé (on scanne une fois, le téléphone s'en souvient), et un secret pour le QR
+  function identifiants() {
+    try { code = localStorage.getItem('lumi-tv-code'); secret = localStorage.getItem('lumi-tv-secret'); } catch {}
+    if (!/^\d{4}$/.test(code || '')) code = String(1000 + ((Math.random() * 9000) | 0));
+    if (!/^[0-9a-f]{24}$/.test(secret || '')) secret = Array.from(crypto.getRandomValues(new Uint8Array(12)), (x) => x.toString(16).padStart(2, '0')).join('');
+    try { localStorage.setItem('lumi-tv-code', code); localStorage.setItem('lumi-tv-secret', secret); } catch {}
+  }
+  const lienManette = () => { if (!code) identifiants(); return `${LIEN_WEB}?manette=${code}&s=${secret}`; };
   function joueurDe(id) {
     if (!joueurs.has(id)) {
       if (joueurs.size >= 2) return null;
-      const n = joueurs.size + 1, st = JOUEURS_STYLE[n - 1], curseur = document.createElement('div');
-      curseur.className = 'duo-curseur'; curseur.style.setProperty('--c', st.couleur);
-      curseur.innerHTML = `<span class="main">${st.main}</span><span class="num">${n}</span>`;
+      const n = [1, 2].find((k) => ![...joueurs.values()].some((j) => j.n === k)), st = JOUEURS_STYLE[n - 1], curseur = document.createElement('div');
+      curseur.className = 'duo-curseur cache'; curseur.style.setProperty('--c', st.couleur);
+      curseur.innerHTML = `<span class="anneau-dwell"></span><span class="main">${st.main}</span><span class="num">${n}</span>`;
       document.body.appendChild(curseur);
-      joueurs.set(id, { n, couleur: st.couleur, curseur, appui: false });
-      majPetitQr();
+      joueurs.set(id, { n, couleur: st.couleur, curseur, appui: false, x: innerWidth / 2, y: innerHeight / 2 });
+      majPetitQr(); emettre('joueur', n);
     }
     return joueurs.get(id);
   }
@@ -4730,131 +5597,269 @@ const DuoEcran = (() => {
     const o = document.createElement('span'); o.className = 'duo-onde'; o.style.left = x + 'px'; o.style.top = y + 'px'; o.style.setProperty('--c', couleur);
     $('effets').appendChild(o); setTimeout(() => o.remove(), 600);
   }
-  function pointeur(nx, ny, appui, id = 'local') {
+  function pointeur(nx, ny, appui, id = 'local', cam = false) {
     const j = joueurDe(id); if (!j) return;
-    const x = nx * innerWidth, y = ny * innerHeight;
+    const x = nx * innerWidth, y = ny * innerHeight; j.x = x; j.y = y;
+    // caméra : pas de pince à faire. On garde la main immobile, un cercle se remplit, et ça touche.
+    // Dans la pluie de formes, la main tranche dès qu'elle bouge.
+    if (cam) {
+      if (fo && !$('fa-fond')) appui = true;
+      else {
+        const t = performance.now();
+        if (!j.dw || Math.hypot(x - j.dw.x, y - j.dw.y) > innerWidth * .025) j.dw = { x, y, t, fait: false };
+        const p = j.dw.fait ? 0 : Math.min(1, (t - j.dw.t) / 1000);
+        j.curseur.style.setProperty('--dwell', p.toFixed(2));
+        if (p >= 1) { j.dw.fait = true; tape(j, x, y); son('pop'); }
+        appui = false;
+      }
+    }
     j.curseur.style.transform = `translate(${x}px, ${y}px)`;
     j.curseur.classList.toggle('appui', appui);
     clearTimeout(j.cache); j.curseur.classList.remove('cache');
-    j.cache = setTimeout(() => j.curseur.classList.add('cache'), 4000); // disparaît si la main n'est plus vue
+    j.cache = setTimeout(() => j.curseur.classList.add('cache'), 4000); // disparaît si la main ne bouge plus
     const el = document.elementFromPoint(x, y);
     const o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 70 + j.n, pointerType: 'touch', isPrimary: j.n === 1 };
     if (appui && !j.appui) { j.appui = true; j.x0 = x; j.y0 = y; onde(x, y, j.couleur); el?.dispatchEvent(new PointerEvent('pointerdown', o)); }
     else if (appui) el?.dispatchEvent(new PointerEvent('pointermove', o));
-    else if (j.appui) {
-      el?.dispatchEvent(new PointerEvent('pointerup', o));
-      if (Math.hypot(x - j.x0, y - j.y0) < 30) (el?.closest('button, a, [tabindex], input, select') || null)?.click();
-      j.appui = false;
+    else {
+      el?.dispatchEvent(new PointerEvent('pointermove', o)); // survol : la tuile visée s'allume
+      if (j.appui) {
+        el?.dispatchEvent(new PointerEvent('pointerup', o));
+        if (Math.hypot(x - j.x0, y - j.y0) < 40) (el?.closest('button, a, [tabindex], input, select') || null)?.click();
+        j.appui = false;
+      }
     }
   }
-  // petit QR dans un coin tant qu'un 2e joueur peut rejoindre
+  function tape(j, x, y) {
+    const el = document.elementFromPoint(x, y), o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 70 + j.n, pointerType: 'touch', isPrimary: j.n === 1 };
+    onde(x, y, j.couleur);
+    el?.dispatchEvent(new PointerEvent('pointerdown', o)); el?.dispatchEvent(new PointerEvent('pointerup', o));
+    (el?.closest('button, a, [tabindex], input, select') || null)?.click();
+  }
+  // pavé « relatif » : le doigt pousse la main, comme le pavé d'un ordinateur portable
+  function relatif(dx, dy, appui, id) {
+    const j = joueurDe(id); if (!j) return;
+    const gain = innerWidth * 1.6;
+    pointeur(Math.min(1, Math.max(0, (j.x + dx * gain) / innerWidth)), Math.min(1, Math.max(0, (j.y + dy * gain) / innerHeight)), appui, id);
+  }
+  // les gestes du téléphone deviennent des touches de télécommande
+  const TOUCHES = { haut: 'ArrowUp', bas: 'ArrowDown', gauche: 'ArrowLeft', droite: 'ArrowRight' };
+  function touche(k) {
+    if (TOUCHES[k]) return document.dispatchEvent(new KeyboardEvent('keydown', { key: TOUCHES[k], bubbles: true }));
+    if (k === 'ok') {
+      if (fo && fo.viseur && !$('fa-fond')) return foTrancher();
+      const a = document.activeElement;
+      if (a && a !== document.body) a.click(); else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      return;
+    }
+    if (k === 'retour') return document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    if (k === 'maison') { if (Theatre.actif) Theatre.quitter(); fermerFenetre(); while (pile.length > 2) pile.pop(); if (pile.length > 1) retour(); }
+  }
+  // dire au téléphone ce qu'il doit montrer : glisser (menus) ou pavé (jeux)
+  function signaler() {
+    const e = $('app').dataset.ecran;
+    const pointeurUtile = ['formes', 'compter', 'coloriage', 'jeu'].includes(e) || (typeof Trace !== 'undefined' && Trace.actif);
+    canaux.forEach((ch) => ch.send({ type: 'broadcast', event: 'ecran', payload: { pointeur: pointeurUtile } }));
+  }
+  // petit QR dans un coin tant qu'un 2e joueur peut rejoindre (hors accueil télé, qui a le sien)
   async function majPetitQr() {
     let p = $('duo-petit-qr');
-    if (!canal || joueurs.size >= 2 || $('fa-fond')) { p?.remove(); return; }
+    if (!joueurs.size || joueurs.size >= 2 || $('fa-fond') || TV.actif) { p?.remove(); TV.petitQr(); return; }
     if (!p) { p = document.createElement('button'); p.id = 'duo-petit-qr'; p.type = 'button'; document.body.appendChild(p); p.onclick = () => p.remove(); }
-    try { p.innerHTML = (await qrSvg(LIEN_WEB + '?manette=' + code, 120)) + '<span>+1 🖐️</span>'; } catch { p.remove(); }
+    try { p.innerHTML = (await qrSvg(lienManette(), 120)) + '<span>+1 🖐️</span>'; } catch { p.remove(); }
+  }
+  // la télé écoute dès qu'elle démarre : il suffit de scanner
+  async function ecouter() {
+    if (branche) return branche;
+    if (!code) identifiants();
+    branche = (async () => {
+      const c = await supa();
+      const brancher = (nom, prive) => {
+        const ch = c.channel(nom, { config: { broadcast: { self: false } } });
+        ch.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d, payload.id, payload.cam))
+          .on('broadcast', { event: 'orient' }, ({ payload }) => emettre('orient', payload))
+          .on('broadcast', { event: 'squelette' }, ({ payload }) => emettre('squelette', payload))
+          .on('broadcast', { event: 'r' }, ({ payload }) => relatif(payload.dx, payload.dy, payload.d, payload.id))
+          .on('broadcast', { event: 'k' }, ({ payload }) => touche(payload.k))
+          .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
+            const j = joueurDe(payload?.id || 'x');
+            if ($('fa-fond')?.querySelector('.fa-t-duo')) fermerFenetre();
+            jingle(); resterAllume(); majPetitQr();
+            ch.send({ type: 'broadcast', event: 'ok', payload: { id: payload?.id, n: j?.n || 0, couleur: j?.couleur, prive } });
+            setTimeout(signaler, 200);
+          })
+          .on('broadcast', { event: 'aurevoir' }, ({ payload }) => { const j = joueurs.get(payload?.id); if (j) { j.curseur.remove(); joueurs.delete(payload.id); majPetitQr(); } });
+        // seul le QR (avec son secret) permet de connecter la télé au compte des parents
+        if (prive) ch.on('broadcast', { event: 'compte' }, async ({ payload }) => {
+          try { await Famille.depuisJeton(payload.jeton); ch.send({ type: 'broadcast', event: 'compte-ok', payload: { email: Famille.email } }); jingle(); afficher(); }
+          catch { ch.send({ type: 'broadcast', event: 'compte-ko', payload: {} }); }
+        });
+        ch.subscribe(); canaux.push(ch);
+      };
+      brancher('lumi-duo-' + code, false); brancher(`lumi-duo-${code}-${secret}`, true);
+      return true;
+    })().catch((e) => { branche = null; throw e; });
+    return branche;
   }
   async function demarrer() {
-    arreter();
-    code = String(1000 + ((Math.random() * 9000) | 0));
     const f = fenetre('duo');
-    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📺 ${td('titre')}</h2>
+    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📺📱 ${td('titre')}</h2>
       <div class="duo-qr"></div><p class="duo-scan"></p><div class="duo-code"></div><p class="fa-msg"></p>`;
     f.querySelector('.duo-scan').textContent = td('scan');
+    if (!code) identifiants();
     f.querySelector('.duo-code').textContent = code;
-    f.querySelector('.fa-msg').textContent = td('attente');
-    f.querySelector('.fa-fermer').onclick = () => { fermerFenetre(); arreter(); };
-    qrSvg(LIEN_WEB + '?manette=' + code, 240).then((svg) => { f.querySelector('.duo-qr').innerHTML = svg; }).catch(() => {});
-    try {
-      const c = await supa();
-      canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
-      canal.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d, payload.id))
-        .on('broadcast', { event: 'k' }, ({ payload }) => { if (payload.k === 'retour') { if ($('fa-fond')) fermerFenetre(); else retour(); } else if (payload.k === 'maison') { while (pile.length > 2) pile.pop(); retour(); } })
-        .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
-          const j = joueurDe(payload?.id || 'x');
-          if ($('fa-fond')?.querySelector('.fa-t-duo')) fermerFenetre();
-          jingle(); resterAllume(); majPetitQr();
-          canal.send({ type: 'broadcast', event: 'ok', payload: { id: payload?.id, n: j?.n || 0, couleur: j?.couleur } });
-        })
-        .subscribe();
-    } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
+    f.querySelector('.fa-msg').textContent = joueurs.size ? `✋ ${joueurs.size}/2` : td('attente');
+    f.querySelector('.fa-fermer').onclick = () => fermerFenetre();
+    qrSvg(lienManette(), 260).then((svg) => { f.querySelector('.duo-qr').innerHTML = svg; }).catch(() => {});
+    try { await ecouter(); } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
   }
-  function arreter() {
-    if (canal) { clientSupa?.removeChannel(canal); canal = null; }
-    joueurs.forEach((j) => j.curseur.remove()); joueurs.clear(); $('duo-petit-qr')?.remove();
-  }
-  return { demarrer, arreter, pointeur, get nbJoueurs() { return joueurs.size; }, joueurDuPointeur: (pid) => pid - 70, couleurJoueur: (n) => JOUEURS_STYLE[n - 1]?.couleur };
+  function arreter() { joueurs.forEach((j) => j.curseur.remove()); joueurs.clear(); $('duo-petit-qr')?.remove(); }
+  const dire = (event, payload) => canaux.forEach((ch) => ch.send({ type: 'broadcast', event, payload }));
+  const sur = (e, fn) => { (ecouteurs[e] = ecouteurs[e] || []).push(fn); return () => { ecouteurs[e] = ecouteurs[e].filter((x) => x !== fn); }; };
+  return { demarrer, arreter, ecouter, pointeur, signaler, lienManette, dire, sur, get code() { if (!code) identifiants(); return code; }, get nbJoueurs() { return joueurs.size; }, joueurDuPointeur: (pid) => pid - 70, couleurJoueur: (n) => JOUEURS_STYLE[n - 1]?.couleur };
 })();
-// ----- Manette : pavé tactile ou caméra qui suit le doigt -----
+// ----- Manette : une grande surface. Menus : on glisse pour choisir, on tape pour lancer.
+//       Jeux : le doigt pousse la main sur la télé (pavé relatif). Caméra en option. -----
 const DuoManette = (() => {
-  let canal = null, envoi = 0, dernier = null, camera = null;
+  let canal = null, envoi = 0, envoiSq = 0, camera = null, mode = 'menu', relie = false, fen = null;
   const monId = Math.random().toString(36).slice(2, 9);
-  const envoyer = (x, y, d) => {
-    dernier = { x, y, d };
-    const t = performance.now();
-    if (t - envoi < 33 && d === (envoyer.d ?? d)) return; // ~30 messages par seconde
-    envoi = t; envoyer.d = d;
-    canal?.send({ type: 'broadcast', event: 'p', payload: { id: monId, x: +x.toFixed(4), y: +y.toFixed(4), d } });
+  const vibrer = (ms = 12) => { try { navigator.vibrate?.(ms); } catch {} };
+  const dire = (event, payload) => canal?.send({ type: 'broadcast', event, payload: { id: monId, ...payload } });
+  const envoyer = (x, y) => { // caméra : position absolue de la main (le toucher se fait en restant immobile)
+    const t = performance.now(); if (t - envoi < 33) return; envoi = t;
+    dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: false, cam: true });
   };
-  async function relier(code, f) {
+  const squelette = (pts, taille) => { // pour l'écran de réglage sur la télé, quelques fois par seconde
+    const t = performance.now(); if (t - envoiSq < 160) return; envoiSq = t;
+    dire('squelette', { pts: pts ? pts.map(([x, y]) => [+x.toFixed(3), +y.toFixed(3)]) : null, taille: taille ? +taille.toFixed(3) : 0 });
+  };
+  const k = (x) => { vibrer(); canal?.send({ type: 'broadcast', event: 'k', payload: { k: x } }); };
+  const paysage = () => matchMedia('(orientation: landscape)').matches;
+  async function relier(code, secret, f) {
     const c = await supa();
-    canal = c.channel('lumi-duo-' + code, { config: { broadcast: { self: false } } });
+    canal = c.channel(secret ? `lumi-duo-${code}-${secret}` : 'lumi-duo-' + code, { config: { broadcast: { self: false } } });
     canal.on('broadcast', { event: 'ok' }, ({ payload }) => {
       if (payload?.id && payload.id !== monId) return;
-      const m = f.querySelector('.fa-msg');
-      m.textContent = td('relie') + (payload?.n ? ` — ${td('joueur')} ${payload.n} ${JOUEURS_STYLE[payload.n - 1].main}` : '');
-      if (payload?.couleur) { m.style.color = payload.couleur; f.querySelector('.duo-pave')?.style.setProperty('border-color', payload.couleur); }
-      son('juste');
-    });
-    await new Promise((ok, ko) => { canal.subscribe((s) => { if (s === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
+      relie = true;
+      f.querySelector('.mn-etat').textContent = payload?.n ? `${JOUEURS_STYLE[payload.n - 1].main} ${td('joueur')} ${payload.n}` : td('relie');
+      if (payload?.couleur) f.style.setProperty('--c', payload.couleur);
+      vibrer(60); son('juste');
+      dire('orient', { paysage: paysage() });
+    }).on('broadcast', { event: 'ecran' }, ({ payload }) => choisirMode(payload.pointeur ? 'pave' : 'menu', f))
+      .on('broadcast', { event: 'mode' }, ({ payload }) => { if (payload.mode === 'camera' && !camera) basculerCamera(f, true); else if (payload.mode === 'manette' && camera) basculerCamera(f, false); })
+      .on('broadcast', { event: 'compte-ok' }, ({ payload }) => { f.querySelector('.mn-compte').textContent = '✅ ' + (payload.email || ''); vibrer(60); })
+      .on('broadcast', { event: 'compte-ko' }, () => { f.querySelector('.mn-compte').textContent = '❌ ' + td('erreur'); });
+    await new Promise((ok, ko) => { canal.subscribe((st) => { if (st === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
     canal.send({ type: 'broadcast', event: 'bonjour', payload: { id: monId } });
+    try { localStorage.setItem('lumi-manette', JSON.stringify({ code, secret })); } catch {}
+    addEventListener('pagehide', () => canal?.send({ type: 'broadcast', event: 'aurevoir', payload: { id: monId } }));
+    matchMedia('(orientation: landscape)').addEventListener?.('change', () => dire('orient', { paysage: paysage() }));
     resterAllume();
   }
-  function ouvrir(codeQr) {
-    const f = fenetre('manette');
-    f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button><h2>📱 ${td('titre')}</h2>
+  function choisirMode(m, f) {
+    mode = m; f.dataset.mode = m;
+    if (camera) return; // la caméra garde la main tant qu'elle est allumée
+    f.querySelector('.mn-aide').textContent = m === 'pave' ? td('aidePave') : td('aideMenu');
+  }
+  function basculerCamera(f, oui) {
+    f.querySelector('[data-a=camera]').classList.toggle('on', oui);
+    f.classList.toggle('cam', oui);
+    f.querySelector('.mn-surface').hidden = oui; f.querySelector('.duo-camera').hidden = !oui;
+    if (oui) { suivreDoigt(f.querySelector('.duo-camera'), envoyer, squelette); try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch {} }
+    else { arreterCamera(); squelette(null, 0); choisirMode(mode, f); }
+  }
+  function ouvrir(codeQr, secretQr) {
+    const f = fenetre('manette'); fen = f;
+    f.innerHTML = `<div class="mn-haut"><span class="mn-etat"></span><button class="fa-fermer" aria-label="${tf('fermer')}">✕</button></div>
       <div class="fa-form duo-relier"><input inputmode="numeric" maxlength="4" autocomplete="off"><button class="fa-bouton fa-principal"></button></div>
-      <p class="fa-msg"></p>
-      <div class="duo-modes" hidden><button class="puce on" data-m="pave"></button><button class="puce" data-m="camera"></button></div>
-      <div class="duo-pave" hidden></div>
-      <div class="duo-camera" hidden><video playsinline muted></video><span class="duo-point"></span><p class="fa-aide"></p></div>
-      <div class="duo-touches" hidden><button class="fa-bouton" data-k="retour">⬅</button><button class="fa-bouton" data-k="maison">🏠</button></div>`;
+      <div class="mn-jeu" hidden>
+        <div class="mn-surface"><svg class="mn-main" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10h.5V3.5a1.5 1.5 0 0 1 3 0V10h.5V5.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6.5 7-3 0-4.5-1.5-6-4l-2.3-4a1.4 1.4 0 0 1 2.3-1.6L9 13z"/></svg><p class="mn-aide"></p></div>
+        <div class="duo-camera" hidden><video playsinline muted></video><span class="duo-point"></span><p class="fa-aide"></p></div>
+        <div class="mn-cote">
+          <div class="mn-petits"><button class="mn-b" data-k="maison" aria-label="Accueil">🏠</button><button class="mn-b" data-a="camera" aria-label="Caméra">📷</button></div>
+          <button class="mn-ok">OK</button>
+          <button class="mn-b mn-retour" data-k="retour">⬅</button>
+        </div>
+      </div>
+      <div class="mn-tourne" hidden><div class="mn-tel"></div><p></p></div>
+      <button class="fa-bouton mn-lier" hidden></button><p class="mn-compte fa-msg"></p>`;
+    let dernier = null; try { dernier = JSON.parse(localStorage.getItem('lumi-manette') || 'null'); } catch {}
     const champ = f.querySelector('input'); champ.placeholder = td('taper');
+    if (!codeQr && dernier?.code) champ.value = dernier.code;
+    const secretUtilise = secretQr || (dernier?.code === (codeQr || champ.value) ? dernier?.secret : null);
     f.querySelector('.duo-relier button').textContent = td('relier');
-    f.querySelector('[data-m=pave]').textContent = td('pave'); f.querySelector('[data-m=camera]').textContent = td('camera');
-    f.querySelector('.duo-camera .fa-aide').textContent = td('aide');
+    f.querySelector('.mn-etat').textContent = '📱 ' + td('titre');
+    f.querySelector('.duo-camera .fa-aide').textContent = td('poser');
+    f.querySelector('.mn-tourne p').textContent = td('tourne');
     $('fa-fond').onclick = null;
     f.querySelector('.fa-fermer').onclick = () => { arreter(); fermerFenetre(); };
+    const surface = f.querySelector('.mn-surface');
     f.querySelector('.duo-relier button').onclick = async () => {
       if (!/^\d{4}$/.test(champ.value)) return;
-      try { await relier(champ.value, f); } catch { f.querySelector('.fa-msg').textContent = td('erreur'); return; }
-      f.querySelector('.duo-relier').hidden = true;
-      ['.duo-modes', '.duo-pave', '.duo-touches'].forEach((s) => { f.querySelector(s).hidden = false; });
+      f.querySelector('.mn-etat').textContent = '…';
+      try { await relier(champ.value, champ.value === (codeQr || dernier?.code) ? secretUtilise : null, f); } catch { f.querySelector('.mn-etat').textContent = td('erreur'); return; }
+      f.querySelector('.duo-relier').hidden = true; f.querySelector('.mn-jeu').hidden = false; f.querySelector('.mn-tourne').hidden = false;
+      f.classList.add('relie');
+      choisirMode('menu', f);
+      if (Famille.id && secretUtilise) { const l = f.querySelector('.mn-lier'); l.hidden = false; l.textContent = '🔑 ' + td('lier'); l.onclick = async () => {
+        f.querySelector('.mn-compte').textContent = '…';
+        try { const { jeton } = await Famille.jetonTele(); canal.send({ type: 'broadcast', event: 'compte', payload: { jeton } }); } catch { f.querySelector('.mn-compte').textContent = '❌ ' + td('erreur'); }
+      }; }
+      try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch {}
     };
-    // pavé : la position du doigt sur le téléphone = la position sur le grand écran
-    const pave = f.querySelector('.duo-pave');
-    const pos = (e) => { const r = pave.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
-    pave.onpointerdown = (e) => { pave.setPointerCapture(e.pointerId); envoyer(...pos(e), true); };
-    pave.onpointermove = (e) => { if (e.buttons || e.pressure) envoyer(...pos(e), true); };
-    pave.onpointerup = pave.onpointercancel = (e) => { envoi = 0; envoyer(...pos(e), false); };
-    f.querySelectorAll('.duo-modes .puce').forEach((b) => {
-      b.onclick = () => {
-        f.querySelectorAll('.duo-modes .puce').forEach((x) => x.classList.toggle('on', x === b));
-        const cam = b.dataset.m === 'camera';
-        pave.hidden = cam; f.querySelector('.duo-camera').hidden = !cam;
-        if (cam) suivreDoigt(f.querySelector('.duo-camera'), envoyer); else arreterCamera();
-      };
-    });
-    f.querySelectorAll('.duo-touches button').forEach((b) => { b.onclick = () => canal?.send({ type: 'broadcast', event: 'k', payload: { k: b.dataset.k } }); });
+    // la surface : glisser = flèches, taper = OK (menus) ; ou pavé relatif (jeux)
+    let depart = null, prec = null, cumul = { x: 0, y: 0 };
+    surface.onpointerdown = (e) => {
+      surface.setPointerCapture(e.pointerId); depart = prec = { x: e.clientX, y: e.clientY, t: performance.now() }; cumul = { x: 0, y: 0 };
+      surface.classList.add('appui');
+      if (mode === 'pave') dire('r', { dx: 0, dy: 0, d: true });
+    };
+    surface.onpointermove = (e) => {
+      if (!depart) return;
+      const dx = e.clientX - prec.x, dy = e.clientY - prec.y; prec = { x: e.clientX, y: e.clientY };
+      cumul.x += dx; cumul.y += dy;
+      if (mode === 'pave') {
+        const t = performance.now(); if (t - envoi < 30) return; envoi = t;
+        const w = surface.clientWidth;
+        dire('r', { dx: +(cumul.x / w).toFixed(4), dy: +(cumul.y / w).toFixed(4), d: true });
+        cumul = { x: 0, y: 0 };
+      } else {
+        const pas = 80; // un long glissé fait défiler plusieurs tuiles
+        if (Math.abs(cumul.x) > pas && Math.abs(cumul.x) > Math.abs(cumul.y)) { k(cumul.x > 0 ? 'droite' : 'gauche'); cumul = { x: 0, y: 0 }; depart.glisse = true; }
+        else if (Math.abs(cumul.y) > pas) { k(cumul.y > 0 ? 'bas' : 'haut'); cumul = { x: 0, y: 0 }; depart.glisse = true; }
+      }
+    };
+    surface.onpointerup = surface.onpointercancel = (e) => {
+      if (!depart) return;
+      surface.classList.remove('appui');
+      const dist = Math.hypot(e.clientX - depart.x, e.clientY - depart.y), court = performance.now() - depart.t < 350;
+      if (mode === 'pave') {
+        const w = surface.clientWidth;
+        dire('r', { dx: +(cumul.x / w).toFixed(4), dy: +(cumul.y / w).toFixed(4), d: false });
+        if (dist < 12 && court) vibrer(20);
+      } else if (!depart.glisse) {
+        if (dist < 25) k('ok');
+        else if (Math.abs(e.clientX - depart.x) > Math.abs(e.clientY - depart.y)) k(e.clientX > depart.x ? 'droite' : 'gauche');
+        else k(e.clientY > depart.y ? 'bas' : 'haut');
+      }
+      depart = null;
+    };
+    // le gros bouton OK : valider dans les menus, « toucher » là où est la main dans les jeux
+    f.querySelector('.mn-ok').onclick = () => {
+      if (mode === 'pave') { vibrer(20); dire('r', { dx: 0, dy: 0, d: true }); setTimeout(() => dire('r', { dx: 0, dy: 0, d: false }), 60); }
+      else k('ok');
+    };
+    f.querySelectorAll('.mn-cote [data-k]').forEach((x) => { x.onclick = () => k(x.dataset.k); });
+    f.querySelector('[data-a=camera]').onclick = () => basculerCamera(f, !camera);
     if (codeQr) { champ.value = codeQr; f.querySelector('.duo-relier button').click(); }
   }
   function arreterCamera() { camera?.stop(); camera = null; }
-  function arreter() { arreterCamera(); if (canal) { clientSupa?.removeChannel(canal); canal = null; } }
+  function arreter() { arreterCamera(); if (canal) { canal.send({ type: 'broadcast', event: 'aurevoir', payload: { id: monId } }); clientSupa?.removeChannel(canal); canal = null; } relie = false; }
   return { ouvrir, arreter, set camera(c) { camera = c; } };
 })();
-// ----- Suivre le doigt avec la caméra (MediaPipe, sur l'appareil) -----
+// ----- Suivre le doigt avec la caméra (MediaPipe, sur l'appareil : seule la position du doigt part vers la télé) -----
 let repereMain = null;
-async function suivreDoigt(boite, rappel) {
+async function suivreDoigt(boite, rappel, squelette) {
   const video = boite.querySelector('video'), point = boite.querySelector('.duo-point');
   try {
     if (!repereMain) {
@@ -4862,31 +5867,167 @@ async function suivreDoigt(boite, rappel) {
       const fichiers = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
       repereMain = await vision.HandLandmarker.createFromOptions(fichiers, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
-        runningMode: 'VIDEO', numHands: 1,
+        runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: .5, minTrackingConfidence: .5,
       });
     }
-    const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+    const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
     video.srcObject = flux; await video.play();
-    let actif = true, lisse = null;
+    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0;
     DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
     const boucle = () => {
       if (!actif) return;
-      const r = repereMain.detectForVideo(video, performance.now());
+      const t = performance.now(), r = repereMain.detectForVideo(video, t);
       const m = r.landmarks?.[0];
       if (m) {
-        const bout = m[8], pouce = m[4];
-        // image en miroir, et on « agrandit » le centre pour atteindre les bords sans tendre le bras
-        let x = Math.min(1, Math.max(0, ((1 - bout.x) - .5) * 1.5 + .5)), y = Math.min(1, Math.max(0, (bout.y - .5) * 1.5 + .5));
-        lisse = lisse ? { x: lisse.x * .6 + x * .4, y: lisse.y * .6 + y * .4 } : { x, y };
-        const pince = Math.hypot(bout.x - pouce.x, bout.y - pouce.y) < .06;
-        point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.classList.toggle('appui', pince);
-        rappel(lisse.x, lisse.y, pince);
-      }
+        perdu = 0;
+        const bout = m[8];
+        // image en miroir ; la zone utile est le centre de l'image (on atteint les bords sans tendre le bras)
+        const x = Math.min(1, Math.max(0, ((1 - bout.x) - .5) * 1.6 + .5)), y = Math.min(1, Math.max(0, (bout.y - .45) * 1.7 + .5));
+        // lissage adaptatif : très stable quand la main est presque immobile, réactif quand elle bouge vite
+        if (!lisse) lisse = { x, y };
+        const v = Math.hypot(x - lisse.x, y - lisse.y) / Math.max(1, t - dernierT) * 1000, a = Math.min(.85, .12 + v * .9);
+        lisse = { x: lisse.x + (x - lisse.x) * a, y: lisse.y + (y - lisse.y) * a };
+        point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.hidden = false;
+        rappel(lisse.x, lisse.y);
+        // taille de la main (poignet → base du majeur) : sert à dire « recule » ou « approche »
+        const taille = Math.hypot(m[0].x - m[9].x, m[0].y - m[9].y);
+        squelette?.(m.map((q) => [1 - q.x, q.y]), taille);
+      } else if (++perdu === 8) { point.hidden = true; squelette?.(null, 0); }
+      dernierT = t;
       requestAnimationFrame(boucle);
     };
     boucle();
   } catch (e) { boite.querySelector('.fa-aide').textContent = td('erreur'); console.warn(e); }
 }
+
+// ----- Guide « Jouer avec mon téléphone » sur la télé : 4 étapes, la télé avance toute seule -----
+const GT_TXT = {
+  titre: { fr: 'Jouer avec mon téléphone', en: 'Play with my phone', ar: 'العب بهاتفي' },
+  e1: { fr: ['Scanne le carré', 'Avec l’appareil photo'], en: ['Scan the square', 'With the camera app'], ar: ['امسح المربع', 'بتطبيق الكاميرا'] },
+  e2: { fr: ['Tourne ton téléphone', 'À l’horizontale'], en: ['Turn your phone', 'Sideways'], ar: ['أدِر هاتفك', 'أفقيًا'] },
+  e3: { fr: ['Manette ou caméra', 'Comment tu veux jouer'], en: ['Controller or camera', 'How you want to play'], ar: ['جهاز تحكّم أو كاميرا', 'كيف تريد أن تلعب'] },
+  e4: { fr: ['Petit test', 'Touche l’étoile'], en: ['Quick test', 'Touch the star'], ar: ['تجربة صغيرة', 'المس النجمة'] },
+  vise: { fr: 'Ouvre l’appareil photo et vise le carré', en: 'Open the camera and point at the square', ar: 'افتح الكاميرا ووجّهها إلى المربع' },
+  rien: { fr: 'Pas d’application à installer. Jusqu’à 2 téléphones.', en: 'Nothing to install. Up to 2 phones.', ar: 'لا شيء للتثبيت. حتى هاتفين.' },
+  code: { fr: 'Ou sur le site Lumiole, tape le code', en: 'Or on the Lumiole site, type the code', ar: 'أو على موقع لوميول، اكتب الرمز' },
+  manette: { fr: ['Manette', 'Glisse pour bouger, tape pour toucher. Le plus simple.'], en: ['Controller', 'Swipe to move, tap to touch. The easiest.'], ar: ['جهاز تحكّم', 'اسحب للتحرك والمس للضغط. الأسهل.'] },
+  camera: { fr: ['Caméra', 'Pose le téléphone face à toi : ta main pilote la télé.'], en: ['Camera', 'Stand the phone facing you: your hand drives the TV.'], ar: ['كاميرا', 'ضع الهاتف أمامك: يدك تتحكم في التلفاز.'] },
+  reglage: { fr: 'On règle la caméra', en: 'Setting up the camera', ar: 'نضبط الكاميرا' },
+  zone: { fr: 'Zone de jeu', en: 'Play area', ar: 'منطقة اللعب' },
+  pose: { fr: ['Téléphone posé', 'Debout, écran vers toi'], en: ['Phone in place', 'Standing, screen facing you'], ar: ['الهاتف في مكانه', 'واقف والشاشة نحوك'] },
+  vue: { fr: ['Ta main est vue', 'Le bout du doigt est repéré'], en: ['Your hand is seen', 'The fingertip is found'], ar: ['يدك ظاهرة', 'تم رصد طرف الإصبع'] },
+  dist: { fr: ['Bonne distance', ''], en: ['Good distance', ''], ar: ['مسافة جيدة', ''] },
+  dansZone: { fr: ['Main dans la zone', 'Au milieu de l’image'], en: ['Hand in the area', 'In the middle of the picture'], ar: ['اليد في المنطقة', 'في وسط الصورة'] },
+  montre: { fr: 'Montre ta main à la caméra', en: 'Show your hand to the camera', ar: 'أرِ يدك للكاميرا' },
+  recule: { fr: 'Recule d’un petit pas', en: 'Step back a little', ar: 'ارجع خطوة صغيرة' },
+  approche: { fr: 'Approche-toi un peu', en: 'Come a little closer', ar: 'اقترب قليلًا' },
+  centre: { fr: 'Mets ta main au milieu', en: 'Put your hand in the middle', ar: 'ضع يدك في الوسط' },
+  parfait: { fr: 'Parfait, ne bouge plus !', en: 'Perfect, hold still!', ar: 'ممتاز، لا تتحرك!' },
+  pres: { fr: 'Trop près', en: 'Too close', ar: 'قريب جدًا' }, bien: { fr: 'Parfait', en: 'Perfect', ar: 'ممتاز' }, loin: { fr: 'Trop loin', en: 'Too far', ar: 'بعيد جدًا' },
+  distance: { fr: 'Distance', en: 'Distance', ar: 'المسافة' },
+  garde: { fr: 'Pour toucher : garde ta main immobile, le cercle se remplit.', en: 'To touch: hold your hand still, the circle fills up.', ar: 'للّمس: أبقِ يدك ثابتة حتى تمتلئ الدائرة.' },
+  etoile: { fr: 'Amène ta main sur l’étoile', en: 'Bring your hand onto the star', ar: 'حرّك يدك إلى النجمة' },
+  etoileSous: { fr: 'Et touche-la : OK, un tap, ou la main immobile.', en: 'And touch it: OK, a tap, or a still hand.', ar: 'والمسها: OK، أو نقرة، أو يد ثابتة.' },
+  suivant: { fr: 'Suivant', en: 'Next', ar: 'التالي' }, parti: { fr: 'C’est parti !', en: 'Let’s go!', ar: 'هيا بنا!' },
+  attente: { fr: 'en attente…', en: 'waiting…', ar: 'في الانتظار…' }, connecte: { fr: 'connecté', en: 'connected', ar: 'متصل' },
+};
+const tg = (k) => GT_TXT[k][langue] ?? GT_TXT[k].fr;
+const GuideTel = (() => {
+  let f = null, etape = 1, off = [], cam = false, sq = null, okDepuis = 0;
+  const vivant = () => f && f.isConnected;
+  function ouvrir() {
+    f = fenetre('guide'); $('fa-fond').onclick = null; cam = false;
+    f.innerHTML = `<div class="gt-haut"><h2></h2><div class="gt-joueurs"></div><button class="fa-fermer" aria-label="${tf('fermer')}">✕</button></div>
+      <div class="gt-corps"><div class="gt-etapes"></div><div class="gt-zone"></div></div>
+      <div class="gt-bas"><button class="gt-suiv"></button></div>`;
+    f.querySelector('h2').textContent = '📱 ' + tg('titre');
+    f.querySelector('.fa-fermer').onclick = fermer;
+    f.querySelector('.gt-suiv').onclick = () => (etape < 4 ? aller(etape === 3 && !cam ? 4 : etape + 1) : fermer());
+    off.forEach((x) => x()); off = [
+      DuoEcran.sur('joueur', () => { if (!vivant()) return; joueurs(); if (etape === 1) aller(2); }),
+      DuoEcran.sur('orient', (p) => { if (vivant() && etape === 2 && p?.paysage) aller(3); }),
+      DuoEcran.sur('squelette', (p) => { if (vivant()) { sq = p; reglage(); } }),
+    ];
+    DuoEcran.ecouter().catch(() => {});
+    joueurs();
+    aller(DuoEcran.nbJoueurs ? 2 : 1);
+  }
+  function fermer() { off.forEach((x) => x()); off = []; f = null; fermerFenetre(); if (TV.actif) TV.montrer(pile[pile.length - 1]); }
+  function joueurs() {
+    const n = DuoEcran.nbJoueurs;
+    f.querySelector('.gt-joueurs').innerHTML = [1, 2].map((j) => `<span><i style="background:${JOUEURS_STYLE[j - 1].couleur}"></i>${td('joueur')} ${j} · ${j <= n ? tg('connecte') : tg('attente')}</span>`).join('');
+  }
+  function aller(n) {
+    etape = n;
+    const L = f.querySelector('.gt-etapes'); L.innerHTML = '';
+    ['e1', 'e2', 'e3', 'e4'].forEach((k, i) => {
+      const b = document.createElement('div'); const num = i + 1;
+      b.className = 'gt-etape' + (num === n ? ' on' : num < n ? ' fait' : '');
+      b.innerHTML = `<span class="gt-num">${num < n ? '✓' : num}</span><span><b></b><small></small></span>`;
+      b.querySelector('b').textContent = tg(k)[0]; b.querySelector('small').textContent = tg(k)[1];
+      L.appendChild(b);
+    });
+    const z = f.querySelector('.gt-zone'), suiv = f.querySelector('.gt-suiv');
+    suiv.textContent = n < 4 ? tg('suivant') + ' ›' : tg('parti');
+    if (n === 1) {
+      z.innerHTML = `<div class="gt-qr"></div><div class="gt-txt"><h3></h3><p></p><small></small><div class="duo-code"></div></div>`;
+      z.querySelector('h3').textContent = tg('vise'); z.querySelector('p').textContent = tg('rien'); z.querySelector('small').textContent = tg('code');
+      z.querySelector('.duo-code').textContent = DuoEcran.code;
+      qrSvg(DuoEcran.lienManette(), 300).then((svg) => { if (vivant()) z.querySelector('.gt-qr').innerHTML = svg; }).catch(() => {});
+    } else if (n === 2) {
+      z.innerHTML = `<div class="gt-tourne"><span class="t1"></span><span class="fl">↻</span><span class="t2"></span></div><h3></h3>`;
+      z.querySelector('h3').textContent = td('tourne');
+    } else if (n === 3) {
+      z.innerHTML = `<div class="gt-choix"><button class="gt-carte" data-m="manette"><span class="e">🎮</span><b></b><small></small></button><button class="gt-carte" data-m="camera"><span class="e">📷</span><b></b><small></small></button></div>`;
+      z.querySelectorAll('.gt-carte').forEach((c) => {
+        const t = tg(c.dataset.m); c.querySelector('b').textContent = t[0]; c.querySelector('small').textContent = t[1];
+        c.onclick = () => { cam = c.dataset.m === 'camera'; DuoEcran.dire('mode', { mode: c.dataset.m }); son('juste'); cam ? afficherReglage() : aller(4); };
+      });
+      setTimeout(() => z.querySelector('.gt-carte')?.focus({ preventScroll: true }), 50);
+      return;
+    } else {
+      z.innerHTML = `<button class="gt-etoile" aria-label="Étoile"><svg viewBox="0 0 120 120"><circle class="fond" cx="60" cy="60" r="54"/><path d="M60 14 L72 46 L106 46 L78 66 L88 100 L60 80 L32 100 L42 66 L14 46 L48 46 Z"/></svg></button><h3></h3><p></p>`;
+      z.querySelector('h3').textContent = tg('etoile'); z.querySelector('p').textContent = tg('etoileSous');
+      z.querySelector('.gt-etoile').onclick = () => { fete(); jingle(); z.querySelector('h3').textContent = '✨ ' + tg('parti'); setTimeout(() => { if (vivant()) fermer(); }, 1500); };
+      setTimeout(() => z.querySelector('.gt-etoile')?.focus({ preventScroll: true }), 50);
+      return;
+    }
+    setTimeout(() => suiv.focus({ preventScroll: true }), 50);
+  }
+  // réglage de la caméra : on voit sa main sur la télé, et Lumi guide
+  function afficherReglage() {
+    etape = 3.5;
+    const z = f.querySelector('.gt-zone');
+    z.innerHTML = `<div class="gt-reglage"><div class="gt-cadre"><canvas width="640" height="480"></canvas><span class="gt-zonejeu"></span><span class="gt-zonetxt"></span><span class="gt-conseil"></span></div>
+      <div class="gt-checks"></div></div>`;
+    z.querySelector('.gt-zonetxt').textContent = tg('zone');
+    f.querySelector('.gt-suiv').textContent = tg('suivant') + ' ›';
+    reglage();
+  }
+  function reglage() {
+    if (etape !== 3.5 || !vivant()) return;
+    const z = f.querySelector('.gt-zone'), cv = z.querySelector('canvas'); if (!cv) return;
+    const g = cv.getContext('2d'); g.clearRect(0, 0, 640, 480);
+    const pts = sq?.pts, taille = sq?.taille || 0;
+    const vue = !!pts, bout = pts?.[8], dans = vue && bout[0] > .15 && bout[0] < .85 && bout[1] > .12 && bout[1] < .88;
+    const distEtat = !vue ? null : taille > .26 ? 'pres' : taille < .09 ? 'loin' : 'bien';
+    if (vue) {
+      const OS = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [0, 17], [17, 18], [18, 19], [19, 20]];
+      g.strokeStyle = '#7FE7C4'; g.lineWidth = 6; g.lineCap = 'round';
+      OS.forEach(([a, b]) => { g.beginPath(); g.moveTo(pts[a][0] * 640, pts[a][1] * 480); g.lineTo(pts[b][0] * 640, pts[b][1] * 480); g.stroke(); });
+      pts.forEach(([x, y], i) => { g.fillStyle = i === 8 ? '#FFC94D' : '#fff'; g.beginPath(); g.arc(x * 640, y * 480, i === 8 ? 10 : 6, 0, 7); g.fill(); });
+    }
+    const checks = [['pose', vue], ['vue', vue], ['dist', distEtat === 'bien'], ['dansZone', dans]];
+    z.querySelector('.gt-checks').innerHTML = checks.map(([k, ok]) => `<div class="gt-check ${ok ? 'ok' : ''}"><span>${ok ? '✓' : '!'}</span><span><b>${tg(k)[0]}</b><small>${k === 'dist' ? (distEtat ? tg(distEtat) : '') : tg(k)[1]}</small></span></div>`).join('')
+      + `<p class="gt-label">${tg('distance')}</p><div class="gt-jauge"><span style="left:${Math.round(Math.min(1, Math.max(0, 1 - (taille - .05) / .27)) * 100)}%"></span></div><div class="gt-jtxt"><span>${tg('pres')}</span><span>${tg('bien')}</span><span>${tg('loin')}</span></div><p class="gt-garde">${tg('garde')}</p>`;
+    const conseil = !vue ? tg('montre') : distEtat === 'pres' ? tg('recule') : distEtat === 'loin' ? tg('approche') : !dans ? tg('centre') : tg('parfait');
+    z.querySelector('.gt-conseil').textContent = conseil;
+    const tout = checks.every(([, ok]) => ok);
+    if (tout) { okDepuis = okDepuis || performance.now(); if (performance.now() - okDepuis > 1500) { okDepuis = 0; son('juste'); aller(4); } }
+    else okDepuis = 0;
+  }
+  return { ouvrir };
+})();
 // ----- La caméra sur le grand écran lui-même (webcam branchée sur la télé ou tablette) -----
 function cameraIci() {
   fermerFenetre();
@@ -4895,7 +6036,7 @@ function cameraIci() {
   boite.querySelector('.fa-aide').textContent = td('aide');
   document.body.appendChild(boite);
   boite.querySelector('button').onclick = () => { DuoManette.arreter(); boite.remove(); DuoEcran.arreter(); };
-  suivreDoigt(boite, (x, y, d) => DuoEcran.pointeur(x, y, d, 'camera'));
+  suivreDoigt(boite, (x, y) => DuoEcran.pointeur(x, y, false, 'camera', true));
 }
 function blocDuo() {
   const b = $('fa-duo'); if (!b) return;
@@ -4906,13 +6047,283 @@ function blocDuo() {
   });
 }
 
+
+// =====================================================================
+// ---------- Lumiole TV : un accueil façon « Netflix des petits » ----------
+// Une grande bannière (Lumi dessine ce qu'on regarde, sa voix dit le nom), des rangées de grosses
+// tuiles qu'on parcourt aux flèches, un ciel qui suit l'heure (jour, soir, nuit).
+// =====================================================================
+const TV_TXT = {
+  pourToi: { fr: 'Pour toi aujourd’hui', en: 'For you today', ar: 'لك اليوم' },
+  aDeux: { fr: 'On joue à deux', en: 'Play together', ar: 'نلعب معًا' },
+  decouvrir: { fr: 'Découvrir', en: 'Discover', ar: 'اكتشف' },
+  soir: { fr: 'Histoires et comptines', en: 'Stories and songs', ar: 'حكايات وأناشيد' },
+  jeux: { fr: 'Petits jeux', en: 'Little games', ar: 'ألعاب صغيرة' },
+  ok: { fr: 'OK pour jouer', en: 'OK to play', ar: 'اضغط OK' },
+  deux: { fr: 'À deux avec les téléphones', en: 'Two players with phones', ar: 'لاعبان بالهاتفين' },
+  theatre: { fr: 'Au théâtre, en plein écran', en: 'Full-screen theatre', ar: 'مسرح بملء الشاشة' },
+  langueChant: { fr: 'Langue des comptines', en: 'Song language', ar: 'لغة الأناشيد' },
+  karaoke: { fr: 'On chante avec Lumi, en grand', en: 'Sing along with Lumi, full screen', ar: 'نغني مع لومي بملء الشاشة' },
+  langueHist: { fr: 'Langue des histoires', en: 'Story language', ar: 'لغة الحكايات' },
+  voixFamille: { fr: 'Avec la voix de la famille', en: 'With a family voice', ar: 'بصوت العائلة' },
+  quiRaconte: { fr: 'Qui raconte ?', en: 'Who tells it?', ar: 'من يحكي؟' },
+  lumiRaconte: { fr: 'Lumi raconte', en: 'Lumi tells it', ar: 'لومي يحكي' },
+  jeLis: { fr: 'Je lis moi-même', en: 'I read it myself', ar: 'أقرأ بنفسي' },
+  regarder: { fr: 'Regarder au théâtre', en: 'Watch at the theatre', ar: 'شاهد في المسرح' },
+  reprendre: { fr: 'Reprendre page', en: 'Resume page', ar: 'تابع الصفحة' },
+  pages: { fr: 'Les pages', en: 'Pages', ar: 'الصفحات' },
+  histoireSoir: { fr: 'Histoire du soir', en: 'Bedtime story', ar: 'حكاية المساء' },
+  telephone: { fr: 'Jouer avec mon téléphone', en: 'Play with my phone', ar: 'العب بهاتفي' },
+  scanne: { fr: 'Scanne pour jouer avec ton téléphone', en: 'Scan to play with your phone', ar: 'امسح للّعب بهاتفك' },
+  jour: { fr: 'Bonjour', en: 'Hello', ar: 'صباح الخير' },
+  soirSalut: { fr: 'Bonsoir', en: 'Good evening', ar: 'مساء الخير' },
+  nuit: { fr: 'Bonne nuit', en: 'Good night', ar: 'تصبح على خير' },
+};
+const tt = (k) => TV_TXT[k][langue] ?? TV_TXT[k].fr;
+const nomDe = (n) => n?.nom?.[langue] ?? n?.nom?.fr ?? '';
+function moment() { const h = new Date().getHours(); return h >= 7 && h < 18 ? 'jour' : h >= 18 && h < 20 ? 'soir' : 'nuit'; }
+const TV = (() => {
+  let racine = null, actif = false, noeud = null, rangees = [], r = 0, focusVoix = 0, focusDessin = 0;
+  const memoire = {}; // position du focus par écran, pour revenir au même endroit
+  const item = (id, extra = {}) => { const n = NOEUDS[id]; return { id, emoji: n.emoji, nom: nomDe(n), desc: n.desc?.[langue] ?? n.desc?.fr ?? '', ferme: !libre(id), action: () => aller(id), ...extra }; };
+  function rangeesDe(id) {
+    if (id === 'histoires') return rangeesHistoires();
+    if (id === 'chansons') return rangeesChansons();
+    const n = NOEUDS[id];
+    if (!n.enfants) {
+      const L = LANGUES[langue];
+      const lettres = L.alphabet.split(' ').map((x) => x.split(':')[0]);
+      const motDe = Object.fromEntries(L.alphabet.split(' ').map((x) => x.split(':')));
+      if (n.type === 'lettres') return [{ titre: nomDe(n), items: lettres.map((l) => ({ id: 'l-' + l, emoji: l, nom: motDe[l] ? `${l} · ${motDe[l]}` : l, texte: true, action: () => montrerLettre(l) })) }];
+      if (n.type === 'nombres') return [{ titre: nomDe(n), items: L.nombres.map((nom, i) => ({ id: 'n-' + i, emoji: L.chiffre(i + 1), nom, texte: true, action: () => montrerNombre(i + 1) })) }];
+      if (n.type === 'dessin') return [{ titre: nomDe(n) + ' · 📱', items: [{ id: 'libre', emoji: '✨', nom: L.libre, tel: true, action: () => dessinLibre() }, ...lettres.map((l) => ({ id: 'd-' + l, emoji: l, nom: '✍️ ' + l, texte: true, tel: true, action: () => tracer(l) }))] }];
+      if (n.mots) {
+        const mots = n.mots.split(' ').map((e) => PAR_EMOJI.get(e)).filter(Boolean);
+        const actions = mots.map((m) => () => montrerEntree(m, true, id));
+        return [{ titre: nomDe(n), items: [
+          { id: 'tout', emoji: '▶', nom: L.toutVoir, texte: true, action: () => toutVoir(actions) },
+          { id: 'atoi', emoji: '🎯', nom: L.aToi, action: () => quizTheme(id) },
+          ...mots.map((m) => ({ id: 'm-' + m.emoji, emoji: m.emoji, nom: nomComplet(m), action: (t) => (quiz ? repondreQuiz(m, t) : montrerEntree(m, true, id)) })),
+        ] }];
+      }
+    }
+    if (id !== 'accueil') return [{ titre: nomDe(NOEUDS[id]), items: NOEUDS[id].enfants.map((e) => item(e)) }];
+    const L = LANGUES[langue], dj = duJour();
+    const contes = HISTOIRES.filter((h) => h.langue === (['fr', 'en', 'ar'].includes(langue) ? langue : 'fr')).slice(0, 8).map((h) => ({
+      id: 'h-' + h.id, emoji: h.emoji, nom: h.titre, desc: tt('theatre'), conte: true, ferme: !(Achat.ouvert || HISTOIRES_LIBRES.has(h.id)),
+      action: () => { if (!(Achat.ouvert || HISTOIRES_LIBRES.has(h.id))) return proposerAchat(); aller('histoires'); setTimeout(() => { ouvrirHistoire(h); if (!modeTele || ReglesConte.get().mode !== 'lumi') Theatre.entrer(); }, 120); },
+    }));
+    const liste = [
+      { titre: '✨ ' + tt('pourToi'), items: [
+        { id: 'j-lettre', emoji: dj.lettre, nom: L.lettreJour, desc: dj.lettre, texte: true, action: () => { aller('lettres', false); montrerLettre(dj.lettre); } },
+        { id: 'j-nombre', emoji: L.chiffre(dj.nombre), nom: L.nombreJour, desc: L.nombres[dj.nombre - 1], texte: true, action: () => { aller('nombres', false); montrerNombre(dj.nombre); } },
+        { id: 'j-mot', emoji: dj.mot.emoji, nom: L.motJour, desc: nomComplet(dj.mot), action: () => montrerEntree(dj.mot) },
+        item('histoires'), item('chansons'),
+      ] },
+      { titre: '👫 ' + tt('aDeux'), items: ['formes', 'compter', 'bulles'].map((e) => item(e, { deux: true })) },
+      { titre: '🌍 ' + tt('decouvrir'), items: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage'].map((e) => item(e, e === 'dessin' || e === 'coloriage' ? { tel: true } : {})) },
+      { titre: '🌙 ' + tt('soir'), items: [...contes, item('chansons')] },
+      { titre: '🎲 ' + tt('jeux'), items: ['devine', 'ecoute', 'range', 'intrus'].map((e) => item(e)) },
+    ];
+    // le soir et la nuit, les histoires passent en premier
+    if (moment() !== 'jour') liste.unshift(liste.splice(3, 1)[0]);
+    return liste;
+  }
+  const NOM_LANGUE = { fr: 'Français', en: 'English', ar: 'العربية' };
+  const TITRE_LANGUE = { fr: 'Histoires en français', en: 'Stories in English', ar: 'حكايات بالعربية' };
+  const conteItem = (h) => ({ id: 'h-' + h.id, emoji: h.emoji, nom: h.titre, desc: `${h.pages.length} pages · ${NOM_LANGUE[h.langue]}`, conte: true,
+    ferme: !(Achat.ouvert || HISTOIRES_LIBRES.has(h.id)), action: () => (Achat.ouvert || HISTOIRES_LIBRES.has(h.id) ? Fiche.ouvrir(h) : proposerAchat()) });
+  function rangeesChansons() {
+    const pref = ReglesChant.get().langue;
+    const choix = ['fr', 'en', 'ar', 'toutes'].includes(pref) ? pref : (['fr', 'en', 'ar'].includes(langue) ? langue : 'fr');
+    const puces = [['toutes', '🌍', { fr: 'Toutes', en: 'All', ar: 'الكل' }[langue] || 'Toutes'], ['fr', 'FR', 'Français'], ['en', 'EN', 'English'], ['ar', 'ع', 'العربية']].map(([k, e, nom]) => ({
+      id: 'cl-' + k, emoji: e, nom, texte: true, choisi: k === choix, desc: tt('langueChant'), action: () => { ReglesChant.set('langue', k); montrer('chansons'); } }));
+    const TITRES = { fr: 'Comptines en français', en: 'Songs in English', ar: 'أناشيد بالعربية' };
+    const liste = [{ titre: '🌍 ' + tt('langueChant'), items: puces, petit: true }];
+    (choix === 'toutes' ? ['fr', 'en', 'ar'] : [choix]).forEach((l) => liste.push({ titre: '🎵 ' + TITRES[l], items: CHANSONS.filter((c) => c.langue === l).map((c) => {
+      const ok = Achat.ouvert || CHANSONS_LIBRES.has(c.id);
+      return { id: 'c-' + c.id, emoji: c.emoji, nom: c.titre, desc: tt('karaoke'), ferme: !ok, action: () => (ok ? SceneChant.entrer(c) : proposerAchat()) };
+    }) }));
+    return liste;
+  }
+  function message(titre, sous) {
+    if (!racine || !actif) return;
+    clearTimeout(focusVoix);
+    racine.querySelector('.tv-titre').textContent = titre;
+    racine.querySelector('.tv-desc').textContent = sous || '';
+    const h = racine.querySelector('.tv-hero'); h.classList.remove('entre'); void h.offsetWidth; h.classList.add('entre');
+  }
+  function rangeesHistoires() {
+    const pref = ReglesConte.get().langue;
+    const choix = ['fr', 'en', 'ar'].includes(pref) || pref === 'toutes' ? pref : (['fr', 'en', 'ar'].includes(langue) ? langue : 'fr');
+    const puces = [['toutes', '🌍', { fr: 'Toutes', en: 'All', ar: 'الكل' }[langue] || 'Toutes'], ['fr', 'FR', 'Français'], ['en', 'EN', 'English'], ['ar', 'ع', 'العربية']].map(([k, e, nom]) => ({
+      id: 'l-' + k, emoji: e, nom, texte: true, choisi: k === choix, desc: tt('langueHist'), action: () => { ReglesConte.set('langue', k); montrer('histoires'); } }));
+    const liste = [{ titre: '🌍 ' + tt('langueHist'), items: puces, petit: true }];
+    const famille = HISTOIRES.filter((h) => aVoix(h, 'maman') || aVoix(h, 'papa'));
+    if (famille.length) liste.push({ titre: '🎙️ ' + tt('voixFamille'), items: famille.map(conteItem) });
+    (choix === 'toutes' ? ['fr', 'en', 'ar'] : [choix]).forEach((l) => liste.push({ titre: TITRE_LANGUE[l], items: HISTOIRES.filter((h) => h.langue === l).map(conteItem) }));
+    return liste;
+  }
+  function construire() {
+    racine = document.createElement('div'); racine.id = 'tv'; racine.className = 'tv';
+    racine.innerHTML = `<div class="tv-ciel"><div class="tv-astre"></div><div class="tv-nuages"></div><div class="tv-etoiles"></div></div>
+      <div class="tv-barre"><span class="tv-logo">Lumiole <b>✦</b></span><span class="tv-vide"></span></div>
+      <div class="tv-hero"><p class="tv-salut"></p><h1 class="tv-titre"></h1><p class="tv-desc"></p><div class="tv-badges"></div></div>
+      <div class="tv-rangees"><div class="tv-piste"></div></div>`;
+    // étoiles semées une fois pour toutes
+    racine.querySelector('.tv-etoiles').style.boxShadow = Array.from({ length: 90 }, () => `${(Math.random() * 100).toFixed(1)}vw ${(Math.random() * 60).toFixed(1)}vh 0 ${Math.random() < .2 ? 2 : 1}px rgba(255,255,255,${(.4 + Math.random() * .6).toFixed(2)})`).join(',');
+    document.body.appendChild(racine);
+  }
+  function barre() {
+    const b = racine.querySelector('.tv-barre');
+    b.querySelectorAll('button').forEach((x) => x.remove());
+    const p = Profils.actif;
+    const bouton = (cls, html, fn, aria) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'tv-pilule ' + cls; x.innerHTML = html; x.onclick = fn; if (aria) x.setAttribute('aria-label', aria); x.onpointermove = () => viser(-1, [...b.querySelectorAll('button')].indexOf(x)); return x; };
+    b.querySelector('.tv-logo').after(bouton('moi', `<span>${p.avatar}</span><span>${p.nom || ''}</span>`, () => choisirEnfant()));
+    const vide = b.querySelector('.tv-vide');
+    vide.after(bouton('tel', '📱 ' + tt('telephone'), () => (typeof GuideTel !== 'undefined' ? GuideTel.ouvrir() : DuoEcran.demarrer())),
+      bouton('', '🌍 ' + langue.toUpperCase(), () => $('btn-langue').click()),
+      bouton('', '👨‍👩‍👧', () => porteParents(() => espaceParents()), tf('parents')));
+  }
+  function tuile(it, i) {
+    const t = document.createElement('button');
+    t.type = 'button'; t.className = 'tv-tuile u' + (i % 5) + (it.ferme ? ' ferme' : '') + (it.texte ? ' texte' : '') + (it.conte ? ' conte' : '') + (it.choisi ? ' choisi' : '');
+    t.innerHTML = '<span class="e"></span><span class="n"></span>' + (it.deux ? '<span class="badge">👫</span>' : '') + (it.tel ? '<span class="badge">📱</span>' : '') + (it.ferme ? '<span class="badge">🔒</span>' : '');
+    t.querySelector('.e').textContent = it.emoji; t.querySelector('.n').textContent = it.nom;
+    t.onclick = () => { memoire[noeud] = { r, c: rangees[r]?.c || 0 }; if (!quiz) son('juste'); it.action(t); };
+    return t;
+  }
+  function remplir() {
+    const piste = racine.querySelector('.tv-piste'); piste.innerHTML = '';
+    rangees = rangeesDe(noeud).map((rg, ri) => {
+      const el = document.createElement('section'); el.className = 'tv-rang' + (rg.petit ? ' petit' : '');
+      el.innerHTML = '<h2></h2><div class="tv-tuiles"></div>';
+      el.querySelector('h2').textContent = rg.titre;
+      const zone = el.querySelector('.tv-tuiles');
+      const tuiles = rg.items.map((it, ci) => { const t = tuile(it, ci); t.onpointermove = () => viser(ri, ci, true); zone.appendChild(t); return t; });
+      piste.appendChild(el);
+      return { ...rg, el, zone, tuiles, c: 0 };
+    });
+  }
+  function salut() {
+    const m = moment(), p = Profils.actif;
+    racine.dataset.moment = m; document.documentElement.dataset.moment = m;
+    racine.querySelector('.tv-salut').textContent = `${tt(m === 'jour' ? 'jour' : m === 'soir' ? 'soirSalut' : 'nuit')}${p.nom ? ' ' + p.nom : ''} ${m === 'jour' ? '☀️' : m === 'soir' ? '🌆' : '🌙'}`;
+  }
+  // déplacer le focus : rangée ri, tuile ci (-1 = la barre du haut)
+  function viser(ri, ci, souris = false) {
+    if (!actif) return;
+    const avant = r + ':' + (rangees[r]?.c ?? -1);
+    if (ri === -1) {
+      const bs = [...racine.querySelectorAll('.tv-barre button')]; r = -1;
+      const b = bs[Math.max(0, Math.min(bs.length - 1, ci))]; racine.querySelectorAll('.f').forEach((x) => x.classList.remove('f'));
+      b?.classList.add('f'); b?.focus({ preventScroll: true }); racine.dataset.barre = Math.max(0, Math.min(bs.length - 1, ci));
+      racine.classList.add('en-haut'); return;
+    }
+    racine.classList.remove('en-haut');
+    r = Math.max(0, Math.min(rangees.length - 1, ri));
+    const rg = rangees[r]; rg.c = Math.max(0, Math.min(rg.tuiles.length - 1, ci));
+    racine.querySelectorAll('.f').forEach((x) => x.classList.remove('f'));
+    const t = rg.tuiles[rg.c]; t.classList.add('f'); t.focus({ preventScroll: true });
+    // la rangée choisie monte en haut de la zone, la tuile glisse vers la gauche (comme Netflix)
+    racine.querySelector('.tv-piste').style.transform = `translateY(${-rg.el.offsetTop}px)`;
+    const max = Math.max(0, rg.zone.scrollWidth - rg.zone.parentElement.clientWidth + 40);
+    rg.zone.style.transform = `translateX(${-Math.min(max, Math.max(0, t.offsetLeft - rg.tuiles[0].offsetLeft))}px)`;
+    rangees.forEach((x, i) => x.el.classList.toggle('loin', i < r));
+    if (avant !== r + ':' + rg.c) { if (!souris) son('tic'); heros(rg.items[rg.c]); }
+  }
+  function heros(it) {
+    racine.querySelector('.tv-titre').textContent = it.nom;
+    racine.querySelector('.tv-desc').textContent = it.desc || '';
+    racine.querySelector('.tv-badges').innerHTML = `<span class="ok">▶ ${tt('ok')}</span>` + (it.deux ? `<span>👫 ${tt('deux')}</span>` : '') + (it.conte ? `<span>🎭 ${tt('theatre')}</span>` : '') + (it.ferme ? '<span>🔒</span>' : '');
+    const h = racine.querySelector('.tv-hero'); h.classList.remove('entre'); void h.offsetWidth; h.classList.add('entre');
+    // Lumi dessine ce qu'on regarde, et dit son nom (après un petit temps, pour ne pas bavarder en défilant)
+    clearTimeout(focusDessin); clearTimeout(focusVoix);
+    focusDessin = setTimeout(() => { clearTimeout(retourNuage); avatar?.forme(it.emoji); }, 220);
+    focusVoix = setTimeout(() => { if (actif && !$('fa-fond')) parler(it.nom); }, 700);
+  }
+  function touche(dx, dy) {
+    if (r === -1) {
+      const bs = racine.querySelectorAll('.tv-barre button'), i = +racine.dataset.barre || 0;
+      if (dy > 0) return viser(0, rangees[0].c);
+      if (dx) { son('tic'); return viser(-1, Math.max(0, Math.min(bs.length - 1, i + dx))); }
+      return;
+    }
+    if (dy < 0 && r === 0) { son('tic'); return viser(-1, 0); }
+    if (dy) return viser(r + dy, rangees[Math.max(0, Math.min(rangees.length - 1, r + dy))].c);
+    if (dx) { const rg = rangees[r]; if (rg.c + dx < 0 || rg.c + dx >= rg.tuiles.length) { trembler(rg.tuiles[rg.c]); return; } viser(r, rg.c + dx); }
+  }
+  function trembler(el) { el.classList.remove('bute'); void el.offsetWidth; el.classList.add('bute'); }
+  function petitQr() {} // le QR n'apparaît plus en permanence : bouton « Jouer avec mon téléphone » → guide
+  function montrer(id) {
+    if (!racine) construire();
+    const nouveau = noeud !== id || !actif;
+    noeud = id; actif = true;
+    document.documentElement.classList.add('tv-on');
+    racine.hidden = false; racine.classList.toggle('sous', id !== 'accueil');
+    barre(); salut(); remplir(); petitQr();
+    const m = memoire[id] || { r: 0, c: 0 };
+    r = -2; requestAnimationFrame(() => viser(m.r, m.c));
+    if (nouveau) setTimeout(() => focusTele(), 0);
+  }
+  function cacher() { if (!actif) return; actif = false; document.documentElement.classList.remove('tv-on'); if (racine) racine.hidden = true; clearTimeout(focusVoix); }
+  return { montrer, cacher, touche, petitQr, message, get actif() { return actif; }, get racine() { return racine; } };
+})();
+// ----- Fiche d'une histoire (télé) : qui raconte, les pages, le théâtre -----
+const Fiche = (() => {
+  let el = null, h = null, voix = 'lumi';
+  function ouvrir(histoire) {
+    fermer(true); h = histoire;
+    const dispo = ['lumi', ...['maman', 'papa'].filter((q) => aVoix(h, q)), 'moi'];
+    voix = dispo.includes(ReglesConte.get().voix) ? ReglesConte.get().voix : 'lumi';
+    const lue = PagesLues.get(h.id);
+    el = document.createElement('div'); el.id = 'tv-fiche'; el.className = 'tv-fiche';
+    el.innerHTML = `<div class="tf-texte"><span class="tf-kicker"></span><h1></h1><p class="tf-resume"></p>
+      <span class="tf-label"></span><div class="tf-puces"></div>
+      <div class="tf-actions"><button type="button" class="tf-jouer"></button></div></div>
+      <div class="tf-pages"><span class="tf-label"></span><div class="tf-liste"></div></div>`;
+    el.querySelector('.tf-kicker').textContent = `${tt('histoireSoir')} · ${h.pages.length} pages · ${{ fr: 'Français', en: 'English', ar: 'العربية' }[h.langue]}`;
+    const t = el.querySelector('h1'); t.textContent = h.titre; t.dir = RTL(h.langue) ? 'rtl' : 'ltr';
+    const r = el.querySelector('.tf-resume'); r.textContent = h.pages[0][0].length > 150 ? h.pages[0][0].slice(0, 147).replace(/\s\S*$/, '') + '…' : h.pages[0][0]; r.dir = t.dir;
+    el.querySelectorAll('.tf-label')[0].textContent = tt('quiRaconte');
+    el.querySelectorAll('.tf-label')[1].textContent = tt('pages');
+    const puces = el.querySelector('.tf-puces');
+    dispo.forEach((q) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tf-puce' + (q === voix ? ' on' : '');
+      b.textContent = q === 'lumi' ? '✨ ' + tt('lumiRaconte') : q === 'moi' ? '📖 ' + tt('jeLis') : `${VOIX_FAMILLE[q].e} ${VOIX_FAMILLE[q][langue] || VOIX_FAMILLE[q].fr}`;
+      b.onclick = () => { voix = q; ReglesConte.set('voix', q); puces.querySelectorAll('.tf-puce').forEach((x) => x.classList.toggle('on', x === b)); son('tic'); };
+      puces.appendChild(b);
+    });
+    const jouer = el.querySelector('.tf-jouer'); jouer.innerHTML = `▶ ${tt('regarder')}`; jouer.onclick = () => lancer(0);
+    if (lue > 0 && lue < h.pages.length - 1) { const rep = document.createElement('button'); rep.type = 'button'; rep.className = 'tf-second'; rep.textContent = `${tt('reprendre')} ${lue + 1}`; rep.onclick = () => lancer(lue); el.querySelector('.tf-actions').appendChild(rep); }
+    const liste = el.querySelector('.tf-liste');
+    h.pages.forEach((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tf-page' + (i < lue ? ' lu' : ''); b.textContent = i + 1; b.onclick = () => lancer(i); b.onfocus = () => avatar?.forme(h.pages[i][1]); liste.appendChild(b); });
+    TV.racine.appendChild(el); TV.racine.classList.add('fiche-ouverte');
+    clearTimeout(retourNuage); avatar?.mode(h.palette || 'galaxie'); avatar?.forme(h.pages[0][1]);
+    setTimeout(() => jouer.focus({ preventScroll: true }), 30);
+    parler(h.titre);
+  }
+  function lancer(page) {
+    ReglesConte.set('voix', voix); ReglesConte.set('mode', voix === 'moi' ? 'moi' : 'lumi');
+    const x = h; fermer(true); son('juste');
+    ouvrirHistoire(x, { voix, page });
+  }
+  function fermer(sansFocus) {
+    if (!el) return; el.remove(); el = null; TV.racine?.classList.remove('fiche-ouverte');
+    if (!sansFocus && TV.actif) TV.montrer(pile[pile.length - 1]);
+  }
+  return { ouvrir, fermer };
+})();
+
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
 accueillir();
 demarrerFamille();
 // le téléphone a scanné le QR de la télé : il devient tout de suite une manette
-const codeManette = new URLSearchParams(location.search).get('manette');
-if (/^\d{4}$/.test(codeManette || '')) { document.documentElement.classList.add('mode-manette'); setTimeout(() => DuoManette.ouvrir(codeManette), 300); }
+const paramsUrl = new URLSearchParams(location.search), codeManette = paramsUrl.get('manette'), secretManette = paramsUrl.get('s');
+if (/^\d{4}$/.test(codeManette || '')) { document.documentElement.classList.add('mode-manette'); setTimeout(() => DuoManette.ouvrir(codeManette, /^[0-9a-f]{24}$/.test(secretManette || '') ? secretManette : null), 300); }
+// la télé écoute les téléphones dès le démarrage (le QR est sur l'accueil)
+else if (modeTele && CONFIG_APP.supabase.url) setTimeout(() => DuoEcran.ecouter().then(() => TV.petitQr()).catch(() => {}), 1200);
 // à la télé et sur grand écran : un bouton « téléphone » pour jouer sans passer par l'espace parents
 $('btn-duo').onclick = () => DuoEcran.demarrer();
 setTimeout(() => { avatar?.mode(paletteAmb); avatar?.forme(duJour().mot.emoji); revenirAuNuage(8000); }, 600);
