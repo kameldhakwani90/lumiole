@@ -1630,6 +1630,149 @@
   .tele .jc-scene .cam-boite { height: 50vh; width: auto; }
   .pastille-nouveau { position: absolute; top: 8px; inset-inline-end: 8px; padding: 3px 8px; border-radius: 99px; background: #FF8FB8; color: #2A0B1A; font: 800 11px system-ui; box-shadow: 0 4px 12px rgba(255,143,184,.45); }
   .univers { position: relative; }
+
+  /* ======================= Lumiole cinéma ======================= */
+  .ci { position: absolute; inset: 0; background: #000; overflow: hidden; color: #fff; --h: 100vh; }
+  .ci-cadre { position: absolute; inset: 0; overflow: hidden; background: #000; }
+  .ci-cam { position: absolute; inset: 0; }
+  .ci-cam.secoue { animation: ci-secoue .7s linear; }
+  @keyframes ci-secoue { 10%, 50%, 90% { transform: translate(-1.2%, .6%); } 30%, 70% { transform: translate(1.2%, -.6%); } }
+  .ci-couche { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+  .ci-ciel { transition: background 1.2s; }
+  .ci-astre { position: absolute; transform: translate(-50%, -50%); line-height: 1; filter: drop-shadow(0 0 calc(var(--h) * .05) rgba(255,240,200,.6)); }
+  .ci-el, .ci-acteur { position: absolute; transform: translate(-50%, -100%); line-height: 1; white-space: nowrap; }
+  .ci-el.ci-loin { filter: blur(1px) brightness(.5) saturate(.75); }
+  .ci-el.ci-milieu { filter: brightness(.85) drop-shadow(0 1vh 2vh rgba(0,0,0,.4)); animation: ci-balance 7s ease-in-out infinite; transform-origin: 50% 100%; }
+  .ci-el.ci-avant { filter: blur(3px) brightness(.45); animation: ci-balance 6s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes ci-balance { 50% { transform: translate(-50%, -100%) rotate(1.5deg); } 0%, 100% { transform: translate(-50%, -100%) rotate(-1deg); } }
+  .ci-sol { pointer-events: none; }
+  .ci-acteurs { pointer-events: none; }
+  .ci-acteur { text-align: center; z-index: 1; }
+  .ci-corps { display: inline-block; filter: drop-shadow(0 .08em .12em rgba(0,0,0,.55)); }
+  .ci-corps .e { display: inline-block; }
+  .ci-acteur.miroir .ci-corps { transform: scaleX(-1); }
+  .ci-acteur[data-anim=marche] .e { animation: ci-marche .55s ease-in-out infinite; }
+  .ci-acteur[data-anim=saute] .e { animation: ci-saute .8s ease-in-out infinite; }
+  .ci-acteur[data-anim=tremble] .e { animation: ci-tremble .25s linear infinite; }
+  .ci-acteur[data-anim=flotte] .e { animation: ci-flotte 3s ease-in-out infinite; }
+  .ci-acteur[data-anim=danse] .e { animation: ci-danse 1s ease-in-out infinite; }
+  .ci-acteur[data-anim=vole] .e { animation: ci-vole .5s ease-in-out infinite; }
+  .ci-acteur[data-anim=dort] .e { animation: ci-dort 3s ease-in-out infinite; }
+  .ci-acteur[data-anim=dort]::after { content: 'z z'; position: absolute; top: -.2em; right: -.4em; font: 800 .25em 'Baloo 2', system-ui; color: #C9D6FF; animation: ci-flotte 2s ease-in-out infinite; }
+  @keyframes ci-marche { 50% { transform: translateY(-6%) rotate(3deg); } }
+  @keyframes ci-saute { 0%, 100% { transform: translateY(0) scaleY(.92); } 50% { transform: translateY(-35%) scaleY(1.05); } }
+  @keyframes ci-tremble { 25% { transform: translateX(-3%); } 75% { transform: translateX(3%); } }
+  @keyframes ci-flotte { 50% { transform: translateY(-10%); } }
+  @keyframes ci-danse { 25% { transform: rotate(-12deg) translateY(-6%); } 75% { transform: rotate(12deg) translateY(-6%); } }
+  @keyframes ci-vole { 50% { transform: translateY(-12%) scaleY(.82); } }
+  @keyframes ci-dort { 50% { transform: scale(1.04, .96); } }
+  .ci-acteur.lumi .ci-corps { width: 1em; height: 1em; border-radius: 50%; background: radial-gradient(circle, #fff 0 18%, #BFFBEA 30%, rgba(46,230,197,.55) 50%, transparent 70%); filter: drop-shadow(0 0 .3em #2EE6C5); animation: ci-flotte 3s ease-in-out infinite, ci-pulse 1.8s ease-in-out infinite; }
+  @keyframes ci-pulse { 50% { filter: drop-shadow(0 0 .6em #7FF3CB); } }
+  .ci-bulle { position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -.15em); display: none; align-items: center; gap: .5em; padding: .35em .8em; border-radius: 99px; background: rgba(255,255,255,.95); color: #1B1030; font: 800 calc(var(--h) * .022) system-ui; white-space: nowrap; box-shadow: 0 .4em 1em rgba(0,0,0,.35); }
+  .ci-bulle b { color: #1B1030; } .ci-bulle i { font-style: normal; color: var(--c); letter-spacing: .1em; animation: ci-points 1s steps(3) infinite; }
+  @keyframes ci-points { 0% { opacity: .3; } 50% { opacity: 1; } }
+  .ci-acteur.parle .ci-bulle { display: flex; }
+  .ci-acteur.parle .ci-corps { animation: ci-parle .35s ease-in-out infinite; }
+  @keyframes ci-parle { 50% { transform: scale(1.04) translateY(-2%); } }
+  .ci-acteur.lumi.parle .ci-corps { animation: ci-pulse .5s ease-in-out infinite; }
+  .ci-part, .ci-magie { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .ci-effet { position: absolute; inset: 0; pointer-events: none; }
+  .ci-effet.e-eclair { animation: ci-eclair 1s ease-out; }
+  @keyframes ci-eclair { 0%, 20% { background: rgba(255,255,255,.9); } 10%, 40% { background: transparent; } 30% { background: rgba(220,230,255,.6); } }
+  .ci-effet.e-clignote { animation: ci-clignote 2.4s steps(1); }
+  @keyframes ci-clignote { 0%, 30%, 60% { background: rgba(0,0,0,.55); } 15%, 45%, 75%, 100% { background: transparent; } }
+  .ci-effet.e-lumiere { animation: ci-lumiere 3s ease-out; }
+  @keyframes ci-lumiere { 0% { background: radial-gradient(circle at 50% 40%, rgba(255,230,160,.0), transparent 60%); } 30% { background: radial-gradient(circle at 50% 40%, rgba(255,230,160,.55), transparent 70%); } 100% { background: radial-gradient(circle at 50% 40%, rgba(255,230,160,0), transparent 70%); } }
+  .ci-effet.t-noir { animation: ci-noir 1.4s ease-in-out; }
+  @keyframes ci-noir { 0%, 100% { background: rgba(0,0,0,0); } 45%, 55% { background: #000; } }
+  .ci-effet.t-fondu { animation: ci-fondu .9s ease-in-out; }
+  @keyframes ci-fondu { 0%, 100% { background: rgba(0,0,0,0); } 50% { background: rgba(0,0,0,.7); } }
+  .ci-effet.t-iris::before { content: ''; position: absolute; left: 50%; top: 45%; width: 0; height: 0; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 250vmax #000; animation: ci-iris 1.6s ease-out forwards; }
+  @keyframes ci-iris { 0% { width: 0; height: 0; } 100% { width: 260vmax; height: 260vmax; } }
+  .ci-bandes i { position: absolute; left: 0; right: 0; height: calc(var(--h) * .075); background: #000; transition: height .8s ease; z-index: 2; }
+  .ci-bandes i:first-child { top: 0; } .ci-bandes i:last-child { bottom: 0; }
+  .ci.affiche .ci-bandes i, .ci.interagit .ci-bandes i { height: 0; }
+  .ci-chap { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; opacity: 0; z-index: 4; background: #000; }
+  .ci-chap span { max-width: 80%; text-align: center; font: 800 clamp(26px, 6vh, 72px)/1.15 'Baloo 2', system-ui; background: linear-gradient(135deg, #FFE0A8, #FF9F43 50%, #C9A4FF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .ci-chap.on { animation: ci-chap 3.6s ease-in-out forwards; }
+  @keyframes ci-chap { 0% { opacity: 0; } 15%, 80% { opacity: 1; } 100% { opacity: 0; } }
+  .ci-sous { position: absolute; left: 50%; bottom: 10vh; transform: translateX(-50%); width: min(92%, 1300px); display: flex; flex-direction: column; align-items: center; gap: .6vh; text-align: center; opacity: 0; transition: opacity .4s; pointer-events: none; z-index: 3; }
+  .ci-sous.on { opacity: 1; }
+  .ci-sous.entre p { animation: av-entre .5s ease-out; }
+  .ci-qui { font: 800 clamp(13px, 2.3vh, 26px) system-ui; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+  .ci-qui:empty { display: none; }
+  .ci-sous p { margin: 0; padding: 1.2vh 2.2vw; border-radius: 2vh; background: rgba(4,4,16,.55); backdrop-filter: blur(6px); font: 700 clamp(17px, 3.4vh, 40px)/1.35 'Baloo 2', system-ui; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .ci-sous.narr p { font-style: italic; background: rgba(4,4,16,.4); }
+  .ci.interagit .ci-sous { bottom: auto; top: 9vh; }
+  .ci-inter { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .ci-inter > * { pointer-events: auto; }
+  .ci-defi { position: absolute; left: 0; right: 0; top: 18vh; bottom: 26vh; display: grid; place-items: center; pointer-events: none; }
+  .ci-defi > * { pointer-events: auto; }
+  .ci.affiche .ci-defi { top: 40vh; bottom: 22vh; }
+  .ci-choix { position: absolute; left: 0; right: 0; bottom: 6vh; display: flex; flex-wrap: wrap; gap: 1.6vw; justify-content: center; align-items: center; padding: 0 4vw; }
+  .ci-ui { position: absolute; top: 2.4vh; right: 2vw; display: flex; gap: .8vw; z-index: 5; }
+  .ci-b { height: clamp(36px, 5.4vh, 60px); min-width: clamp(36px, 5.4vh, 60px); padding: 0 1.2vw; border-radius: 99px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.4); color: #fff; font: 800 clamp(13px, 2vh, 22px) system-ui; backdrop-filter: blur(6px); cursor: pointer; }
+  .ci.affiche [data-a=passer], .ci.affiche [data-a=pause], .ci.interagit [data-a=passer] { display: none; }
+  .ci.en-pause .ci-cadre { filter: brightness(.55) saturate(.6); }
+  .ci-affiche { display: flex; flex-direction: column; align-items: center; gap: 1.2vh; text-align: center; max-width: 90%; }
+  .ci-kicker { font: 800 clamp(11px, 1.9vh, 22px) system-ui; letter-spacing: .1em; text-transform: uppercase; color: #9FF5DF; }
+  .ci-titre { font: 800 clamp(30px, 8vh, 96px)/1.02 'Baloo 2', system-ui; background: linear-gradient(135deg, #FFE0A8, #FF9F43 50%, #C9A4FF); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 .4vh 2vh rgba(0,0,0,.6)); }
+  .ci-resume { font: 600 clamp(15px, 2.6vh, 30px)/1.35 system-ui; max-width: 900px; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
+  .ci-fins { font: 800 clamp(13px, 2.2vh, 24px) system-ui; color: #FFE0A8; }
+  .ci-karaoke { display: flex; flex-direction: column; align-items: center; gap: 2vh; text-align: center; }
+  .ci-karaoke .grand { font: 800 clamp(70px, 22vh, 260px)/1 'Baloo 2', system-ui; color: #FFE0A8; text-shadow: 0 0 5vh rgba(255,159,67,.7); animation: ph-pop .6s ease-out; }
+  .ci-karaoke b { font: 800 clamp(22px, 5.4vh, 64px)/1.2 'Baloo 2', system-ui; animation: av-entre .5s ease-out; text-shadow: 0 2px 14px rgba(0,0,0,.8); }
+  .ci-esquive { display: flex; flex-direction: column; align-items: center; gap: 2vh; }
+  .ci-esquive span { font-size: clamp(40px, 12vh, 140px); }
+  .ci-esquive span.vient-g { animation: ci-vient-g 1.4s ease-in infinite; } .ci-esquive span.vient-d { animation: ci-vient-d 1.4s ease-in infinite; }
+  @keyframes ci-vient-g { from { transform: translateX(-40vw) rotate(0); } to { transform: translateX(20vw) rotate(360deg); opacity: 0; } }
+  @keyframes ci-vient-d { from { transform: translateX(40vw) rotate(0); } to { transform: translateX(-20vw) rotate(-360deg); opacity: 0; } }
+  .ci-esquive b { font: 800 clamp(24px, 6vh, 72px) 'Baloo 2', system-ui; color: #FFE0A8; text-shadow: 0 0 3vh rgba(255,159,67,.6); }
+  .ci-fleches { display: flex; gap: 2vw; width: 100%; justify-content: center; }
+  .ci-generique { display: flex; flex-direction: column; align-items: center; gap: 1.6vh; text-align: center; }
+  .ci-fin { font: 800 clamp(40px, 11vh, 130px) 'Baloo 2', system-ui; color: #FFE0A8; text-shadow: 0 0 5vh rgba(255,159,67,.7); animation: av-entre .8s ease-out; }
+  .ci-morale { margin: 0; font: 700 clamp(17px, 3.4vh, 40px) 'Baloo 2', system-ui; color: #BFFBEA; }
+  .ci-defile { height: clamp(90px, 20vh, 240px); overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent); mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent); }
+  .ci-defile > div { display: flex; flex-direction: column; gap: 1vh; animation: ci-defile 16s linear infinite; font: 700 clamp(14px, 2.4vh, 28px) system-ui; }
+  .ci-defile em { font-style: normal; color: #9FF5DF; font-weight: 800; }
+  @keyframes ci-defile { from { transform: translateY(20vh); } to { transform: translateY(-100%); } }
+  .av-cible.bouge { animation: ci-derive 6s ease-in-out infinite alternate, av-cible 1.6s ease-in-out infinite; }
+  @keyframes ci-derive { from { translate: -8vw -3vh; } to { translate: 8vw 3vh; } }
+  .tele .ci button:focus { outline: none; box-shadow: 0 0 0 .6vh #fff, 0 0 4vh rgba(255,255,255,.5); transform: scale(1.07); }
+  /* téléphone tenu en hauteur : l'image en 16/9 en haut, le texte et les choix dessous */
+  @media (orientation: portrait) {
+    .ci-cadre { right: auto; width: 178vh; }
+    .ci-cadre::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), transparent 18%, transparent 52%, rgba(0,0,0,.82)); pointer-events: none; z-index: 2; }
+    .ci-bandes { display: none; }
+    .ci-sous, .ci.interagit .ci-sous { top: auto; bottom: 7vh; width: calc(100% - 28px); }
+    .ci-sous p { font-size: 19px; padding: 12px 16px; border-radius: 18px; }
+    .ci.interagit .ci-sous { bottom: auto; top: 9vh; }
+    .ci-defi { top: 22vh; bottom: 30vh; }
+    .ci.affiche .ci-defi { top: 30vh; bottom: 20vh; }
+    .ci-choix { bottom: 5vh; gap: 10px; padding: 0 14px; }
+    .ci-titre { font-size: 40px; } .ci-resume { font-size: 16px; }
+    .av-carte { width: calc(50% - 8px); min-height: 118px; border-radius: 22px; } .av-carte .e { font-size: 46px; } .av-carte .n { font-size: 16px; }
+    .ci-choix:has(.av-carte:nth-of-type(3)) .av-carte { width: calc(33% - 8px); } .ci-choix:has(.av-carte:nth-of-type(3)) .av-carte .n { font-size: 13px; }
+    .av-cam { width: 74vw; }
+    .ci-ui { top: 14px; right: 12px; gap: 6px; }
+    .ci-chap span { font-size: 34px; }
+    .ci-karaoke .grand { font-size: 120px; } .ci-karaoke b { font-size: 26px; }
+  }
+  .ci-cam { transition: transform 1.2s ease; transform-origin: 50% 60%; }
+  .ci-cam.penche { transform: rotate(-5deg) scale(1.08); }
+  .ci-cam.orbite { animation: ci-orbite var(--duree, 8s) ease-in-out forwards; }
+  @keyframes ci-orbite { 0% { transform: rotate(2.5deg) scale(1.06); } 100% { transform: rotate(-2.5deg) scale(1.06); } }
+  .ci-cam.tourbillon { animation: ci-tourbillon var(--duree, 4s) ease-in-out forwards; }
+  @keyframes ci-tourbillon { 0% { transform: rotate(0) scale(1.1); } 100% { transform: rotate(360deg) scale(1.1); } }
+  .ci[data-voix=effrayant] .ci-cadre { filter: saturate(.6) brightness(.8) hue-rotate(-12deg); transition: filter 1s; }
+  .ci[data-voix=effrayant] .ci-sous p { font-family: 'Baloo 2', system-ui; letter-spacing: .03em; color: #DDE3F5; text-shadow: 0 0 1.5vh rgba(150,170,220,.9); animation: ci-frisson 2s ease-in-out infinite; }
+  @keyframes ci-frisson { 50% { transform: translateX(.15vw) skewX(-1deg); } }
+  .ci[data-voix=fantome] .ci-sous p { color: #F2F6FF; text-shadow: 0 0 1.4vh rgba(255,255,255,.9); animation: ci-flotte 2.6s ease-in-out infinite; }
+  .ci[data-voix=chuchote] .ci-sous p { font-size: clamp(15px, 2.9vh, 34px); opacity: .85; font-style: italic; }
+  .ci-pont { width: 140vw; height: .5em; }
+  .ci-pont b { position: absolute; left: 0; right: 0; bottom: 0; height: .14em; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: repeating-linear-gradient(90deg, #8A5A34 0 .16em, #5E3A1E .16em .2em); box-shadow: 0 .05em .1em rgba(0,0,0,.6); }
+  .ci-pont i { position: absolute; left: 0; right: 0; top: 0; height: .4em; border-top: .03em solid #C9A27A; border-radius: 50% 50% 0 0 / 30% 30% 0 0; background: repeating-linear-gradient(90deg, transparent 0 .28em, rgba(201,162,122,.8) .28em .3em); -webkit-mask-image: linear-gradient(#000 0 70%, transparent); mask-image: linear-gradient(#000 0 70%, transparent); }
+  @media (orientation: portrait) { .ci.joue::after { content: '📱↻'; position: absolute; left: 14px; top: 16px; font: 700 15px system-ui; color: rgba(255,255,255,.5); pointer-events: none; z-index: 5; } }
 </style>
 </head>
 <body>
@@ -2728,7 +2871,7 @@ async function parlerNatif(texte, l, o) {
   try { await tts.stop(); } catch {}
   avatar?.parle(true); Ambiance.baisser(true);
   const pouls = setInterval(() => avatar?.syllabe(), 200);
-  try { await tts.speak({ text: texte, lang: LANGUES[l].voix, rate: o.vitesse || .92, pitch: o.ton || 1.08, volume: 1, category: 'playback' }); } catch {}
+  try { await tts.speak({ text: texte, lang: LANGUES[l].voix, rate: o.vitesse || .92, pitch: o.ton || 1.08, volume: o.volume ?? 1, category: 'playback' }); } catch {}
   clearInterval(pouls);
   if (moi === paroleNative) { avatar?.parle(false); Ambiance.baisser(false); }
 }
@@ -2745,7 +2888,7 @@ function parler(texte, l = langue, o = {}) {
     const occupe = speechSynthesis.speaking || speechSynthesis.pending || performance.now() - dernierSilence < 250;
     speechSynthesis.cancel(); dernierSilence = performance.now();
     const u = new SpeechSynthesisUtterance(texte), code = LANGUES[l].voix.slice(0, 2);
-    u.lang = LANGUES[l].voix; u.rate = o.vitesse || .92; u.pitch = o.ton || 1.12;
+    u.lang = LANGUES[l].voix; u.rate = o.vitesse || .92; u.pitch = o.ton || 1.12; u.volume = o.volume ?? 1;
     const v = voixDe(code);
     if (v) { u.voice = v; u.lang = v.lang; }
     let fini = false;
@@ -8037,16 +8180,25 @@ const Musiquette = (() => {
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
     o.connect(g).connect(gain); o.start(t); o.stop(t + d + .05);
   }
-  function jouer(bpm = 116, surTemps) {
+  // styles : joyeux (majeur), mystere (mineur, lent, clairsemé), aventure (mineur, qui avance), berceuse (doux), fete (rapide, avec claps)
+  const STYLES = {
+    mystere: [[57, 60, 64, 69, 64, 60, 59, 62], [53, 57, 60, 65, 60, 57, 55, 59], [55, 58, 62, 67, 62, 58, 57, 60], [52, 56, 59, 64, 59, 56, 55, 59]],
+    aventure: [[50, 53, 57, 62, 57, 53, 55, 57], [46, 50, 53, 58, 53, 50, 52, 53], [48, 52, 55, 60, 55, 52, 53, 55], [45, 49, 52, 57, 52, 49, 50, 52]],
+    berceuse: [[60, 64, 67, 72, 67, 64, 65, 64], [57, 60, 64, 69, 64, 60, 62, 60], [53, 57, 60, 65, 60, 57, 59, 57], [55, 59, 62, 67, 62, 59, 60, 62]],
+  };
+  function clap(t) { const n = ctx.createBuffer(1, ctx.sampleRate * .06, ctx.sampleRate), x = n.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / x.length); const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = n; g.gain.value = .12; s.connect(g).connect(gain); s.start(t); }
+  function jouer(bpm = 116, surTemps, style = 'joyeux') {
     arreter();
     try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume?.(); } catch { return; }
     gain = ctx.createGain(); gain.gain.value = Ambiance.actif ? 1 : 0; gain.connect(ctx.destination);
-    const croche = 60 / bpm / 2; pas = 0;
+    const croche = 60 / bpm / 2, G = STYLES[style] || GAMMES; pas = 0;
     minuteur = setInterval(() => {
-      const t = ctx.currentTime + .05, mesure = Math.floor(pas / 16) % 4, g = GAMMES[mesure], i = pas % 16;
-      note(g[i % 8] + 12, t, croche * .9, 'triangle', .07);
-      if (i % 4 === 0) { note(g[0] - 12, t, croche * 3, 'sine', .16); surTemps?.(Math.floor(pas / 4)); }
-      if (i % 4 === 2) note(g[2] - 12, t, croche * 1.5, 'sine', .08);
+      const t = ctx.currentTime + .05, mesure = Math.floor(pas / 16) % 4, g = G[mesure], i = pas % 16;
+      if (style === 'mystere') { if (i % 2 === 0) note(g[(i / 2) % 8] + 12, t, croche * 3, 'sine', .05); if (i === 0) note(g[0] - 12, t, croche * 14, 'triangle', .1); }
+      else if (style === 'berceuse') { if (i % 2 === 0) note(g[(i / 2) % 8] + 12, t, croche * 2.6, 'sine', .06); if (i % 8 === 0) note(g[0] - 12, t, croche * 7, 'sine', .1); }
+      else if (style === 'aventure') { note(g[i % 8] + 12, t, croche * .8, 'triangle', .05); if (i % 2 === 0) note(g[0] - 12, t, croche * 1.2, 'sawtooth', .025); if (i % 4 === 0) note(g[0] - 24, t, croche * 2, 'sine', .14); }
+      else { note(g[i % 8] + 12, t, croche * .9, 'triangle', .07); if (i % 4 === 2) note(g[2] - 12, t, croche * 1.5, 'sine', .08); if (style === 'fete' && i % 4 === 2) clap(t); }
+      if (i % 4 === 0) { if (style === 'joyeux' || style === 'fete') note(g[0] - 12, t, croche * 3, 'sine', .16); surTemps?.(Math.floor(pas / 4)); }
       pas++;
     }, croche * 1000);
   }
@@ -9296,10 +9448,11 @@ MODULES.couleurs = (() => {
 })();
 
 // =====================================================================
-// ---------- Les grandes aventures : des films interactifs où les enfants décident ----------
-// Lumi raconte en plein écran, sa poussière dessine la scène, les enfants choisissent la suite
-// (doigt, télécommande, main ou téléphone) et relèvent des défis devant la caméra (ou sans caméra).
-// La première partie est offerte (bande-annonce), la suite fait partie de Lumiole Famille.
+// ---------- Lumiole cinéma : des films interactifs où les enfants décident ----------
+// Décors en couches (profondeur), caméra (plans large / moyen / gros, travelling, zoom, montée, secousse),
+// acteurs qui entrent, bougent et parlent avec leur propre voix, bruitages, musiques d'ambiance,
+// chapitres, défis devant la caméra, choix, plusieurs fins et générique.
+// Les films sont des données (dossier films/), écrites avec le skill « film-lumiole ».
 // =====================================================================
 const AV_TXT = {
   aventures: { fr: 'Les grandes aventures', en: 'Big adventures', ar: 'المغامرات الكبرى' },
@@ -9307,237 +9460,759 @@ const AV_TXT = {
   decidez: { fr: '👫 Décidez ensemble !', en: '👫 Decide together!', ar: '👫 قرّروا معًا!' },
   suite: { fr: 'La suite de l’aventure est dans Lumiole Famille', en: 'The rest of the adventure is in Lumiole Family', ar: 'بقية المغامرة في لوميول العائلة' },
   debloquer: { fr: '✨ Débloquer l’aventure', en: '✨ Unlock the adventure', ar: '✨ افتح المغامرة' },
-  continuer: { fr: 'Continuer', en: 'Continue', ar: 'تابع' },
   passer: { fr: 'Passer', en: 'Skip', ar: 'تخطَّ' },
+  pause: { fr: 'Pause', en: 'Pause', ar: 'إيقاف' },
   fin: { fr: 'Fin', en: 'The end', ar: 'النهاية' },
-  rejouer: { fr: '↺ Revivre l’aventure', en: '↺ Play it again', ar: '↺ أعد المغامرة' },
-  autreChemin: { fr: 'Essayez l’autre chemin !', en: 'Try the other path!', ar: 'جرّبوا الطريق الآخر!' },
+  rejouer: { fr: '↺ Revoir le film', en: '↺ Watch again', ar: '↺ شاهد من جديد' },
+  autreChemin: { fr: 'Essayez un autre chemin pour découvrir une autre fin !', en: 'Try another path to discover another ending!', ar: 'جرّبوا طريقًا آخر لتكتشفوا نهاية أخرى!' },
   finsTrouvees: { fr: 'Fins trouvées', en: 'Endings found', ar: 'النهايات المكتشفة' },
-  commencer: { fr: '▶ Commencer', en: '▶ Start', ar: '▶ ابدأ' },
-  reprendre: { fr: 'Reprendre', en: 'Resume', ar: 'تابع' },
-  defiOk: { fr: 'Défi réussi !', en: 'Challenge done!', ar: 'نجح التحدي!' },
+  commencer: { fr: '▶ Regarder', en: '▶ Watch', ar: '▶ شاهد' },
+  reprendre: { fr: '⏵ Reprendre', en: '⏵ Resume', ar: '⏵ تابع' },
+  depuisDebut: { fr: 'Depuis le début', en: 'From the start', ar: 'من البداية' },
+  defiOk: { fr: 'Bravo !', en: 'Well done!', ar: 'أحسنتم!' },
   minutes: { fr: 'min', en: 'min', ar: 'د' },
+  avec: { fr: 'Avec', en: 'Starring', ar: 'بمشاركة' },
+  etVous: { fr: 'et vous, les héros de l’histoire !', en: 'and you, the heroes of the story!', ar: 'وأنتم، أبطال الحكاية!' },
+  gauche: { fr: '⬅ À gauche', en: '⬅ Left', ar: '⬅ يسار' }, droite: { fr: 'À droite ➡', en: 'Right ➡', ar: 'يمين ➡' },
+  penche: { fr: 'Penchez-vous', en: 'Lean', ar: 'مِيلوا' },
+  versGauche: { fr: 'à gauche !', en: 'to the left!', ar: 'إلى اليسار!' }, versDroite: { fr: 'à droite !', en: 'to the right!', ar: 'إلى اليمين!' },
 };
 const av = (k) => t3(AV_TXT[k]);
+const FILMS = [];
 
-// ---------- La poussière de Lumi : des grains qui se rassemblent pour dessiner un emoji ----------
+// ---------- La poussière de Lumi pour les moments magiques : des grains qui dessinent un emoji ----------
 function poussiereFilm(cv) {
   const g = cv.getContext('2d'), grains = [];
-  let cibles = [], raf = 0, centre = [.5, matchMedia('(orientation: portrait)').matches ? .3 : .4];
-  const N = 900;
-  for (let i = 0; i < N; i++) grains.push({ x: Math.random(), y: Math.random(), vx: 0, vy: 0, t: .6 + Math.random() * 1.6, h: Math.random() });
-  function forme(e, taille = .46) {
+  let cibles = [], raf = 0, centre = [.5, .4], visible = 0, cible = 0;
+  for (let i = 0; i < 700; i++) grains.push({ x: .5, y: .4, vx: 0, vy: 0, t: .6 + Math.random() * 1.6 });
+  function forme(e, taille = .44, ou) {
+    if (ou) centre = ou;
     const o = document.createElement('canvas'), T = 160; o.width = o.height = T;
     const c = o.getContext('2d', { willReadFrequently: true });
     c.font = `${T * .8}px "Apple Color Emoji","Noto Color Emoji",sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(e, T / 2, T * .54);
     const d = c.getImageData(0, 0, T, T).data, pts = [];
     for (let y = 0; y < T; y += 2) for (let x = 0; x < T; x += 2) { const i = (y * T + x) * 4; if (d[i + 3] > 120) pts.push([x / T, y / T, d[i], d[i + 1], d[i + 2]]); }
-    cibles = grains.map(() => pts[(Math.random() * pts.length) | 0] || [.5, .5, 255, 255, 255]).map(([x, y, r, v, b]) => ({ x: centre[0] + (x - .5) * taille, y: centre[1] + (y - .5) * taille * (cv.width / cv.height), c: `rgb(${Math.min(255, r + 60)},${Math.min(255, v + 60)},${Math.min(255, b + 60)})` }));
+    const r = cv.width / Math.max(1, cv.height) || 1.7;
+    cibles = grains.map(() => pts[(Math.random() * pts.length) | 0] || [.5, .5, 255, 255, 255]).map(([x, y, rr, v, b]) => ({ x: centre[0] + (x - .5) * taille / r, y: centre[1] + (y - .5) * taille, c: `rgb(${Math.min(255, rr + 70)},${Math.min(255, v + 70)},${Math.min(255, b + 70)})` }));
+    cible = 1;
   }
-  function nuage() { cibles = []; }
   const boucle = (ms) => {
     if (!cv.isConnected) return;
     const r = cv.getBoundingClientRect(), k = Math.min(2, devicePixelRatio || 1);
     if (cv.width !== Math.round(r.width * k)) { cv.width = Math.round(r.width * k); cv.height = Math.round(r.height * k); }
     const W = cv.width, H = cv.height, t = ms / 1000;
-    g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
-    // halo doux
-    const hx = centre[0] * W, hy = centre[1] * H, hr = Math.min(W, H) * .32, gr = g.createRadialGradient(hx, hy, 0, hx, hy, hr);
-    gr.addColorStop(0, 'rgba(46,230,197,.16)'); gr.addColorStop(1, 'rgba(46,230,197,0)'); g.fillStyle = gr; g.fillRect(hx - hr, hy - hr, hr * 2, hr * 2);
-    grains.forEach((p, i) => {
-      const c = cibles[i];
-      const tx = c ? c.x : centre[0] + Math.cos(t * .6 + i) * .09 * p.t, ty = c ? c.y : centre[1] + Math.sin(t * .8 + i * 1.3) * .09 * p.t;
-      p.vx = p.vx * .86 + (tx - p.x) * .02; p.vy = p.vy * .86 + (ty - p.y) * .02; p.x += p.vx; p.y += p.vy;
-      const sc = .7 + .5 * Math.sin(t * 3 + i);
-      g.fillStyle = c ? c.c : `hsla(${170 + p.h * 60},90%,80%,.9)`; g.globalAlpha = .55 + .45 * sc;
-      g.beginPath(); g.arc(p.x * W + Math.sin(t * 2 + i) * 1.5, p.y * H, p.t * k * 1.1, 0, 7); g.fill();
-    });
-    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    visible += (cible - visible) * .04;
+    g.clearRect(0, 0, W, H);
+    if (visible > .01) {
+      g.globalCompositeOperation = 'lighter';
+      grains.forEach((p, i) => {
+        const c = cibles[i]; if (!c) return;
+        p.vx = p.vx * .86 + (c.x - p.x) * .022; p.vy = p.vy * .86 + (c.y - p.y) * .022; p.x += p.vx; p.y += p.vy;
+        g.fillStyle = c.c; g.globalAlpha = visible * (.55 + .45 * Math.sin(t * 3 + i));
+        g.beginPath(); g.arc(p.x * W + Math.sin(t * 2 + i) * 1.5, p.y * H, p.t * k * 1.2, 0, 7); g.fill();
+      });
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    } else grains.forEach((p) => { p.x = centre[0] + (Math.random() - .5) * .05; p.y = centre[1] + (Math.random() - .5) * .05; });
     raf = requestAnimationFrame(boucle);
   };
   raf = requestAnimationFrame(boucle);
-  return { forme, nuage, arreter() { cancelAnimationFrame(raf); } };
+  return { forme, eteindre() { cible = 0; }, arreter() { cancelAnimationFrame(raf); } };
 }
 
-// ---------- Le grand film d'Halloween : Lumi et le château des citrouilles ----------
-// fonds : nuit, foret, pont, chateau, hall, cuisine, tour, fete
-const AV_FONDS = {
-  nuit: ['#1B1450', '#0A0820', ['🌕', '🦇', '⭐', '🎃', '🏠']], foret: ['#0E2A2A', '#050F12', ['🌲', '🌲', '🍄', '🌿', '✨']],
-  pont: ['#2A1B4A', '#0B0820', ['🦇', '🌙', '🌉', '⭐', '☁️']], chateau: ['#3A1E5C', '#120A26', ['🏰', '🎃', '🦇', '🌕', '🕸️']],
-  hall: ['#3B2348', '#140C1C', ['🕯️', '🕸️', '👻', '🖼️', '🕯️']], cuisine: ['#3E2416', '#140A06', ['🍲', '🧹', '🫖', '🍄', '✨']],
-  tour: ['#1A1F55', '#070A22', ['⭐', '🌙', '🏮', '✨', '🦉']], fete: ['#5A2A7A', '#1A0C33', ['🎃', '🎉', '🍬', '👻', '✨']],
-};
-const AVENTURES = {
-  'chateau-citrouilles': {
-    emoji: '🏰', saison: 'halloween', duree: 12, palette: 'halloween', debut: 'debut', gratuitJusqua: ['debut', 'appel'],
-    titre: nom3('Lumi et le château des citrouilles', 'Lumi and the Pumpkin Castle', 'لومي وقلعة اليقطين'),
-    resume: nom3('La nuit d’Halloween, le château a perdu sa lumière. C’est vous qui décidez du chemin !', 'On Halloween night the castle has lost its light. You choose the way!', 'في ليلة الهالوين فقدت القلعة نورها. أنتم من يختار الطريق!'),
-    fins: { 'fin-lumi': '✨', 'fin-mains': '👏' },
-    scenes: {
-      debut: { fond: 'nuit', lumi: '🎃', suite: 'appel',
-        texte: nom3('C’est la nuit d’Halloween. Lumi, la petite lumière, flotte au-dessus du village. Toutes les citrouilles brillent… sauf une !', 'It is Halloween night. Lumi, the little light, floats above the village. All the pumpkins are glowing… except one!', 'إنها ليلة الهالوين. لومي، الضوء الصغير، يطفو فوق القرية. كل اليقطينات تلمع… إلا واحدة!') },
-      appel: { fond: 'nuit', lumi: '🥺',
-        texte: nom3('Une toute petite citrouille, Potiron, pleure : « Mon château a perdu sa lumière ! Sans elle, la fête ne peut pas commencer. Vous voulez bien m’aider ? »', 'A tiny pumpkin called Pip is crying: “My castle has lost its light! Without it, the party can’t begin. Will you help me?”', 'يقطينة صغيرة اسمها بومبو تبكي: «قلعتي فقدت نورها! بدونه لا يمكن أن يبدأ الحفل. هل تساعدونني؟»'),
-        choix: [{ e: '🌲', t: nom3('Par la forêt des lucioles', 'Through the firefly forest', 'عبر غابة اليراعات'), va: 'foret' }, { e: '🌉', t: nom3('Par le pont des chauves-souris', 'Over the bat bridge', 'فوق جسر الخفافيش'), va: 'pont' }] },
-      foret: { fond: 'foret', lumi: '🌲', defi: { type: 'tap', cible: '✨', n: 6, t: nom3('Touchez les lucioles pour les réveiller !', 'Tap the fireflies to wake them up!', 'المسوا اليراعات لتوقظوها!') }, suite: 'foret2',
-        texte: nom3('Dans la forêt, il fait tout noir. Les lucioles dorment encore…', 'In the forest it is very dark. The fireflies are still asleep…', 'في الغابة ظلام دامس. اليراعات ما زالت نائمة…') },
-      foret2: { fond: 'foret', lumi: '✨',
-        texte: nom3('Les lucioles se réveillent et dansent ! Elles montrent un chemin… et, sur une branche, un hibou qui bâille.', 'The fireflies wake up and dance! They show a path… and on a branch, an owl is yawning.', 'استيقظت اليراعات ورقصت! أرتنا طريقًا… وعلى غصن بومة تتثاءب.'),
-        choix: [{ e: '🦉', t: nom3('Demander au hibou', 'Ask the owl', 'نسأل البومة'), va: 'hibou' }, { e: '✨', t: nom3('Suivre les lucioles', 'Follow the fireflies', 'نتبع اليراعات'), va: 'chateau' }] },
-      hibou: { fond: 'foret', lumi: '🦉', defi: { type: 'pose', pose: 'etoile', t: nom3('Faites l’étoile : bras et jambes écartés !', 'Make a star: arms and legs wide!', 'اصنعوا نجمة: افتحوا الذراعين والساقين!') }, suite: 'chateau',
-        texte: nom3('« Houhou ! » dit le hibou. « Je connais un raccourci ! Mais d’abord, montrez-moi votre plus belle étoile ! »', '“Hoo-hoo!” says the owl. “I know a shortcut! But first, show me your best star!”', '«هوهو!» قالت البومة. «أعرف طريقًا مختصرًا! لكن أولًا أروني أجمل نجمة!»') },
-      pont: { fond: 'pont', lumi: '🦇',
-        texte: nom3('Sur le pont, des chauves-souris font la sieste, la tête en bas. Chut… il ne faut pas les réveiller !', 'On the bridge, bats are napping upside down. Shh… we mustn’t wake them!', 'على الجسر خفافيش نائمة ورؤوسها إلى الأسفل. هس… لا يجب أن نوقظها!'),
-        choix: [{ e: '🤫', t: nom3('Passer sur la pointe des pieds', 'Tiptoe across', 'نمشي على أطراف الأصابع'), va: 'pointe' }, { e: '🎶', t: nom3('Leur chanter une berceuse', 'Sing them a lullaby', 'نغني لها تهويدة'), va: 'berceuse' }] },
-      pointe: { fond: 'pont', lumi: '🤫', defi: { type: 'immobile', t: nom3('Ne bougez plus du tout, comme des statues !', 'Don’t move at all, like statues!', 'لا تتحركوا أبدًا، مثل التماثيل!') }, suite: 'chateau',
-        texte: nom3('On avance tout doucement… Chaque fois qu’une chauve-souris remue, tout le monde se fige !', 'We creep forward very slowly… Each time a bat wriggles, everyone freezes!', 'نتقدم ببطء شديد… وكلما تحرك خفاش تجمّد الجميع!') },
-      berceuse: { fond: 'pont', lumi: '🎶', chant: true, suite: 'chateau',
-        texte: nom3('Vous chantez tout doux… Les chauves-souris sourient en dormant et s’enroulent dans leurs ailes comme dans une couverture.', 'You sing very softly… The bats smile in their sleep and wrap themselves in their wings like a blanket.', 'تغنون بهدوء… تبتسم الخفافيش في نومها وتلتف بأجنحتها كأنها غطاء.') },
-      chateau: { fond: 'chateau', lumi: '🏰', defi: { type: 'couleur', couleur: 'orange', t: nom3('Montrez quelque chose d’orange à la caméra !', 'Show something orange to the camera!', 'أروا الكاميرا شيئًا برتقاليًا!') }, suite: 'hall',
-        texte: nom3('Voici le château des citrouilles ! La grande porte est fermée. Sur la porte, il y a le dessin d’une clé… toute orange !', 'Here is the Pumpkin Castle! The big door is shut. On the door there is a picture of a key… all orange!', 'ها هي قلعة اليقطين! الباب الكبير مغلق. وعليه رسم مفتاح… برتقالي اللون!') },
-      hall: { fond: 'hall', lumi: '👻',
-        texte: nom3('La porte s’ouvre : crrrr ! Dans le grand hall, trois petits fantômes rigolos jouent à cache-cache.', 'The door creaks open: creeeak! In the great hall, three funny little ghosts are playing hide-and-seek.', 'انفتح الباب: صرررر! وفي القاعة الكبيرة ثلاثة أشباح صغيرة مضحكة تلعب الغميضة.'),
-        choix: [{ e: '👻', t: nom3('Jouer avec les fantômes', 'Play with the ghosts', 'نلعب مع الأشباح'), va: 'fantomes' }, { e: '🍲', t: nom3('Aller dans la cuisine de la sorcière', 'Go to the witch’s kitchen', 'نذهب إلى مطبخ الساحرة'), va: 'cuisine' }] },
-      fantomes: { fond: 'hall', lumi: '🙈', defi: { type: 'tap', cible: '👻', n: 5, t: nom3('Trouvez les fantômes cachés : touchez-les !', 'Find the hidden ghosts: tap them!', 'جدوا الأشباح المختبئة: المسوها!') }, suite: 'tour',
-        texte: nom3('« Un, deux, trois… à vous de nous trouver ! » Les fantômes se cachent derrière les rideaux et les tableaux.', '“One, two, three… come and find us!” The ghosts hide behind the curtains and the paintings.', '«واحد، اثنان، ثلاثة… جدونا!» اختبأت الأشباح خلف الستائر واللوحات.') },
-      cuisine: { fond: 'cuisine', lumi: '🧙', defi: { type: 'mouvement', t: nom3('Tournez la grande cuillère : remuez les bras très fort !', 'Stir the big spoon: wave your arms really hard!', 'حرّكوا الملعقة الكبيرة: حرّكوا أذرعكم بقوة!') }, suite: 'tour',
-        texte: nom3('La gentille sorcière Mirabelle prépare une soupe de lumière. « Aidez-moi à touiller, mes petits ! »', 'Kind witch Mirabelle is making a soup of light. “Help me stir it, my dears!”', 'الساحرة اللطيفة ميرابيل تحضّر حساء النور. «ساعدوني في التحريك يا صغاري!»') },
-      tour: { fond: 'tour', lumi: '🏮',
-        texte: nom3('Tout en haut de la tour, voici la grande lanterne du château. Elle est éteinte… Comment lui redonner de la lumière ?', 'At the very top of the tower is the castle’s great lantern. It’s dark… How can we light it again?', 'في أعلى البرج فانوس القلعة الكبير. إنه مطفأ… كيف نعيد له النور؟'),
-        choix: [{ e: '✨', t: nom3('Lumi partage sa lumière', 'Lumi shares its light', 'لومي يتقاسم نوره'), va: 'fin-lumi' }, { e: '👏', t: nom3('Tout le monde tape dans les mains', 'Everyone claps their hands', 'الجميع يصفّق'), va: 'mains' }] },
-      mains: { fond: 'tour', lumi: '👏', defi: { type: 'mouvement', t: nom3('Tapez dans vos mains, de plus en plus fort !', 'Clap your hands, louder and louder!', 'صفّقوا بأيديكم، أقوى فأقوى!') }, suite: 'fin-mains',
-        texte: nom3('Clap ! Clap ! Chaque applaudissement fait jaillir une étincelle !', 'Clap! Clap! Each clap makes a spark fly!', 'تصفيق! تصفيق! كل تصفيقة تطلق شرارة!') },
-      'fin-lumi': { fond: 'fete', lumi: '🌟', fin: true,
-        texte: nom3('Lumi brille, brille… et donne sa lumière à la lanterne. Le château s’illumine ! Et Lumi brille encore plus fort : une lumière partagée, ça grandit. Joyeux Halloween !', 'Lumi shines and shines… and gives its light to the lantern. The castle lights up! And Lumi shines even brighter: shared light grows. Happy Halloween!', 'يلمع لومي ويلمع… ويعطي نوره للفانوس. تضيء القلعة! ويلمع لومي أكثر: النور المشترك يكبر. هالوين سعيد!') },
-      'fin-mains': { fond: 'fete', lumi: '🎃', fin: true,
-        texte: nom3('Les étincelles volent jusqu’à la lanterne : elle s’allume ! Les citrouilles chantent, les fantômes dansent, et Potiron fait un énorme sourire. Merci, les amis ! Joyeux Halloween !', 'The sparks fly up to the lantern: it lights up! The pumpkins sing, the ghosts dance, and Pip gives a huge smile. Thank you, friends! Happy Halloween!', 'تطير الشرارات إلى الفانوس فيضيء! تغني اليقطينات وترقص الأشباح ويبتسم بومبو ابتسامة كبيرة. شكرًا يا أصدقاء! هالوين سعيد!') },
-    },
-  },
-};
-Object.entries(AVENTURES).forEach(([id, a]) => {
-  NOEUDS['av-' + id] = { emoji: a.emoji, nom: a.titre, desc: a.resume, type: 'module', module: 'aventure', aventure: id, tags: ['histoire', 'deux', 'camera'].concat(a.saison ? ['fete'] : []) };
-  GRATUIT.add('av-' + id); // la bande-annonce est offerte ; la suite demande Lumiole Famille
-  if (a.saison) NOEUDS[a.saison].enfants.unshift('av-' + id);
-});
-NOEUDS.aventures = { emoji: '🎬', nom: AV_TXT.aventures, desc: nom3('Des films où vous décidez de la suite', 'Films where you decide what happens', 'أفلام تقررون فيها ما يحدث'), enfants: Object.keys(AVENTURES).map((id) => 'av-' + id), tags: ['histoire', 'deux'] };
-GRATUIT.add('aventures');
+// ---------- Bruitages fabriqués en direct ----------
+let ctxBruit = null;
+function bruitage(type) {
+  if (!Ambiance.actif) return;
+  try { ctxBruit = ctxBruit || new (window.AudioContext || window.webkitAudioContext)(); ctxBruit.resume?.(); } catch { return; }
+  const c = ctxBruit, t = c.currentTime;
+  const env = (g, a, d, v) => { g.gain.setValueAtTime(.0001, t + a); g.gain.exponentialRampToValueAtTime(v, t + a + .03); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); };
+  const osc = (type2, fq, a, d, v, f2) => { const o = c.createOscillator(), g = c.createGain(); o.type = type2; o.frequency.setValueAtTime(fq, t + a); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + a + d); env(g, a, d, v); o.connect(g).connect(c.destination); o.start(t + a); o.stop(t + a + d + .05); };
+  const bruit = (a, d, v, freq, q = 1, f2) => {
+    const n = c.createBuffer(1, Math.round(c.sampleRate * (d + .1)), c.sampleRate), x = n.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(); s.buffer = n; fl.type = 'bandpass'; fl.frequency.setValueAtTime(freq, t + a); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + a + d); fl.Q.value = q;
+    env(g, a, d, v); s.connect(fl).connect(g).connect(c.destination); s.start(t + a); s.stop(t + a + d + .1);
+  };
+  if (type === 'magie') [0, .08, .16, .24, .32].forEach((a, i) => osc('sine', 880 * 2 ** (i * 4 / 12), a, .5, .07));
+  else if (type === 'vent') bruit(0, 2.4, .25, 400, .6, 1400);
+  else if (type === 'tonnerre') { bruit(0, 2.2, .5, 120, .4, 50); osc('sine', 60, 0, 1.5, .25, 35); }
+  else if (type === 'cloche') [0, 1.1].forEach((a) => { osc('sine', 660, a, 1.6, .12); osc('sine', 1320, a, 1.2, .05); osc('sine', 1980, a, .8, .03); });
+  else if (type === 'grincement') osc('sawtooth', 180, 0, 1.4, .05, 90);
+  else if (type === 'hibou') [0, .45].forEach((a) => osc('sine', 420, a, .35, .12, 360));
+  else if (type === 'grenouille') [0, .2].forEach((a) => osc('square', 140, a, .12, .06, 90));
+  else if (type === 'pop') osc('sine', 600, 0, .12, .1, 1200);
+}
 
+// sous certaines voix : un grondement (voix effrayante), un « ouuuh » (fantôme) ; renvoie une fonction pour arrêter
+function sousVoix(style) {
+  if (!Ambiance.actif || !['effrayant', 'fantome'].includes(style)) return () => {};
+  try { ctxBruit = ctxBruit || new (window.AudioContext || window.webkitAudioContext)(); ctxBruit.resume?.(); } catch { return () => {}; }
+  const c = ctxBruit, t = c.currentTime, g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(style === 'effrayant' ? .16 : .05, t + .6); g.connect(c.destination);
+  const noeuds = [];
+  if (style === 'effrayant') {
+    [55, 58.3, 82.4].forEach((fq) => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fq; const fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 260; o.connect(fl).connect(g); o.start(); noeuds.push(o); });
+    const n = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), x = n.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1;
+    const s2 = c.createBufferSource(); s2.buffer = n; s2.loop = true; const fl = c.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = 500; fl.Q.value = .5; const g2 = c.createGain(); g2.gain.value = .5; s2.connect(fl).connect(g2).connect(g); s2.start(); noeuds.push(s2);
+  } else {
+    const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = 520; const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 5; lg.gain.value = 18; lfo.connect(lg).connect(o.frequency);
+    o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(760, t + 1.4); o.frequency.linearRampToValueAtTime(480, t + 3);
+    o.connect(g); o.start(); lfo.start(); noeuds.push(o, lfo);
+  }
+  return () => { const t2 = c.currentTime; g.gain.cancelScheduledValues(t2); g.gain.setValueAtTime(g.gain.value, t2); g.gain.exponentialRampToValueAtTime(.0001, t2 + .5); setTimeout(() => noeuds.forEach((x) => { try { x.stop(); } catch {} }), 600); };
+}
+const STYLES_VOIX = { effrayant: { ton: .42, vitesse: .76 }, fantome: { ton: 1.45, vitesse: .82 }, chuchote: { volume: .5, vitesse: .82 }, crie: { volume: 1, vitesse: 1.12, ton: 1.3 }, doux: { vitesse: .9 } };
+
+// ---------- Particules d'ambiance (étoiles, feuilles, brume, lucioles…) ----------
+function particulesFilm(cv) {
+  const g = cv.getContext('2d'); let type = null, ps = [], raf = 0, pluie = 0;
+  function regler(t) { type = t; ps = Array.from({ length: { etoiles: 70, feuilles: 22, brume: 14, lucioles: 40, poussiere: 50, bulles: 26, tempete: 60, etincelles: 60 }[t] || 0 }, () => ({ x: Math.random(), y: Math.random(), v: .2 + Math.random(), s: .5 + Math.random(), ph: Math.random() * 6, e: hasard(['🍂', '🍁', '🍃']) })); }
+  const boucle = (ms) => {
+    if (!cv.isConnected) return;
+    const r = cv.getBoundingClientRect(), k = Math.min(2, devicePixelRatio || 1);
+    if (cv.width !== Math.round(r.width * k)) { cv.width = Math.round(r.width * k); cv.height = Math.round(r.height * k); }
+    const W = cv.width, H = cv.height, t = ms / 1000; g.clearRect(0, 0, W, H);
+    ps.forEach((p) => {
+      if (type === 'etoiles') { g.fillStyle = `rgba(255,255,255,${.3 + .5 * Math.abs(Math.sin(t * p.v + p.ph))})`; g.fillRect(p.x * W, p.y * H * .6, p.s * 2 * k, p.s * 2 * k); }
+      else if (type === 'lucioles' || type === 'etincelles') {
+        if (type === 'etincelles') { p.y -= .0015 * p.v; if (p.y < 0) { p.y = 1; p.x = Math.random(); } }
+        const x = (p.x + Math.sin(t * .4 * p.v + p.ph) * .02) * W, y = (p.y + Math.cos(t * .5 * p.v + p.ph) * .02) * H, a = .4 + .6 * Math.abs(Math.sin(t * 2 * p.v + p.ph));
+        const gr = g.createRadialGradient(x, y, 0, x, y, 10 * k * p.s); gr.addColorStop(0, type === 'lucioles' ? `rgba(220,255,140,${a})` : `rgba(255,${200 + 55 * p.s | 0},150,${a})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr; g.beginPath(); g.arc(x, y, 10 * k * p.s, 0, 7); g.fill();
+      } else if (type === 'brume') {
+        p.x += .0003 * p.v; if (p.x > 1.3) p.x = -.3;
+        const x = p.x * W, y = (.55 + p.y * .4) * H, rr = W * .22 * p.s, gr = g.createRadialGradient(x, y, 0, x, y, rr);
+        gr.addColorStop(0, 'rgba(200,210,235,.13)'); gr.addColorStop(1, 'rgba(200,210,235,0)'); g.fillStyle = gr; g.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+      } else if (type === 'feuilles' || type === 'tempete') {
+        const vit = type === 'tempete' ? 4 : 1;
+        p.y += .0012 * p.v * vit; p.x += (type === 'tempete' ? -.004 : .0006 * Math.sin(t + p.ph)) * p.v; if (p.y > 1.05 || p.x < -.05) { p.y = -.05; p.x = type === 'tempete' ? 1 + Math.random() * .3 : Math.random(); }
+        g.save(); g.translate(p.x * W, p.y * H); g.rotate(t * p.v * vit + p.ph); g.font = `${18 * k * p.s}px "Apple Color Emoji","Noto Color Emoji",sans-serif`; g.globalAlpha = .8; g.fillText(p.e, 0, 0); g.restore();
+      } else if (type === 'poussiere') { p.y -= .0002 * p.v; if (p.y < 0) p.y = 1; g.fillStyle = 'rgba(255,230,180,.35)'; g.fillRect((p.x + Math.sin(t * .3 + p.ph) * .01) * W, p.y * H, p.s * 2 * k, p.s * 2 * k); }
+      else if (type === 'bulles') { p.y -= .0012 * p.v; if (p.y < .3) { p.y = 1; p.x = .3 + Math.random() * .3; } g.strokeStyle = 'rgba(190,255,200,.6)'; g.lineWidth = k; g.beginPath(); g.arc(p.x * W, p.y * H, 5 * k * p.s, 0, 7); g.stroke(); }
+    });
+    if (pluie > 0) { pluie--; g.strokeStyle = 'rgba(180,200,255,.5)'; g.lineWidth = k; for (let i = 0; i < 60; i++) { const x = Math.random() * W, y = Math.random() * H; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 4 * k, y + 16 * k); g.stroke(); } }
+    raf = requestAnimationFrame(boucle);
+  };
+  raf = requestAnimationFrame(boucle);
+  return { regler, pleuvoir() { pluie = 140; }, arreter() { cancelAnimationFrame(raf); } };
+}
+
+// ---------- Le lecteur de films ----------
+const CADRES = { large: 1, moyen: 1.5, gros: 2.25 };
+const FACTEURS = { loin: .55, milieu: 1, acteurs: 1, avant: 1.3 };
 MODULES.aventure = (() => {
-  let z = null, a = null, id = null, scene = null, lumi = null, jeton = 0, ecouteur = null;
-  const cleFins = () => Profils.cle('lumi-fins');
+  let z = null, f = null, jeton = 0, pause = false, dust = null, parts = null, acteurs = {}, seqId = null, indexPlan = null, enPlans = false, finVue = null, decorId = null;
+  const cleSuite = () => Profils.cle('lumi-film-' + f.id), cleFins = () => Profils.cle('lumi-fins');
   const fins = () => { try { return JSON.parse(localStorage.getItem(cleFins()) || '{}'); } catch { return {}; } };
+  const $z = (s) => z?.querySelector(s);
+  const vivant = (moi) => moi === jeton && z?.isConnected;
+  async function attendrePause(moi) { while (pause && vivant(moi)) await attendre(200); }
+
   function demarrer(zone, n) {
-    z = zone; id = n.aventure; a = AVENTURES[id];
-    z.innerHTML = `<div class="av-film"><div class="av-fond"></div><div class="av-deco"></div><canvas class="av-lumi"></canvas><div class="av-defi"></div>
-      <div class="av-bas"><p class="av-texte"></p><div class="av-choix"></div></div><button class="av-fermer" aria-label="✕">✕</button></div>`;
-    z.querySelector('.av-fermer').onclick = () => retour();
-    lumi = poussiereFilm(z.querySelector('.av-lumi'));
+    z = zone; f = FILMS.find((x) => x.id === n.aventure); acteurs = {}; decorId = null; pause = false;
+    z.innerHTML = `<div class="ci"><div class="ci-cadre">
+        <div class="ci-cam"><div class="ci-couche ci-ciel" data-f="loin"><span class="ci-astre"></span></div><div class="ci-couche" data-f="loin"></div><div class="ci-couche ci-sol" data-f="milieu"></div><div class="ci-couche" data-f="milieu"></div><div class="ci-couche ci-acteurs" data-f="acteurs"></div><div class="ci-couche" data-f="avant"></div></div>
+        <canvas class="ci-part"></canvas><canvas class="ci-magie"></canvas><div class="ci-effet"></div><div class="ci-bandes"><i></i><i></i></div>
+      </div>
+      <div class="ci-chap"></div>
+      <div class="ci-sous"><span class="ci-qui"></span><p></p></div>
+      <div class="ci-inter"><div class="ci-defi"></div><div class="ci-choix"></div></div>
+      <div class="ci-ui"><button class="ci-b" data-a="pause" aria-label="${av('pause')}">⏸</button><button class="ci-b" data-a="passer">${av('passer')} ›</button><button class="ci-b" data-a="fermer" aria-label="✕">✕</button></div></div>`;
+    $z('[data-a=fermer]').onclick = () => retour();
+    $z('[data-a=passer]').onclick = passer;
+    $z('[data-a=pause]').onclick = () => { pause = !pause; $z('[data-a=pause]').textContent = pause ? '▶' : '⏸'; if (pause) speechSynthesis?.cancel?.(); z.querySelector('.ci').classList.toggle('en-pause', pause); };
+    dust = poussiereFilm($z('.ci-magie')); parts = particulesFilm($z('.ci-part'));
+    mesurer(); addEventListener('resize', mesurer);
     affiche();
   }
-  // l'affiche du film : titre, résumé, durée, fins trouvées, commencer
+  // « passer » : on abandonne le plan en cours et on reprend au plan suivant de la séquence
+  function passer() {
+    if (!enPlans || seqId == null) return;
+    speechSynthesis?.cancel?.(); const m = ++jeton;
+    jouerPlans(f.sequences[seqId], seqId, indexPlan + 1, m);
+  }
+
+  // ----- l'affiche -----
   function affiche() {
-    const f = fins(), nb = Object.keys(a.fins).filter((k) => f[id + ':' + k]).length;
-    fond('nuit'); lumi.forme(a.emoji, .42);
-    z.querySelector('.av-texte').innerHTML = `<span class="av-kicker">🎬 ${av('film')} · ${a.duree} ${av('minutes')}</span><b class="av-titre"></b><span class="av-resume"></span>${nb ? `<span class="av-fins">${av('finsTrouvees')} : ${Object.entries(a.fins).map(([k, e]) => (f[id + ':' + k] ? e : '❔')).join(' ')}</span>` : ''}`;
-    z.querySelector('.av-titre').textContent = t3(a.titre); z.querySelector('.av-resume').textContent = t3(a.resume);
-    const c = z.querySelector('.av-choix'); c.innerHTML = '';
-    c.appendChild(bouton(av('commencer'), () => jouer(a.debut), 'av-b principal'));
-    focusPremier(c); Musiquette.jouer(72);
+    jeton++; const fs = fins(), trouvees = Object.keys(f.fins).filter((k) => fs[f.id + ':' + k]);
+    decor(f.sequences[f.debut].decor); camera('large'); dust.forme(f.emoji, .42, [.5, .34]);
+    z.querySelector('.ci').classList.add('affiche'); z.querySelector('.ci').classList.remove('joue');
+    $z('.ci-defi').innerHTML = `<div class="ci-affiche"><span class="ci-kicker">🎬 ${av('film')} · ${dureeFilm(f)} ${av('minutes')}</span><b class="ci-titre"></b><span class="ci-resume"></span>${trouvees.length ? `<span class="ci-fins">${av('finsTrouvees')} : ${Object.entries(f.fins).map(([k, e]) => (fs[f.id + ':' + k] ? e : '❔')).join(' ')}</span>` : ''}</div>`;
+    $z('.ci-titre').textContent = t3(f.titre); $z('.ci-resume').textContent = t3(f.resume);
+    const ch = $z('.ci-choix'); ch.innerHTML = '';
+    let suite = null; try { suite = localStorage.getItem(cleSuite()); } catch {}
+    if (suite && f.sequences[suite] && suite !== f.debut) { ch.appendChild(bouton(av('reprendre'), () => lancer(suite), 'av-b principal')); ch.appendChild(bouton(av('depuisDebut'), () => lancer(f.debut), 'av-b')); }
+    else ch.appendChild(bouton(av('commencer'), () => lancer(f.debut), 'av-b principal'));
+    Musiquette.jouer(66, null, 'mystere'); focusPremier(ch);
   }
-  function fond(k) {
-    const [h, b, deco] = AV_FONDS[k];
-    z.querySelector('.av-fond').style.background = `radial-gradient(80% 70% at 50% 35%, ${h}, ${b})`;
-    const d = z.querySelector('.av-deco');
-    if (d.dataset.k === k) return; d.dataset.k = k; d.innerHTML = '';
-    for (let i = 0; i < 12; i++) { const s = document.createElement('span'); s.textContent = deco[i % deco.length]; s.style.left = (4 + (i * 8.3 + Math.random() * 5) % 92) + '%'; s.style.top = (6 + Math.random() * 60) + '%'; s.style.setProperty('--t', (.7 + Math.random() * .9).toFixed(2)); s.style.animationDelay = -Math.random() * 6 + 's'; d.appendChild(s); }
+  function lancer(id) {
+    const ci = z.querySelector('.ci'); ci.classList.remove('affiche'); ci.classList.add('joue'); dust.eteindre(); finVue = null;
+    Object.values(acteurs).forEach((a) => a.el.remove()); acteurs = {};
+    sequence(id);
   }
-  async function jouer(sid) {
-    const moi = ++jeton; scene = sid;
-    const s = a.scenes[sid];
-    // la bande-annonce s'arrête ici sans Lumiole Famille
-    if (!Achat.ouvert && !a.gratuitJusqua.includes(sid)) return payer();
-    fond(s.fond); lumi.forme(s.lumi); avatar?.forme(s.lumi);
-    const texte = z.querySelector('.av-texte'), choix = z.querySelector('.av-choix');
-    texte.classList.remove('entre'); void texte.offsetWidth; texte.classList.add('entre');
-    texte.textContent = t3(s.texte); texte.dir = LANGUES[langue].dir;
-    choix.innerHTML = ''; z.querySelector('.av-defi').innerHTML = '';
-    const passer = bouton(av('passer') + ' ›', () => { speechSynthesis?.cancel?.(); jeton++; apres(s, sid); }, 'av-b petit'); choix.appendChild(passer); passer.focus({ preventScroll: true });
-    if (s.chant) Musiquette.jouer(66); else if (s.fin) Musiquette.jouer(120); else Musiquette.arreter();
-    await raconter(t3(s.texte), langue, () => moi === jeton && z?.isConnected);
-    if (moi !== jeton || !z?.isConnected) return;
-    apres(s, sid);
+
+  // ----- décor : ciel, astre, éléments en couches -----
+  function decor(id) {
+    if (decorId === id) return; decorId = id;
+    const d = f.decors[id], couches = z.querySelectorAll('.ci-couche');
+    couches[0].style.background = `linear-gradient(180deg, ${d.ciel[0]}, ${d.ciel[1]})`;
+    const astre = $z('.ci-astre'); astre.textContent = d.astre?.[0] || ''; if (d.astre) { astre.style.left = d.astre[1] * 100 + '%'; astre.style.top = d.astre[2] * 100 + '%'; astre.style.fontSize = `calc(var(--h) * ${d.astre[3] / 100})`; }
+    couches[2].style.background = `linear-gradient(180deg, transparent 0 62%, ${d.sol[0]} 62%, ${d.sol[1]})`;
+    [1, 3, 5].forEach((i) => { couches[i].innerHTML = ''; });
+    const ou = { loin: couches[1], milieu: couches[3], avant: couches[5] };
+    d.el.forEach(([e, x, y, taille, couche]) => { const s = document.createElement('span'); s.className = 'ci-el ci-' + couche; if (e === '#pont') { s.classList.add('ci-pont'); s.innerHTML = '<i></i><b></b>'; } else s.textContent = e; s.style.left = x * 100 + '%'; s.style.top = y * 100 + '%'; s.style.fontSize = `calc(var(--h) * ${taille / 100})`; s.style.animationDelay = -Math.random() * 6 + 's'; ou[couche].appendChild(s); });
+    parts.regler(d.part);
   }
-  function apres(s, sid) {
-    if (!z?.isConnected || scene !== sid) return;
-    const choix = z.querySelector('.av-choix'); choix.innerHTML = '';
-    if (s.fin) return finir(sid);
-    if (s.defi) return defi(s.defi, () => jouer(s.suite));
-    if (s.choix) {
-      if (DuoEcran.nbJoueurs >= 2 || !modeTele) choix.insertAdjacentHTML('beforeend', `<span class="av-ensemble">${av('decidez')}</span>`);
-      s.choix.forEach((c, i) => choix.appendChild(bouton(`<span class="e">${c.e}</span><span class="n">${t3(c.t)}</span>`, () => { son('juste'); jouer(c.va); }, 'av-carte u' + (i % 5))));
-      parler(s.choix.map((c) => t3(c.t)).join(' … '));
-      focusPremier(choix); return;
+  // ----- caméra : on cadre un acteur (ou la scène), avec de la profondeur entre les couches -----
+  function camera(cadre = 'large', sur, mouvement, duree = 1400) {
+    const a = sur && acteurs[sur], s = (CADRES[cadre] || 1) * (mouvement === 'travelling' && cadre === 'large' ? 1.14 : 1);
+    const x = a ? a.x : .5, y = a ? a.y - .12 : .55;
+    recadrer(x);
+    const appliquer = (px, py, ps, ms, courbe = 'cubic-bezier(.45,.05,.25,1)') => {
+      const cad = $z('.ci-cadre'), W = cad.clientWidth, H = cad.clientHeight;
+      z.querySelectorAll('.ci-couche').forEach((c) => {
+        const k = FACTEURS[c.dataset.f] || 1, sl = 1 + (ps - 1) * k;
+        let tx = W * .5 - px * W * sl, ty = H * .5 - py * H * sl;
+        tx = Math.min(0, Math.max(W * (1 - sl), tx)); ty = Math.min(0, Math.max(H * (1 - sl), ty));
+        c.style.transition = `transform ${ms}ms ${courbe}`; c.style.transform = `translate(${tx}px, ${ty}px) scale(${sl})`;
+      });
+    };
+    const camEl = $z('.ci-cam'); camEl.classList.remove('penche', 'tourbillon', 'orbite'); void camEl.offsetWidth;
+    if (mouvement === 'penche' || mouvement === 'orbite' || mouvement === 'tourbillon') camEl.classList.add(mouvement);
+    if (mouvement === 'orbite') { camEl.style.setProperty('--duree', duree + 'ms'); appliquer(x + .16, y, s * 1.12, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x - .16, y, s * 1.12, duree, 'ease-in-out'))); }
+    else if (mouvement === 'contre') { appliquer(x, .95, 1.7, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x, y, Math.max(1.25, s), Math.min(duree, 2600), 'ease-out'))); }
+    else if (mouvement === 'plongee') { appliquer(x, .08, 1.6, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x, y, s, Math.min(duree, 3000), 'ease-in-out'))); }
+    else if (mouvement === 'tourbillon') { camEl.style.setProperty('--duree', Math.min(duree, 4000) + 'ms'); appliquer(x, .7, 1.3, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x, .35, 1.3, duree, 'ease-in-out'))); }
+    else if (mouvement === 'penche') appliquer(x, y, Math.max(s, 1.15), 1300);
+    else if (mouvement === 'travelling') { appliquer(x - .14, y, s, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x + .14, y, s, duree, 'linear'))); }
+    else if (mouvement === 'zoom') { appliquer(x, y, s, 600); setTimeout(() => z && appliquer(x, y - .04, s * 1.2, duree, 'ease-out'), 620); }
+    else if (mouvement === 'monte') { appliquer(x, .85, 1.4, 0); requestAnimationFrame(() => requestAnimationFrame(() => appliquer(x, .25, 1.4, duree, 'ease-in-out'))); }
+    else appliquer(x, y, s, 1300);
+    if (mouvement === 'secousse') { const c = $z('.ci-cam'); c.classList.remove('secoue'); void c.offsetWidth; c.classList.add('secoue'); }
+  }
+  // ----- acteurs -----
+  function poser(a, x, y, ms = 1600) { a.x = x; a.y = y; a.el.style.transition = `left ${ms}ms ease-in-out, top ${ms}ms ease-in-out, font-size .8s`; a.el.style.left = x * 100 + '%'; a.el.style.top = y * 100 + '%'; }
+  function acteur(o) {
+    const p = f.personnages[o.qui]; if (!p) return;
+    let a = acteurs[o.qui];
+    if (o.sort) { if (!a) return; const d = { haut: [a.x, -.3], gauche: [-.25, a.y], droite: [1.25, a.y] }[o.sort] || [a.x, -.3]; poser(a, d[0], d[1]); const el = a.el; setTimeout(() => el.remove(), 1700); delete acteurs[o.qui]; return; }
+    if (!a) {
+      const el = document.createElement('div'); el.className = 'ci-acteur' + (p.lumi ? ' lumi' : '');
+      el.innerHTML = '<span class="ci-corps"><span class="e"></span></span><span class="ci-bulle"><b></b><i>• • •</i></span>';
+      el.querySelector('.e').textContent = p.lumi ? '' : (o.e || p.e); el.querySelector('.ci-bulle b').textContent = t3(p.nom); el.style.setProperty('--c', p.couleur || '#fff');
+      $z('.ci-acteurs').appendChild(el);
+      a = acteurs[o.qui] = { el, x: o.x ?? .5, y: o.y ?? .8, taille: o.taille || (p.lumi ? 6 : 9) };
+      el.style.fontSize = `calc(var(--h) * ${a.taille / 100})`;
+      const depart = { haut: [a.x, -.25], gauche: [-.2, a.y], droite: [1.2, a.y], bas: [a.x, 1.3] }[o.entre];
+      if (depart) { poser(a, depart[0], depart[1], 0); requestAnimationFrame(() => requestAnimationFrame(() => poser(a, o.x ?? a.x, o.y ?? a.y))); }
+      else poser(a, a.x, a.y, 0);
+    } else poser(a, o.x ?? a.x, o.y ?? a.y);
+    if (o.taille) { a.taille = o.taille; a.el.style.fontSize = `calc(var(--h) * ${o.taille / 100})`; }
+    if (o.e && !p.lumi) a.el.querySelector('.e').textContent = o.e;
+    if (o.anim !== undefined) a.el.dataset.anim = o.anim;
+    if (o.miroir !== undefined) a.el.classList.toggle('miroir', o.miroir);
+  }
+  function parle(qui) { Object.values(acteurs).forEach((a) => a.el.classList.remove('parle')); if (qui && acteurs[qui]) acteurs[qui].el.classList.add('parle'); }
+  function effet(type) { if (type === 'pluie') return parts.pleuvoir(); const e = $z('.ci-effet'); e.className = 'ci-effet'; void e.offsetWidth; e.classList.add('e-' + type); }
+  async function transition(type) { const e = $z('.ci-effet'); e.className = 'ci-effet'; void e.offsetWidth; e.classList.add('t-' + type); await attendre(type === 'fondu' ? 450 : 700); }
+  // ----- la voix : chaque personnage a la sienne, phrase par phrase -----
+  async function dire(texte, voix, moi) {
+    const phrases = texte.split(/(?<=[.!?…؟»])\s+/).filter(Boolean);
+    for (const ph of phrases) { if (!vivant(moi)) return; await attendrePause(moi); if (!vivant(moi)) return; await parler(ph, langue, voix); await attendre(160); }
+  }
+  // ----- une séquence : un chapitre éventuel, les plans, puis un défi, un choix, la suite ou la fin -----
+  async function sequence(id) {
+    const moi = ++jeton; seqId = id; indexPlan = -1; enPlans = false; mesurer();
+    const s = f.sequences[id];
+    if (!Achat.ouvert && !f.gratuit.includes(id)) return payer();
+    if (f.fins[id]) finVue = id;
+    try { if (!s.fin) localStorage.setItem(cleSuite(), id); else localStorage.removeItem(cleSuite()); } catch {}
+    $z('.ci-choix').innerHTML = ''; $z('.ci-defi').innerHTML = ''; z.querySelector('.ci').classList.remove('interagit');
+    if (s.musique) Musiquette.jouer({ mystere: 66, aventure: 104, joyeux: 112, berceuse: 72, fete: 128 }[s.musique] || 100, null, s.musique);
+    // nouveau décor : les personnages qui ne jouent pas dans cette séquence quittent la scène
+    if (decorId !== s.decor) {
+      const presents = new Set(s.plans.flatMap((p) => (p.acteurs || []).filter((o) => !o.sort).map((o) => o.qui)));
+      Object.keys(acteurs).forEach((k) => { if (!presents.has(k)) { acteurs[k].el.remove(); delete acteurs[k]; } });
     }
-    jouer(s.suite);
+    if (s.chapitre) {
+      $z('.ci-sous').classList.remove('on');
+      await transition('noir'); decor(s.decor);
+      const c = $z('.ci-chap'); c.innerHTML = '<span></span>'; c.firstChild.textContent = t3(s.chapitre); c.classList.remove('on'); void c.offsetWidth; c.classList.add('on');
+      parler(t3(s.chapitre), langue, f.personnages.conteur.voix); await attendre(3400); if (!vivant(moi)) return;
+    } else decor(s.decor);
+    jouerPlans(s, id, 0, moi);
   }
-  // ---- les défis : toucher des choses, faire une pose, montrer une couleur, bouger, ne plus bouger ----
-  function defi(d, ok) {
-    const boite = z.querySelector('.av-defi'), choix = z.querySelector('.av-choix');
+  async function jouerPlans(s, id, depuis, moi) {
+    enPlans = true;
+    for (let i = depuis; i < s.plans.length; i++) { indexPlan = i; if (!vivant(moi)) return; await attendrePause(moi); if (!vivant(moi)) return; await plan(s.plans[i], moi); }
+    if (!vivant(moi)) return;
+    enPlans = false; apres(s, id, moi);
+  }
+  async function plan(p, moi) {
+    if (p.transition) await transition(p.transition === 'noir' ? 'noir' : p.transition);
+    if (!vivant(moi)) return;
+    (p.acteurs || []).forEach(acteur);
+    const texte = p.dit ? t3(p.dit[1]) : p.narr ? t3(p.narr) : '';
+    const duree = texte ? Math.max(3200, texte.split(/\s+/).length * 430) : (p.duree || 2600);
+    camera(p.cadre || 'large', p.sur, p.camera, duree);
+    if (p.sfx) bruitage(p.sfx);
+    if (p.effet) effet(p.effet);
+    if (p.magie) { dust.forme(p.magie, .34, [.5, .36]); setTimeout(() => dust.eteindre(), 4200); }
+    const sous = $z('.ci-sous');
+    if (!texte) { sous.classList.remove('on'); await attendre(p.duree || 2600); return; }
+    const qui = p.dit ? f.personnages[p.dit[0]] : null;
+    sous.classList.remove('entre'); void sous.offsetWidth; sous.classList.add('entre', 'on'); sous.classList.toggle('narr', !qui);
+    sous.querySelector('.ci-qui').textContent = qui ? `${qui.lumi ? '✨' : qui.e} ${t3(qui.nom)}` : ''; sous.querySelector('.ci-qui').style.color = qui?.couleur || '';
+    sous.querySelector('p').textContent = texte; sous.dir = LANGUES[langue].dir;
+    parle(p.dit?.[0]); if (p.dit && acteurs[p.dit[0]] && !p.sur) recadrer(acteurs[p.dit[0]].x);
+    const base = (qui || f.personnages.conteur).voix, style = p.dit?.[2] || p.style || base.style;
+    const voix = { ...base, ...(STYLES_VOIX[style] || {}), ...(style === 'doux' ? { ton: Math.max(base.ton, .9) } : {}) };
+    const stop = sousVoix(style); z.querySelector('.ci').dataset.voix = style || '';
+    await dire(texte, voix, moi);
+    stop(); if (z) z.querySelector('.ci').dataset.voix = '';
+    parle(null);
+    if (vivant(moi)) await attendre(p.pause || 450);
+  }
+  function apres(s, id, moi) {
+    const ch = $z('.ci-choix'); ch.innerHTML = ''; $z('.ci-sous').classList.remove('on');
+    if (s.fin) return generique();
+    if (s.defi) { z.querySelector('.ci').classList.add('interagit'); return defi(s.defi, moi, () => sequence(s.suite)); }
+    if (s.choix) {
+      z.querySelector('.ci').classList.add('interagit');
+      ch.insertAdjacentHTML('beforeend', `<span class="av-ensemble">${av('decidez')}</span>`);
+      s.choix.forEach((c, i) => {
+        const b = bouton(`<span class="e">${c.e}</span><span class="n">${t3(c.t)}</span>`, async () => {
+          if (c.faux) { oups(b); b.disabled = true; const sous = $z('.ci-sous'); sous.classList.add('on'); sous.classList.remove('narr'); sous.querySelector('.ci-qui').textContent = '✨ ' + t3(f.personnages.lumi.nom); sous.querySelector('.ci-qui').style.color = f.personnages.lumi.couleur; sous.querySelector('p').textContent = t3(c.faux); await parler(t3(c.faux), langue, f.personnages.lumi.voix); return; }
+          son('juste'); bruitage('magie'); sequence(c.va);
+        }, 'av-carte u' + (i % 5));
+        ch.appendChild(b);
+      });
+      parler(s.choix.map((c) => t3(c.t)).join(' … '), langue, f.personnages.lumi.voix);
+      focusPremier(ch); return;
+    }
+    sequence(s.suite);
+  }
+  // ----- les défis -----
+  function defi(d, moi, ok) {
+    const boite = $z('.ci-defi'), ch = $z('.ci-choix');
     let fini = false;
-    const reussi = () => { if (fini) return; fini = true; Capteurs.arreter(); son('juste'); fete(); Progres.gagner(null); boite.innerHTML = `<div class="av-bravo">⭐ ${av('defiOk')}</div>`; parler(av('defiOk')); setTimeout(() => { if (z?.isConnected) ok(); }, 1600); };
-    z.querySelector('.av-texte').textContent = t3(d.t); parler(t3(d.t));
-    choix.appendChild(bouton('✓ ' + fm('ok'), reussi, 'av-b'));
+    const reussi = () => { if (fini || !vivant(moi)) return; fini = true; Capteurs.arreter(); son('juste'); bruitage('magie'); fete(); Progres.gagner(null); boite.innerHTML = `<div class="av-bravo">⭐ ${av('defiOk')}</div>`; ch.innerHTML = ''; setTimeout(() => { if (vivant(moi)) ok(); }, 1500); };
+    const sous = $z('.ci-sous'); sous.classList.add('on'); sous.classList.remove('narr'); sous.querySelector('.ci-qui').textContent = '✨ ' + t3(f.personnages.lumi.nom); sous.querySelector('.ci-qui').style.color = f.personnages.lumi.couleur; sous.querySelector('p').textContent = t3(d.t);
+    parler(t3(d.t), langue, f.personnages.lumi.voix);
+    ch.appendChild(bouton('✓ ' + fm('ok'), reussi, 'av-b'));
     if (d.type === 'tap') {
       let reste = d.n; boite.innerHTML = '<div class="av-cibles"></div>';
       const zone = boite.querySelector('.av-cibles');
       const placer = () => {
         if (fini) return;
-        const b = bouton(d.cible, () => { b.classList.add('pris'); son('pop'); setTimeout(() => b.remove(), 300); if (--reste <= 0) reussi(); else placer(); }, 'av-cible');
-        b.style.left = (12 + Math.random() * 70) + '%'; b.style.top = (10 + Math.random() * 45) + '%'; zone.appendChild(b);
+        const b = bouton(d.cible, () => { b.classList.add('pris'); bruitage('pop'); setTimeout(() => b.remove(), 300); if (--reste <= 0) reussi(); else placer(); }, 'av-cible' + (d.bouge ? ' bouge' : ''));
+        b.style.left = (10 + Math.random() * 74) + '%'; b.style.top = (8 + Math.random() * 50) + '%'; b.style.animationDuration = (5 + Math.random() * 3) + 's'; zone.appendChild(b);
         if (modeTele) setTimeout(() => b.focus({ preventScroll: true }), 30);
       };
-      placer(); if (!modeTele) { placer(); }
+      placer(); if (!modeTele) placer();
       return;
     }
-    // défis caméra : une petite fenêtre « on vous voit », et le bouton « on l'a fait » reste là
+    if (d.type === 'chanson' || d.type === 'compte') {
+      boite.innerHTML = '<div class="ci-karaoke"></div>'; const k = boite.querySelector('.ci-karaoke');
+      (async () => {
+        const L = LANGUES[langue];
+        const lignes = d.type === 'chanson' ? d.lignes.map(t3) : Array.from({ length: d.n }, (_, i) => L.nombres[i] || String(i + 1));
+        for (const [i, l] of lignes.entries()) {
+          if (!vivant(moi) || fini) return;
+          k.innerHTML = `${d.type === 'compte' ? `<span class="grand">${L.chiffre ? L.chiffre(i + 1) : i + 1}</span>` : ''}<b></b>`; k.querySelector('b').textContent = l;
+          if (d.type === 'compte') bruitage('pop');
+          await parler(l, langue, d.type === 'chanson' ? { ton: 1.2, vitesse: .8 } : f.personnages.lumi.voix); await attendre(d.type === 'chanson' ? 500 : 300);
+        }
+        reussi();
+      })();
+      return;
+    }
+    // défis devant la caméra (de cet appareil ou du téléphone) ; sans caméra, la jauge monte toute seule
     boite.innerHTML = '<div class="av-cam"></div><div class="av-jauge"><span></span></div>';
     const cam = zoneCamera(boite.querySelector('.av-cam')), jauge = boite.querySelector('.av-jauge span');
     let niveau = 0;
-    const monter = (v) => { niveau = Math.max(0, Math.min(1, v)); jauge.style.width = Math.round(niveau * 100) + '%'; if (niveau >= 1) reussi(); };
-    if (d.type === 'pose') brancherCamera(cam, 'pose', (x) => { if (x.poses) { dessinerOs(boite.querySelector('.av-os') || Object.assign(cam.boite.appendChild(document.createElement('canvas')), { className: 'bg-os av-os' }), x.poses); monter(niveau + (x.poses.some((p) => poseFaite(p, d.pose)) ? .16 : -.05)); } });
+    const monter = (v) => { if (fini) return; niveau = Math.max(0, Math.min(1, v)); jauge.style.width = Math.round(niveau * 100) + '%'; if (niveau >= 1) reussi(); };
+    const os = () => cam.boite.querySelector('.av-os') || Object.assign(cam.boite.appendChild(document.createElement('canvas')), { className: 'bg-os av-os' });
+    if (d.type === 'pose') brancherCamera(cam, 'pose', (x) => { if (x.poses) { dessinerOs(os(), x.poses); monter(niveau + (x.poses.some((p) => poseFaite(p, d.pose)) ? .16 : -.05)); } });
     if (d.type === 'couleur') { cam.boite.insertAdjacentHTML('beforeend', '<span class="bg-cible" style="--cible:#fb923c"></span>'); brancherCamera(cam, 'couleur', (x) => { if (x.rgb) monter(niveau + (couleurVue(x.rgb) === d.couleur ? .2 : -.06)); }); }
-    if (d.type === 'mouvement') brancherCamera(cam, 'mouvement', (x) => monter(niveau + ((x.g || 0) + (x.d || 0) > .3 ? .07 : -.01)));
+    if (d.type === 'mouvement') brancherCamera(cam, 'mouvement', (x) => monter(niveau + ((x.g || 0) + (x.d || 0) > .3 ? .06 : -.01)));
+    if (d.type === 'danse') {
+      Musiquette.jouer(128, null, 'fete'); const t0 = performance.now();
+      brancherCamera(cam, 'mouvement', (x) => { if ((x.g || 0) + (x.d || 0) > .25) pluieEtoiles(); });
+      const tic = setInterval(() => { if (!vivant(moi) || fini) return clearInterval(tic); monter((performance.now() - t0) / (d.duree * 1000)); if (cam.boite.dataset.etat === 'aucune' && Math.random() < .5) pluieEtoiles(); }, 400);
+    }
     if (d.type === 'immobile') {
       let t0 = performance.now() + 1200;
       brancherCamera(cam, 'mouvement', (x) => { if (performance.now() < t0) return; if ((x.g || 0) + (x.d || 0) > .25) { t0 = performance.now() + 600; monter(niveau * .5); } else monter(niveau + .04); });
     }
-    // sans caméra : le défi se fait quand même, les grands disent « bravo » avec le bouton
-    setTimeout(() => { if (!fini && cam.boite.dataset.etat === 'aucune') monter(1); }, 9000);
+    if (d.type === 'esquive') {
+      // des feuilles arrivent d'un côté : on se penche (caméra) ou on appuie sur le bon côté
+      let tour = 0, cote = null, gaucheVu = 0, droiteVu = 0;
+      brancherCamera(cam, 'mouvement', (x) => { gaucheVu = x.g || 0; droiteVu = x.d || 0; if (cote === 'g' && gaucheVu > .2 && gaucheVu > droiteVu) esquive(); if (cote === 'd' && droiteVu > .2 && droiteVu > gaucheVu) esquive(); });
+      const fleches = document.createElement('div'); fleches.className = 'ci-fleches';
+      const bG = bouton(av('gauche'), () => cote === 'g' && esquive(), 'av-b'), bD = bouton(av('droite'), () => cote === 'd' && esquive(), 'av-b');
+      fleches.append(bG, bD); ch.prepend(fleches);
+      const consigne = document.createElement('div'); consigne.className = 'ci-esquive'; boite.appendChild(consigne);
+      const lancerTour = () => {
+        if (!vivant(moi) || fini) return;
+        cote = Math.random() < .5 ? 'g' : 'd';
+        consigne.innerHTML = `<span class="${cote === 'g' ? 'vient-d' : 'vient-g'}">🍂🍃🍁</span><b>${av('penche')} ${cote === 'g' ? av('versGauche') : av('versDroite')}</b>`;
+        parler(`${av('penche')} ${cote === 'g' ? av('versGauche') : av('versDroite')}`, langue, f.personnages.lumi.voix);
+        (cote === 'g' ? bG : bD).focus({ preventScroll: true });
+        const montour = ++tour; setTimeout(() => { if (montour === tour && cote) esquive(true); }, cam.boite.dataset.etat === 'aucune' ? 4500 : 3500);
+      };
+      function esquive(auto) { if (!cote) return; cote = null; bruitage(auto ? 'vent' : 'pop'); monter(niveau + .2); consigne.innerHTML = '<b>👍</b>'; if (niveau < 1) setTimeout(lancerTour, 1100); }
+      setTimeout(lancerTour, 1600);
+      return;
+    }
+    setTimeout(() => { if (!fini && cam.boite.dataset.etat === 'aucune' && d.type !== 'danse') monter(1); }, 9000);
   }
-  function finir(sid) {
-    const f = fins(); f[id + ':' + sid] = Date.now(); try { localStorage.setItem(cleFins(), JSON.stringify(f)); } catch {}
-    fete(); jingle(); Progres.gagner(null); Progres.gagner(null);
-    const tous = Object.keys(a.fins).every((k) => f[id + ':' + k]);
-    const c = z.querySelector('.av-choix'); c.innerHTML = '';
-    z.querySelector('.av-defi').innerHTML = `<div class="av-fin">${av('fin')} ${a.fins[sid] || '✨'}</div>`;
-    c.appendChild(bouton(av('rejouer'), () => jouer(a.debut), 'av-b principal'));
-    c.appendChild(bouton('🏠', () => { while (pile.length > 2) pile.pop(); retour(); }, 'av-b'));
-    if (!tous) { c.insertAdjacentHTML('beforeend', `<span class="av-ensemble">🔀 ${av('autreChemin')}</span>`); }
-    focusPremier(c);
+  function pluieEtoiles() {
+    if (!z) return;
+    for (let i = 0; i < 3; i++) { const e = document.createElement('span'); e.className = 'bg-goutte'; e.textContent = hasard(['⭐', '✨', '🌟', '🎃', '🍬']); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = 1.6 + Math.random() + 's'; z.querySelector('.ci').appendChild(e); setTimeout(() => e.remove(), 2800); }
+  }
+  // ----- générique de fin -----
+  function generique() {
+    const fs = fins(); if (finVue) fs[f.id + ':' + finVue] = Date.now(); try { localStorage.setItem(cleFins(), JSON.stringify(fs)); localStorage.removeItem(cleSuite()); } catch {}
+    fete(); jingle(); Progres.gagner(null); Progres.gagner(null); Progres.gagner(null);
+    z.querySelector('.ci').classList.add('interagit');
+    const tous = Object.keys(f.fins).every((k) => fs[f.id + ':' + k]);
+    const noms = Object.entries(f.personnages).filter(([k]) => k !== 'conteur').map(([, p]) => `<span>${p.lumi ? '✨' : p.e} ${t3(p.nom)}</span>`).join('');
+    $z('.ci-defi').innerHTML = `<div class="ci-generique"><b class="ci-fin">${av('fin')} ${f.fins[finVue] || '✨'}</b><p class="ci-morale"></p><div class="ci-defile"><div><em>${av('avec')}</em>${noms}<em>${av('etVous')}</em></div></div></div>`;
+    $z('.ci-morale').textContent = '« ' + t3(f.morale) + ' »';
+    const ch = $z('.ci-choix'); ch.innerHTML = '';
+    ch.appendChild(bouton(av('rejouer'), () => { decorId = null; lancer(f.debut); }, 'av-b principal'));
+    ch.appendChild(bouton('🏠', () => { while (pile.length > 2) pile.pop(); retour(); }, 'av-b'));
+    if (!tous) ch.insertAdjacentHTML('beforeend', `<span class="av-ensemble">🔀 ${av('autreChemin')}</span>`);
+    Musiquette.jouer(112, null, 'joyeux'); focusPremier(ch);
   }
   function payer() {
-    fond('chateau'); lumi.forme('🔒', .3); Musiquette.arreter();
-    z.querySelector('.av-texte').innerHTML = `<b class="av-titre"></b><span class="av-resume"></span>`;
-    z.querySelector('.av-titre').textContent = '✨ ' + av('suite'); z.querySelector('.av-resume').textContent = t3(a.resume);
-    const c = z.querySelector('.av-choix'); c.innerHTML = '';
-    c.appendChild(bouton(av('debloquer'), () => { proposerAchat(); }, 'av-b principal'));
-    c.appendChild(bouton('↺', () => jouer(a.debut), 'av-b'));
-    parler(av('suite')); focusPremier(c);
+    jeton++; enPlans = false; Musiquette.jouer(66, null, 'mystere');
+    z.querySelector('.ci').classList.add('interagit'); $z('.ci-sous').classList.remove('on');
+    dust.forme('🔒', .3, [.5, .3]);
+    $z('.ci-defi').innerHTML = '<div class="ci-affiche"><b class="ci-titre"></b><span class="ci-resume"></span></div>';
+    $z('.ci-titre').textContent = '✨ ' + av('suite'); $z('.ci-resume').textContent = t3(f.resume);
+    const ch = $z('.ci-choix'); ch.innerHTML = '';
+    ch.appendChild(bouton(av('debloquer'), () => proposerAchat(), 'av-b principal'));
+    ch.appendChild(bouton('↺', () => lancer(f.debut), 'av-b'));
+    parler(av('suite')); focusPremier(ch);
   }
-  function arreter() { jeton++; lumi?.arreter(); Capteurs.arreter(); speechSynthesis?.cancel?.(); z = null; }
+  // téléphone en hauteur : la scène reste en 16/9, plus large que l'écran, et on la recadre sur l'action
+  const vertical = () => z && z.clientHeight > z.clientWidth * 1.1;
+  function mesurer() {
+    const c = $z('.ci-cadre'); if (!c) return;
+    if (z.clientHeight < 50) return requestAnimationFrame(mesurer);
+    if (vertical()) { c.style.width = Math.round(z.clientHeight * 16 / 9) + 'px'; c.style.height = z.clientHeight + 'px'; } else { c.style.width = ''; c.style.height = ''; c.style.transform = ''; }
+    c.style.setProperty('--h', c.clientHeight + 'px');
+  }
+  function recadrer(x, ms = 1300) {
+    const c = $z('.ci-cadre'); if (!c || !vertical()) return;
+    const Wc = c.clientWidth, Ws = z.clientWidth, tx = Math.min(0, Math.max(Ws - Wc, Ws / 2 - x * Wc));
+    c.style.transition = `transform ${ms}ms cubic-bezier(.45,.05,.25,1)`; c.style.transform = `translateX(${tx}px)`;
+  }
+  function arreter() { removeEventListener('resize', mesurer); jeton++; dust?.arreter(); parts?.arreter(); Capteurs.arreter(); speechSynthesis?.cancel?.(); z = null; }
   return { demarrer, arreter };
 })();
+// durée estimée d'un film (moyenne des chemins) : ~140 mots par minute, + 30 s par défi, 12 s par choix
+function dureeFilm(f) {
+  const mots = (s) => s.plans.reduce((n, p) => n + ((p.dit ? p.dit[1].fr : p.narr?.fr) || '').split(/\s+/).filter(Boolean).length, 0);
+  let total = 0, n = 0;
+  const marcher = (id, t, vu) => {
+    const s = f.sequences[id]; if (!s || vu.has(id)) return;
+    t += mots(s) / 140 * 60 + s.plans.length * 1.5 + (s.defi ? 30 : 0) + (s.choix ? 12 : 0) + (s.chapitre ? 4 : 0);
+    if (s.fin) { total += t; n++; return; }
+    const v2 = new Set(vu).add(id);
+    (s.choix ? s.choix.filter((c) => !c.faux).map((c) => c.va) : [s.suite]).forEach((x) => marcher(x, t, v2));
+  };
+  marcher(f.debut, 0, new Set());
+  return Math.round(total / Math.max(1, n) / 60);
+}
+// les films deviennent des activités (menu « Les grandes aventures », sous-menu de la fête, recherche)
+function enregistrerFilms() {
+  FILMS.forEach((film) => {
+    const id = 'av-' + film.id;
+    NOEUDS[id] = { emoji: film.emoji, nom: film.titre, desc: film.resume, type: 'module', module: 'aventure', aventure: film.id, tags: ['histoire', 'deux', 'camera'].concat(film.saison ? ['fete'] : []) };
+    GRATUIT.add(id);
+    if (film.saison && NOEUDS[film.saison] && !NOEUDS[film.saison].enfants.includes(id)) NOEUDS[film.saison].enfants.unshift(id);
+  });
+  NOEUDS.aventures = { emoji: '🎬', nom: AV_TXT.aventures, desc: nom3('Des films où vous décidez de la suite', 'Films where you decide what happens', 'أفلام تقررون فيها ما يحدث'), enfants: FILMS.map((x) => 'av-' + x.id), tags: ['histoire', 'deux'] };
+  GRATUIT.add('aventures');
+}
 
+// =====================================================================
+// FILM : « Lumi et le château des citrouilles » (Halloween) — format Lumiole cinéma
+// Écrit selon le skill .claude/skills/film-lumiole (structure, plans, voix, défis, durée ≥ 15 min).
+// T(fr, en, ar) = un texte dans les trois langues.
+// =====================================================================
+(() => {
+const T = nom3;
+FILMS.push({
+  id: 'chateau-citrouilles', emoji: '🏰', saison: 'halloween', palette: 'halloween', debut: 'ouverture',
+  gratuit: ['ouverture'], // la bande-annonce : tout le premier chapitre
+  titre: T('Lumi et le château des citrouilles', 'Lumi and the Pumpkin Castle', 'لومي وقلعة اليقطين'),
+  resume: T('La nuit d’Halloween, le Grand Brouillard a emporté la lumière du château. Avec Potiron et Réglisse, c’est vous qui décidez du chemin… et de la fin !',
+    'On Halloween night, the Great Fog has taken the castle’s light. With Pip and Liquorice, you choose the way… and the ending!',
+    'في ليلة الهالوين أخذ الضباب الكبير نور القلعة. مع بومبو وعرقسوس، أنتم من يختار الطريق… والنهاية!'),
+  morale: T('Une lumière partagée, ça grandit.', 'Shared light grows.', 'النور المشترك يكبر.'),
+  personnages: {
+    conteur: { nom: T('Le conteur', 'The storyteller', 'الراوي'), voix: { ton: 1, vitesse: .93 } },
+    lumi: { e: '✨', lumi: true, nom: T('Lumi', 'Lumi', 'لومي'), couleur: '#7FF3CB', voix: { ton: 1.25, vitesse: .98 } },
+    potiron: { e: '🎃', nom: T('Potiron', 'Pip', 'بومبو'), couleur: '#FF9F43', voix: { ton: 1.6, vitesse: 1.05 } },
+    reglisse: { e: '🐈‍⬛', nom: T('Réglisse', 'Liquorice', 'عرقسوس'), couleur: '#C9A4FF', voix: { ton: 1.05, vitesse: .95 } },
+    hector: { e: '🦉', nom: T('Hector le hibou', 'Hector the owl', 'هكتور البومة'), couleur: '#E8C38A', voix: { ton: .6, vitesse: .82 } },
+    zip: { e: '🦇', nom: T('Zip', 'Zip', 'زيب'), couleur: '#FF8FB8', voix: { ton: 1.85, vitesse: 1.18 } },
+    zap: { e: '🦇', nom: T('Zap', 'Zap', 'زاب'), couleur: '#8FD0FF', voix: { ton: 1.5, vitesse: 1.18 } },
+    mirabelle: { e: '🧙‍♀️', nom: T('Mirabelle', 'Mirabelle', 'ميرابيل'), couleur: '#B6F09C', voix: { ton: 1.3, vitesse: .95 } },
+    bouh: { e: '👻', nom: T('Bouh', 'Boo', 'بوو'), couleur: '#FFFFFF', voix: { ton: 1.45, vitesse: .9, style: 'fantome' } },
+    pouf: { e: '👻', nom: T('Pouf', 'Poof', 'بوف'), couleur: '#E0E8FF', voix: { ton: 1.7, vitesse: 1, style: 'fantome' } },
+    flou: { e: '👻', nom: T('Flou', 'Blur', 'فلو'), couleur: '#D6F5FF', voix: { ton: 1.2, vitesse: .88, style: 'fantome' } },
+    brouillard: { e: '🌫️', nom: T('Le Grand Brouillard', 'The Great Fog', 'الضباب الكبير'), couleur: '#B8C2D8', voix: { ton: .5, vitesse: .8, style: 'effrayant' } },
+  },
+  // décors : [emoji, x, y, taille en vh, couche (loin | milieu | avant)]
+  decors: {
+    village: { ciel: ['#2A1E68', '#0B0A26'], astre: ['🌕', .8, .16, 14], part: 'etoiles', sol: ['#2A1B45', '#120B22'],
+      el: [['🏠', .08, .58, 13, 'loin'], ['🏡', .22, .56, 15, 'loin'], ['⛪', .38, .5, 18, 'loin'], ['🏠', .56, .58, 12, 'loin'], ['🏡', .7, .56, 14, 'loin'], ['🏠', .92, .58, 13, 'loin'],
+        ['🎃', .15, .74, 7, 'milieu'], ['🏮', .33, .62, 6, 'milieu'], ['🎃', .47, .76, 6, 'milieu'], ['🌳', .86, .66, 16, 'milieu'], ['🍂', .05, .93, 9, 'avant'], ['🌿', .95, .92, 11, 'avant']] },
+    carrefour: { ciel: ['#26205A', '#0A0822'], astre: ['🌕', .2, .15, 11], part: 'feuilles', sol: ['#2B2240', '#100A1C'],
+      el: [['🌲', .06, .52, 22, 'loin'], ['🌲', .2, .5, 26, 'loin'], ['🌳', .82, .52, 24, 'loin'], ['🌲', .95, .5, 22, 'loin'], ['🪧', .5, .62, 14, 'milieu'], ['🍂', .1, .92, 8, 'avant'], ['🍄', .9, .9, 7, 'avant']] },
+    foret: { ciel: ['#0E2A2A', '#030C0E'], part: 'brume', sol: ['#0E2018', '#040A08'],
+      el: [['🌲', .05, .48, 30, 'loin'], ['🌲', .2, .46, 34, 'loin'], ['🌲', .36, .5, 28, 'loin'], ['🌲', .62, .47, 32, 'loin'], ['🌲', .8, .49, 30, 'loin'], ['🌲', .95, .46, 34, 'loin'],
+        ['🌳', .12, .62, 22, 'milieu'], ['🍄', .42, .82, 6, 'milieu'], ['🌳', .9, .6, 24, 'milieu'], ['🌿', .04, .92, 14, 'avant'], ['🍄', .96, .9, 9, 'avant']] },
+    clairiere: { ciel: ['#12304A', '#04101A'], astre: ['🌙', .5, .14, 10], part: 'lucioles', sol: ['#10261C', '#040C08'],
+      el: [['🌲', .04, .48, 30, 'loin'], ['🌲', .18, .5, 26, 'loin'], ['🌲', .84, .5, 26, 'loin'], ['🌲', .97, .48, 30, 'loin'], ['🌳', .76, .5, 40, 'milieu'], ['🌼', .3, .84, 5, 'milieu'], ['🌿', .05, .93, 12, 'avant']] },
+    marais: { ciel: ['#16283A', '#060C14'], astre: ['🌙', .78, .14, 9], part: 'brume', sol: ['#123040', '#05121A'],
+      el: [['🌾', .06, .6, 14, 'loin'], ['🌳', .2, .52, 20, 'loin'], ['🏰', .82, .4, 12, 'loin'], ['🪨', .2, .8, 7, 'milieu'], ['🪨', .38, .78, 6, 'milieu'], ['🪨', .56, .8, 7, 'milieu'], ['🪨', .74, .78, 6, 'milieu'], ['🐸', .9, .82, 6, 'milieu'], ['🌾', .04, .9, 14, 'avant'], ['🌾', .97, .9, 12, 'avant']] },
+    pont: { ciel: ['#2A1B4A', '#0B0820'], astre: ['🌕', .16, .16, 13], part: 'etoiles', sol: ['#1A1030', '#050310'],
+      el: [['⛰️', .1, .56, 26, 'loin'], ['🏔️', .5, .52, 30, 'loin'], ['⛰️', .9, .56, 26, 'loin'], ['#pont', .5, .7, 36, 'milieu'], ['🍂', .06, .92, 8, 'avant']] },
+    tempete: { ciel: ['#1C1838', '#050412'], part: 'tempete', sol: ['#120C24', '#040210'],
+      el: [['⛰️', .1, .56, 26, 'loin'], ['🏔️', .5, .52, 30, 'loin'], ['⛰️', .9, .56, 26, 'loin'], ['#pont', .5, .7, 36, 'milieu'], ['🌫️', .85, .2, 18, 'loin']] },
+    porte: { ciel: ['#3A1E5C', '#120A26'], astre: ['🌕', .5, .14, 12], part: 'etoiles', sol: ['#2A1640', '#0E0618'],
+      el: [['🏰', .5, .44, 44, 'loin'], ['🎃', .22, .78, 11, 'milieu'], ['🎃', .78, .78, 11, 'milieu'], ['🦇', .2, .24, 5, 'loin'], ['🕸️', .94, .18, 9, 'avant'], ['🕸️', .05, .16, 7, 'avant']] },
+    hall: { ciel: ['#3B2348', '#140C1C'], part: 'poussiere', sol: ['#2A1820', '#0E080C'],
+      el: [['🖼️', .18, .3, 12, 'loin'], ['🕯️', .34, .26, 6, 'loin'], ['🖼️', .5, .28, 14, 'loin'], ['🕯️', .66, .26, 6, 'loin'], ['🖼️', .82, .3, 12, 'loin'], ['🪑', .12, .74, 12, 'milieu'], ['🕸️', .95, .14, 10, 'avant'], ['🕯️', .9, .78, 9, 'milieu']] },
+    cuisine: { ciel: ['#3E2416', '#140A06'], part: 'bulles', sol: ['#2A160C', '#0E0704'],
+      el: [['🫙', .1, .34, 8, 'loin'], ['🧂', .2, .34, 6, 'loin'], ['🫖', .3, .34, 7, 'loin'], ['🫙', .82, .34, 8, 'loin'], ['🍲', .42, .72, 20, 'milieu'], ['🧹', .9, .62, 16, 'milieu'], ['🍄', .06, .86, 8, 'avant'], ['🧄', .96, .88, 7, 'avant']] },
+    escalier: { ciel: ['#1E1A3E', '#08061A'], part: 'poussiere', sol: ['#141030', '#06041A'],
+      el: [['🕯️', .15, .3, 7, 'loin'], ['🕯️', .5, .2, 7, 'loin'], ['🕯️', .85, .3, 7, 'loin'], ['🪜', .5, .56, 40, 'milieu'], ['🕸️', .06, .12, 9, 'avant']] },
+    tour: { ciel: ['#1A1F55', '#070A22'], astre: ['🌕', .82, .18, 16], part: 'brume', sol: ['#141838', '#05061A'],
+      el: [['⭐', .1, .14, 3, 'loin'], ['✨', .3, .1, 3, 'loin'], ['⭐', .6, .12, 3, 'loin'], ['🏮', .22, .44, 20, 'milieu'], ['🫙', .4, .76, 7, 'milieu']] },
+    fete: { ciel: ['#5A2A7A', '#1A0C33'], astre: ['🌕', .5, .12, 12], part: 'etincelles', sol: ['#3A1A55', '#14082A'],
+      el: [['🎆', .15, .2, 12, 'loin'], ['🏰', .5, .42, 36, 'loin'], ['🎆', .85, .2, 12, 'loin'], ['🎃', .1, .8, 10, 'milieu'], ['🏮', .3, .6, 7, 'milieu'], ['🍬', .7, .84, 6, 'milieu'], ['🎃', .9, .8, 10, 'milieu'], ['🎉', .05, .92, 10, 'avant'], ['🎉', .95, .92, 10, 'avant']] },
+  },
+  fins: { 'fin-lumi': '✨', 'fin-mains': '👏', 'fin-souffle': '💨' },
+  sequences: {
+    // ===================== ACTE 1 =====================
+    ouverture: { chapitre: T('Chapitre 1 — La citrouille éteinte', 'Chapter 1 — The pumpkin that went dark', 'الفصل الأول — اليقطينة المطفأة'), decor: 'village', musique: 'mystere', plans: [
+      { transition: 'noir', cadre: 'large', camera: 'travelling', narr: T('Il était une fois, tout au bout du monde, un petit village où la nuit d’Halloween était, chaque année, la plus belle nuit de toutes.', 'Once upon a time, at the very end of the world, there was a little village where Halloween night was, every year, the most beautiful night of all.', 'كان يا ما كان، في آخر الدنيا، قرية صغيرة كانت فيها ليلة الهالوين كل عام أجمل ليلة على الإطلاق.') },
+      { cadre: 'large', acteurs: [{ qui: 'potiron', x: .64, y: .78, taille: 9, anim: 'dort' }], narr: T('Sur chaque fenêtre, une citrouille souriait. Sur chaque toit, des guirlandes clignotaient, et les enfants préparaient leurs costumes en riant.', 'On every windowsill a pumpkin was smiling. On every roof, lights were twinkling, and the children were getting their costumes ready, laughing.', 'على كل نافذة يقطينة تبتسم، وعلى كل سطح أضواء تلمع، والأطفال يجهّزون أزياءهم وهم يضحكون.') },
+      { cadre: 'moyen', sur: 'potiron', narr: T('Mais tout au bout de la rue, une petite citrouille restait toute seule dans le noir. Elle s’appelait Potiron, et elle ne brillait plus du tout.', 'But at the very end of the street, a little pumpkin sat all alone in the dark. Her name was Pip, and she wasn’t glowing at all.', 'لكن في آخر الشارع كانت يقطينة صغيرة وحيدة في الظلام. اسمها بومبو، ولم تعد تلمع أبدًا.') },
+      { cadre: 'gros', sur: 'potiron', acteurs: [{ qui: 'potiron', anim: 'tremble' }], dit: ['potiron', T('Snif… snif… Ma lumière s’est envolée…', 'Sniff… sniff… My light has flown away…', 'سنف… سنف… لقد طار نوري…')] },
+      { sfx: 'magie', magie: '✨', cadre: 'moyen', sur: 'lumi', acteurs: [{ qui: 'lumi', x: .34, y: .46, entre: 'haut', anim: 'flotte' }], narr: T('Soudain, une petite lumière descendit du ciel en tourbillonnant. C’était Lumi !', 'Suddenly, a little light came spinning down from the sky. It was Lumi!', 'فجأة نزل ضوء صغير من السماء وهو يدور. إنه لومي!') },
+      { cadre: 'moyen', sur: 'potiron', dit: ['lumi', T('Bonsoir, petite citrouille ! Pourquoi tu pleures, un soir de fête ?', 'Good evening, little pumpkin! Why are you crying on a party night?', 'مساء الخير أيتها اليقطينة الصغيرة! لماذا تبكين في ليلة العيد؟')] },
+      { dit: ['potiron', T('Je suis Potiron, la gardienne de la grande lanterne du château. Cette nuit, un gros nuage gris est entré dans la tour… et il a emporté toute la lumière !', 'I’m Pip, keeper of the castle’s great lantern. Tonight a big grey cloud came into the tower… and took all the light away!', 'أنا بومبو، حارسة فانوس القلعة الكبير. الليلة دخلت غيمة رمادية كبيرة إلى البرج… وأخذت كل النور!')] },
+      { effet: 'clignote', sfx: 'vent', cadre: 'large', camera: 'penche', narr: T('Au même moment, toutes les citrouilles du village se mirent à clignoter, de plus en plus faiblement.', 'At that very moment, all the pumpkins in the village began to flicker, weaker and weaker.', 'وفي تلك اللحظة بدأت كل يقطينات القرية ترتعش بضوء يضعف شيئًا فشيئًا.') },
+      { sfx: 'cloche', cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Si la grande lanterne n’est pas rallumée avant minuit, toutes les lumières d’Halloween vont s’éteindre. Il n’y aura plus de fête… plus jamais !', 'If the great lantern isn’t lit again before midnight, all the Halloween lights will go out. There’ll be no more party… ever again!', 'إذا لم يُضأ الفانوس الكبير قبل منتصف الليل، ستنطفئ كل أضواء الهالوين. ولن يكون هناك حفل… أبدًا!')] },
+      { cadre: 'moyen', sur: 'reglisse', acteurs: [{ qui: 'reglisse', x: .84, y: .8, taille: 10, entre: 'droite', anim: 'marche' }], narr: T('Un chat noir sortit de l’ombre en s’étirant. Ses yeux brillaient comme deux petites lunes.', 'A black cat stepped out of the shadows, stretching. Its eyes shone like two little moons.', 'خرج قط أسود من الظل وهو يتمطّى. كانت عيناه تلمعان كقمرين صغيرين.') },
+      { dit: ['reglisse', T('Miaou… Je m’appelle Réglisse. Je connais tous les chemins jusqu’au château. Mais il faut faire vite, et il faut être courageux.', 'Miaow… My name is Liquorice. I know every path to the castle. But we must be quick, and we must be brave.', 'مياو… اسمي عرقسوس. أعرف كل الطرق إلى القلعة. لكن علينا أن نسرع، وأن نكون شجعانًا.')] },
+      { cadre: 'gros', sur: 'lumi', dit: ['lumi', T('Les amis qui regardez avec moi… vous voulez bien venir avec nous ? Ensemble, on est beaucoup plus forts !', 'Friends watching with me… will you come with us? Together we are much stronger!', 'يا أصدقائي الذين تشاهدون معي… هل تأتون معنا؟ معًا نحن أقوى بكثير!')] },
+      { cadre: 'large', narr: T('Avant de partir, il faut un peu de lumière pour la route. Réglisse a une idée : rallumer les citrouilles du village, une par une !', 'Before setting off, we need a little light for the road. Liquorice has an idea: let’s light the village pumpkins again, one by one!', 'قبل الانطلاق نحتاج قليلًا من النور للطريق. لعرقسوس فكرة: نعيد إضاءة يقطينات القرية واحدة تلو الأخرى!') },
+    ], defi: { type: 'tap', cible: '🎃', n: 6, t: T('Touchez les citrouilles pour les rallumer !', 'Tap the pumpkins to light them up!', 'المسوا اليقطينات لتضيئوها!') }, suite: 'depart' },
+
+    depart: { decor: 'carrefour', musique: 'aventure', plans: [
+      { transition: 'fondu', cadre: 'large', acteurs: [{ qui: 'potiron', x: .36, y: .8, taille: 9, anim: 'marche' }, { qui: 'reglisse', x: .52, y: .8, taille: 10, anim: 'marche' }, { qui: 'lumi', x: .44, y: .5, anim: 'flotte' }], narr: T('Les citrouilles brillent à nouveau, un tout petit peu. Potiron sourit, et la petite troupe se met en route.', 'The pumpkins glow again, just a little. Pip smiles, and the little band sets off.', 'تلمع اليقطينات من جديد، قليلًا فقط. تبتسم بومبو وتنطلق الفرقة الصغيرة.') },
+      { camera: 'travelling', narr: T('Ils marchent, marchent, marchent… jusqu’à un vieux panneau en bois, au croisement de deux chemins.', 'They walk and walk and walk… until they reach an old wooden signpost where two paths meet.', 'يمشون ويمشون ويمشون… حتى يصلوا إلى لافتة خشبية قديمة عند مفترق طريقين.') },
+      { cadre: 'moyen', sur: 'reglisse', dit: ['reglisse', T('À gauche, la forêt des lucioles. C’est plus long, mais c’est plein de magie… et le vieux hibou Hector y habite.', 'To the left, the firefly forest. It’s longer, but full of magic… and old Hector the owl lives there.', 'إلى اليسار غابة اليراعات. الطريق أطول لكنه مليء بالسحر… وتعيش فيها البومة العجوز هكتور.')] },
+      { dit: ['reglisse', T('À droite, le pont des chauves-souris. C’est plus rapide… mais ce soir, le vent y souffle très fort.', 'To the right, the bat bridge. It’s quicker… but tonight the wind is blowing very hard there.', 'إلى اليمين جسر الخفافيش. الطريق أسرع… لكن الريح تهب بقوة هناك الليلة.')] },
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Moi, j’ai un peu peur des deux… Qu’est-ce qu’on fait ?', 'I’m a little scared of both… What shall we do?', 'أنا أخاف قليلًا من الاثنين… ماذا نفعل؟')] },
+    ], choix: [{ e: '🌲', t: T('Par la forêt des lucioles', 'Through the firefly forest', 'عبر غابة اليراعات'), va: 'foret' }, { e: '🌉', t: T('Par le pont des chauves-souris', 'Over the bat bridge', 'فوق جسر الخفافيش'), va: 'pont' }] },
+
+    // ===================== ACTE 2 A : la forêt =====================
+    foret: { chapitre: T('Chapitre 2 — La forêt des lucioles', 'Chapter 2 — The firefly forest', 'الفصل الثاني — غابة اليراعات'), decor: 'foret', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', camera: 'orbite', acteurs: [{ qui: 'potiron', x: .3, y: .8, taille: 9 }, { qui: 'reglisse', x: .45, y: .8, taille: 10 }, { qui: 'lumi', x: .38, y: .5, anim: 'flotte' }], narr: T('La forêt était si sombre qu’on ne voyait même plus le bout de son nez. Les grands arbres craquaient doucement.', 'The forest was so dark you couldn’t even see the tip of your nose. The tall trees creaked softly.', 'كانت الغابة مظلمة جدًا لدرجة أننا لا نرى طرف أنوفنا. والأشجار الكبيرة تطقطق بهدوء.') },
+      { sfx: 'hibou', cadre: 'gros', sur: 'potiron', acteurs: [{ qui: 'potiron', anim: 'tremble' }], dit: ['potiron', T('C’était quoi, ce bruit ?', 'What was that noise?', 'ما هذا الصوت؟')] },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Ce n’est rien, c’est la forêt qui respire. Regarde, sur les feuilles… des lucioles ! Elles dorment.', 'It’s nothing, it’s just the forest breathing. Look, on the leaves… fireflies! They’re asleep.', 'لا شيء، إنها الغابة تتنفس. انظري على الأوراق… يراعات! إنها نائمة.')] },
+      { cadre: 'large', narr: T('Des centaines de petites lucioles dormaient, roulées en boule. Si on les réveille, elles éclaireront le chemin.', 'Hundreds of tiny fireflies were sleeping, curled up in balls. If we wake them, they’ll light the way.', 'مئات اليراعات الصغيرة نائمة وهي ملتفة. إذا أيقظناها ستضيء لنا الطريق.') },
+    ], defi: { type: 'tap', cible: '✨', n: 8, bouge: true, t: T('Réveillez les lucioles : touchez-les !', 'Wake the fireflies: tap them!', 'أيقظوا اليراعات: المسوها!') }, suite: 'foret2' },
+
+    foret2: { decor: 'clairiere', musique: 'joyeux', plans: [
+      { effet: 'lumiere', cadre: 'large', narr: T('Les lucioles s’envolent en riant ! Elles tournent, elles dansent, et dessinent une grande flèche dans la nuit.', 'The fireflies fly up, laughing! They spin, they dance, and draw a big arrow in the night.', 'تطير اليراعات وهي تضحك! تدور وترقص وترسم سهمًا كبيرًا في الليل.') },
+      { magie: '➡️', cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Merci, les lucioles ! Elles nous montrent le chemin !', 'Thank you, fireflies! They’re showing us the way!', 'شكرًا يا يراعات! إنها ترينا الطريق!')] },
+      { sfx: 'hibou', cadre: 'moyen', sur: 'hector', acteurs: [{ qui: 'hector', x: .74, y: .36, taille: 11, entre: 'haut', anim: 'flotte' }], narr: T('Sur une grosse branche, un vieux hibou ouvrit un œil… puis l’autre.', 'On a thick branch, an old owl opened one eye… then the other.', 'على غصن كبير فتحت بومة عجوز عينًا… ثم الأخرى.') },
+      { dit: ['hector', T('Houhou… Qui vient me réveiller en pleine nuit d’Halloween ?', 'Hoo-hoo… Who comes to wake me in the middle of Halloween night?', 'هوهو… من جاء يوقظني في منتصف ليلة الهالوين؟')] },
+      { cadre: 'moyen', sur: 'potiron', dit: ['potiron', T('C’est moi, Potiron ! Un grand nuage gris a pris la lumière du château…', 'It’s me, Pip! A big grey cloud took the castle’s light…', 'أنا بومبو! غيمة رمادية كبيرة أخذت نور القلعة…')] },
+      { cadre: 'gros', sur: 'hector', dit: ['hector', T('Le Grand Brouillard… Je le connais. Il n’est pas méchant, vous savez. Mais il est très, très triste.', 'The Great Fog… I know him. He isn’t wicked, you know. But he is very, very sad.', 'الضباب الكبير… أعرفه. إنه ليس شريرًا، لكنه حزين جدًا جدًا.')] },
+      { dit: ['hector', T('Je vous aiderai si vous répondez à ma devinette. Écoutez bien : je suis ronde et orange, on me creuse et on m’allume le soir d’Halloween. Qui suis-je ?', 'I’ll help you if you answer my riddle. Listen carefully: I’m round and orange, people hollow me out and light me up on Halloween night. What am I?', 'سأساعدكم إن أجبتم عن لغزي. اسمعوا جيدًا: أنا مستديرة وبرتقالية، يحفرونني ويضيئونني في ليلة الهالوين. من أنا؟')] },
+    ], choix: [
+      { e: '🎃', t: T('Une citrouille', 'A pumpkin', 'يقطينة'), va: 'foret3' },
+      { e: '🍎', t: T('Une pomme', 'An apple', 'تفاحة'), faux: T('Une pomme ? Elle est ronde, c’est vrai… mais on ne l’allume pas ! Essayez encore !', 'An apple? It’s round, that’s true… but you can’t light it up! Try again!', 'تفاحة؟ إنها مستديرة حقًا… لكننا لا نضيئها! حاولوا مرة أخرى!') },
+      { e: '🌕', t: T('La lune', 'The moon', 'القمر'), faux: T('La lune est ronde et elle brille… mais on ne peut pas la creuser ! Encore un essai !', 'The moon is round and it shines… but you can’t hollow it out! One more try!', 'القمر مستدير ويلمع… لكننا لا نستطيع حفره! محاولة أخرى!') },
+    ] },
+
+    foret3: { decor: 'clairiere', musique: 'joyeux', plans: [
+      { sfx: 'magie', cadre: 'gros', sur: 'hector', dit: ['hector', T('Bravo ! Vous êtes malins. Voici une plume de courage. Quand vous aurez peur, serrez-la très fort.', 'Well done! You’re clever. Here is a feather of courage. When you feel scared, hold it tight.', 'أحسنتم! أنتم أذكياء. هذه ريشة الشجاعة. عندما تخافون، اضغطوا عليها بقوة.')] },
+      { magie: '🪶', cadre: 'moyen', sur: 'potiron', narr: T('Une plume dorée tomba doucement, doucement, entre les feuilles de Potiron.', 'A golden feather floated gently, gently down into Pip’s leaves.', 'سقطت ريشة ذهبية ببطء، ببطء، بين أوراق بومبو.') },
+      { cadre: 'moyen', sur: 'hector', dit: ['hector', T('Pour aller au château, traversez le marais. Mais attention : il faut sauter de pierre en pierre… en tenant sur un pied, comme le héron !', 'To reach the castle, cross the marsh. But careful: you must hop from stone to stone… standing on one foot, like the heron!', 'لتصلوا إلى القلعة اعبروا المستنقع. لكن انتبهوا: يجب القفز من حجر إلى حجر… على قدم واحدة مثل مالك الحزين!')] },
+      { cadre: 'large', acteurs: [{ qui: 'hector', sort: 'haut' }], narr: T('Et le hibou s’envola sans un bruit, comme une ombre dans la nuit.', 'And the owl flew off without a sound, like a shadow in the night.', 'وطارت البومة دون صوت، كظلٍّ في الليل.') },
+    ], suite: 'marais' },
+
+    marais: { decor: 'marais', musique: 'aventure', plans: [
+      { transition: 'fondu', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'potiron', x: .1, y: .8, taille: 9 }, { qui: 'reglisse', x: .2, y: .74, taille: 10 }, { qui: 'lumi', x: .16, y: .48, anim: 'flotte' }], narr: T('Le marais était couvert d’une brume épaisse. Des pierres plates sortaient de l’eau, comme un chemin secret.', 'The marsh was covered in thick mist. Flat stones poked out of the water, like a secret path.', 'كان المستنقع مغطى بضباب كثيف، وحجارة مسطحة تبرز من الماء كأنها طريق سري.') },
+      { sfx: 'grenouille', cadre: 'moyen', sur: 'reglisse', acteurs: [{ qui: 'reglisse', x: .38, y: .72, anim: 'saute' }], dit: ['reglisse', T('Je passe le premier. Hop ! Hop ! À vous, maintenant !', 'I’ll go first. Hop! Hop! Your turn now!', 'سأعبر أولًا. هوب! هوب! دوركم الآن!')] },
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Il faut tenir sur un pied… comme le héron. Vous m’aidez ?', 'We have to stand on one foot… like the heron. Will you help me?', 'يجب أن نقف على قدم واحدة… مثل مالك الحزين. هل تساعدونني؟')] },
+    ], defi: { type: 'pose', pose: 'pied', t: T('Tenez sur un pied, comme le héron !', 'Stand on one foot, like the heron!', 'قفوا على قدم واحدة مثل مالك الحزين!') }, suite: 'marais2' },
+
+    marais2: { decor: 'marais', musique: 'joyeux', plans: [
+      { cadre: 'large', acteurs: [{ qui: 'potiron', x: .76, y: .78, anim: 'saute' }, { qui: 'reglisse', x: .86, y: .78 }, { qui: 'lumi', x: .8, y: .5 }], narr: T('Pierre après pierre, hop, hop, hop… tout le monde arrive de l’autre côté sans se mouiller les pieds !', 'Stone after stone, hop, hop, hop… everyone reaches the other side without getting their feet wet!', 'حجرًا بعد حجر، هوب، هوب، هوب… وصل الجميع إلى الضفة الأخرى دون أن تبتل أقدامهم!') },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Bravo, les amis ! Regardez, là-bas, au-dessus des arbres…', 'Well done, friends! Look, over there, above the trees…', 'أحسنتم يا أصدقاء! انظروا هناك فوق الأشجار…')] },
+      { cadre: 'large', camera: 'zoom', narr: T('Sur la colline, sous la grande lune, se dressait le château des citrouilles. Mais sa plus haute tour était toute noire.', 'On the hill, beneath the big moon, stood the Pumpkin Castle. But its highest tower was completely dark.', 'على التلة، تحت القمر الكبير، كانت تقف قلعة اليقطين. لكن أعلى أبراجها كان مظلمًا تمامًا.') },
+    ], suite: 'porte' },
+
+    // ===================== ACTE 2 B : le pont =====================
+    pont: { chapitre: T('Chapitre 2 — Le pont des chauves-souris', 'Chapter 2 — The bat bridge', 'الفصل الثاني — جسر الخفافيش'), decor: 'pont', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', camera: 'travelling', sfx: 'vent', acteurs: [{ qui: 'potiron', x: .22, y: .8, taille: 9 }, { qui: 'reglisse', x: .34, y: .8, taille: 10 }, { qui: 'lumi', x: .28, y: .5, anim: 'flotte' }], narr: T('Le pont des chauves-souris se balançait au-dessus d’un grand ravin. Le vent sifflait entre les planches.', 'The bat bridge swayed over a deep ravine. The wind whistled between the planks.', 'كان جسر الخفافيش يتأرجح فوق وادٍ عميق، والريح تصفر بين الألواح.') },
+      { cadre: 'moyen', sur: 'zip', acteurs: [{ qui: 'zip', x: .46, y: .7, taille: 7, anim: 'dort', miroir: true }, { qui: 'zap', x: .56, y: .7, taille: 7, anim: 'dort' }], narr: T('Sous le pont, deux petites chauves-souris dormaient, la tête en bas. Elles s’appelaient Zip et Zap.', 'Under the bridge, two little bats were sleeping upside down. Their names were Zip and Zap.', 'تحت الجسر كان خفاشان صغيران نائمين ورأساهما إلى الأسفل. اسمهما زيب وزاب.') },
+      { cadre: 'moyen', sur: 'reglisse', dit: ['reglisse', T('Chut… Si on les réveille, elles vont faire un tel vacarme que tout le château va nous entendre !', 'Shh… If we wake them, they’ll make such a racket that the whole castle will hear us!', 'هس… إذا أيقظناهما سيحدثان ضجة تسمعها القلعة كلها!'), 'chuchote'] },
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Comment on va passer sans faire de bruit ?', 'How are we going to cross without a sound?', 'كيف سنعبر دون أي صوت؟'), 'chuchote'] },
+    ], choix: [{ e: '🤫', t: T('Sur la pointe des pieds', 'On tiptoe', 'على أطراف الأصابع'), va: 'pont-pointe' }, { e: '🎶', t: T('Leur chanter une berceuse', 'Sing them a lullaby', 'نغني لهما تهويدة'), va: 'pont-berceuse' }] },
+
+    'pont-pointe': { decor: 'pont', musique: 'mystere', plans: [
+      { cadre: 'large', acteurs: [{ qui: 'potiron', x: .4, anim: 'marche' }, { qui: 'reglisse', x: .5, anim: 'marche' }], narr: T('Tout le monde avance sur la pointe des pieds… Chaque fois qu’une planche craque, il faut se figer comme une statue !', 'Everyone creeps forward on tiptoe… Each time a plank creaks, freeze like a statue!', 'يتقدم الجميع على أطراف الأصابع… وكلما طقطق لوح يجب أن نتجمد مثل التمثال!') },
+    ], defi: { type: 'immobile', t: T('Ne bougez plus du tout, comme des statues !', 'Don’t move at all, like statues!', 'لا تتحركوا أبدًا، مثل التماثيل!') }, suite: 'tempete' },
+
+    'pont-berceuse': { decor: 'pont', musique: 'berceuse', plans: [
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Chantez tout doucement avec moi… tout doucement.', 'Sing very softly with me… very softly.', 'غنّوا معي بهدوء… بهدوء شديد.')] },
+    ], defi: { type: 'chanson', lignes: [T('Dodo, petites chauves-souris,', 'Hush, little bats, go to sleep,', 'نامي يا خفافيش صغيرة،'), T('la lune veille sur vos nids,', 'the moon is watching, soft and deep,', 'القمر يحرس أعشاشك،'), T('fermez les yeux, faites dodo,', 'close your eyes and dream so sweet,', 'أغمضي عينيك ونامي،'), T('le vent vous berce tout là-haut.', 'the wind will rock you, off your feet.', 'والريح تهدهدك في الأعالي.')], t: T('Chantons la berceuse ensemble !', 'Let’s sing the lullaby together!', 'لنغنِّ التهويدة معًا!') }, suite: 'tempete' },
+
+    tempete: { decor: 'tempete', musique: 'aventure', plans: [
+      { sfx: 'tonnerre', effet: 'eclair', camera: 'penche', cadre: 'large', narr: T('Soudain, un énorme coup de vent ! Hou-hou-houuu ! C’est le Grand Brouillard qui souffle depuis le château !', 'Suddenly, a huge gust of wind! Whoo-whoo-whooo! It’s the Great Fog blowing from the castle!', 'فجأة هبت ريح عظيمة! هوو هوو هووو! إنه الضباب الكبير ينفخ من القلعة!') },
+      { cadre: 'moyen', sur: 'zip', acteurs: [{ qui: 'zip', x: .42, y: .36, anim: 'vole' }, { qui: 'zap', x: .6, y: .32, anim: 'vole' }], dit: ['zip', T('Hé ! Qui nous réveille comme ça ?', 'Hey! Who’s waking us up like that?', 'هيه! من يوقظنا هكذا؟')] },
+      { cadre: 'moyen', sur: 'zap', dit: ['zap', T('C’est encore ce grincheux de Brouillard ! Il veut empêcher tout le monde d’arriver au château !', 'It’s that grumpy Fog again! He wants to stop anyone reaching the castle!', 'إنه الضباب العابس مرة أخرى! يريد أن يمنع الجميع من الوصول إلى القلعة!')] },
+      { cadre: 'gros', sur: 'lumi', dit: ['lumi', T('Attention, des feuilles et des branches volent partout ! Penchez-vous pour les éviter !', 'Watch out, leaves and branches are flying everywhere! Lean to dodge them!', 'انتبهوا، أوراق وأغصان تطير في كل مكان! مِيلوا لتتجنبوها!')] },
+    ], defi: { type: 'esquive', n: 5, t: T('Penchez-vous pour éviter les feuilles !', 'Lean to dodge the leaves!', 'مِيلوا لتتجنبوا الأوراق!') }, suite: 'tempete2' },
+
+    tempete2: { decor: 'tempete', musique: 'aventure', plans: [
+      { cadre: 'moyen', sur: 'zip', dit: ['zip', T('Waouh, vous êtes drôlement forts ! On va vous aider à traverser.', 'Wow, you’re really strong! We’ll help you across.', 'واو، أنتم أقوياء جدًا! سنساعدكم على العبور.')] },
+      { cadre: 'moyen', sur: 'zap', dit: ['zap', T('Levez les bras bien haut : on vous emporte au-dessus du ravin !', 'Raise your arms up high: we’ll carry you over the ravine!', 'ارفعوا أذرعكم عاليًا: سنحملكم فوق الوادي!')] },
+    ], defi: { type: 'pose', pose: 'bras', t: T('Levez les bras bien haut !', 'Raise your arms up high!', 'ارفعوا أذرعكم عاليًا!') }, suite: 'tempete3' },
+
+    tempete3: { decor: 'pont', musique: 'joyeux', plans: [
+      { cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'potiron', x: .6, y: .4, anim: 'vole' }, { qui: 'reglisse', x: .7, y: .44, anim: 'vole' }, { qui: 'zip', x: .62, y: .3, anim: 'vole' }, { qui: 'zap', x: .72, y: .32, anim: 'vole' }, { qui: 'lumi', x: .5, y: .3 }], narr: T('Et hop ! Zip et Zap attrapent tout le monde et s’envolent au-dessus du ravin, en faisant des loopings !', 'And off they go! Zip and Zap grab everyone and fly over the ravine, doing loop-the-loops!', 'وهوب! يمسك زيب وزاب بالجميع ويطيران فوق الوادي وهما يدوران في الهواء!') },
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Wouhou ! Je vole ! Je vole !', 'Woo-hoo! I’m flying! I’m flying!', 'ووهوو! أنا أطير! أنا أطير!')] },
+      { cadre: 'large', narr: T('Ils se posent tout en douceur devant le château des citrouilles. Mais sa plus haute tour était toute noire.', 'They land gently in front of the Pumpkin Castle. But its highest tower was completely dark.', 'هبطوا بلطف أمام قلعة اليقطين. لكن أعلى أبراجها كان مظلمًا تمامًا.') },
+    ], suite: 'porte' },
+
+    // ===================== ACTE 3 : le château =====================
+    porte: { chapitre: T('Chapitre 3 — Le château des citrouilles', 'Chapter 3 — The Pumpkin Castle', 'الفصل الثالث — قلعة اليقطين'), decor: 'porte', musique: 'mystere', plans: [
+      { transition: 'fondu', cadre: 'large', camera: 'contre', acteurs: [{ qui: 'potiron', x: .42, y: .84, taille: 9 }, { qui: 'reglisse', x: .58, y: .84, taille: 10 }, { qui: 'lumi', x: .5, y: .62, anim: 'flotte' }, { qui: 'zip', sort: 'haut' }, { qui: 'zap', sort: 'haut' }], narr: T('Le château était immense. Des citrouilles géantes gardaient l’entrée, mais leurs yeux étaient éteints.', 'The castle was enormous. Giant pumpkins guarded the entrance, but their eyes were dark.', 'كانت القلعة ضخمة. يقطينات عملاقة تحرس المدخل، لكن عيونها كانت مطفأة.') },
+      { cadre: 'moyen', sur: 'reglisse', dit: ['reglisse', T('La grande porte est fermée à clé. Regardez, il y a un dessin dessus…', 'The great door is locked. Look, there’s a picture on it…', 'الباب الكبير مقفل. انظروا، عليه رسم…')] },
+      { cadre: 'gros', sur: 'potiron', magie: '🗝️', dit: ['potiron', T('C’est une clé… toute orange ! Il faut trouver quelque chose d’orange pour ouvrir la porte !', 'It’s a key… all orange! We need to find something orange to open the door!', 'إنه مفتاح… برتقالي اللون! يجب أن نجد شيئًا برتقاليًا لنفتح الباب!')] },
+    ], defi: { type: 'couleur', couleur: 'orange', t: T('Montrez quelque chose d’orange à la caméra !', 'Show something orange to the camera!', 'أروا الكاميرا شيئًا برتقاليًا!') }, suite: 'hall' },
+
+    hall: { decor: 'hall', musique: 'mystere', plans: [
+      { sfx: 'grincement', transition: 'fondu', cadre: 'large', acteurs: [{ qui: 'potiron', x: .3, y: .82, taille: 9 }, { qui: 'reglisse', x: .42, y: .82, taille: 10 }, { qui: 'lumi', x: .36, y: .5 }], narr: T('Crrrr… La porte s’ouvre lentement. Dans le grand hall, des bougies flottent dans l’air.', 'Creeeak… The door slowly opens. In the great hall, candles float in the air.', 'صرررر… ينفتح الباب ببطء. وفي القاعة الكبيرة شموع تطفو في الهواء.') },
+      { cadre: 'large', acteurs: [{ qui: 'bouh', x: .6, y: .5, taille: 9, entre: 'droite', anim: 'flotte' }, { qui: 'pouf', x: .74, y: .38, taille: 7, entre: 'haut', anim: 'flotte' }, { qui: 'flou', x: .86, y: .56, taille: 8, entre: 'droite', anim: 'flotte' }], narr: T('Et là, trois petits fantômes jouent à cache-cache derrière les rideaux.', 'And there, three little ghosts are playing hide-and-seek behind the curtains.', 'وهناك ثلاثة أشباح صغيرة تلعب الغميضة خلف الستائر.') },
+      { cadre: 'gros', sur: 'bouh', style: 'fantome', dit: ['bouh', T('Bouh ! Oh… vous n’avez pas peur ? D’habitude, tout le monde a peur de nous…', 'Boo! Oh… aren’t you scared? Usually everyone is scared of us…', 'بوو! أوه… ألا تخافون؟ عادة يخاف منا الجميع…')] },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Bien sûr que non ! Vous avez l’air très gentils.', 'Of course not! You look very kind.', 'طبعًا لا! تبدون لطفاء جدًا.')] },
+      { cadre: 'moyen', sur: 'bouh', dit: ['bouh', T('Moi, c’est Bouh. Voici Pouf et Flou. Vous voulez jouer avec nous ? Ou bien aller voir Mirabelle, dans la cuisine ?', 'I’m Boo. This is Poof and Blur. Do you want to play with us? Or go and see Mirabelle in the kitchen?', 'أنا بوو، وهذان بوف وفلو. هل تريدون اللعب معنا؟ أم الذهاب إلى ميرابيل في المطبخ؟')] },
+    ], choix: [{ e: '👻', t: T('Jouer avec les fantômes', 'Play with the ghosts', 'نلعب مع الأشباح'), va: 'fantomes' }, { e: '🍲', t: T('Aller voir Mirabelle', 'Go and see Mirabelle', 'نذهب إلى ميرابيل'), va: 'cuisine' }] },
+
+    fantomes: { decor: 'hall', musique: 'joyeux', plans: [
+      { cadre: 'large', acteurs: [{ qui: 'bouh', sort: 'droite' }, { qui: 'pouf', sort: 'haut' }, { qui: 'flou', sort: 'gauche' }], narr: T('« Un, deux, trois… cachés ! » Les fantômes disparaissent dans un petit nuage. À vous de les retrouver !', '“One, two, three… hidden!” The ghosts vanish in a little puff. Now find them!', '«واحد، اثنان، ثلاثة… اختبأنا!» تختفي الأشباح في غيمة صغيرة. جدوها!') },
+    ], defi: { type: 'tap', cible: '👻', n: 6, bouge: true, t: T('Trouvez les fantômes cachés : touchez-les !', 'Find the hidden ghosts: tap them!', 'جدوا الأشباح المختبئة: المسوها!') }, suite: 'fantomes2' },
+
+    fantomes2: { decor: 'hall', musique: 'joyeux', plans: [
+      { cadre: 'large', acteurs: [{ qui: 'bouh', x: .58, y: .5, entre: 'droite', anim: 'danse' }, { qui: 'pouf', x: .72, y: .4, entre: 'haut', anim: 'danse' }, { qui: 'flou', x: .84, y: .54, entre: 'droite', anim: 'danse' }], dit: ['pouf', T('Vous nous avez trouvés ! C’est la première fois qu’on joue avec des amis !', 'You found us! It’s the first time we’ve played with friends!', 'وجدتمونا! إنها أول مرة نلعب فيها مع أصدقاء!')] },
+      { cadre: 'gros', sur: 'flou', dit: ['flou', T('Vous savez… le Grand Brouillard aussi aimerait bien jouer. Mais personne ne l’invite jamais.', 'You know… the Great Fog would like to play too. But nobody ever invites him.', 'أتعرفون… الضباب الكبير يحب أن يلعب أيضًا. لكن لا أحد يدعوه أبدًا.')] },
+      { cadre: 'moyen', sur: 'bouh', dit: ['bouh', T('Il est là-haut, dans la tour. Il garde la lumière dans un bocal, tout seul.', 'He’s up there in the tower. He keeps the light in a jar, all alone.', 'إنه هناك في البرج، يحتفظ بالنور في وعاء، وحيدًا.')] },
+    ], suite: 'escalier' },
+
+    cuisine: { decor: 'cuisine', musique: 'joyeux', plans: [
+      { transition: 'fondu', sfx: 'magie', cadre: 'large', acteurs: [{ qui: 'potiron', x: .2, y: .82, taille: 9 }, { qui: 'reglisse', x: .1, y: .82, taille: 10 }, { qui: 'lumi', x: .22, y: .5 }, { qui: 'mirabelle', x: .66, y: .72, taille: 14, anim: 'danse' }], narr: T('Dans la cuisine, une sorcière toute ronde chantonnait devant un grand chaudron qui faisait des bulles.', 'In the kitchen, a round little witch was humming in front of a big bubbling cauldron.', 'في المطبخ كانت ساحرة مستديرة تدندن أمام قدر كبير يفور بالفقاعات.') },
+      { cadre: 'gros', sur: 'mirabelle', dit: ['mirabelle', T('Oh ! Des visiteurs ! Je suis Mirabelle. Je prépare une soupe de lumière pour rallumer la lanterne… mais elle est bien trop lourde à touiller !', 'Oh! Visitors! I’m Mirabelle. I’m making a soup of light to relight the lantern… but it’s far too heavy to stir!', 'أوه! زوار! أنا ميرابيل. أحضّر حساء النور لإعادة إضاءة الفانوس… لكنه ثقيل جدًا على التحريك!')] },
+    ], defi: { type: 'mouvement', t: T('Aidez Mirabelle : tournez la cuillère, remuez les bras !', 'Help Mirabelle: stir the spoon, wave your arms!', 'ساعدوا ميرابيل: حرّكوا الملعقة وأذرعكم!') }, suite: 'cuisine2' },
+
+    cuisine2: { decor: 'cuisine', musique: 'joyeux', plans: [
+      { magie: '✨', effet: 'lumiere', cadre: 'moyen', sur: 'mirabelle', dit: ['mirabelle', T('Merci, mes petits ! La soupe brille ! Mais il manque l’ingrédient le plus important…', 'Thank you, my dears! The soup is glowing! But the most important ingredient is missing…', 'شكرًا يا صغاري! الحساء يلمع! لكن ينقصه أهم مكوّن…')] },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Lequel ?', 'Which one?', 'ما هو؟')] },
+      { cadre: 'gros', sur: 'mirabelle', dit: ['mirabelle', T('Un peu d’amitié ! Le Grand Brouillard est si seul… Personne ne l’a jamais invité à la fête. C’est pour ça qu’il a pris la lumière.', 'A little friendship! The Great Fog is so lonely… Nobody has ever invited him to the party. That’s why he took the light.', 'قليل من الصداقة! الضباب الكبير وحيد جدًا… لم يدعه أحد إلى الحفل أبدًا، ولهذا أخذ النور.')] },
+    ], suite: 'escalier' },
+
+    escalier: { decor: 'escalier', musique: 'aventure', plans: [
+      { transition: 'fondu', cadre: 'large', camera: 'tourbillon', acteurs: [{ qui: 'potiron', x: .38, y: .82, taille: 9, anim: 'marche' }, { qui: 'reglisse', x: .5, y: .82, taille: 10, anim: 'marche' }, { qui: 'lumi', x: .44, y: .5 }, { qui: 'bouh', sort: 'droite' }, { qui: 'pouf', sort: 'haut' }, { qui: 'flou', sort: 'droite' }, { qui: 'mirabelle', sort: 'droite' }], narr: T('Pour monter tout en haut de la tour, il y a un escalier en colimaçon qui tourne, qui tourne, qui tourne…', 'To climb to the top of the tower, there’s a spiral staircase that turns and turns and turns…', 'للصعود إلى أعلى البرج هناك درج حلزوني يدور ويدور ويدور…') },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('On compte les marches ensemble ? Prêts ?', 'Shall we count the steps together? Ready?', 'هل نعدّ الدرجات معًا؟ مستعدون؟')] },
+    ], defi: { type: 'compte', n: 10, t: T('Comptez les marches avec Lumi !', 'Count the steps with Lumi!', 'عدّوا الدرجات مع لومي!') }, suite: 'tour' },
+
+    tour: { chapitre: T('Chapitre 4 — Le Grand Brouillard', 'Chapter 4 — The Great Fog', 'الفصل الرابع — الضباب الكبير'), decor: 'tour', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', camera: 'plongee', acteurs: [{ qui: 'potiron', x: .22, y: .84, taille: 9 }, { qui: 'reglisse', x: .1, y: .84, taille: 10 }, { qui: 'lumi', x: .2, y: .5 }], narr: T('Tout en haut, il faisait froid. Une brume grise remplissait toute la pièce.', 'At the very top it was cold. A grey mist filled the whole room.', 'في الأعلى كان الجو باردًا، وضباب رمادي يملأ الغرفة كلها.') },
+      { sfx: 'tonnerre', effet: 'eclair', camera: 'contre', cadre: 'large', acteurs: [{ qui: 'brouillard', x: .64, y: .44, taille: 30, entre: 'droite', anim: 'flotte' }], narr: T('Et au milieu, il y avait un énorme nuage gris, avec de gros sourcils froncés. Le Grand Brouillard !', 'And in the middle was an enormous grey cloud with big frowning eyebrows. The Great Fog!', 'وفي الوسط كانت غيمة رمادية ضخمة بحاجبين عابسين. إنه الضباب الكبير!') },
+      { cadre: 'gros', sur: 'brouillard', camera: 'penche', dit: ['brouillard', T('Qui ose monter dans MA tour ? Allez-vous-en ! Cette lumière est à moi !', 'Who dares climb MY tower? Go away! This light is mine!', 'من يجرؤ على صعود برجي؟ اذهبوا! هذا النور لي!')] },
+      { cadre: 'gros', sur: 'potiron', acteurs: [{ qui: 'potiron', anim: 'tremble' }], dit: ['potiron', T('Je n’ai pas peur… enfin, juste un tout petit peu.', 'I’m not scared… well, just a tiny bit.', 'لست خائفة… حسنًا، قليلًا فقط.')] },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Bonsoir, Grand Brouillard. Pourquoi as-tu pris la lumière du château ?', 'Good evening, Great Fog. Why did you take the castle’s light?', 'مساء الخير أيها الضباب الكبير. لماذا أخذت نور القلعة؟')] },
+      { cadre: 'gros', sur: 'brouillard', dit: ['brouillard', T('Parce que… chaque année, tout le monde fait la fête. Tout le monde danse, tout le monde rit… et moi, personne ne m’invite. Personne ne veut d’un gros nuage gris.', 'Because… every year everyone has a party. Everyone dances, everyone laughs… and nobody invites me. Nobody wants a big grey cloud.', 'لأن… كل عام يحتفل الجميع. الجميع يرقص ويضحك… ولا أحد يدعوني. لا أحد يريد غيمة رمادية كبيرة.'), 'doux'] },
+      { cadre: 'gros', sur: 'brouillard', effet: 'pluie', narr: T('Une petite larme de pluie coula sur sa joue toute grise.', 'A little raindrop tear rolled down his grey cheek.', 'سالت دمعة مطر صغيرة على خده الرمادي.') },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Les amis… qu’est-ce qu’on peut faire pour lui ?', 'Friends… what can we do for him?', 'يا أصدقاء… ماذا نستطيع أن نفعل من أجله؟')] },
+    ], choix: [
+      { e: '🤗', t: T('Lui faire un gros câlin', 'Give him a big hug', 'نعانقه عناقًا كبيرًا'), va: 'calin' },
+      { e: '💌', t: T('L’inviter à la fête', 'Invite him to the party', 'ندعوه إلى الحفل'), va: 'invitation' },
+      { e: '🫙', t: T('Lui reprendre la lumière de force', 'Take the light back by force', 'نأخذ النور منه بالقوة'), faux: T('Hum… Et si on essayait d’abord d’être gentils ? Un ami triste a surtout besoin d’un ami.', 'Hmm… What if we tried being kind first? A sad friend mostly needs a friend.', 'همم… ماذا لو جرّبنا اللطف أولًا؟ الصديق الحزين يحتاج قبل كل شيء إلى صديق.') },
+    ] },
+
+    calin: { decor: 'tour', musique: 'berceuse', plans: [
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Ouvrez grand les bras… et faites un énorme câlin au Grand Brouillard !', 'Open your arms wide… and give the Great Fog an enormous hug!', 'افتحوا أذرعكم واسعًا… وعانقوا الضباب الكبير عناقًا كبيرًا!')] },
+    ], defi: { type: 'pose', pose: 'avion', t: T('Ouvrez grand les bras pour le câlin !', 'Open your arms wide for the hug!', 'افتحوا أذرعكم للعناق!') }, suite: 'pardon' },
+
+    invitation: { decor: 'tour', musique: 'joyeux', plans: [
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Grand Brouillard… tu veux venir à la fête avec nous ? Tu seras notre invité d’honneur !', 'Great Fog… would you like to come to the party with us? You’ll be our guest of honour!', 'أيها الضباب الكبير… هل تأتي معنا إلى الحفل؟ ستكون ضيف الشرف!')] },
+      { cadre: 'large', narr: T('Pour l’inviter, tout le monde tape dans les mains !', 'To invite him, everyone claps their hands!', 'لندعوه، يصفّق الجميع!') },
+    ], defi: { type: 'mouvement', t: T('Tapez dans vos mains pour l’inviter !', 'Clap your hands to invite him!', 'صفّقوا لتدعوه!') }, suite: 'pardon' },
+
+    pardon: { decor: 'tour', musique: 'joyeux', plans: [
+      { effet: 'lumiere', cadre: 'gros', sur: 'brouillard', acteurs: [{ qui: 'brouillard', anim: 'danse', e: '☁️' }], narr: T('Le Grand Brouillard ouvrit de grands yeux. Personne ne lui avait jamais dit ça. Ses sourcils se défroncèrent… et il sourit !', 'The Great Fog opened his eyes wide. Nobody had ever said that to him. His eyebrows unfrowned… and he smiled!', 'فتح الضباب الكبير عينيه واسعتين. لم يقل له أحد ذلك من قبل. ارتخى حاجباه… وابتسم!') },
+      { dit: ['brouillard', T('C’est vrai ? Vous voulez bien de moi ? Alors… je vous rends la lumière. Pardon, Potiron.', 'Really? You want me there? Then… I’ll give you back the light. Sorry, Pip.', 'حقًا؟ تريدونني معكم؟ إذن… سأعيد لكم النور. آسف يا بومبو.'), 'doux'] },
+      { magie: '🫙', cadre: 'moyen', sur: 'potiron', narr: T('Il ouvrit le bocal. La lumière s’en échappa en tourbillonnant… mais elle était toute petite, et toute faible.', 'He opened the jar. The light swirled out… but it was tiny, and very weak.', 'فتح الوعاء. خرج النور وهو يدور… لكنه كان صغيرًا جدًا وضعيفًا.') },
+      { cadre: 'gros', sur: 'potiron', dit: ['potiron', T('Oh non… Elle est trop faible pour rallumer la grande lanterne ! Et minuit approche !', 'Oh no… It’s too weak to light the great lantern! And midnight is coming!', 'أوه لا… إنه أضعف من أن يضيء الفانوس الكبير! ومنتصف الليل يقترب!')] },
+      { sfx: 'cloche', cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Il faut lui donner de la force. Comment on fait, les amis ?', 'We have to give it strength. How shall we do it, friends?', 'يجب أن نمنحه القوة. كيف نفعل ذلك يا أصدقاء؟')] },
+    ], choix: [
+      { e: '✨', t: T('Lumi partage sa lumière', 'Lumi shares its light', 'لومي يتقاسم نوره'), va: 'fin-lumi' },
+      { e: '👏', t: T('Tout le monde tape dans les mains', 'Everyone claps', 'الجميع يصفّق'), va: 'fin-mains' },
+      { e: '💨', t: T('Le Brouillard souffle des paillettes', 'The Fog blows glitter', 'الضباب ينفخ لمعانًا'), va: 'fin-souffle' },
+    ] },
+
+    'fin-lumi': { decor: 'tour', musique: 'joyeux', plans: [
+      { magie: '🌟', effet: 'lumiere', cadre: 'gros', sur: 'lumi', dit: ['lumi', T('Je vous donne un peu de ma lumière… parce qu’une lumière partagée, ça ne diminue jamais : ça grandit !', 'I’ll give you some of my light… because shared light never gets smaller: it grows!', 'سأعطيكم قليلًا من نوري… لأن النور المشترك لا ينقص أبدًا: بل يكبر!')] },
+      { cadre: 'large', camera: 'tourbillon', narr: T('Lumi brilla, brilla, plus fort que jamais. La petite lumière grandit, grandit… et s’envola dans la grande lanterne !', 'Lumi shone and shone, brighter than ever. The little light grew and grew… and flew up into the great lantern!', 'لمع لومي ولمع أكثر من أي وقت مضى. كبر النور الصغير وكبر… وطار إلى الفانوس الكبير!') },
+    ], suite: 'finale' },
+
+    'fin-mains': { decor: 'tour', musique: 'fete', plans: [
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Chaque applaudissement donne une étincelle ! Tapez dans vos mains, de plus en plus fort !', 'Every clap makes a spark! Clap your hands, louder and louder!', 'كل تصفيقة تصنع شرارة! صفّقوا أقوى فأقوى!')] },
+    ], defi: { type: 'mouvement', t: T('Tapez dans vos mains, de plus en plus fort !', 'Clap your hands, louder and louder!', 'صفّقوا أقوى فأقوى!') }, suite: 'fin-mains2' },
+    'fin-mains2': { decor: 'tour', musique: 'fete', plans: [
+      { effet: 'lumiere', cadre: 'large', camera: 'zoom', narr: T('Clap ! Clap ! Clap ! Mille étincelles volent jusqu’à la petite lumière… qui grandit, grandit, et s’envole dans la grande lanterne !', 'Clap! Clap! Clap! A thousand sparks fly to the little light… which grows and grows, and flies up into the great lantern!', 'تصفيق! تصفيق! تصفيق! ألف شرارة تطير إلى النور الصغير… فيكبر ويكبر ويطير إلى الفانوس الكبير!') },
+    ], suite: 'finale' },
+
+    'fin-souffle': { decor: 'tour', musique: 'joyeux', plans: [
+      { cadre: 'gros', sur: 'brouillard', dit: ['brouillard', T('Je sais faire du vent ! Mais cette fois, je vais souffler tout doucement… Aidez-moi : soufflez et agitez les bras comme le vent !', 'I know how to make wind! But this time I’ll blow very gently… Help me: blow and wave your arms like the wind!', 'أعرف كيف أصنع الريح! لكن هذه المرة سأنفخ بلطف… ساعدوني: انفخوا وحرّكوا أذرعكم مثل الريح!'), 'doux'] },
+    ], defi: { type: 'mouvement', t: T('Soufflez et agitez les bras comme le vent !', 'Blow and wave your arms like the wind!', 'انفخوا وحرّكوا أذرعكم مثل الريح!') }, suite: 'fin-souffle2' },
+    'fin-souffle2': { decor: 'tour', musique: 'joyeux', plans: [
+      { effet: 'lumiere', cadre: 'large', camera: 'zoom', narr: T('Le Brouillard souffla, et toute sa brume se transforma en milliers de paillettes d’argent. Elles nourrirent la petite lumière, qui s’envola dans la grande lanterne !', 'The Fog blew, and all his mist turned into thousands of silver sparkles. They fed the little light, which flew up into the great lantern!', 'نفخ الضباب، فتحول ضبابه كله إلى آلاف اللمعات الفضية. غذّت النور الصغير، فطار إلى الفانوس الكبير!') },
+    ], suite: 'finale' },
+
+    finale: { chapitre: T('La grande fête', 'The big party', 'الحفل الكبير'), decor: 'fete', musique: 'fete', plans: [
+      { sfx: 'cloche', effet: 'lumiere', cadre: 'large', acteurs: [{ qui: 'brouillard', sort: 'droite' }, { qui: 'potiron', x: .5, y: .8, taille: 11 }, { qui: 'lumi', x: .5, y: .3 }], narr: T('Ding… dong… Au douzième coup de minuit, la grande lanterne s’alluma !', 'Ding… dong… On the twelfth stroke of midnight, the great lantern lit up!', 'دينغ… دونغ… عند الدقة الثانية عشرة من منتصف الليل أضاء الفانوس الكبير!') },
+      { cadre: 'large', camera: 'orbite', narr: T('Toutes les citrouilles du village se rallumèrent d’un coup. Le château brillait comme un énorme gâteau d’anniversaire !', 'All the pumpkins in the village lit up at once. The castle glowed like an enormous birthday cake!', 'أضاءت كل يقطينات القرية دفعة واحدة. وصارت القلعة تلمع مثل كعكة عيد ميلاد ضخمة!') },
+      { cadre: 'large', acteurs: [{ qui: 'reglisse', x: .36, y: .82, anim: 'danse' }, { qui: 'potiron', x: .5, y: .8, anim: 'danse' }, { qui: 'mirabelle', x: .68, y: .76, taille: 12, anim: 'danse' }, { qui: 'bouh', x: .2, y: .5, anim: 'danse' }, { qui: 'zip', x: .3, y: .3, anim: 'vole' }, { qui: 'zap', x: .74, y: .3, anim: 'vole' }, { qui: 'hector', x: .86, y: .44, taille: 9, anim: 'flotte' }, { qui: 'brouillard', x: .82, y: .62, taille: 16, entre: 'droite', anim: 'danse', e: '☁️' }], dit: ['potiron', T('Ma lumière est revenue ! Merci, merci, les amis !', 'My light is back! Thank you, thank you, friends!', 'عاد نوري! شكرًا، شكرًا يا أصدقاء!')] },
+      { cadre: 'moyen', sur: 'mirabelle', dit: ['mirabelle', T('Que la fête commence !', 'Let the party begin!', 'فليبدأ الحفل!')] },
+      { cadre: 'moyen', sur: 'brouillard', dit: ['brouillard', T('C’est la plus belle nuit de toute ma vie !', 'This is the most wonderful night of my whole life!', 'إنها أجمل ليلة في حياتي كلها!'), 'doux'] },
+      { cadre: 'gros', sur: 'lumi', dit: ['lumi', T('Allez, tout le monde danse avec nous !', 'Come on, everyone dance with us!', 'هيا، ليرقص الجميع معنا!')] },
+    ], defi: { type: 'danse', duree: 20, t: T('Dansez avec tout le monde !', 'Dance with everyone!', 'ارقصوا مع الجميع!') }, suite: 'generique' },
+
+    generique: { decor: 'fete', musique: 'fete', fin: true, plans: [
+      { cadre: 'large', narr: T('Et depuis ce jour, chaque année, le Grand Brouillard est l’invité d’honneur de la fête d’Halloween. Il fait de jolies brumes pour les danses… et plus personne n’est jamais tout seul.', 'And ever since that day, every year, the Great Fog is the guest of honour at the Halloween party. He makes pretty mists for the dances… and nobody is ever alone again.', 'ومنذ ذلك اليوم، كل عام، يكون الضباب الكبير ضيف الشرف في حفل الهالوين. يصنع ضبابًا جميلًا للرقص… ولم يعد أحد وحيدًا أبدًا.') },
+      { cadre: 'gros', sur: 'lumi', dit: ['lumi', T('Joyeux Halloween, les amis ! Et n’oubliez jamais : une lumière partagée, ça grandit.', 'Happy Halloween, friends! And never forget: shared light grows.', 'هالوين سعيد يا أصدقاء! ولا تنسوا أبدًا: النور المشترك يكبر.')] },
+    ] },
+  },
+});
+})();
+
+enregistrerFilms();
 // =====================================================================
 // ---------- Nos cultures : comptines, contes, jeux de cour et mots de chez nous ----------
 // Chaque famille choisit ses pays (espace parents). Lumi anime les jeux traditionnels à la télé.
