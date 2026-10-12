@@ -2036,6 +2036,7 @@
   .pw-liens { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
   .pw-liens a[hidden] { display: none; }
   .vt-ico.vt-famille { color: #2EE6C5; font-size: calc(var(--vu) * 28); }
+  .avis-google { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 200; width: min(92vw, 520px); padding: 14px 18px; border-radius: 16px; background: #131A3D; color: #F4FBF8; border: 1px solid rgba(46,230,197,.5); box-shadow: 0 12px 40px rgba(0,0,0,.5); font: 700 15px/1.4 system-ui, sans-serif; text-align: center; }
 </style>
 </head>
 <body>
@@ -6772,7 +6773,11 @@ Famille = (() => {
       return n;
     },
     // connexion Google (page web) : Supabase renvoie ici avec les jetons dans l'adresse
-    google() { location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname + location.search)}`; },
+    async google() {
+      // tant que Google n'est pas activé dans Supabase, on prévient au lieu d'afficher une page d'erreur
+      try { const r = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: cle_ } }); const j = await r.json(); if (!j?.external?.google) { avisGoogle(); return false; } } catch {}
+      location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname + location.search)}`;
+    },
     async retourOAuth() {
       const h = new URLSearchParams(location.hash.slice(1));
       if (!h.get('access_token') || !h.get('refresh_token')) return false;
@@ -8005,6 +8010,12 @@ const Fiche = (() => {
   return { ouvrir, fermer };
 })();
 
+function avisGoogle() {
+  document.querySelector('.avis-google')?.remove();
+  const d = document.createElement('div'); d.className = 'avis-google'; d.setAttribute('role', 'status');
+  d.textContent = { fr: 'La connexion avec Google arrive bientôt. En attendant, utilisez votre e-mail : vous recevez un code à 6 chiffres.', en: 'Google sign-in is coming soon. For now, use your email: you’ll get a 6-digit code.', ar: 'تسجيل الدخول عبر Google قريبًا. استخدموا بريدكم الإلكتروني حاليًا: ستصلكم رمز من 6 أرقام.' }[langue] || 'Google : bientôt';
+  document.body.appendChild(d); setTimeout(() => d.remove(), 6000);
+}
 // =====================================================================
 // ---------- Lumiole en famille : menus par envie, recherche, fêtes de l'année ----------
 // (assemblé juste avant le démarrage de app.js : tout ce qui est plus haut est disponible)
