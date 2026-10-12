@@ -2274,6 +2274,25 @@
     html:not(.tele) #hi-lecteur .ch-titre { text-align: center; font-size: 19px; }
     html:not(.tele) #hi-lecteur .ch-commandes { justify-content: center; }
   }
+  /* ----- Comptine en cours (téléphone, tablette) : Lumi en grand, paroles façon karaoké en bas de l'écran ----- */
+  .ch-mot { padding-inline: .05em; }
+  .ch-mot.on { transform: translateY(-3px) scale(1.06); }
+  html:not(.tele) .app[data-ecran="chansons"]:has(#ch-lecteur:not(.vide)) #btn-maison { display: none; }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-haut { display: contents; }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-titre { order: 0; text-align: center; font-size: 15px; color: var(--doux); }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-paroles { order: 1; min-height: 7.5em; }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-commandes { order: 2; justify-content: center; gap: 14px; }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-ligne.active { font-size: clamp(26px, 7.4vw, 40px); line-height: 1.25; }
+  html:not(.tele) #ch-lecteur:not(.vide) .ch-ligne.suivante { font-size: clamp(17px, 4.6vw, 24px); }
+  @media (orientation: portrait) {
+    html:not(.tele) #ch-lecteur:not(.vide) { position: fixed; z-index: 15; left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); bottom: 0;
+      border: none; border-radius: 0; gap: 10px; padding: 48px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(180deg, rgba(var(--fond-rgb), 0) 0%, rgba(var(--fond-rgb), .88) 26%, rgba(var(--fond-rgb), .97) 100%); }
+    html:not(.tele) .app[data-ecran="chansons"]:has(#ch-lecteur:not(.vide)) .scene { max-height: none; height: calc(100dvh - 400px - env(safe-area-inset-bottom, 0px)); min-height: 220px; width: 100%; }
+  }
+  @media (orientation: landscape) {
+    html:not(.tele) #ch-lecteur:not(.vide) { min-height: min(calc(100dvh - 110px), 520px); justify-content: center; gap: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -12276,6 +12295,10 @@ $('hi-autres').onclick = () => (modeTele ? autresAvantCatalogue() : retour());
   b.setAttribute('aria-label', 'Réglages'); b.onclick = () => { son('tic'); document.documentElement.classList.toggle('hi-reglages'); };
   $('btn-son').before(b);
 })();
+
+// Lumi ne sait pas dessiner les émojis « photo » (carrés) : on lui donne une forme qui lui va
+const FORME_DE_CARRE = { '🌉': '🎶', '🌌': '✨', '🖼': '🎨', '🖼️': '🎨', '🌅': '☀️', '🌄': '☀️', '🌆': '🌙', '🌃': '🌙', '🏙': '🏢', '🏙️': '🏢', '🎆': '✨', '🎇': '✨', '🏞': '🌳', '🏞️': '🌳' };
+if (typeof avatar !== 'undefined' && avatar?.forme) { const formeAvantCarre = avatar.forme.bind(avatar); avatar.forme = (e, ...r) => formeAvantCarre(FORME_DE_CARRE[e] || e, ...r); }
 
 // =====================================================================
 // ---------- « Comment on joue ? » : une fiche courte pour chaque jeu ----------
