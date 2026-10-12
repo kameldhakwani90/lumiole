@@ -2180,6 +2180,26 @@
   .vt-art-heros { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); mask-composite: intersect; }
   .vitrine[dir="rtl"] .vt-art-heros { -webkit-mask-image: linear-gradient(270deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); mask-image: linear-gradient(270deg, transparent 0%, #000 48%), linear-gradient(0deg, transparent 0%, #000 42%); }
   .vt-art-heros::after, .vitrine[dir="rtl"] .vt-art-heros::after { background: none; }
+
+  /* ----- Audit : pages de catégories en grille sur téléphone et tablette (fini la rangée seule et le grand vide) ----- */
+  .vitrine:not(.vt-grand).vt-sous .vt-ligne-r:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste { display: grid; overflow: visible; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px 10px; padding: 10px 16px 6px; }
+  .vitrine:not(.vt-grand).vt-sous .vt-ligne-r.vt-r-paysage:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste, .vitrine:not(.vt-grand).vt-sous .vt-ligne-r.vt-r-grande:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .vitrine:not(.vt-grand).vt-sous .vt-piste .vt-carte.vt-portrait { width: 100%; height: auto; aspect-ratio: 2 / 3; font-size: clamp(11px, 3vw, 14px); }
+  .vitrine:not(.vt-grand).vt-sous .vt-piste .vt-carte.vt-paysage, .vitrine:not(.vt-grand).vt-sous .vt-piste .vt-carte.vt-grande { width: 100%; height: auto; aspect-ratio: 16 / 9; font-size: clamp(11px, 2.8vw, 14px); }
+  @media (min-width: 700px) { .vitrine:not(.vt-grand).vt-sous .vt-ligne-r:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } .vitrine:not(.vt-grand).vt-sous .vt-ligne-r.vt-r-paysage:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste, .vitrine:not(.vt-grand).vt-sous .vt-ligne-r.vt-r-grande:not(.vt-r-filtres):not(.vt-r-rond) .vt-piste { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); } }
+  /* téléphone couché : l'affiche devient un bandeau, on voit la suite */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .vitrine:not(.vt-grand) .vt-affiche { height: min(70vh, 260px); }
+    .vitrine:not(.vt-grand) .vt-affiche > .vt-art { font-size: 20px; }
+    .vitrine:not(.vt-grand) .vt-affiche .e0 { right: 6%; top: 8%; font-size: 7em; }
+    .vitrine:not(.vt-grand) .vt-affiche > .vt-art::after { background: linear-gradient(90deg, rgba(10,14,38,.95) 0%, rgba(10,14,38,.6) 45%, rgba(10,14,38,0) 70%); }
+    .vitrine[dir="rtl"]:not(.vt-grand) .vt-affiche > .vt-art::after { background: linear-gradient(270deg, rgba(10,14,38,.95) 0%, rgba(10,14,38,.6) 45%, rgba(10,14,38,0) 70%); }
+    .vitrine:not(.vt-grand) .vt-af-txt { right: auto; inset-inline-end: auto; width: 52%; align-items: flex-start; text-align: start; bottom: 14px; }
+    .vitrine:not(.vt-grand) .vt-af-titre { font-size: 26px; }
+    .vitrine:not(.vt-grand) .vt-onglets { padding-top: 4px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
+    .vitrine:not(.vt-grand) .vt-onglets button { flex-direction: row; gap: 6px; font-size: 12px; }
+    .vitrine:not(.vt-grand) .vt-page { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 54px); }
+  }
 </style>
 </head>
 <body>
@@ -2287,6 +2307,7 @@
                 <button type="button" id="hi-lecture" aria-label="Lecture">▶</button>
                 <button type="button" id="hi-suiv" aria-label="Page suivante">⏭</button>
                 <button type="button" id="hi-theatre" aria-label="Théâtre plein écran">🎭</button>
+                <button type="button" id="hi-autres" aria-label="Autres histoires">📚</button>
               </div>
             </div>
             <p class="hi-texte" id="hi-texte"></p>
@@ -2312,6 +2333,7 @@
                 <button type="button" id="ch-lent"></button>
                 <button type="button" id="ch-boucle"></button>
                 <button type="button" id="ch-lecture" aria-label="Lecture">▶</button>
+                <button type="button" id="ch-autres" aria-label="Autres comptines">📚</button>
               </div>
             </div>
             <div class="ch-paroles" id="ch-paroles"></div>
@@ -4921,6 +4943,7 @@ function construireChansons() {
   $('ch-boucle').classList.toggle('on', r.boucle);
 }
 let dernier = null;
+$('ch-autres').onclick = () => { arreterChanson(); son('tic'); setTimeout(() => $('ch-liste')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); };
 $('ch-lecture').onclick = () => { if (chant) arreterChanson(); else if (dernier) chanter(dernier); else $('ch-liste').firstElementChild?.click(); };
 $('ch-lent').onclick = () => { ReglesChant.set('lent', !ReglesChant.get().lent); construireChansons(); if (chant && dernier) chanter(dernier); };
 $('ch-boucle').onclick = () => { ReglesChant.set('boucle', !ReglesChant.get().boucle); construireChansons(); };
@@ -5317,6 +5340,8 @@ const Theatre = (() => {
   return { entrer, quitter, rideauFin, get actif() { return actif; } };
 })();
 $('hi-theatre').onclick = () => (Theatre.actif ? Theatre.quitter() : Theatre.entrer());
+// 📚 revenir aux autres histoires : on arrête celle-ci et on montre la liste
+$('hi-autres').onclick = () => { arreterHistoire(); $('hi-lecteur').classList.add('vide'); $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; son('tic'); setTimeout(() => $('hi-liste')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); };
 // ----- Enregistrer sa voix, page par page -----
 let enreg = null; // { rec, flux, cle }
 async function commencerEnregistrement() {
@@ -11988,7 +12013,8 @@ const Vitrine = (() => {
     }
     R.forEach((r, i) => {
       const s = mk('section', `vt-ligne-r vt-r-${r.forme}${r.univers ? ' vt-univers' : ''}`);
-      if (r.titre) { const h = mk('h3', '', r.titre); if (r.sous) h.appendChild(mk('small', '', r.sous)); s.appendChild(h); }
+      const seule = page !== 'accueil' && R.filter((x) => x.forme !== 'filtres').length === 1 && r.titre === nomDe(NOEUDS[page]); // pas de titre répété
+      if (r.titre && !seule) { const h = mk('h3', '', r.titre); if (r.sous) h.appendChild(mk('small', '', r.sous)); s.appendChild(h); }
       const p = mk('div', 'vt-piste'); s.appendChild(p);
       const cartes = r.items.map((it, ci) => {
         let b;
