@@ -2045,6 +2045,42 @@
     .atelier canvas#trace { top: 13vh; height: calc(100vh - 13vh - 150px - env(safe-area-inset-bottom, 0px)); }
     @supports (height: 100dvh) { .atelier canvas#trace { top: 13dvh; height: calc(100dvh - 13dvh - 150px - env(safe-area-inset-bottom, 0px)); } }
   }
+
+  /* ----- « Comment on joue ? » ----- */
+  .aide-fond { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; padding: 16px; background: rgba(6,8,26,.72); backdrop-filter: blur(6px); }
+  .aide-carte { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 26px 24px 22px; border-radius: 26px;
+    background: radial-gradient(ellipse at 50% 0%, #2A2F7A 0%, #131A3D 60%); border: 1px solid rgba(46,230,197,.35); box-shadow: 0 24px 70px rgba(0,0,0,.55); color: #F4FBF8; font-family: system-ui, sans-serif; }
+  .aide-lumi { width: 54px; height: 54px; border-radius: 50%; align-self: center; background: radial-gradient(circle, #fff 0%, #BFFBEA 16%, rgba(46,230,197,.5) 40%, rgba(46,230,197,0) 70%); }
+  .aide-sur { align-self: center; font: 800 12px/1 system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #2EE6C5; }
+  .aide-carte h2 { margin: 0; text-align: center; font: 800 28px/1.1 'Baloo 2', system-ui, sans-serif; text-wrap: balance; }
+  .aide-but { margin: 0; font-size: 17px; line-height: 1.45; color: #E2EAF5; text-align: center; }
+  .aide-but b { color: #FFE0A8; }
+  .aide-etapes { margin: 0; padding: 0; list-style: none; counter-reset: e; display: flex; flex-direction: column; gap: 10px; }
+  .aide-etapes li { counter-increment: e; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.06); font-size: 16px; line-height: 1.4; font-weight: 600; }
+  .aide-etapes li::before { content: counter(e); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--degrade); color: var(--primaire-encre); font-weight: 900; }
+  .aide-avec { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .aide-avec b { font-size: 13px; color: #A9BCD0; text-transform: uppercase; letter-spacing: .08em; }
+  .aide-avec div { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .aide-avec span { padding: 6px 12px; border-radius: 20px; background: rgba(255,255,255,.08); font-size: 14px; font-weight: 700; }
+  .aide-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 4px; }
+  .aide-actions button { height: 52px; padding: 0 24px; border-radius: 28px; border: none; font: 800 17px system-ui, sans-serif; cursor: pointer; background: rgba(255,255,255,.08); color: #F4FBF8; box-shadow: inset 0 0 0 1px rgba(46,230,197,.5); }
+  .aide-actions .principal { background: var(--degrade); color: var(--primaire-encre); box-shadow: 0 8px 24px rgba(46,230,197,.35); }
+  .aide-actions button:focus-visible, .tele .aide-actions button:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 4px #fff, 0 0 24px rgba(255,255,255,.45); }
+  .tele .aide-carte { width: 56vw; max-width: none; padding: 4vh 3vw; gap: 2vh; }
+  .tele .aide-carte h2 { font-size: 5.4vh; } .tele .aide-but { font-size: 2.6vh; } .tele .aide-etapes li { font-size: 2.4vh; grid-template-columns: 4.4vh 1fr; } .tele .aide-etapes li::before { width: 4vh; height: 4vh; }
+  .tele .aide-avec span { font-size: 2vh; } .tele .aide-actions button { height: 6.4vh; font-size: 2.4vh; padding: 0 2.4vw; }
+  .aide-q { position: fixed; left: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); z-index: 140; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(46,230,197,.6);
+    background: rgba(10,14,38,.75); color: #2EE6C5; font: 900 22px/1 system-ui, sans-serif; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+  .aide-q[hidden] { display: none; }
+  .tele .aide-q { left: 2vw; bottom: 3vh; width: 6vh; height: 6vh; font-size: 3vh; }
+  .tele .aide-q:focus { outline: none; box-shadow: 0 0 0 .5vh #fff; transform: scale(1.1); }
+  /* « Mon dessin prend vie » sur téléphone : une seule rangée de boutons qui défile, le dessin reste bien visible */
+  @media (max-width: 700px) {
+    .vi-cmd { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; bottom: 10px; }
+    .vi-cmd::-webkit-scrollbar { display: none; }
+    .vi-cmd .vi-mvts { flex-wrap: nowrap; flex: none; display: flex; gap: 6px; }
+    .vi-cmd .puce, .vi-cmd .mod-b { flex: none; white-space: nowrap; height: 38px; font-size: 14px; padding: 0 12px; }
+  }
 </style>
 </head>
 <body>
@@ -11655,6 +11691,222 @@ const afficherAvantVitrine = afficher;
 afficher = function () { afficherAvantVitrine(); Vitrine.suivre(); }; // eslint-disable-line no-func-assign
 const montrerTVAvantVitrine = TV.montrer;
 TV.montrer = (id) => { if (Vitrine.pour(id)) return; montrerTVAvantVitrine(id); };
+
+// =====================================================================
+// ---------- « Comment on joue ? » : une fiche courte pour chaque jeu ----------
+// Elle s'ouvre la première fois qu'on lance un jeu (Lumi la lit à voix haute), puis à la demande avec le bouton « ? ».
+// =====================================================================
+const AIDE_TXT = {
+  titre: nom3('Comment on joue ?', 'How do we play?', 'كيف نلعب؟'),
+  but: nom3('Le but', 'The goal', 'الهدف'),
+  avec: nom3('Il faut', 'You need', 'نحتاج'),
+  go: nom3('On joue !', 'Let’s play!', 'هيا نلعب!'),
+  relire: nom3('🔊 Lumi m’explique', '🔊 Lumi explains', '🔊 لومي يشرح'),
+  aide: nom3('Comment jouer', 'How to play', 'طريقة اللعب'),
+  camera: nom3('📷 la caméra', '📷 the camera', '📷 الكاميرا'),
+  doigt: nom3('👆 le doigt ou la souris', '👆 a finger or the mouse', '👆 الإصبع أو الفأرة'),
+  telecommande: nom3('🎮 la télécommande', '🎮 the remote', '🎮 جهاز التحكم'),
+  telephone: nom3('📱 un téléphone (facultatif)', '📱 a phone (optional)', '📱 هاتف (اختياري)'),
+  deux: nom3('👫 seul ou à plusieurs', '👫 alone or together', '👫 وحدك أو مع غيرك'),
+  parent: nom3('👨‍👩‍👧 un adulte pas loin', '👨‍👩‍👧 a grown-up nearby', '👨‍👩‍👧 شخص كبير قريب'),
+  espace: nom3('🏃 un peu de place', '🏃 a little space', '🏃 مكان صغير للحركة'),
+  photos: nom3('🖼️ des photos ou des dessins', '🖼️ photos or drawings', '🖼️ صور أو رسومات'),
+};
+const ai = (k) => t3(AIDE_TXT[k]);
+// chaque fiche : le but en une phrase, 2 à 4 étapes, et ce qu'il faut
+const A = (but, etapes, avec) => ({ but, etapes, avec });
+const AIDES = {
+  formes: A(nom3('Tranche les formes qui tombent du ciel, et compte avec Lumi.', 'Slice the shapes falling from the sky, and count with Lumi.', 'اقطع الأشكال التي تسقط من السماء، وعُدّ مع لومي.'),
+    [nom3('Lumi dit quelle forme trancher (les ronds, les étoiles…).', 'Lumi says which shape to slice (circles, stars…).', 'لومي يقول أي شكل تقطع (الدوائر، النجوم…).'),
+     nom3('Glisse le doigt dessus comme un sabre. À la télé : bouge le viseur avec les flèches, puis OK.', 'Swipe your finger across it like a sword. On TV: move the target with the arrows, then OK.', 'مرّر إصبعك عليه مثل السيف. على التلفاز: حرّك الهدف بالأسهم ثم OK.'),
+     nom3('Attention aux autres formes : on ne les touche pas !', 'Watch out for the other shapes: don’t touch them!', 'انتبه للأشكال الأخرى: لا تلمسها!')], ['doigt', 'telecommande', 'deux']),
+  compter: A(nom3('Compter des objets avec Lumi, de 1 à 10.', 'Count objects with Lumi, from 1 to 10.', 'عُدّ الأشياء مع لومي، من ١ إلى ١٠.'),
+    [nom3('Touche chaque objet une seule fois : Lumi compte avec toi.', 'Tap each object once: Lumi counts with you.', 'المس كل شيء مرة واحدة: لومي يعدّ معك.'),
+     nom3('Quand tout est compté, choisis le bon nombre.', 'When everything is counted, pick the right number.', 'عندما تنتهي، اختر العدد الصحيح.')], ['doigt', 'telecommande']),
+  bulles: A(nom3('Éclater les bonnes bulles avant qu’elles s’envolent.', 'Pop the right bubbles before they fly away.', 'فرقع الفقاعات الصحيحة قبل أن تطير.'),
+    [nom3('Écoute ce que Lumi demande (un animal, une couleur…).', 'Listen to what Lumi asks for (an animal, a color…).', 'استمع لما يطلبه لومي (حيوان، لون…).'),
+     nom3('Touche seulement les bulles qui vont bien. Vite !', 'Tap only the right bubbles. Quick!', 'المس الفقاعات الصحيحة فقط. بسرعة!')], ['doigt', 'telecommande']),
+  devine: A(nom3('Deviner ce que Lumi dessine avec sa poussière de lumière.', 'Guess what Lumi is drawing with its light dust.', 'خمّن ما يرسمه لومي بغبار الضوء.'),
+    [nom3('Regarde Lumi : le dessin apparaît petit à petit.', 'Watch Lumi: the drawing appears little by little.', 'انظر إلى لومي: الرسم يظهر شيئًا فشيئًا.'),
+     nom3('Touche la bonne image en bas. Plus tu trouves vite, plus tu gagnes d’étoiles.', 'Tap the right picture below. The faster you find it, the more stars.', 'المس الصورة الصحيحة في الأسفل. كلما كنت أسرع ربحت نجومًا أكثر.')], ['doigt', 'telecommande']),
+  ecoute: A(nom3('Écouter un mot et trouver la bonne image.', 'Listen to a word and find the right picture.', 'استمع لكلمة وجد الصورة الصحيحة.'),
+    [nom3('Lumi dit un mot. Le bouton 🔊 le répète.', 'Lumi says a word. The 🔊 button repeats it.', 'لومي يقول كلمة. زر 🔊 يعيدها.'),
+     nom3('Touche l’image qui correspond.', 'Tap the matching picture.', 'المس الصورة المناسبة.')], ['doigt', 'telecommande']),
+  range: A(nom3('Ranger chaque chose à sa place : l’école, la ferme, la cuisine…', 'Put each thing in its place: school, farm, kitchen…', 'ضع كل شيء في مكانه: المدرسة، المزرعة، المطبخ…'),
+    [nom3('Lumi montre un objet.', 'Lumi shows an object.', 'لومي يُظهر شيئًا.'),
+     nom3('Touche l’endroit où il va.', 'Tap the place where it goes.', 'المس المكان الذي يناسبه.')], ['doigt', 'telecommande']),
+  intrus: A(nom3('Trouver l’intrus : celui qui n’est pas comme les autres.', 'Find the odd one out: the one that’s not like the others.', 'جد الدخيل: الذي لا يشبه الآخرين.'),
+    [nom3('Regarde les images : elles vont ensemble… sauf une !', 'Look at the pictures: they go together… except one!', 'انظر إلى الصور: كلها متشابهة… إلا واحدة!'),
+     nom3('Touche celle qui n’a rien à faire là.', 'Tap the one that doesn’t belong.', 'المس التي لا تنتمي إليها.')], ['doigt', 'telecommande']),
+  chasse: A(nom3('Cache-cache : trouver un objet dans la maison et le montrer à la caméra.', 'Hide-and-seek: find an object at home and show it to the camera.', 'الغميضة: جد شيئًا في البيت وأرِه للكاميرا.'),
+    [nom3('Lumi demande un objet (une cuillère, un nounours…).', 'Lumi asks for an object (a spoon, a teddy…).', 'لومي يطلب شيئًا (ملعقة، دبدوب…).'),
+     nom3('Va le chercher, puis montre-le bien en face de la caméra.', 'Go and find it, then hold it right in front of the camera.', 'ابحث عنه ثم أرِه أمام الكاميرا مباشرة.'),
+     nom3('Pas de caméra ? Appuie sur « Je l’ai trouvé ! ».', 'No camera? Press “I found it!”.', 'لا كاميرا؟ اضغط «وجدته!».')], ['camera', 'espace', 'parent']),
+  photo: A(nom3('Une photo de famille avec des couronnes, puis Lumi la redessine.', 'A family photo with crowns, then Lumi redraws it.', 'صورة عائلية بالتيجان، ثم يعيد لومي رسمها.'),
+    [nom3('Mettez-vous tous devant la caméra.', 'Everyone get in front of the camera.', 'قفوا جميعًا أمام الكاميرا.'),
+     nom3('Choisissez un cadre ou un chapeau, puis prenez la photo.', 'Pick a frame or a hat, then take the photo.', 'اختاروا إطارًا أو قبعة ثم التقطوا الصورة.'),
+     nom3('Lumi la redessine en poussière de lumière. Elle va dans l’album.', 'Lumi redraws it in light dust. It goes into the album.', 'لومي يعيد رسمها بغبار الضوء. وتُحفظ في الألبوم.')], ['camera', 'deux']),
+  coloriage: A(nom3('Colorier un dessin avec Lumi.', 'Color a picture with Lumi.', 'لوّن رسمًا مع لومي.'),
+    [nom3('Choisis une couleur en bas.', 'Pick a color at the bottom.', 'اختر لونًا في الأسفل.'),
+     nom3('Touche une zone du dessin : elle se remplit.', 'Tap an area of the picture: it fills in.', 'المس جزءًا من الرسم: يمتلئ باللون.'),
+     nom3('Garde-le dans « Mes dessins » quand c’est fini.', 'Keep it in “My drawings” when you’re done.', 'احفظه في «رسوماتي» عندما تنتهي.')], ['doigt', 'telephone']),
+  atelier: A(nom3('Dessiner librement avec de la poussière de lumière.', 'Draw freely with light dust.', 'ارسم بحرية بغبار الضوء.'),
+    [nom3('Choisis une couleur, puis dessine avec le doigt dans le grand cadre.', 'Pick a color, then draw with your finger in the big frame.', 'اختر لونًا ثم ارسم بإصبعك في الإطار الكبير.'),
+     nom3('🗑️ efface tout, 💾 garde le dessin dans « Mes dessins ».', '🗑️ clears everything, 💾 keeps the drawing in “My drawings”.', '🗑️ يمسح كل شيء، 💾 يحفظ الرسم في «رسوماتي».'),
+     nom3('🪄 la baguette fait bouger ton dessin : il nage, vole, saute ou danse !', '🪄 the wand brings your drawing to life: it swims, flies, jumps or dances!', '🪄 العصا تحرّك رسمك: يسبح أو يطير أو يقفز أو يرقص!')], ['doigt', 'telephone']),
+  lettres: A(nom3('Découvrir les lettres : A comme avion…', 'Discover letters: A is for apple…', 'اكتشف الحروف: أ أرنب…'),
+    [nom3('Touche une lettre : Lumi la dit et dessine un mot qui commence par elle.', 'Tap a letter: Lumi says it and draws a word that starts with it.', 'المس حرفًا: لومي يقوله ويرسم كلمة تبدأ به.'),
+     nom3('Pour l’écrire, va dans « Dessine » et repasse sur les pointillés.', 'To write it, go to “Draw” and trace over the dots.', 'لكتابته، اذهب إلى «ارسم» ومرّ على النقاط.')], ['doigt', 'telecommande']),
+  nombres: A(nom3('Découvrir les nombres de 1 à 10.', 'Discover numbers from 1 to 10.', 'اكتشف الأعداد من ١ إلى ١٠.'),
+    [nom3('Touche un nombre : Lumi le dit et dessine autant d’objets.', 'Tap a number: Lumi says it and draws that many objects.', 'المس عددًا: لومي يقوله ويرسم عددًا مماثلًا من الأشياء.')], ['doigt', 'telecommande']),
+  mots: A(nom3('Apprendre des mots : Lumi les dessine et les dit.', 'Learn words: Lumi draws them and says them.', 'تعلّم كلمات: لومي يرسمها ويقولها.'),
+    [nom3('Touche une image : Lumi la dessine, la dit et l’épelle.', 'Tap a picture: Lumi draws it, says it and spells it.', 'المس صورة: لومي يرسمها ويقولها ويتهجّاها.'),
+     nom3('« Tout voir » : Lumi les montre l’un après l’autre.', '“See all”: Lumi shows them one after another.', '«شاهد الكل»: لومي يعرضها واحدة تلو الأخرى.'),
+     nom3('« À toi ! » : Lumi dit un mot, tu trouves l’image.', '“Your turn!”: Lumi says a word, you find the picture.', '«دورك!»: لومي يقول كلمة وأنت تجد الصورة.')], ['doigt', 'telecommande']),
+  parler: A(nom3('Dire un mot à voix haute : Lumi le dessine.', 'Say a word out loud: Lumi draws it.', 'قل كلمة بصوت عالٍ: لومي يرسمها.'),
+    [nom3('Appuie sur le micro et dis un mot (chat, voiture, soleil…).', 'Press the microphone and say a word (cat, car, sun…).', 'اضغط على الميكروفون وقل كلمة (قط، سيارة، شمس…).'),
+     nom3('Lumi le dessine en lumière et te le répète.', 'Lumi draws it in light and says it back.', 'لومي يرسمها بالضوء ويعيدها لك.')], ['parent']),
+  miroir: A(nom3('Le miroir magique : des chapeaux et des oreilles qui suivent ton visage.', 'The magic mirror: hats and ears that follow your face.', 'المرآة السحرية: قبعات وآذان تتبع وجهك.'),
+    [nom3('Regarde la caméra : ton visage apparaît dans le miroir.', 'Look at the camera: your face appears in the mirror.', 'انظر إلى الكاميرا: يظهر وجهك في المرآة.'),
+     nom3('Choisis un chapeau, des oreilles ou une moustache en bas.', 'Pick a hat, ears or a moustache at the bottom.', 'اختر قبعة أو آذانًا أو شاربًا في الأسفل.'),
+     nom3('📸 prends une photo souvenir. À plusieurs, chacun a le sien !', '📸 take a souvenir photo. Together, everyone gets one!', '📸 التقط صورة تذكارية. مع الآخرين، لكل واحد قبعته!')], ['camera', 'deux']),
+  puzzle: A(nom3('Remettre une image en ordre.', 'Put a picture back together.', 'أعد ترتيب صورة.'),
+    [nom3('Choisis une image (une scène de Lumi ou une photo de famille).', 'Pick a picture (a Lumi scene or a family photo).', 'اختر صورة (مشهد من لومي أو صورة عائلية).'),
+     nom3('Regarde-la bien 3 secondes : ensuite elle se mélange.', 'Look at it for 3 seconds: then it gets mixed up.', 'انظر إليها ٣ ثوانٍ: ثم تختلط.'),
+     nom3('Touche un morceau, puis l’endroit où il va : ils s’échangent. « Voir le modèle » montre l’image entière.', 'Tap a piece, then where it goes: they swap. “See the picture” shows the whole image.', 'المس قطعة ثم مكانها: تتبادلان. «شاهد الصورة» تعرض الصورة كاملة.')], ['doigt', 'telecommande']),
+  memory: A(nom3('Retrouver les paires de cartes : les visages de la famille.', 'Find the pairs of cards: the family’s faces.', 'جد أزواج البطاقات: وجوه العائلة.'),
+    [nom3('Retourne deux cartes.', 'Turn over two cards.', 'اقلب بطاقتين.'),
+     nom3('Si elles sont pareilles, c’est une paire ! Sinon, elles se retournent.', 'If they match, it’s a pair! If not, they turn back.', 'إذا تطابقتا فهي زوج! وإلا تنقلبان من جديد.'),
+     nom3('À deux joueurs : chacun son tour.', 'With 2 players: take turns.', 'مع لاعبين: كل واحد بدوره.')], ['doigt', 'telecommande', 'deux']),
+  'col-photo': A(nom3('Transformer une photo en coloriage.', 'Turn a photo into a coloring page.', 'حوّل صورة إلى صفحة تلوين.'),
+    [nom3('Choisis une photo ou prends-en une.', 'Pick a photo or take one.', 'اختر صورة أو التقط واحدة.'),
+     nom3('Lumi trace les contours. Choisis une couleur et touche les zones.', 'Lumi draws the outlines. Pick a color and tap the areas.', 'لومي يرسم الحدود. اختر لونًا والمس المناطق.')], ['photos', 'doigt']),
+  autoportrait: A(nom3('Dessiner son propre visage.', 'Draw your own face.', 'ارسم وجهك.'),
+    [nom3('Prends une photo de ton visage.', 'Take a photo of your face.', 'التقط صورة لوجهك.'),
+     nom3('Lumi trace ton visage en pointillés.', 'Lumi dots your face.', 'لومي يرسم وجهك بالنقاط.'),
+     nom3('Repasse sur les pointillés avec le doigt.', 'Trace over the dots with your finger.', 'مرّ على النقاط بإصبعك.')], ['camera', 'doigt']),
+  musee: A(nom3('Le musée de la famille : vos photos et dessins en grand, en musique.', 'The family museum: your photos and drawings, big, with music.', 'متحف العائلة: صوركم ورسوماتكم بالحجم الكبير مع الموسيقى.'),
+    [nom3('Lancez-le et regardez : les images défilent toutes seules.', 'Start it and watch: the pictures play on their own.', 'شغّلوه وشاهدوا: الصور تمرّ وحدها.'),
+     nom3('Il est vide ? Prenez une photo ou faites un dessin d’abord.', 'Empty? Take a photo or make a drawing first.', 'فارغ؟ التقطوا صورة أو ارسموا أولًا.')], ['photos']),
+  livre: A(nom3('Fabriquer un livre avec vos photos et dessins.', 'Make a book with your photos and drawings.', 'اصنعوا كتابًا بصوركم ورسوماتكم.'),
+    [nom3('Choisis une histoire, puis jusqu’à 6 images.', 'Pick a story, then up to 6 pictures.', 'اختر حكاية ثم حتى ٦ صور.'),
+     nom3('Lumi lit le livre. Tu peux aussi enregistrer ta voix.', 'Lumi reads the book. You can also record your voice.', 'لومي يقرأ الكتاب. ويمكنك تسجيل صوتك أيضًا.')], ['photos', 'parent']),
+  carte: A(nom3('Faire une carte pour mamie, papi ou un ami.', 'Make a card for Grandma, Grandpa or a friend.', 'اصنع بطاقة للجدة أو الجد أو صديق.'),
+    [nom3('Choisis pour qui, une image et un décor.', 'Pick who it’s for, a picture and a background.', 'اختر لمن، وصورة، وخلفية.'),
+     nom3('Écris ou choisis un petit mot.', 'Write or pick a short message.', 'اكتب أو اختر كلمة صغيرة.'),
+     nom3('Un adulte l’envoie ou l’enregistre.', 'A grown-up sends or saves it.', 'شخص كبير يرسلها أو يحفظها.')], ['photos', 'parent']),
+  imite: A(nom3('Faire la même pose que Lumi, devant la caméra.', 'Strike the same pose as Lumi, in front of the camera.', 'اتخذ نفس وضعية لومي أمام الكاميرا.'),
+    [nom3('Recule pour que la caméra te voie en entier.', 'Step back so the camera sees your whole body.', 'ابتعد قليلًا لترى الكاميرا جسمك كله.'),
+     nom3('Lumi montre une pose (les bras en l’air, l’avion…).', 'Lumi shows a pose (arms up, the airplane…).', 'لومي يُظهر وضعية (اليدان للأعلى، الطائرة…).'),
+     nom3('Fais pareil et ne bouge plus : le cercle se remplit, gagné !', 'Do the same and hold still: the circle fills up, you win!', 'افعل مثله ولا تتحرك: تمتلئ الدائرة، فزت!')], ['camera', 'espace', 'deux']),
+  statues: A(nom3('Danser, puis se figer quand la musique s’arrête.', 'Dance, then freeze when the music stops.', 'ارقص ثم تجمّد عندما تتوقف الموسيقى.'),
+    [nom3('Mettez-vous devant la caméra et dansez avec la musique.', 'Stand in front of the camera and dance to the music.', 'قفوا أمام الكاميرا وارقصوا مع الموسيقى.'),
+     nom3('Quand la musique s’arrête : statue ! On ne bouge plus.', 'When the music stops: freeze! No moving.', 'عندما تتوقف الموسيقى: تمثال! لا نتحرك.'),
+     nom3('Lumi regarde… celui qui bouge rigole un bon coup !', 'Lumi watches… whoever moves has a good laugh!', 'لومي يراقب… ومن يتحرك يضحك كثيرًا!')], ['camera', 'espace', 'deux']),
+  danse: A(nom3('Danser avec Lumi : plus tu bouges, plus il pleut des étoiles.', 'Dance with Lumi: the more you move, the more stars fall.', 'ارقص مع لومي: كلما تحركت أمطرت النجوم.'),
+    [nom3('Mettez-vous devant la caméra.', 'Stand in front of the camera.', 'قفوا أمام الكاميرا.'),
+     nom3('Tapez, sautez, tournez avec la musique : la jauge d’énergie monte.', 'Clap, jump, spin to the music: the energy bar goes up.', 'صفّقوا واقفزوا ودوروا مع الموسيقى: يرتفع مؤشر الطاقة.')], ['camera', 'espace', 'deux']),
+  'couleurs-chasse': A(nom3('Chasse aux couleurs : rapporter un objet de la bonne couleur.', 'Color hunt: bring back an object of the right color.', 'صيد الألوان: أحضر شيئًا باللون الصحيح.'),
+    [nom3('Lumi demande une couleur (« quelque chose de rouge »).', 'Lumi asks for a color (“something red”).', 'لومي يطلب لونًا («شيئًا أحمر»).'),
+     nom3('Trouve un objet de cette couleur dans la maison.', 'Find an object of that color at home.', 'جد شيئًا بهذا اللون في البيت.'),
+     nom3('Montre-le au milieu de la caméra : elle vérifie !', 'Show it in the middle of the camera: it checks!', 'أرِه في وسط الكاميرا: هي تتحقق!')], ['camera', 'espace']),
+  vivant: A(nom3('Ton dessin prend vie : il nage, vole, saute ou danse !', 'Your drawing comes to life: it swims, flies, jumps or dances!', 'رسمك يصبح حيًّا: يسبح أو يطير أو يقفز أو يرقص!'),
+    [nom3('Choisis un de tes dessins, ou dessines-en un nouveau.', 'Pick one of your drawings, or draw a new one.', 'اختر أحد رسوماتك أو ارسم رسمًا جديدًا.'),
+     nom3('Ton dessin apparaît dans un décor et se met à bouger.', 'Your drawing appears in a scene and starts moving.', 'يظهر رسمك في مشهد ويبدأ بالحركة.'),
+     nom3('En bas : choisis comment il bouge, ajoute des amis, ou change d’image.', 'At the bottom: choose how it moves, add friends, or change picture.', 'في الأسفل: اختر كيف يتحرك، أضف أصدقاء، أو غيّر الصورة.')], ['doigt']),
+  coffre: A(nom3('Le coffre aux trésors : tes étoiles débloquent des surprises.', 'The treasure chest: your stars unlock surprises.', 'صندوق الكنوز: نجومك تفتح المفاجآت.'),
+    [nom3('Chaque jeu gagné te donne des étoiles ⭐.', 'Every game you win gives you stars ⭐.', 'كل لعبة تربحها تعطيك نجومًا ⭐.'),
+     nom3('Ouvre le coffre du jour, et échange tes étoiles contre des tenues pour Lumi, des chapeaux et des autocollants.', 'Open today’s chest, and swap your stars for Lumi outfits, hats and stickers.', 'افتح صندوق اليوم، واستبدل نجومك بملابس للومي وقبعات وملصقات.')], ['doigt', 'telecommande']),
+  aventure: A(nom3('Un vrai film où c’est vous qui décidez de la suite.', 'A real film where you decide what happens next.', 'فيلم حقيقي تقررون فيه ما يحدث.'),
+    [nom3('Installez-vous devant l’écran et regardez l’histoire.', 'Settle in front of the screen and watch the story.', 'اجلسوا أمام الشاشة وشاهدوا القصة.'),
+     nom3('Quand il faut choisir, touchez un chemin.', 'When there’s a choice, tap a path.', 'عندما يجب الاختيار، المسوا طريقًا.'),
+     nom3('Pendant les défis, faites le geste devant la caméra (lever les bras, souffler…) ou touchez l’écran.', 'During challenges, do the move in front of the camera (raise your arms, blow…) or tap the screen.', 'في التحديات، قوموا بالحركة أمام الكاميرا (رفع اليدين، النفخ…) أو المسوا الشاشة.')], ['camera', 'deux', 'doigt']),
+  jeucour: A(nom3('Un vrai jeu de cour d’école, à jouer ensemble à la maison ou dehors.', 'A real playground game, to play together at home or outside.', 'لعبة ساحة حقيقية، نلعبها معًا في البيت أو في الخارج.'),
+    [nom3('Lumi explique les règles une par une.', 'Lumi explains the rules one by one.', 'لومي يشرح القواعد واحدة واحدة.'),
+     nom3('Jouez pour de vrai : Lumi fait la musique, compte et donne les ordres.', 'Play for real: Lumi plays the music, counts and gives the orders.', 'العبوا حقًا: لومي يشغّل الموسيقى ويعدّ ويعطي الأوامر.')], ['espace', 'deux', 'parent']),
+  histoires: A(nom3('Écouter une histoire racontée par Lumi, ou par maman et papa.', 'Listen to a story told by Lumi, or by Mum and Dad.', 'استمع لحكاية يرويها لومي أو ماما وبابا.'),
+    [nom3('Choisis une histoire et qui la raconte.', 'Pick a story and who tells it.', 'اختر حكاية ومن يرويها.'),
+     nom3('Lumi dessine chaque page. Les flèches tournent les pages.', 'Lumi draws each page. The arrows turn the pages.', 'لومي يرسم كل صفحة. الأسهم تقلب الصفحات.')], ['telecommande', 'doigt']),
+  chansons: A(nom3('Chanter des comptines avec Lumi, en karaoké.', 'Sing nursery rhymes with Lumi, karaoke style.', 'غنِّ الأناشيد مع لومي على طريقة الكاريوكي.'),
+    [nom3('Choisis une comptine.', 'Pick a song.', 'اختر أنشودة.'),
+     nom3('Les paroles s’allument au bon moment : chante avec Lumi !', 'The words light up at the right time: sing along with Lumi!', 'تضيء الكلمات في الوقت المناسب: غنِّ مع لومي!')], ['telecommande', 'doigt']),
+};
+// quelle fiche pour quel élément du menu
+function cleAide(id) {
+  if (!id || !NOEUDS[id]) return null;
+  const n = NOEUDS[id];
+  if (AIDES[id]) return id;
+  if (id.startsWith('av-')) return 'aventure';
+  if (id.startsWith('jc-')) return 'jeucour';
+  if (n.type === 'colorier') return 'coloriage';
+  if (n.mots) return 'mots';
+  if (n.type === 'jeu' && AIDES[n.jeu]) return n.jeu;
+  return null;
+}
+const Aide = (() => {
+  let ouverte = null, bouton = null;
+  const cleVu = () => Profils.cle('lumi-aides-vues', Profils.actif.id);
+  const vues = () => new Set(lireJSON(cleVu()));
+  const vu = (k) => vues().has(k);
+  const noter = (k) => { const v = vues(); v.add(k); try { localStorage.setItem(cleVu(), JSON.stringify([...v])); } catch {} };
+  function texteLu(k) { const a = AIDES[k]; return [t3(a.but), ...a.etapes.map(t3)].join(' '); }
+  function montrer(k, ensuite, id = k) {
+    const a = AIDES[k]; if (!a) { ensuite?.(); return; }
+    fermer(true);
+    noter(k);
+    const n = NOEUDS[id] || NOEUDS[k] || null;
+    const f = document.createElement('div'); f.className = 'aide-fond'; f.id = 'fa-fond'; // même identifiant que les fenêtres : flèches et Retour restent dans la fiche f.setAttribute('role', 'dialog'); f.setAttribute('aria-modal', 'true');
+    f.innerHTML = `<div class="aide-carte" dir="${LANGUES[langue].dir}"><span class="aide-lumi"></span><span class="aide-sur"></span><h2></h2>
+      <p class="aide-but"><b></b> <span></span></p><ol class="aide-etapes"></ol><div class="aide-avec"><b></b><div></div></div>
+      <div class="aide-actions"><button type="button" class="aide-go principal"></button><button type="button" class="aide-lire"></button></div></div>`;
+    f.querySelector('.aide-sur').textContent = ai('titre');
+    f.querySelector('h2').textContent = n ? `${n.emoji} ${nomDe(n)}` : k === 'atelier' ? '✍️ ' + t3(nom3('Dessin libre', 'Free drawing', 'رسم حر')) : ai('aide');
+    f.querySelector('.aide-but b').textContent = ai('but') + ' :'; f.querySelector('.aide-but span').textContent = t3(a.but);
+    const ol = f.querySelector('.aide-etapes'); a.etapes.forEach((e) => { const li = document.createElement('li'); li.textContent = t3(e); ol.appendChild(li); });
+    f.querySelector('.aide-avec b').textContent = ai('avec');
+    const av = f.querySelector('.aide-avec div');
+    a.avec.filter((x) => !(x === 'telecommande' && !modeTele) && !(x === 'doigt' && modeTele)).forEach((x) => { const s = document.createElement('span'); s.textContent = ai(x); av.appendChild(s); });
+    const go = f.querySelector('.aide-go'); go.textContent = '▶ ' + ai('go');
+    const lire = f.querySelector('.aide-lire'); lire.textContent = ai('relire');
+    const finir = () => { fermer(); son('juste'); ensuite?.(); };
+    go.onclick = finir; lire.onclick = () => parler(texteLu(k));
+    f.onclick = (e) => { if (e.target === f) finir(); };
+    f.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'GoBack' || e.key === 'BrowserBack') { e.preventDefault(); e.stopPropagation(); finir(); } });
+    document.body.appendChild(f); ouverte = f;
+    setTimeout(() => go.focus({ preventScroll: true }), 60);
+    parler(texteLu(k));
+  }
+  function fermer(silence) { if (!ouverte) return; ouverte.remove(); ouverte = null; if (!silence) window.speechSynthesis?.cancel?.(); }
+  // le petit « ? » : visible quand le jeu en cours a une fiche
+  function contexte() {
+    if (document.documentElement.classList.contains('vitrine-on') || $('fa-fond')) return null;
+    if (typeof Trace !== 'undefined' && Trace.actif) return 'atelier';
+    return cleAide(pile[pile.length - 1]);
+  }
+  function majBouton() {
+    if (!bouton) {
+      bouton = document.createElement('button'); bouton.type = 'button'; bouton.className = 'aide-q'; bouton.textContent = '?';
+      bouton.onclick = () => { const k = contexte(); if (k) montrer(k, null, k === 'atelier' ? k : pile[pile.length - 1]); };
+      document.body.appendChild(bouton);
+    }
+    const k = contexte();
+    bouton.hidden = !k; bouton.setAttribute('aria-label', ai('aide'));
+  }
+  setInterval(majBouton, 800);
+  return { montrer, fermer, vu, get ouverte() { return !!ouverte; } };
+})();
+// la première fois qu'on lance un jeu : la fiche d'abord, puis le jeu
+const allerAvantAide = aller;
+aller = function (id, ...reste) { // eslint-disable-line no-func-assign
+  const k = cleAide(id);
+  if (k && !Aide.vu(k) && !['histoires', 'chansons'].includes(k) && libre(id)) return Aide.montrer(k, () => allerAvantAide(id, ...reste), id);
+  return allerAvantAide(id, ...reste);
+};
+const dessinLibreAvantAide = dessinLibre;
+dessinLibre = function (...a) { // eslint-disable-line no-func-assign
+  if (!Aide.vu('atelier')) return Aide.montrer('atelier', () => dessinLibreAvantAide(...a));
+  return dessinLibreAvantAide(...a);
+};
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
