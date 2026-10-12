@@ -2152,6 +2152,26 @@
   .tv-ciel, [data-moment] .tv-ciel { background: radial-gradient(ellipse at 70% 0%, #1E2A6B 0%, #0A0E26 62%) !important; }
   .tv-nuages, .tv-astre { display: none !important; }
   .tv .tv-etoiles { opacity: .55 !important; }
+
+  /* ----- Vitrine en arabe : de droite à gauche ----- */
+  .vitrine[dir="rtl"].vt-grand .vt-rail { left: auto; right: 0; background: linear-gradient(270deg, rgba(10,14,38,.96), rgba(10,14,38,0)); }
+  .vitrine[dir="rtl"].vt-grand.rail-ouvert .vt-rail { background: linear-gradient(270deg, #0A0E26 80%, rgba(10,14,38,0)); box-shadow: -30px 0 80px 40px rgba(10,14,38,.75); }
+  .vitrine[dir="rtl"] .vt-ligne { padding: 0 0 0 calc(var(--vu) * 26); }
+  .vitrine[dir="rtl"] .vt-art-heros { right: auto; left: 0; }
+  .vitrine[dir="rtl"] .vt-art-heros::after { background: linear-gradient(270deg, #0A0E26 0%, rgba(10,14,38,.75) 22%, rgba(10,14,38,0) 58%), linear-gradient(0deg, #0A0E26 0%, rgba(10,14,38,0) 38%); }
+  .vitrine[dir="rtl"] .vt-art-heros .vt-art { transform: scaleX(-1); }
+  .vitrine[dir="rtl"] .vt-art-heros .vt-e, .vitrine[dir="rtl"] .vt-art-heros img, .vitrine[dir="rtl"] .vt-art-heros video { transform: scaleX(-1); }
+  .vitrine[dir="rtl"] .vt-texte { left: auto; right: calc(var(--vu) * 176); align-items: flex-start; }
+  .vitrine[dir="rtl"] .vt-points { left: auto; right: calc(var(--vu) * 176); }
+  .vitrine[dir="rtl"].vt-grand .vt-ligne-r { padding-left: 0; padding-right: calc(var(--vu) * 142); }
+  .vitrine[dir="rtl"] .vt-ligne-r h3 { padding-left: 0; padding-right: calc(var(--vu) * 34); }
+  .vitrine[dir="rtl"].vt-grand .vt-piste { padding: calc(var(--vu) * 22) calc(var(--vu) * 34) calc(var(--vu) * 28) calc(var(--vu) * 160); }
+  .vitrine[dir="rtl"] .vt-badge { left: auto; right: .55em; }
+  .vitrine[dir="rtl"] .vt-badge.nv { right: auto; left: .55em; }
+  .vitrine[dir="rtl"] .vt-coin { right: auto; left: .5em; }
+  .vitrine[dir="rtl"] .vt-titre, .vitrine[dir="rtl"] .vt-desc { text-align: right; }
+  .vt-rtl.vitrine-grand #scene { right: auto; left: calc(var(--vu) * 20); }
+  .vitrine[dir="rtl"]:not(.vt-grand) .vt-ligne-r h3 { padding: 0 16px; }
 </style>
 </head>
 <body>
@@ -11976,7 +11996,8 @@ const Vitrine = (() => {
     grand = calculerGrand();
     racine.classList.toggle('vt-grand', grand); racine.classList.toggle('vt-sous', page !== 'accueil'); racine.classList.toggle('vt-tele', !!modeTele);
     racine.dataset.page = page; document.documentElement.classList.toggle('vitrine-grand', grand);
-    racine.dir = 'ltr';
+    // arabe : tout le menu se lit de droite à gauche (barre à droite, affiche miroir, rangées qui partent de la droite)
+    racine.dir = LANGUES[langue].dir; document.documentElement.classList.toggle('vt-rtl', racine.dir === 'rtl');
     rail(); haut();
     const an = racine.querySelector('.vt-annonce'), a = ConfigDistante.conf.annonce;
     an.hidden = !(page === 'accueil' && a?.actif && t3(a.texte)); if (!an.hidden) an.textContent = `${a.emoji || '📣'} ${t3(a.texte)}`;
@@ -12014,7 +12035,9 @@ const Vitrine = (() => {
     if (zone === 'rangees') {
       const L = lignes[ri];
       if (grand) rz.scrollTo({ top: Math.max(0, L.el.offsetTop - (ri ? 0 : 0)), behavior: comportement });
-      L.piste.scrollTo({ left: Math.max(0, el.offsetLeft - L.cartes[0].offsetLeft), behavior: comportement });
+      const prem = L.cartes[0], rtl = racine.dir === 'rtl';
+      const dist = rtl ? (prem.offsetLeft + prem.offsetWidth) - (el.offsetLeft + el.offsetWidth) : el.offsetLeft - prem.offsetLeft;
+      L.piste.scrollTo({ left: rtl ? -Math.max(0, dist) : Math.max(0, dist), behavior: comportement });
       if (L.forme !== 'filtres') montrerHeros(L.items[L.c], true);
     } else if (zone === 'heros' && grand) rz.scrollTo({ top: 0, behavior: comportement });
   }
@@ -12022,6 +12045,7 @@ const Vitrine = (() => {
   function bouger(z) { if (z) zone = z; son('tic'); survol = false; poser(); }
   function touche(dx, dy) {
     if (!actif) return false;
+    if (racine.dir === 'rtl') dx = -dx; // en arabe, « suivant » est vers la gauche
     if (document.activeElement && !racine.contains(document.activeElement)) { poser(); return true; }
     if (zone === 'rail') {
       const n = boutonsRail().length;
