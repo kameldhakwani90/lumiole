@@ -2147,6 +2147,11 @@
   .vi-mot.petit .vi-tuiles { flex-wrap: nowrap; }
   .vi-cmd .vi-mvts[hidden] { display: none !important; }
   .vi-cmd:has(.vi-mvts[hidden]) { flex-wrap: wrap; overflow: visible; justify-content: center; }
+  @media (max-width: 600px) { .mu-legende { left: 50%; transform: translateX(-50%); bottom: 84px; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .mu-cmd { left: 50%; right: auto; transform: translateX(-50%); } }
+  /* les anciens écrans télé (histoires, comptines, lettres, mots…) prennent la même nuit que la vitrine */
+  .tv-ciel, [data-moment] .tv-ciel { background: radial-gradient(ellipse at 70% 0%, #1E2A6B 0%, #0A0E26 62%) !important; }
+  .tv-nuages, .tv-astre { display: none !important; }
+  .tv .tv-etoiles { opacity: .55 !important; }
 </style>
 </head>
 <body>
@@ -9559,6 +9564,7 @@ MODULES.coffre = (() => {
   const jour = () => new Date().toISOString().slice(0, 10);
   function demarrer(zone) { z = zone; dessiner(); }
   function dessiner() {
+    if (!z) return; // on a quitté le coffre pendant l'animation
     const s = salle(z, { titre: '🎁 ' + t3(NOEUDS.coffre.nom), sous: t3(NOEUDS.coffre.desc) });
     s.coin.innerHTML = `<span class="cf-etoiles">⭐ ${Progres.etoiles}</span>`;
     const ouvert = (() => { try { return localStorage.getItem(cleJour()) === jour(); } catch { return false; } })();
@@ -9831,7 +9837,7 @@ const Vivant = (() => {
     const g = s.corps.querySelector('.ci-grille'), l = lireJSON(Profils.cle('lumi-dessins', Profils.actif.id));
     g.appendChild(bouton(`<span class="ci-ic">✍️</span><b>${jx('dessinerMaintenant').replace('✍️ ', '')}</b>`, () => { aller('dessin'); dessinLibre(); }, 'ci-tuile ci-nouvelle principal'));
     l.forEach((d) => g.appendChild(bouton(`<img alt="" src="${d.img}">`, () => chargerImage(d.img).then((im) => { sprite = detourer(im); traitsCourants = null; choisirForme(); }), 'ci-tuile')));
-    ['🐟', '🚀', '🦋', '🚗'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => { const c = document.createElement('canvas'); c.width = c.height = 300; dessinerEmoji(c.getContext('2d'), e, 150, 150, 280); sprite = c; mvt = { '🐟': 'nage', '🚀': 'fusee', '🦋': 'vole', '🚗': 'roule' }[e]; scene(); }, 'ci-tuile ci-lumi')));
+    ['🐟', '🚀', '🦋', '🚗'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => { const c = document.createElement('canvas'); c.width = c.height = 300; dessinerEmoji(c.getContext('2d'), e, 150, 150, 280); sprite = c; dessinOriginal = null; morph = null; motCourant = entreeDe(e); mvt = { '🐟': 'nage', '🚀': 'fusee', '🦋': 'vole', '🚗': 'roule' }[e]; scene(); }, 'ci-tuile ci-lumi')));
     focusPremier(g);
   }
   let dessinOriginal = null, morph = null, prochainTraits = null, traitsCourants = null;
@@ -9975,6 +9981,8 @@ const Vivant = (() => {
     };
     raf = requestAnimationFrame(boucle);
     focusPremier(p);
+    // un émoji déjà « vrai » (pas de transformation) : la carte du mot arrive tout de suite
+    if (motCourant && !morph) setTimeout(() => { if (cv.isConnected && !morph) apprendre(motCourant); }, 700);
   }
   return { demarrer, arreter() { cancelAnimationFrame(raf); z = null; }, depuisAtelier(cv, tr) { prochain = recadrer(cv); prochainTraits = tr?.length ? tr : null; aller('vivant'); }, set prochain(c) { prochain = c; } };
 })();
