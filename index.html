@@ -1848,6 +1848,180 @@
   .adm-charge { padding: 40px; text-align: center; color: #9AA7C8; }
   .annonce-admin.apercu { max-width: 600px; }
   .adm-page > .adm-b { align-self: flex-start; min-width: 200px; }
+  /* ======================= Vitrine : menu façon plateforme de streaming (tous les écrans) ======================= */
+  :root { --vu: min(calc(100vh / 1080), calc(100vw / 1600)); }
+  .vitrine { position: fixed; inset: 0; z-index: 4; overflow: hidden; color: #F4FBF8; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: radial-gradient(ellipse at 70% 0%, #1E2A6B 0%, #0A0E26 62%); -webkit-tap-highlight-color: transparent; }
+  .vitrine[hidden] { display: none; }
+  .vitrine button:focus { outline: none; }
+  .vitrine button { font-family: inherit; -webkit-appearance: none; appearance: none; }
+  .vitrine-on .app > .haut, .vitrine-on .cote-activite, .vitrine-on .carte, .vitrine-on #decor, .vitrine-on .tv-retour, .vitrine-on #tv { display: none !important; }
+  .vitrine-on body { overflow: hidden; }
+  .vitrine-on .app { position: relative; z-index: 6; pointer-events: none; }
+  .vitrine-on #scene { visibility: hidden; }
+  .vitrine-grand #scene { visibility: visible; position: fixed; right: calc(var(--vu) * 20); top: calc(var(--vu) * 170); width: calc(var(--vu) * 440); height: calc(var(--vu) * 400); max-height: none !important; aspect-ratio: auto; z-index: 5; pointer-events: none; margin: 0;
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at center, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at center, #000 55%, transparent 100%); }
+  .vt-orbe { display: inline-block; flex: none; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #BFFBEA 16%, rgba(46,230,197,.5) 40%, rgba(46,230,197,0) 70%); }
+  .vt-e { position: absolute; line-height: 1; filter: drop-shadow(0 .12em .2em rgba(0,0,0,.35)); }
+  .vt-art img, .vt-art video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vt-piste::-webkit-scrollbar, .vt-rangees::-webkit-scrollbar, .vt-af-piste::-webkit-scrollbar, .vt-puces::-webkit-scrollbar, .vt-page::-webkit-scrollbar { display: none; }
+  .vt-piste, .vt-rangees, .vt-af-piste, .vt-puces, .vt-page { scrollbar-width: none; }
+  .vt-rangees { position: relative; }
+  .vt-heros, .vt-rail, .vt-haut, .vt-onglets, .vt-puces, .vt-affiches { display: none; }
+
+  /* fonds des affiches (charte : pastels clairs pour les jeux, nuit pour ce qu'on regarde) */
+  .vf-turq { background: linear-gradient(150deg, #BFFBEA, #5BF0B8 60%, #22D8C4); } .vf-rose { background: linear-gradient(150deg, #FFE0EC, #FF9EC1); }
+  .vf-bleu { background: linear-gradient(150deg, #D6ECFF, #7CC6FE); } .vf-lilas { background: linear-gradient(150deg, #EBE2FF, #B9A3FF); }
+  .vf-pech { background: linear-gradient(150deg, #FFEBD6, #FFB86B); } .vf-menthe { background: linear-gradient(150deg, #E2FFF4, #8FE8C8); }
+  .vf-nuit { background: radial-gradient(circle at 78% 22%, rgba(255,236,170,.35) 0 4%, transparent 20%), linear-gradient(160deg, #2B1E6B, #5B3FA8); }
+  .vf-indigo { background: radial-gradient(circle at 20% 80%, rgba(46,230,197,.25), transparent 45%), linear-gradient(160deg, #18205A, #3B3FA8); }
+  .vf-hw { background: radial-gradient(circle at 75% 25%, #FFB45E 0 5%, rgba(255,180,94,.25) 10%, transparent 26%), linear-gradient(170deg, #3A1460, #8A2E6A 60%, #E0703A); }
+  .vf-noel { background: radial-gradient(circle at 80% 20%, rgba(255,255,255,.35) 0 3%, transparent 18%), linear-gradient(165deg, #0E4D5C, #1E8C7A 70%, #D9F5EC); }
+  .vf-lune { background: radial-gradient(circle at 75% 22%, #FFF1C9 0 5%, rgba(255,241,201,.2) 10%, transparent 24%), linear-gradient(170deg, #1C2A6B, #3E5BB8 70%, #E9C46A); }
+  .vf-ete { background: radial-gradient(circle at 80% 18%, #FFE38A 0 6%, transparent 22%), linear-gradient(175deg, #1C6FD1, #36B7E8 60%, #F5D6A0); }
+  .vf-rentree { background: linear-gradient(165deg, #2E3B8C, #4E6FD8 60%, #F2A65A); }
+  .vf-mer { background: linear-gradient(170deg, #0B3A6B, #1E7FB8 70%, #6FE3D8); } .vf-foret { background: linear-gradient(170deg, #12352A, #2E7D4F 70%, #A6D96A); }
+
+  /* ----- affiches ----- */
+  .vt-carte { position: relative; flex: none; overflow: hidden; border: none; padding: 0; border-radius: calc(var(--vu) * 18); color: #fff; cursor: pointer; text-align: start; display: block; font-size: calc(var(--vu) * 22);
+    box-shadow: 0 calc(var(--vu) * 8) calc(var(--vu) * 24) rgba(0,0,0,.3); transition: transform .2s cubic-bezier(.3,1.5,.6,1), box-shadow .2s; }
+  .vt-carte.vt-paysage { width: calc(var(--vu) * 380); height: calc(var(--vu) * 214); } .vt-carte.vt-grande { width: calc(var(--vu) * 520); height: calc(var(--vu) * 293); font-size: calc(var(--vu) * 30); } .vt-carte.vt-portrait { width: calc(var(--vu) * 220); height: calc(var(--vu) * 330); }
+  .vt-carte .vt-art { position: absolute; inset: 0; }
+  .vt-carte .vt-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(8,6,30,.55), rgba(8,6,30,0) 50%); }
+  .vt-carte.vt-claire { color: #1B1030; } .vt-carte.vt-claire .vt-art::after { background: linear-gradient(0deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%); }
+  .vt-carte .e0 { font-size: 5em; } .vt-carte .e1 { font-size: 2.2em; opacity: .85; } .vt-carte .e2 { font-size: 1.7em; opacity: .7; }
+  .vt-carte.vt-paysage .e0, .vt-carte.vt-grande .e0 { right: 9%; top: 9%; } .vt-carte.vt-paysage .e1, .vt-carte.vt-grande .e1 { left: 6%; top: 24%; } .vt-carte.vt-paysage .e2, .vt-carte.vt-grande .e2 { right: 46%; top: 7%; }
+  .vt-carte.vt-portrait .e0 { left: 50%; top: 12%; transform: translateX(-50%); } .vt-carte.vt-portrait .e1 { left: 7%; top: 47%; } .vt-carte.vt-portrait .e2 { right: 7%; top: 42%; }
+  .vt-nom { position: absolute; left: .7em; right: .7em; bottom: .6em; font: 800 1.36em/1.02 'Baloo 2', system-ui, sans-serif; text-shadow: 0 .1em .45em rgba(0,0,0,.5);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .vt-carte.vt-claire .vt-nom { text-shadow: none; }
+  .vt-badge { position: absolute; top: .55em; left: .55em; font: 800 .66em/1 system-ui, sans-serif; letter-spacing: .08em; padding: .45em .6em; border-radius: .4em; background: var(--degrade); color: #032B2C; }
+  .vt-badge.nv { left: auto; right: .55em; background: #FF8FB8; color: #2A0B1A; }
+  .vt-coin { position: absolute; top: .45em; right: .5em; font-size: 1em; }
+  .vt-carte.vt-ferme .vt-art, .vt-carte.vt-bientot .vt-art { filter: saturate(.55) brightness(.82); }
+  .vt-carte.f, .vt-carte:focus-visible { transform: scale(1.1); z-index: 2; outline: none; box-shadow: 0 0 0 calc(var(--vu) * 7) #fff, 0 0 calc(var(--vu) * 40) rgba(255,255,255,.45), 0 calc(var(--vu) * 18) calc(var(--vu) * 40) rgba(0,0,0,.45); }
+  .vt-carte.f .e0 { animation: vt-respire 1.8s ease-in-out infinite; }
+  .vt-carte.vt-portrait.f .e0 { animation-name: vt-respire-c; }
+  @keyframes vt-respire { 50% { transform: scale(1.08) rotate(-3deg); } }
+  @keyframes vt-respire-c { 0%, 100% { transform: translateX(-50%); } 50% { transform: translateX(-50%) scale(1.08) rotate(-3deg); } }
+  .vt-carte.bute, .vt-rond.bute, .vt-pilule.bute, .vt-btn.bute, .vt-ligne.bute { animation: vt-bute .3s; }
+  @keyframes vt-bute { 30% { translate: 1vw 0; } 60% { translate: -.6vw 0; } }
+  .vt-rond { flex: none; border: none; background: none; color: #A9BCD0; display: flex; flex-direction: column; align-items: center; gap: calc(var(--vu) * 10); width: calc(var(--vu) * 136); padding: 0; cursor: pointer;
+    font: 700 calc(var(--vu) * 22)/1.1 'Baloo 2', system-ui, sans-serif; text-align: center; }
+  .vt-rond b { width: calc(var(--vu) * 112); height: calc(var(--vu) * 112); border-radius: 50%; display: grid; place-items: center; font-size: calc(var(--vu) * 52); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), 0 calc(var(--vu) * 8) calc(var(--vu) * 20) rgba(0,0,0,.3); transition: transform .2s, box-shadow .2s; }
+  .vt-rond span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .vt-rond.f, .vt-rond:focus-visible { color: #fff; outline: none; } .vt-rond.f b, .vt-rond:focus-visible b { transform: scale(1.1); box-shadow: 0 0 0 calc(var(--vu) * 6) #fff, 0 0 calc(var(--vu) * 30) rgba(255,255,255,.45); }
+  .vt-pilule { flex: none; height: calc(var(--vu) * 52); padding: 0 calc(var(--vu) * 24); border-radius: calc(var(--vu) * 30); border: none; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+    color: #F4FBF8; font: 700 calc(var(--vu) * 22)/1 system-ui, sans-serif; cursor: pointer; white-space: nowrap; transition: transform .15s; }
+  .vt-pilule.on { background: var(--degrade); color: #032B2C; box-shadow: none; }
+  .vt-pilule.f, .vt-pilule:focus-visible { outline: none; transform: scale(1.08); box-shadow: 0 0 0 calc(var(--vu) * 5) #fff, 0 0 calc(var(--vu) * 24) rgba(255,255,255,.4); }
+  .vt-btn { height: calc(var(--vu) * 66); padding: 0 calc(var(--vu) * 34); border-radius: calc(var(--vu) * 40); border: none; display: inline-flex; align-items: center; justify-content: center; gap: calc(var(--vu) * 12); white-space: nowrap; cursor: pointer;
+    font: 800 calc(var(--vu) * 26)/1 system-ui, sans-serif; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(46,230,197,.6); color: #F4FBF8; transition: transform .15s, box-shadow .15s; }
+  .vt-btn.principal { background: var(--degrade); color: #032B2C; box-shadow: none; }
+  .vt-btn.f, .vt-btn:focus-visible { outline: none; transform: scale(1.08); box-shadow: 0 0 0 calc(var(--vu) * 6) #fff, 0 0 calc(var(--vu) * 30) rgba(255,255,255,.5); }
+
+  /* ----- télé et ordinateur : barre de gauche, grande affiche, rangées ----- */
+  .vitrine.vt-grand .vt-rail { display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--vu) * 6); position: absolute; left: 0; top: 0; bottom: 0; z-index: 8; width: calc(var(--vu) * 120); padding: calc(var(--vu) * 28) calc(var(--vu) * 32); overflow: hidden;
+    background: linear-gradient(90deg, rgba(10,14,38,.96), rgba(10,14,38,0)); transition: width .25s cubic-bezier(.2,.8,.2,1), background .25s; }
+  .vitrine.vt-grand.rail-ouvert .vt-rail { width: calc(var(--vu) * 400); background: linear-gradient(90deg, #0A0E26 80%, rgba(10,14,38,0)); box-shadow: 30px 0 80px 40px rgba(10,14,38,.75); }
+  .vt-rail .vt-orbe.vt-o-grand { width: calc(var(--vu) * 56); height: calc(var(--vu) * 56); margin-bottom: calc(var(--vu) * 12); }
+  .vt-ligne { flex: none; display: flex; align-items: center; gap: calc(var(--vu) * 18); border: none; background: none; color: #A9BCD0; padding: 0 calc(var(--vu) * 26) 0 0; border-radius: calc(var(--vu) * 40); cursor: pointer; white-space: nowrap;
+    font: 700 calc(var(--vu) * 28)/1 'Baloo 2', system-ui, sans-serif; transition: background .15s, color .15s; }
+  .vt-ico { width: calc(var(--vu) * 56); height: calc(var(--vu) * 56); border-radius: 50%; display: grid; place-items: center; flex: none; font-size: calc(var(--vu) * 30); }
+  .vt-ico svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-lib { opacity: 0; transition: opacity .2s; }
+  .rail-ouvert .vt-lib { opacity: 1; }
+  .vt-ligne.on { color: #fff; } .vt-ligne.on .vt-ico { background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+  .vt-ligne.f, .vt-ligne:hover, .vt-ligne:focus-visible { outline: none; background: var(--degrade); color: #032B2C; }
+  .vt-ligne.f .vt-ico, .vt-ligne:hover .vt-ico { background: none; box-shadow: none; }
+  .vt-avatar { background: linear-gradient(135deg, #FFB86B, #FF8FB8) !important; }
+  .vt-bas { margin-top: auto; display: flex; flex-direction: column; gap: calc(var(--vu) * 6); }
+  .vitrine.vt-grand .vt-heros { display: block; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--vu) * 540); }
+  .vitrine.vt-grand.vt-sous .vt-heros { height: calc(var(--vu) * 450); }
+  .vt-art-heros { position: absolute; right: 0; top: 0; width: 72%; height: 100%; overflow: hidden; }
+  .vt-art-heros::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0A0E26 0%, rgba(10,14,38,.75) 22%, rgba(10,14,38,0) 58%), linear-gradient(0deg, #0A0E26 0%, rgba(10,14,38,0) 38%); }
+  .vt-art-heros .vt-art { position: absolute; inset: 0; font-size: calc(var(--vu) * 52); }
+  .vt-art-heros .e0 { right: 30%; top: 10%; font-size: 5em; } .vt-art-heros .e1 { right: 60%; top: 48%; font-size: 2.4em; } .vt-art-heros .e2 { right: 50%; top: 14%; font-size: 1.6em; }
+  .vt-art-heros .e3 { right: 20%; top: 64%; font-size: 1.5em; } .vt-art-heros .e4 { right: 42%; top: 36%; font-size: 1.2em; }
+  .vt-heros.entre .vt-art { animation: vt-fondu .5s ease-out; }
+  .vt-heros.entre .vt-titre, .vt-heros.entre .vt-metas, .vt-heros.entre .vt-desc { animation: vt-entre .35s ease-out; }
+  @keyframes vt-fondu { from { opacity: 0; transform: scale(1.04); } }
+  @keyframes vt-entre { from { opacity: 0; transform: translateY(1.2vh); } }
+  .vt-texte { position: absolute; left: calc(var(--vu) * 176); top: calc(var(--vu) * 58); width: calc(var(--vu) * 780); display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--vu) * 16); z-index: 3; }
+  .vt-sous .vt-texte { top: calc(var(--vu) * 48); gap: calc(var(--vu) * 14); }
+  .vt-annonce { margin: 0; font: 800 calc(var(--vu) * 21)/1.2 system-ui, sans-serif; padding: calc(var(--vu) * 9) calc(var(--vu) * 18); border-radius: calc(var(--vu) * 30); background: rgba(255,143,184,.16); box-shadow: inset 0 0 0 1px rgba(255,143,184,.5); color: #FFE0EC; }
+  .vt-kicker { display: flex; align-items: center; gap: calc(var(--vu) * 12); font: 800 calc(var(--vu) * 21)/1 system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #2EE6C5; }
+  .vt-kicker .vt-orbe { width: calc(var(--vu) * 30); height: calc(var(--vu) * 30); }
+  .vt-titre { margin: 0; font: 800 calc(var(--vu) * 76)/.98 'Baloo 2', system-ui, sans-serif; letter-spacing: -.01em; text-shadow: 0 calc(var(--vu) * 3) calc(var(--vu) * 18) rgba(0,0,0,.45); max-width: 100%;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding-bottom: .04em; }
+  .vt-titre.long { font-size: calc(var(--vu) * 62); }
+  .vt-sous .vt-titre { font-size: calc(var(--vu) * 70); } .vt-sous .vt-titre.long { font-size: calc(var(--vu) * 58); }
+  .vt-titre.logo, .vt-af-titre.logo { background: linear-gradient(180deg, #FFE3B0, #FF9A3D); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+  .vt-metas { display: flex; flex-wrap: wrap; gap: calc(var(--vu) * 10); min-height: calc(var(--vu) * 39); }
+  .vt-pill { font: 700 calc(var(--vu) * 20)/1 system-ui, sans-serif; padding: calc(var(--vu) * 9) calc(var(--vu) * 16); border-radius: calc(var(--vu) * 30); background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); white-space: nowrap; }
+  .vt-pill.fort { background: rgba(46,230,197,.14); box-shadow: inset 0 0 0 1px rgba(46,230,197,.5); color: #BFFBEA; }
+  .vt-desc { margin: 0; font-size: calc(var(--vu) * 25); line-height: 1.4; color: #D6E2EE; max-width: calc(var(--vu) * 720); min-height: 2.8em; text-shadow: 0 calc(var(--vu) * 2) calc(var(--vu) * 12) rgba(0,0,0,.4);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .vt-sous .vt-desc { min-height: 0; -webkit-line-clamp: 1; }
+  .vt-actions { display: flex; gap: calc(var(--vu) * 16); margin-top: calc(var(--vu) * 4); }
+  .vt-points { position: absolute; left: calc(var(--vu) * 176); bottom: calc(var(--vu) * 22); display: flex; gap: calc(var(--vu) * 8); z-index: 3; }
+  .vt-points i { width: calc(var(--vu) * 12); height: calc(var(--vu) * 12); border-radius: calc(var(--vu) * 6); background: rgba(255,255,255,.3); transition: width .3s, background .3s; }
+  .vt-points i.on { width: calc(var(--vu) * 36); background: #2EE6C5; }
+  .vitrine.vt-grand .vt-rangees { position: absolute; left: 0; right: 0; top: calc(var(--vu) * 548); bottom: 0; overflow-y: auto; overflow-x: hidden; padding-bottom: calc(var(--vu) * 600); }
+  .vitrine.vt-grand.vt-sous .vt-rangees { top: calc(var(--vu) * 458); }
+  .vitrine.vt-grand .vt-ligne-r { padding-left: calc(var(--vu) * 142); }
+  .vt-ligne-r h3 { margin: 0; padding-left: calc(var(--vu) * 34); font: 700 calc(var(--vu) * 32)/1 'Baloo 2', system-ui, sans-serif; display: flex; align-items: baseline; gap: calc(var(--vu) * 14); }
+  .vt-ligne-r h3 small { font: 600 calc(var(--vu) * 19)/1 system-ui, sans-serif; color: #A9BCD0; }
+  .vt-piste { display: flex; gap: calc(var(--vu) * 26); overflow-x: auto; overflow-y: hidden; padding: calc(var(--vu) * 22) calc(var(--vu) * 160) calc(var(--vu) * 28) calc(var(--vu) * 34); position: relative; }
+  .vt-r-filtres .vt-piste { gap: calc(var(--vu) * 12); padding-top: calc(var(--vu) * 6); padding-bottom: calc(var(--vu) * 14); }
+  .vt-r-rond .vt-piste { gap: calc(var(--vu) * 14); padding-bottom: calc(var(--vu) * 20); }
+  .vitrine.vt-grand .vt-carte:hover { transform: scale(1.05); z-index: 2; }
+  .vitrine.vt-grand .vt-carte.f:hover, .vitrine.vt-grand .vt-carte.f { transform: scale(1.1); }
+  .vitrine.vt-grand.en-bas .vt-heros .vt-actions { opacity: .55; }
+  .vitrine.vt-tele .vt-carte:hover:not(.f) { transform: none; }
+
+  /* ----- téléphone et tablette : barre du haut, affiches verticales, onglets en bas ----- */
+  .vitrine:not(.vt-grand) .vt-page { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: calc(env(safe-area-inset-top, 0px) + 64px) 0 calc(env(safe-area-inset-bottom, 0px) + 86px); }
+  .vitrine:not(.vt-grand) .vt-haut { display: flex; align-items: center; gap: 10px; position: absolute; left: 0; right: 0; top: 0; z-index: 8; padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 12px;
+    background: linear-gradient(180deg, rgba(10,14,38,.96), rgba(10,14,38,.8) 70%, rgba(10,14,38,0)); }
+  .vt-haut .vt-orbe { width: 32px; height: 32px; }
+  .vt-marque { flex: 1; min-width: 0; font: 800 22px/1.1 'Baloo 2', system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vt-rond-ic { width: 40px; height: 40px; flex: none; border-radius: 50%; border: none; padding: 0; display: grid; place-items: center; font-size: 20px; color: #fff;
+    background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); cursor: pointer; }
+  .vt-rond-ic svg { width: 50%; height: 50%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vitrine:not(.vt-grand) .vt-puces { display: flex; gap: 8px; overflow-x: auto; padding: 2px 16px 14px; }
+  .vitrine:not(.vt-grand) .vt-pilule { height: 36px; padding: 0 14px; font-size: 14px; border-radius: 20px; }
+  .vitrine:not(.vt-grand) .vt-affiches { display: block; margin-bottom: 20px; }
+  .vitrine .vt-affiches:empty, .vitrine .vt-puces:empty { display: none; }
+  .vt-af-piste { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .vt-affiche { position: relative; flex: 0 0 calc(100% - 32px); margin: 0 16px; height: min(116vw, 60vh, 540px); border-radius: 22px; overflow: hidden; scroll-snap-align: center; box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+  .vt-affiche > .vt-art { position: absolute; inset: 0; font-size: min(7vw, 34px); }
+  .vt-affiche > .vt-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(10,14,38,.96) 0%, rgba(10,14,38,.6) 30%, rgba(10,14,38,0) 58%); }
+  .vt-affiche .e0 { right: 8%; top: 7%; font-size: 5em; } .vt-affiche .e1 { left: 7%; top: 30%; font-size: 2.4em; } .vt-affiche .e2 { left: 16%; top: 7%; font-size: 1.4em; }
+  .vt-affiche .e3 { right: 12%; top: 44%; font-size: 1.5em; } .vt-affiche .e4 { left: 42%; top: 24%; font-size: 1.1em; }
+  .vt-af-txt { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+  .vt-af-k { font: 800 11px/1 system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #2EE6C5; }
+  .vt-af-titre { font: 800 32px/1 'Baloo 2', system-ui, sans-serif; text-wrap: balance; padding-bottom: .04em; }
+  .vt-af-meta { font: 700 12px/1.3 system-ui, sans-serif; color: #D6E2EE; }
+  .vt-af-btns { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
+  .vt-af-btns .vt-btn { flex: 1; height: 44px; padding: 0 10px; font-size: 15px; gap: 6px; }
+  .vt-af-points { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .vt-af-points i { width: 7px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.3); transition: width .3s; } .vt-af-points i.on { width: 22px; background: #2EE6C5; }
+  .vitrine:not(.vt-grand) .vt-ligne-r { margin-bottom: 14px; }
+  .vitrine:not(.vt-grand) .vt-ligne-r h3 { font-size: 18px; padding: 0 16px; } .vitrine:not(.vt-grand) .vt-ligne-r h3 small { display: none; }
+  .vitrine:not(.vt-grand) .vt-piste { gap: 10px; padding: 10px 16px 8px; }
+  .vitrine:not(.vt-grand) .vt-r-filtres .vt-piste { padding-top: 0; gap: 8px; }
+  .vitrine:not(.vt-grand) .vt-carte { font-size: 11px; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,.3); }
+  .vitrine:not(.vt-grand) .vt-carte.vt-portrait { width: 112px; height: 168px; } .vitrine:not(.vt-grand) .vt-carte.vt-paysage { width: 200px; height: 112px; }
+  .vitrine:not(.vt-grand) .vt-carte.vt-grande { width: 270px; height: 152px; font-size: 13px; }
+  .vitrine:not(.vt-grand) .vt-rond { width: 78px; font-size: 12px; gap: 6px; } .vitrine:not(.vt-grand) .vt-rond b { width: 64px; height: 64px; font-size: 30px; }
+  .vitrine:not(.vt-grand)[data-page="accueil"] .vt-univers { display: none; }
+  .vitrine:not(.vt-grand) .vt-onglets { display: flex; justify-content: space-around; position: absolute; left: 0; right: 0; bottom: 0; z-index: 8;
+    padding: 8px 6px calc(env(safe-area-inset-bottom, 0px) + 10px); background: rgba(10,14,38,.95); border-top: 1px solid rgba(255,255,255,.1); }
+  .vt-onglets button { border: none; background: none; color: #A9BCD0; display: flex; flex-direction: column; align-items: center; gap: 4px; font: 700 11px/1 system-ui, sans-serif; padding: 4px 6px; min-width: 56px; cursor: pointer; }
+  .vt-onglets svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vt-onglets .on { color: #2EE6C5; }
+  @media (prefers-reduced-motion: reduce) { .vt-carte.f .e0, .vt-heros.entre * { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -6731,6 +6905,7 @@ document.addEventListener('keydown', (e) => {
     if (Trace.actif && !$('fa-fond')) { Trace.fermer(); e.preventDefault(); return; }
     if (Theatre.actif) { Theatre.quitter(); e.preventDefault(); return; }
     if ($('fa-fond')) { fermerFenetre(); e.preventDefault(); return; }
+    if (Vitrine.fermerRail()) { e.preventDefault(); return; }
     if (pile.length > 1) { retour(); e.preventDefault(); }
     return;
   }
@@ -6741,6 +6916,7 @@ document.addEventListener('keydown', (e) => {
   if (!modeTele) { modeTele = true; document.documentElement.classList.add('tele'); afficher(); e.preventDefault(); return; }
   // Pluie de formes : un viseur lumineux qu'on déplace, OK pour trancher
   if (fo && !$('fa-fond')) { foViseur(d[0], d[1]); e.preventDefault(); return; }
+  if (Vitrine.actif && !$('fa-fond') && !Theatre.actif && Vitrine.touche(d[0], d[1])) { e.preventDefault(); return; }
   if (TV.actif && !$('fa-fond') && !Theatre.actif && !$('tv-fiche')) { TV.touche(d[0], d[1]); e.preventDefault(); return; }
   if (!$('fa-fond') && Hote.actuel?.touche?.(d[0], d[1])) { e.preventDefault(); return; }
   deplacerFocus(d[0], d[1]);
@@ -6757,12 +6933,13 @@ PLUGINS.App?.addListener?.('backButton', () => {
   if (Trace.actif) return Trace.fermer();
   if (Theatre.actif) return Theatre.quitter();
   if ($('fa-fond')) return fermerFenetre();
+  if (Vitrine.fermerRail()) return;
   if (pile.length > 1) return retour();
   PLUGINS.App.minimizeApp?.();
 });
 // après chaque changement d'écran, à la télé, on met la sélection sur le premier bouton utile
 function focusTele() {
-  if (!modeTele || TV.actif) return;
+  if (!modeTele || TV.actif || document.documentElement.classList.contains('vitrine-on')) return;
   setTimeout(() => {
     if (focusables().includes(document.activeElement)) return;
     const premier = document.querySelector('.cote-activite section:not([hidden]) button, .cote-activite section:not([hidden]) [tabindex]');
@@ -10861,6 +11038,541 @@ const SuperAdmin = (() => {
   }
   return { ouvrir };
 })();
+
+// =====================================================================
+// ---------- La vitrine : le menu façon plateforme de streaming ----------
+// Une barre fine à gauche (le menu, partout), une grande affiche en haut qui suit la sélection,
+// des rangées d'affiches dessous. Une forme par type : jeu = portrait 2:3, à regarder = 16:9, univers = rond.
+// Sur le téléphone : barre du haut, grande affiche verticale, rangées, onglets en bas.
+// Pour mettre une vraie illustration (PNG, JPG, WebP) ou une vidéo sur une affiche : déposer le fichier
+// dans le dossier affiches/ et l'ajouter à AFFICHES ci-dessous, la mise en page ne change pas.
+// =====================================================================
+const VT_TXT = {
+  chercher: nom3('Chercher', 'Search', 'بحث'), accueil: nom3('Accueil', 'Home', 'الرئيسية'), aventures: nom3('Aventures', 'Adventures', 'مغامرات'),
+  jouer: nom3('Jouer', 'Play', 'العب'), creer: nom3('Créer', 'Create', 'أبدع'), famille: nom3('En famille', 'Family', 'مع العائلة'),
+  histoires: nom3('Histoires', 'Stories', 'حكايات'), cultures: nom3('Cultures', 'Cultures', 'ثقافات'), apprendre: nom3('J’apprends', 'Learn', 'أتعلّم'),
+  coffre: nom3('Coffre', 'Treasures', 'الكنز'), parents: nom3('Parents', 'Parents', 'الأولياء'), telephone: nom3('Téléphone', 'Phone', 'الهاتف'), langue: nom3('Langue', 'Language', 'اللغة'),
+  lancer: nom3('Jouer', 'Play', 'العب'), regarder: nom3('Regarder', 'Watch', 'شاهد'), ecouter: nom3('Écouter', 'Listen', 'استمع'), ouvrir: nom3('Ouvrir', 'Open', 'افتح'),
+  maListe: nom3('Ma liste', 'My list', 'قائمتي'), dansListe: nom3('Dans ma liste', 'In my list', 'في قائمتي'),
+  reprendre: nom3('Reprendre', 'Continue', 'تابع'), reprendreSous: nom3('là où vous vous êtes arrêtés', 'where you left off', 'من حيث توقفتم'),
+  univers: nom3('Les univers', 'Worlds', 'العوالم'), grandes: nom3('Les grandes aventures', 'Big adventures', 'المغامرات الكبرى'),
+  interactif: nom3('INTERACTIF', 'INTERACTIVE', 'تفاعلي'), aDeux: nom3('À DEUX', 'TOGETHER', 'معًا'), nouveau: nom3('NOUVEAU', 'NEW', 'جديد'), bientotB: nom3('BIENTÔT', 'SOON', 'قريبًا'),
+  filmInteractif: nom3('Film interactif Lumiole', 'Lumiole interactive film', 'فيلم لوميول التفاعلي'), conte: nom3('Histoire', 'Story', 'حكاية'), comptine: nom3('Comptine', 'Song', 'أنشودة'),
+  univ: nom3('Univers', 'World', 'عالم'), jeu: nom3('Jeu', 'Game', 'لعبة'), jeuCam: nom3('Jeu avec la caméra', 'Camera game', 'لعبة بالكاميرا'), atelier: nom3('Atelier', 'Studio', 'ورشة'),
+  fins: nom3('3 fins', '3 endings', '3 نهايات'), min: nom3('min', 'min', 'د'), pages: nom3('pages', 'pages', 'صفحات'), karaoke: nom3('Karaoké', 'Karaoke', 'كاريوكي'),
+  tout: nom3('Tout', 'All', 'الكل'), deux: nom3('À deux', 'Together', 'معًا'), camera: nom3('Caméra', 'Camera', 'الكاميرا'), bouge: nom3('Bouger', 'Move', 'حركة'),
+  calme: nom3('Calme', 'Calm', 'هدوء'), tete: nom3('Réfléchir', 'Think', 'تفكير'), creerT: nom3('Créer', 'Create', 'إبداع'),
+  aRegarder: nom3('À regarder et à écouter', 'Watch and listen', 'للمشاهدة والاستماع'), aExplorer: nom3('À explorer', 'Explore', 'لنستكشف'),
+  aJouer: nom3('À jouer', 'Play', 'للعب'), aColorier: nom3('À colorier', 'To color', 'للتلوين'),
+  soirTitre: nom3('Histoires et comptines', 'Stories and songs', 'حكايات وأناشيد'), soirDesc: nom3('Lumi raconte, on chante ensemble', 'Lumi tells stories, we sing together', 'لومي يحكي ونغني معًا'),
+  comptines: nom3('Comptines', 'Songs', 'أناشيد'), autresLangues: nom3('Dans les autres langues', 'In other languages', 'بلغات أخرى'),
+  quiJoue: nom3('Qui joue ?', 'Who’s playing?', 'من يلعب؟'),
+  bientot: nom3('Bientôt dans Lumiole !', 'Coming soon to Lumiole!', 'قريبًا في لوميول!'),
+  noelTitre: nom3('Le Noël de Lumi', 'Lumi’s Christmas', 'عيد لومي في الشتاء'), noelDesc: nom3('Le prochain grand film, pour les fêtes de fin d’année.', 'The next big film, for the holiday season.', 'الفيلم الكبير القادم لأعياد نهاية السنة.'),
+  lanternesTitre: nom3('La nuit des lanternes', 'The night of lanterns', 'ليلة الفوانيس'), lanternesDesc: nom3('Le grand film du Ramadan et de l’Aïd.', 'The big film for Ramadan and Eid.', 'الفيلم الكبير لرمضان والعيد.'),
+};
+const vt = (k) => t3(VT_TXT[k]);
+
+// la page « Histoires » de la vitrine : contes et comptines réunis
+NOEUDS.soir = { emoji: '🌙', nom: VT_TXT.soirTitre, desc: VT_TXT.soirDesc, enfants: [], tags: ['histoire', 'calme'] };
+GRATUIT.add('soir');
+
+// ---------- Le contenu : chaque affiche a son fond et sa composition (émoji principal + décor) ----------
+// Les vraies images et vidéos, quand elles existent : id → { image: 'affiches/x.webp', video: 'affiches/x.mp4' }
+const AFFICHES = {};
+const ART = {
+  aventures: ['vf-nuit', ['🎬', '🏰', '✨', '🎃']], jeux: ['vf-turq', ['🎮', '🗿', '🧩']], creer: ['vf-pech', ['🖍️', '🪄', '🎨']],
+  'en-famille': ['vf-rose', ['👨‍👩‍👧', '📸', '💛']], apprendre: ['vf-menthe', ['🔤', '🐾', '🔢']], cultures: ['vf-bleu', ['🌍', '🪢', '🎵']],
+  fetes: ['vf-hw', ['🎉', '🎃', '🎄']], coffre: ['vf-lilas', ['🎁', '⭐', '💎']], soir: ['vf-nuit', ['🌙', '⭐', '🦉']], cherche: ['vf-indigo', ['🔎', '⭐']],
+  imite: ['vf-rose', ['🤸', '⭐', '✨']], statues: ['vf-turq', ['🗿', '🎵', '💃']], danse: ['vf-pech', ['💃', '⭐', '🎶']], 'couleurs-chasse': ['vf-bleu', ['🌈', '🔴', '🟡']],
+  chasse: ['vf-menthe', ['🔎', '🧸', '🍎']], formes: ['vf-indigo', ['🔷', '🔺', '⭐']], bulles: ['vf-bleu', ['🫧', '🫧', '✨']],
+  memory: ['vf-lilas', ['🃏', '👧', '👦']], puzzle: ['vf-turq', ['🧩', '🏰', '✨']], compter: ['vf-pech', ['🔢', '🍎', '⭐']], devine: ['vf-lilas', ['🔮', '✨', '❓']],
+  ecoute: ['vf-menthe', ['👂', '🎵', '🐶']], range: ['vf-pech', ['🧺', '🏫', '🐄']], intrus: ['vf-rose', ['🕵️', '🍎', '🍌']],
+  dessin: ['vf-pech', ['✍️', '🌈', '⭐']], vivant: ['vf-indigo', ['🪄', '🐟', '🚀']], autoportrait: ['vf-rose', ['🧑‍🎨', '✏️', '🙂']], coloriage: ['vf-menthe', ['🖍️', '🦋', '🌸']],
+  'col-photo': ['vf-lilas', ['🖼️', '🖍️', '📸']], carte: ['vf-rose', ['💌', '💛', '🌸']], livre: ['vf-nuit', ['📖', '📸', '✨']],
+  photo: ['vf-pech', ['📸', '👑', '🎉']], miroir: ['vf-lilas', ['🪞', '🎩', '🐱']], musee: ['vf-indigo', ['🏛️', '🖼️', '🎻']], album: ['vf-pech', ['📒', '⭐', '🐾']],
+  histoires: ['vf-nuit', ['🌙', '📖', '⭐']], chansons: ['vf-indigo', ['🎵', '🎤', '🎶']],
+  animaux: ['vf-menthe', ['🐾', '🦁', '🐘']], manger: ['vf-pech', ['🍽️', '🍎', '🥕']], monde: ['vf-bleu', ['🏡', '👪', '🏫']], couleurs: ['vf-rose', ['🎨', '🔴', '🔵']],
+  lettres: ['vf-turq', ['🔤', '✏️', '📚']], nombres: ['vf-lilas', ['🔢', '⭐', '🍎']], parler: ['vf-bleu', ['🎤', '💬', '✨']],
+  ferme: ['vf-pech', ['🐄', '🐔', '🐑']], ocean: ['vf-bleu', ['🐠', '🐙', '🐬']], sauvages: ['vf-menthe', ['🦁', '🦒', '🐘']], oiseaux: ['vf-bleu', ['🐦', '🦜', '🦉']], insectes: ['vf-menthe', ['🐞', '🦋', '🐝']],
+};
+const FOND_SAISON = { halloween: 'vf-hw', noel: 'vf-noel', rentree: 'vf-rentree', ramadan: 'vf-lune', ete: 'vf-ete' };
+Object.entries(SAISONS).forEach(([k, s]) => {
+  const m = s.mots.split(' ');
+  ART[k] = [FOND_SAISON[k] || 'vf-nuit', [s.emoji, m[1], m[2], m[3]]];
+  ART[k + '-mots'] = [FOND_SAISON[k] || 'vf-nuit', [m[0], m[4], m[5]]];
+  ART[k + '-conte'] = [FOND_SAISON[k] || 'vf-nuit', ['🌙', s.emoji, '⭐']];
+  ART[k + '-chant'] = [FOND_SAISON[k] || 'vf-nuit', ['🎵', s.emoji, '🎶']];
+  ART[k + '-miroir'] = ['vf-lilas', ['🪞', s.emoji]];
+  ART[k + '-memory'] = ['vf-lilas', ['🃏', m[0], m[1]]];
+});
+FILMS.forEach((f) => { ART['av-' + f.id] = [FOND_SAISON[f.saison] || 'vf-nuit', f.id === 'chateau-citrouilles' ? ['🏰', '🎃', '🎃', '🦇', '👻'] : [f.emoji, '✨']]; });
+const FOND_TAG = [['fete', 'vf-hw'], ['histoire', 'vf-nuit'], ['camera', 'vf-rose'], ['bouge', 'vf-turq'], ['creer', 'vf-pech'], ['famille', 'vf-rose'], ['tete', 'vf-lilas'], ['apprendre', 'vf-menthe'], ['culture', 'vf-bleu']];
+const SOMBRES = /vf-(nuit|indigo|hw|noel|lune|ete|rentree|mer|foret)/;
+const FOND_PALETTE = { halloween: 'vf-hw', noel: 'vf-noel', ramadan: 'vf-lune', ete: 'vf-ete', mer: 'vf-mer', foret: 'vf-foret', galaxie: 'vf-indigo' };
+const pictogramme = (e) => typeof e === 'string' && /\p{Extended_Pictographic}/u.test(e);
+function artDe(id) {
+  const n = NOEUDS[id], a = ART[id];
+  const fond = a?.[0] || ART[PARENT_VT[id]]?.[0] || FOND_TAG.find(([t]) => n?.tags?.includes(t))?.[1] || ['vf-turq', 'vf-rose', 'vf-bleu', 'vf-menthe', 'vf-lilas', 'vf-pech'][[...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 6];
+  const e = (a?.[1] || [n?.emoji]).filter(Boolean);
+  return { fond, e, ...(AFFICHES[id] || {}), ...(n?.affiche ? { image: n.affiche } : {}), ...(n?.video ? { video: n.video } : {}) };
+}
+// le parent d'un élément (pour hériter du fond de son univers)
+const PARENT_VT = {};
+Object.entries(NOEUDS).forEach(([id, n]) => enfantsDe(n).forEach((e) => { if (!PARENT_VT[e]) PARENT_VT[e] = id; }));
+
+// ---------- Les éléments affichés (activités, histoires, comptines) ----------
+const estFilm = (id) => id.startsWith('av-');
+const estHub = (id) => { const n = NOEUDS[id]; return !!n && !n.type && !n.lancer && !n.mots && !!(n.enfants || n.groupes); };
+const estRegarder = (id) => /^(av-|h:|c:|cc-|ct-)/.test(id) || /-(conte|chant)$/.test(id) || ['histoires', 'chansons', 'soir'].includes(id);
+const visible = (id) => NOEUDS[id] && !ConfigDistante.cache(id) && !(modeTele && id === 'parler');
+function lancerVt(cle, faire) {
+  if (!estHub(cle)) Recents.ajouter(cle);
+  son('juste'); faire();
+}
+function itemNoeud(id) {
+  const n = NOEUDS[id]; if (!n) return null;
+  const film = n.module === 'aventure' ? FILMS.find((f) => f.id === n.aventure) : null, tags = n.tags || [];
+  const meta = [], badges = [];
+  if (film) {
+    if (film.saison && SAISONS[film.saison]) meta.push({ t: t3(SAISONS[film.saison].nom), fort: true });
+    meta.push({ t: `${dureeFilm(film)} ${vt('min')}` }, { t: vt('fins') }, { t: vt('deux') }, { t: '📷 ' + vt('camera') });
+    badges.push(vt('interactif'));
+  } else {
+    if (tags.includes('deux')) { meta.push({ t: vt('deux') }); badges.push(vt('aDeux')); }
+    if (tags.includes('camera')) meta.push({ t: '📷 ' + vt('camera') });
+    [['bouge', 'bouge'], ['calme', 'calme'], ['tete', 'tete'], ['creer', 'creerT']].forEach(([t, k]) => tags.includes(t) && meta.push({ t: vt(k) }));
+    if (estHub(id)) meta.unshift({ t: `${enfantsDe(n).filter(visible).length} ✦`, fort: true });
+  }
+  const hub = estHub(id);
+  return {
+    cle: id, nom: nomDe(n), desc: t3(n.desc), emoji: n.emoji, art: artDe(id), film: !!film, hub, regarder: estRegarder(id),
+    kicker: film ? vt('filmInteractif') : hub ? vt('univ') : /-conte$|^ct-/.test(id) ? vt('conte') : /-chant$|^cc-/.test(id) ? vt('comptine') : tags.includes('camera') ? vt('jeuCam') : tags.includes('creer') ? vt('atelier') : vt('jeu'),
+    meta, badges, cam: tags.includes('camera'), nouveau: nouveautes().includes(id) && libre(id), ferme: !libre(id), tags,
+    action: () => lancerVt(id, () => (n.lancer ? (libre(id) ? n.lancer() : proposerAchat()) : aller(id))),
+  };
+}
+const NOM_LANGUE_VT = { fr: 'Français', en: 'English', ar: 'العربية' };
+const resume = (t) => (t.length > 150 ? t.slice(0, 147).replace(/\s\S*$/, '') + '…' : t);
+function itemConte(h) {
+  const ok = Achat.ouvert || HISTOIRES_LIBRES.has(h.id), e = [h.emoji, ...h.pages.map((p) => p[1]).filter(pictogramme)];
+  return { cle: 'h:' + h.id, nom: h.titre, desc: resume(h.pages[0][0]), emoji: h.emoji, regarder: true, kicker: vt('conte'), tags: ['histoire', 'calme'],
+    art: { fond: FOND_PALETTE[h.amb] || FOND_PALETTE[h.palette] || 'vf-nuit', e: [...new Set(e)].slice(0, 4), ...(AFFICHES['h:' + h.id] || {}) },
+    meta: [{ t: `${h.pages.length} ${vt('pages')}` }, { t: NOM_LANGUE_VT[h.langue] }], badges: [], ferme: !ok,
+    action: () => lancerVt('h:' + h.id, () => ouvrirConte(h.id)) };
+}
+function itemChant(c) {
+  const ok = Achat.ouvert || CHANSONS_LIBRES.has(c.id), e = [c.emoji, ...(c.lignes || []).map((l) => l[2]).filter(pictogramme)];
+  return { cle: 'c:' + c.id, nom: c.titre, desc: (c.lignes?.[0]?.[0] || '').replace(/-/g, ''), emoji: c.emoji, regarder: true, kicker: vt('comptine'), tags: ['histoire', 'calme'],
+    art: { fond: FOND_PALETTE[c.palette] || 'vf-indigo', e: [...new Set(e)].slice(0, 4), ...(AFFICHES['c:' + c.id] || {}) },
+    meta: [{ t: vt('karaoke') }, { t: NOM_LANGUE_VT[c.langue] || c.langue }], badges: [], ferme: !ok,
+    action: () => lancerVt('c:' + c.id, () => ouvrirComptine(c.id)) };
+}
+function itemCle(cle) {
+  if (cle.startsWith('h:')) { const h = HISTOIRES.find((x) => x.id === cle.slice(2)); return h && itemConte(h); }
+  if (cle.startsWith('c:')) { const c = CHANSONS.find((x) => x.id === cle.slice(2)); return c && itemChant(c); }
+  return visible(cle) ? itemNoeud(cle) : null;
+}
+// les films à venir : une affiche « bientôt », sans action
+const bientot = (cle, titre, desc, fond, e) => ({ cle, nom: t3(VT_TXT[titre]), desc: t3(VT_TXT[desc]), emoji: e[0], film: true, regarder: true, kicker: vt('filmInteractif'),
+  art: { fond, e }, meta: [{ t: vt('bientotB'), fort: true }], badges: [vt('bientotB')], bientot: true, tags: [], action: () => { son('pop'); parler(vt('bientot')); } });
+
+// ---------- Mémoire : reprendre et ma liste ----------
+const memoVt = (cle) => ({
+  lire: () => lireJSON(cle).filter((x) => typeof x === 'string'),
+  ecrire: (l) => { try { localStorage.setItem(cle, JSON.stringify(l.slice(0, 20))); } catch {} },
+});
+const Recents = (() => { const m = memoVt('lumi-recents'); return { liste: m.lire, ajouter: (k) => m.ecrire([k, ...m.lire().filter((x) => x !== k)]) }; })();
+const MaListe = (() => { const m = memoVt('lumi-liste'); return { liste: m.lire, a: (k) => m.lire().includes(k), basculer: (k) => { const l = m.lire(); m.ecrire(l.includes(k) ? l.filter((x) => x !== k) : [k, ...l]); return !l.includes(k); } }; })();
+
+// ---------- Les rangées de chaque page ----------
+const titrePropre = (t) => t.replace(/^[^\p{L}\p{N}]+/u, '');
+const UNIVERS_VT = ['aventures', 'jeux', 'creer', 'en-famille', 'soir', 'cultures', 'apprendre', 'fetes', 'coffre'];
+function rangeesVitrine(id) {
+  const R = [], items = (ids) => ids.filter(visible).map(itemNoeud).filter(Boolean);
+  const lc = langueContenu();
+  if (id === 'accueil') {
+    const rec = Recents.liste().map(itemCle).filter(Boolean).slice(0, 12);
+    if (rec.length) R.push({ titre: vt('reprendre'), sous: vt('reprendreSous'), forme: 'paysage', items: rec });
+    const ml = MaListe.liste().map(itemCle).filter(Boolean);
+    if (ml.length) R.push({ titre: vt('maListe'), forme: 'paysage', items: ml });
+    const s = Saisons.courante;
+    R.push({ titre: vt('univers'), forme: 'rond', univers: true, items: items([...(s ? [s.id] : []), ...UNIVERS_VT]) });
+    const soir = [];
+    rangeesAccueil().forEach((r) => {
+      if (r.saison) return R.push({ titre: titrePropre(r.titre), forme: 'paysage', items: items(r.ids) });
+      if (r.aventures) return R.push({ titre: vt('grandes'), forme: 'grande', items: [...items(r.ids), ...filmsBientot()] });
+      if (r.ids.includes('histoires')) {
+        soir.push(R.length);
+        R.push({ titre: titrePropre(r.titre), forme: 'paysage', items: HISTOIRES.filter((h) => h.langue === lc).slice(0, 12).map(itemConte) });
+        return R.push({ titre: vt('comptines'), forme: 'paysage', items: CHANSONS.filter((c) => c.langue === (lc === 'ar' ? 'ar' : lc)).slice(0, 12).map(itemChant) });
+      }
+      const ids = r.ids.filter((x) => x !== 'cherche');
+      if (ids.length) R.push({ titre: titrePropre(r.titre), forme: ids.every(estRegarder) ? 'paysage' : 'portrait', items: items(ids) });
+    });
+    // le soir et la nuit, les histoires montent juste après « Reprendre »
+    if (moment() !== 'jour' && soir.length) { const k = soir[0], debut = R.findIndex((r) => r.univers); R.splice(debut + 1, 0, ...R.splice(k, 2)); }
+    return R.filter((r) => r.items.length);
+  }
+  if (id === 'soir') {
+    R.push({ titre: t3({ fr: 'Histoires du soir', en: 'Bedtime stories', ar: 'حكايات قبل النوم' }), forme: 'paysage', items: HISTOIRES.filter((h) => h.langue === lc).map(itemConte) });
+    R.push({ titre: vt('comptines'), forme: 'paysage', items: CHANSONS.filter((c) => c.langue === lc).map(itemChant) });
+    ['fr', 'en', 'ar'].filter((l) => l !== lc).forEach((l) => {
+      R.push({ titre: { fr: 'Histoires en français', en: 'Stories in English', ar: 'حكايات بالعربية' }[l], forme: 'paysage', items: HISTOIRES.filter((h) => h.langue === l).map(itemConte) });
+      R.push({ titre: { fr: 'Comptines en français', en: 'Songs in English', ar: 'أناشيد بالعربية' }[l], forme: 'paysage', items: CHANSONS.filter((c) => c.langue === l).map(itemChant) });
+    });
+    return R.filter((r) => r.items.length);
+  }
+  const n = NOEUDS[id];
+  if (id === 'aventures') return [{ titre: vt('grandes'), forme: 'grande', items: [...items(n.enfants), ...filmsBientot()] }];
+  if (n.groupes) {
+    n.groupes.forEach(([cle, e, ids]) => { const l = ids.filter(visible); if (l.length) R.push({ titre: fm(cle) || cle, forme: l.filter(estRegarder).length > l.length / 2 ? 'paysage' : 'portrait', items: items(l) }); });
+    return R;
+  }
+  const seaux = [['grande', 'grandes', estFilm], ['paysage', 'aRegarder', estRegarder], [enfantsDe(n).every(estHub) ? 'paysage' : 'portrait', 'aExplorer', estHub],
+    ['portrait', 'aColorier', (x) => NOEUDS[x]?.type === 'colorier'], ['portrait', 'aJouer', () => true]];
+  const tri = seaux.map(() => []);
+  enfantsDe(n).filter(visible).forEach((x) => tri[seaux.findIndex(([, , f]) => f(x))].push(x));
+  tri.forEach((ids, i) => ids.length && R.push({ titre: vt(seaux[i][1]), forme: seaux[i][0], items: items(ids) }));
+  if (R.length === 1) R[0].titre = nomDe(n);
+  return R;
+}
+function filmsBientot() {
+  return [bientot('b-noel', 'noelTitre', 'noelDesc', 'vf-noel', ['🎄', '⛄', '🎁', '❄️', '⭐']), bientot('b-lanternes', 'lanternesTitre', 'lanternesDesc', 'vf-lune', ['🏮', '🌙', '⭐', '🕌'])];
+}
+// les vedettes de l'accueil (l'affiche du haut tourne entre elles)
+function vedettes() {
+  const s = Saisons.courante;
+  return [...FILMS.map((f) => 'av-' + f.id), ...(s ? [s.id] : []), 'statues', 'vivant', 'miroir'].filter(visible).slice(0, 4).map(itemNoeud);
+}
+
+// ---------- Icônes au trait ----------
+const ICONES_VT = {
+  chercher: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  accueil: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  aventures: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/>',
+  jouer: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".8"/><circle cx="18" cy="13.5" r=".8"/>',
+  creer: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/>',
+  famille: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2.5 20c0-3.5 2.5-6 5.5-6s5.5 2.5 5.5 6M14 20c0-2.8 1.3-5 3-5s4 1.6 4 5"/>',
+  histoires: '<path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/>',
+  cultures: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+  apprendre: '<path d="M4 18l4-12 4 12M5.5 14h5M15 12c1-1 4-1 4 1.5V18M19 15.5c-3-.5-4.5.5-4.5 1.5s1.5 1.5 4.5-.5"/>',
+  coffre: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M3 13h18M12 9v11M12 9c-2-4-6-4-6-1.5S10 9 12 9c2 0 6 0 6-1.5S14 5 12 9"/>',
+  reglages: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  telephone: '<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  langue: '<path d="M4 5h9M8.5 3v2M6 5c1 4 4 7 7 8M11 5c-1 4-4 7-7 8M13 21l4-9 4 9M14.5 18h5"/>',
+  retour: '<path d="M15 5l-7 7 7 7"/>',
+};
+const icone = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONES_VT[k]}</svg>`;
+const MENU_VT = [['chercher', 'cherche'], ['accueil', 'accueil'], ['aventures', 'aventures'], ['jouer', 'jeux'], ['creer', 'creer'], ['famille', 'en-famille'],
+  ['histoires', 'soir'], ['cultures', 'cultures'], ['apprendre', 'apprendre'], ['coffre', 'coffre']];
+const ONGLETS_VT = [['accueil', 'accueil'], ['aventures', 'aventures'], ['jouer', 'jeux'], ['creer', 'creer'], ['chercher', 'cherche']];
+
+// ---------- La vitrine elle-même ----------
+const Vitrine = (() => {
+  let racine = null, actif = false, page = null, grand = false, lignes = [], filtre = 'tout';
+  let zone = 'heros', ri = 0, bi = 0, railI = 1, zoneAvant = 'heros';
+  let liste = [], vi = 0, minuteur = 0, tDessin = 0, tVoix = 0, tHeros = 0, courant = null, survol = false;
+  const memoire = {};
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const pour = (id) => {
+    const h = document.documentElement.classList;
+    return !h.contains('mode-admin') && !h.contains('mode-manette') && (id === 'accueil' || id === 'soir' || estHub(id));
+  };
+  // ----- composition d'une affiche : image ou vidéo si elle existe, sinon décor d'émojis -----
+  function art(it, cadre, enGrand) {
+    const a = it.art, z = mk('span', 'vt-art');
+    if (enGrand && a.video) { const v = mk('video'); Object.assign(v, { src: a.video, muted: true, loop: true, autoplay: true, playsInline: true }); if (a.image) v.poster = a.image; z.appendChild(v); return z; }
+    if (a.image) { const im = mk('img'); im.alt = ''; im.loading = 'lazy'; im.src = a.image; z.appendChild(im); return z; }
+    a.e.slice(0, cadre === 'heros' ? 5 : 3).forEach((e, i) => { const s = mk('span', `vt-e e${i}`, e); z.appendChild(s); });
+    return z;
+  }
+  function carte(it, forme, ri2, ci) {
+    const b = mk('button', `vt-carte vt-${forme} ${it.art.fond}${SOMBRES.test(it.art.fond) ? '' : ' vt-claire'}${it.ferme ? ' vt-ferme' : ''}${it.bientot ? ' vt-bientot' : ''}`);
+    b.type = 'button'; b.appendChild(art(it, forme));
+    const badge = it.badges[0];
+    if (badge) b.appendChild(mk('span', 'vt-badge', badge));
+    if (it.ferme) b.appendChild(mk('span', 'vt-coin', '🔒'));
+    else if (it.nouveau) b.appendChild(mk('span', 'vt-badge nv', vt('nouveau')));
+    else if (it.cam) b.appendChild(mk('span', 'vt-coin', '📷'));
+    const nom = mk('span', 'vt-nom', it.nom); nom.dir = 'auto'; b.appendChild(nom);
+    b.onclick = () => { memoriser(); it.action(); };
+    b.onpointerenter = (e) => { if (e.pointerType === 'mouse' && grand) { survol = true; montrerHeros(it, true); } };
+    b.onfocus = () => { if (zone !== 'rangees' || lignes[ri]?.cartes[lignes[ri].c] !== b) { zone = 'rangees'; ri = ri2; lignes[ri].c = ci; } };
+    return b;
+  }
+  function rond(it, ri2, ci) {
+    const b = mk('button', 'vt-rond'); b.type = 'button';
+    const r = mk('b', it.art.fond + (SOMBRES.test(it.art.fond) ? '' : ' vt-claire'), it.emoji); b.append(r, mk('span', '', it.nom));
+    b.onclick = () => { memoriser(); it.action(); };
+    b.onpointerenter = (e) => { if (e.pointerType === 'mouse' && grand) { survol = true; montrerHeros(it, true); } };
+    b.onfocus = () => { zone = 'rangees'; ri = ri2; lignes[ri].c = ci; };
+    return b;
+  }
+  // ----- construction -----
+  function construire() {
+    racine = mk('div', 'vitrine'); racine.id = 'vitrine'; racine.hidden = true;
+    racine.innerHTML = `<nav class="vt-rail"></nav><header class="vt-haut"></header>
+      <div class="vt-page"><section class="vt-heros"><div class="vt-art-heros"></div>
+        <div class="vt-texte"><p class="vt-annonce" hidden></p><span class="vt-kicker"><i class="vt-orbe"></i><span></span></span><h1 class="vt-titre"></h1><div class="vt-metas"></div><p class="vt-desc"></p><div class="vt-actions"></div></div>
+        <div class="vt-points"></div></section>
+        <div class="vt-affiches"></div><div class="vt-puces"></div><div class="vt-rangees"></div></div>
+      <nav class="vt-onglets"></nav>`;
+    document.body.appendChild(racine);
+    racine.querySelector('.vt-heros').onpointerenter = () => { survol = true; };
+    racine.querySelector('.vt-heros').onpointerleave = () => { survol = false; };
+    racine.querySelector('.vt-rail').onpointerenter = (e) => { if (e.pointerType === 'mouse') racine.classList.add('rail-ouvert'); };
+    racine.querySelector('.vt-rail').onpointerleave = () => { if (zone !== 'rail') racine.classList.remove('rail-ouvert'); };
+    addEventListener('resize', () => { if (actif) { const g = calculerGrand(); if (g !== grand) rendre(); } });
+  }
+  const calculerGrand = () => modeTele || (innerWidth >= 900 && innerWidth > innerHeight * 1.15);
+  const actifMenu = () => { for (let i = pile.length - 1; i >= 0; i--) { const k = MENU_VT.findIndex(([, id]) => id === pile[i]); if (k >= 0) return k; } return 1; };
+  function allerRacine(id) {
+    if (pile[pile.length - 1] === id) return;
+    if (!libre(id)) return proposerAchat();
+    son('tic');
+    if (id === 'accueil') { pile.splice(1); afficher(); return; }
+    if (NOEUDS[id]?.type === 'module') { aller(id); return; }
+    pile.splice(1); aller(id);
+  }
+  function rail() {
+    const r = racine.querySelector('.vt-rail'); r.innerHTML = '<i class="vt-orbe vt-o-grand"></i>';
+    const k = actifMenu();
+    MENU_VT.forEach(([ic, id], i) => {
+      const b = mk('button', 'vt-ligne' + (i === k ? ' on' : '')); b.type = 'button';
+      b.innerHTML = `<span class="vt-ico">${icone(ic)}</span>`; b.appendChild(mk('span', 'vt-lib', vt(ic)));
+      b.onclick = () => { racine.classList.remove('rail-ouvert'); allerRacine(id); };
+      b.onfocus = () => { if (zone !== 'rail') { zoneAvant = zone === 'rail' ? zoneAvant : zone; zone = 'rail'; railI = i; racine.classList.add('rail-ouvert'); } };
+      r.appendChild(b);
+    });
+    const bas = mk('div', 'vt-bas'), p = Profils.actif;
+    const ajout = (html, lib, fn, cls = '') => { const b = mk('button', 'vt-ligne ' + cls); b.type = 'button'; b.innerHTML = html; b.appendChild(mk('span', 'vt-lib', lib)); b.onclick = fn; bas.appendChild(b); };
+    ajout(`<span class="vt-ico vt-avatar">${p.avatar}</span>`, p.nom || vt('quiJoue'), () => choisirEnfant());
+    if (grand) ajout(`<span class="vt-ico">${icone('telephone')}</span>`, vt('telephone'), () => (typeof GuideTel !== 'undefined' ? GuideTel.ouvrir() : DuoEcran.demarrer()));
+    ajout(`<span class="vt-ico">${icone('langue')}</span>`, `${vt('langue')} · ${langue.toUpperCase()}`, () => $('btn-langue').click());
+    ajout(`<span class="vt-ico">${icone('reglages')}</span>`, vt('parents'), () => porteParents(() => espaceParents()));
+    r.appendChild(bas);
+  }
+  function haut() {
+    const h = racine.querySelector('.vt-haut'); h.innerHTML = '';
+    if (page === 'accueil') { h.append(mk('i', 'vt-orbe'), mk('b', 'vt-marque', 'Lumiole')); }
+    else { const r = mk('button', 'vt-rond-ic'); r.type = 'button'; r.innerHTML = icone('retour'); r.setAttribute('aria-label', LANGUES[langue].retour); r.onclick = () => retour(); h.append(r, mk('b', 'vt-marque', nomDe(NOEUDS[page]))); }
+    const c = mk('button', 'vt-rond-ic'); c.type = 'button'; c.innerHTML = icone('chercher'); c.setAttribute('aria-label', vt('chercher')); c.onclick = () => aller('cherche');
+    const a = mk('button', 'vt-rond-ic vt-avatar', Profils.actif.avatar); a.type = 'button'; a.onclick = () => choisirEnfant();
+    const g = mk('button', 'vt-rond-ic'); g.type = 'button'; g.innerHTML = icone('reglages'); g.setAttribute('aria-label', vt('parents')); g.onclick = () => porteParents(() => espaceParents());
+    h.append(c, a, g);
+    const o = racine.querySelector('.vt-onglets'); o.innerHTML = '';
+    const k = MENU_VT[actifMenu()][1];
+    ONGLETS_VT.forEach(([ic, id]) => { const b = mk('button', id === k ? 'on' : ''); b.type = 'button'; b.innerHTML = icone(ic); b.appendChild(mk('span', '', vt(ic))); b.onclick = () => allerRacine(id); o.appendChild(b); });
+  }
+  // ----- la grande affiche -----
+  function montrerHeros(it, differe) {
+    if (!it) return;
+    clearTimeout(tHeros);
+    if (differe) { tHeros = setTimeout(() => montrerHeros(it, false), 140); return; }
+    if (courant === it) return;
+    courant = it;
+    const h = racine.querySelector('.vt-heros');
+    const fond = racine.querySelector('.vt-art-heros');
+    fond.className = 'vt-art-heros ' + it.art.fond; fond.innerHTML = ''; fond.appendChild(art(it, 'heros', true));
+    h.querySelector('.vt-kicker span').textContent = it.kicker || '';
+    const t = h.querySelector('.vt-titre'); t.textContent = it.nom; t.dir = 'auto'; t.classList.toggle('logo', !!it.film); t.classList.toggle('long', it.nom.length > 26);
+    const m = h.querySelector('.vt-metas'); m.innerHTML = ''; it.meta.slice(0, 4).forEach((x) => m.appendChild(mk('span', 'vt-pill' + (x.fort ? ' fort' : ''), x.t)));
+    const d = h.querySelector('.vt-desc'); d.textContent = it.desc || ''; d.dir = 'auto';
+    const a = h.querySelector('.vt-actions'); a.innerHTML = '';
+    const jouer = mk('button', 'vt-btn principal'); jouer.type = 'button';
+    jouer.textContent = `${it.ferme ? '🔒' : '▶'}  ${it.hub ? vt('ouvrir') : it.film ? vt('lancer') : it.cle?.startsWith('c:') ? vt('ecouter') : it.regarder ? vt('regarder') : vt('lancer')}`;
+    jouer.onclick = () => { memoriser(); it.action(); };
+    a.appendChild(jouer);
+    if (!it.bientot) {
+      const dans = MaListe.a(it.cle), l = mk('button', 'vt-btn', `${dans ? '✓' : '＋'} ${dans ? vt('dansListe') : vt('maListe')}`); l.type = 'button';
+      l.onclick = () => { const oui = MaListe.basculer(it.cle); l.textContent = `${oui ? '✓' : '＋'} ${oui ? vt('dansListe') : vt('maListe')}`; son('pop'); memoriser(); setTimeout(() => { courant = null; rendre(true); }, 250); };
+      a.appendChild(l);
+    }
+    a.querySelectorAll('button').forEach((b, i) => { b.onfocus = () => { zone = 'heros'; bi = i; }; });
+    h.classList.remove('entre'); void h.offsetWidth; h.classList.add('entre');
+    // Lumi dessine ce qu'on regarde ; à la télé, la voix dit son nom
+    clearTimeout(tDessin); clearTimeout(tVoix);
+    tDessin = setTimeout(() => { clearTimeout(retourNuage); avatar?.forme(pictogramme(it.emoji) ? it.emoji : it.art.e[0]); }, 220);
+    if (modeTele) tVoix = setTimeout(() => { if (actif && !$('fa-fond')) parler(it.nom); }, 700);
+    if (zone === 'heros' && modeTele) poser();
+  }
+  function points() {
+    const p = racine.querySelector('.vt-points'); p.innerHTML = '';
+    if (page !== 'accueil' || liste.length < 2) return;
+    liste.forEach((_, i) => p.appendChild(mk('i', i === vi ? 'on' : '')));
+  }
+  function tourner() {
+    clearInterval(minuteur);
+    if (page !== 'accueil' || liste.length < 2) return;
+    minuteur = setInterval(() => {
+      if (!actif || !grand || survol || zone !== 'heros' || $('fa-fond')) return;
+      vi = (vi + 1) % liste.length; montrerHeros(liste[vi]); points();
+    }, 8000);
+  }
+  // ----- les affiches verticales du téléphone (on les fait glisser) -----
+  function affiches() {
+    const z = racine.querySelector('.vt-affiches'); z.innerHTML = '';
+    if (grand || page !== 'accueil') return;
+    const piste = mk('div', 'vt-af-piste'), pts = mk('div', 'vt-af-points');
+    liste.forEach((it, i) => {
+      const c = mk('article', `vt-affiche ${it.art.fond}`);
+      c.appendChild(art(it, 'heros', true));
+      const t = mk('div', 'vt-af-txt');
+      t.append(mk('small', 'vt-af-k', it.kicker));
+      const ti = mk('b', 'vt-af-titre' + (it.film ? ' logo' : ''), it.nom); ti.dir = 'auto'; t.appendChild(ti);
+      t.appendChild(mk('small', 'vt-af-meta', it.meta.map((x) => x.t).join(' · ')));
+      const btns = mk('div', 'vt-af-btns');
+      const j = mk('button', 'vt-btn principal', `${it.ferme ? '🔒' : '▶'} ${it.hub ? vt('ouvrir') : vt('lancer')}`); j.type = 'button'; j.onclick = () => it.action();
+      const dans = MaListe.a(it.cle), l = mk('button', 'vt-btn', `${dans ? '✓' : '＋'} ${vt('maListe')}`); l.type = 'button';
+      l.onclick = () => { const oui = MaListe.basculer(it.cle); l.textContent = `${oui ? '✓' : '＋'} ${vt('maListe')}`; son('pop'); };
+      btns.append(j, l); t.appendChild(btns); c.appendChild(t);
+      piste.appendChild(c); pts.appendChild(mk('i', i ? '' : 'on'));
+    });
+    piste.onscroll = () => { const k = Math.round(piste.scrollLeft / Math.max(1, piste.clientWidth)); [...pts.children].forEach((x, i) => x.classList.toggle('on', i === k)); };
+    z.append(piste, pts);
+  }
+  function puces() {
+    const z = racine.querySelector('.vt-puces'); z.innerHTML = '';
+    if (grand || page !== 'accueil') return;
+    UNIVERS_VT.filter(visible).forEach((id) => { const b = mk('button', 'vt-pilule', nomDe(NOEUDS[id])); b.type = 'button'; b.onclick = () => allerRacine(id); z.appendChild(b); });
+  }
+  // ----- les rangées -----
+  function filtres(R) {
+    if (page === 'accueil' || page === 'soir') return null;
+    const tags = ['deux', 'camera', 'bouge', 'calme', 'tete'].filter((t) => R.some((r) => r.items.some((it) => it.tags?.includes(t))));
+    return tags.length >= 2 ? ['tout', ...tags] : null;
+  }
+  function rangees() {
+    const z = racine.querySelector('.vt-rangees'); z.innerHTML = ''; lignes = [];
+    let R = rangeesVitrine(page);
+    const f = filtres(R);
+    if (f) {
+      if (!f.includes(filtre)) filtre = 'tout';
+      if (filtre !== 'tout') R = R.map((r) => ({ ...r, items: r.items.filter((it) => it.tags?.includes(filtre)) })).filter((r) => r.items.length);
+      R.unshift({ forme: 'filtres', items: f.map((k) => ({ cle: 'f-' + k, nom: vt(k), on: k === filtre, action: () => { filtre = k; son('tic'); memoire[page] = { zone: 'rangees', ri: 0, cs: [f.indexOf(k)] }; rendre(true); } })) });
+    }
+    R.forEach((r, i) => {
+      const s = mk('section', `vt-ligne-r vt-r-${r.forme}${r.univers ? ' vt-univers' : ''}`);
+      if (r.titre) { const h = mk('h3', '', r.titre); if (r.sous) h.appendChild(mk('small', '', r.sous)); s.appendChild(h); }
+      const p = mk('div', 'vt-piste'); s.appendChild(p);
+      const cartes = r.items.map((it, ci) => {
+        let b;
+        if (r.forme === 'filtres') { b = mk('button', 'vt-pilule' + (it.on ? ' on' : ''), it.nom); b.type = 'button'; b.onclick = it.action; b.onfocus = () => { zone = 'rangees'; ri = i; lignes[ri].c = ci; }; }
+        else b = r.forme === 'rond' ? rond(it, i, ci) : carte(it, r.forme, i, ci);
+        p.appendChild(b); return b;
+      });
+      z.appendChild(s);
+      lignes.push({ el: s, piste: p, cartes, items: r.items, c: 0, forme: r.forme });
+    });
+  }
+  function rendre(garder) {
+    grand = calculerGrand();
+    racine.classList.toggle('vt-grand', grand); racine.classList.toggle('vt-sous', page !== 'accueil'); racine.classList.toggle('vt-tele', !!modeTele);
+    racine.dataset.page = page; document.documentElement.classList.toggle('vitrine-grand', grand);
+    racine.dir = 'ltr';
+    rail(); haut();
+    const an = racine.querySelector('.vt-annonce'), a = ConfigDistante.conf.annonce;
+    an.hidden = !(page === 'accueil' && a?.actif && t3(a.texte)); if (!an.hidden) an.textContent = `${a.emoji || '📣'} ${t3(a.texte)}`;
+    rangees();
+    liste = page === 'accueil' ? vedettes() : [];
+    if (!liste.length) { const L = lignes.find((l) => l.forme !== 'filtres'); if (L) liste = [L.items[0]]; }
+    vi = 0; courant = null; points(); affiches(); puces();
+    const m = memoire[page];
+    if (m) { lignes.forEach((l, i) => { l.c = Math.min(m.cs?.[i] || 0, l.cartes.length - 1); }); zone = m.zone; ri = Math.min(m.ri || 0, lignes.length - 1); bi = m.bi || 0; }
+    else { zone = page === 'accueil' ? 'heros' : 'rangees'; ri = lignes.findIndex((l) => l.forme !== 'filtres'); if (ri < 0) ri = 0; bi = 0; }
+    if (zone === 'rail') zone = zoneAvant || 'heros';
+    const vise = zone === 'rangees' && lignes[ri] && lignes[ri].forme !== 'filtres' ? lignes[ri].items[lignes[ri].c] : liste[0];
+    montrerHeros(vise);
+    tourner();
+    if (modeTele) requestAnimationFrame(() => poser(true));
+    else if (!garder) { racine.querySelector('.vt-page').scrollTop = 0; racine.querySelector('.vt-rangees').scrollTop = 0; }
+  }
+  function memoriser() { if (page) memoire[page] = { zone: zone === 'rail' ? zoneAvant : zone, ri, bi, cs: lignes.map((l) => l.c) }; }
+  // ----- la télécommande -----
+  const boutonsRail = () => [...racine.querySelectorAll('.vt-rail .vt-ligne')];
+  const boutonsHeros = () => [...racine.querySelectorAll('.vt-actions button')];
+  function cible() {
+    if (zone === 'rail') return boutonsRail()[railI];
+    if (zone === 'heros') return boutonsHeros()[bi];
+    const L = lignes[ri]; return L?.cartes[L.c];
+  }
+  function poser(instant) {
+    if (!actif) return;
+    racine.querySelectorAll('.f').forEach((x) => x.classList.remove('f'));
+    racine.classList.toggle('rail-ouvert', zone === 'rail');
+    racine.classList.toggle('en-bas', zone === 'rangees');
+    const el = cible(); if (!el) return;
+    el.classList.add('f'); el.focus({ preventScroll: true });
+    const rz = racine.querySelector('.vt-rangees'), comportement = instant ? 'auto' : 'smooth';
+    if (zone === 'rangees') {
+      const L = lignes[ri];
+      if (grand) rz.scrollTo({ top: Math.max(0, L.el.offsetTop - (ri ? 0 : 0)), behavior: comportement });
+      L.piste.scrollTo({ left: Math.max(0, el.offsetLeft - L.cartes[0].offsetLeft), behavior: comportement });
+      if (L.forme !== 'filtres') montrerHeros(L.items[L.c], true);
+    } else if (zone === 'heros' && grand) rz.scrollTo({ top: 0, behavior: comportement });
+  }
+  function buter() { const el = cible(); if (!el) return; el.classList.remove('bute'); void el.offsetWidth; el.classList.add('bute'); }
+  function bouger(z) { if (z) zone = z; son('tic'); survol = false; poser(); }
+  function touche(dx, dy) {
+    if (!actif) return false;
+    if (document.activeElement && !racine.contains(document.activeElement)) { poser(); return true; }
+    if (zone === 'rail') {
+      const n = boutonsRail().length;
+      if (dy) { if (railI + dy < 0 || railI + dy >= n) return buter(), true; railI += dy; return bouger(), true; }
+      if (dx > 0) return bouger(zoneAvant === 'rail' ? 'heros' : zoneAvant), true;
+      return buter(), true;
+    }
+    const versRail = () => { zoneAvant = zone; railI = actifMenu(); bouger('rail'); };
+    if (zone === 'heros') {
+      const n = boutonsHeros().length;
+      if (dx) { if (bi + dx < 0) return versRail(), true; if (bi + dx >= n) return buter(), true; bi += dx; return bouger(), true; }
+      if (dy > 0 && lignes.length) { ri = 0; return bouger('rangees'), true; }
+      return buter(), true;
+    }
+    const L = lignes[ri];
+    if (dy) {
+      if (ri + dy < 0) return bouger('heros'), true;
+      if (ri + dy >= lignes.length) return buter(), true;
+      ri += dy; return bouger(), true;
+    }
+    if (dx) {
+      if (L.c + dx < 0) return versRail(), true;
+      if (L.c + dx >= L.cartes.length) return buter(), true;
+      L.c += dx; return bouger(), true;
+    }
+    return true;
+  }
+  function fermerRail() { if (!actif || zone !== 'rail') return false; zone = zoneAvant === 'rail' ? 'heros' : zoneAvant; son('tic'); poser(); return true; }
+  // ----- montrer / cacher -----
+  function montrer(id) {
+    if (!racine) construire();
+    if (page && page !== id) memoriser();
+    if (page !== id) filtre = 'tout';
+    page = id; actif = true;
+    TV.cacher();
+    document.documentElement.classList.add('vitrine-on');
+    racine.hidden = false;
+    rendre();
+  }
+  function cacher() {
+    if (!actif) return;
+    memoriser(); actif = false; clearInterval(minuteur); clearTimeout(tVoix); clearTimeout(tHeros);
+    document.documentElement.classList.remove('vitrine-on', 'vitrine-grand');
+    if (racine) racine.hidden = true;
+  }
+  function suivre() {
+    const id = pile[pile.length - 1];
+    if (pour(id)) montrer(id); else cacher();
+    document.documentElement.classList.toggle('vitrine-grand', actif && grand);
+  }
+  return { suivre, montrer, cacher, touche, fermerRail, pour, get actif() { return actif; }, get racine() { return racine; } };
+})();
+// la vitrine remplace l'ancien accueil et les sous-menus (télé, ordinateur, téléphone)
+const afficherAvantVitrine = afficher;
+afficher = function () { afficherAvantVitrine(); Vitrine.suivre(); }; // eslint-disable-line no-func-assign
+const montrerTVAvantVitrine = TV.montrer;
+TV.montrer = (id) => { if (Vitrine.pour(id)) return; montrerTVAvantVitrine(id); };
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
