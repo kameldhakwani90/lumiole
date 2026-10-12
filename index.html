@@ -2145,6 +2145,8 @@
   .tele .vi-mot { width: 46vw; top: 3vh; padding: 2.4vh 2vw; gap: 1.4vh; } .tele .vi-t { min-width: 6vh; height: 7.4vh; font-size: 4.4vh; } .tele .vi-art { font-size: 3.6vh; }
   .tele .vi-infos { font-size: 2vh; } .tele .vi-lg { font-size: 2.2vh; } .tele .vi-mot-b .mod-b { height: 6vh; font-size: 2.2vh; }
   .vi-mot.petit .vi-tuiles { flex-wrap: nowrap; }
+  .vi-cmd .vi-mvts[hidden] { display: none !important; }
+  .vi-cmd:has(.vi-mvts[hidden]) { flex-wrap: wrap; overflow: visible; justify-content: center; }
 </style>
 </head>
 <body>
@@ -9913,6 +9915,8 @@ const Vivant = (() => {
     cancelAnimationFrame(raf); amis = 1;
     z.innerHTML = `<div class="vi-scene"><canvas></canvas><div class="vi-mot" hidden></div><div class="vi-cmd"><div class="mod-puces vi-mvts"></div><button class="mod-b" data-a="magie"></button><button class="mod-b" data-a="ami"></button><button class="mod-b" data-a="autre"></button></div></div>`;
     const p = z.querySelector('.vi-mvts');
+    // transformé en vrai (méduse, voiture…) : il bouge déjà comme il faut, pas de « il vole / il roule » ; seulement pour un dessin gardé tel quel
+    p.hidden = !!motCourant;
     Object.entries(MOUVEMENTS).forEach(([k, m]) => p.appendChild(bouton(`${m.e} ${t3(m.nom)}`, () => { mvt = k; p.querySelectorAll('.puce').forEach((x) => x.classList.toggle('on', x.dataset.k === k)); son('tic'); avatar?.forme(m.e); }, 'puce' + (k === mvt ? ' on' : ''))).dataset.k = k);
     const mg = z.querySelector('[data-a=magie]'); mg.textContent = '✨ ' + jx('transformer'); mg.hidden = !dessinOriginal; mg.onclick = () => { sprite = dessinOriginal; choisirForme(); };
     z.querySelector('[data-a=ami]').textContent = '➕ ' + jx('ami'); z.querySelector('[data-a=ami]').onclick = () => { amis = amis % 4 + 1; son('pop'); };
@@ -12190,7 +12194,7 @@ const AIDES = {
     [nom3('Choisis un de tes dessins, ou dessines-en un nouveau.', 'Pick one of your drawings, or draw a new one.', 'اختر أحد رسوماتك أو ارسم رسمًا جديدًا.'),
      nom3('Lumi devine ce que c’est (« Je crois que c’est… un poisson ! »). Dis oui, ou choisis dans la liste : ton dessin se transforme en vrai !', 'Lumi guesses what it is (“I think it’s… a fish!”). Say yes, or pick from the list: your drawing turns into the real thing!', 'لومي يخمّن ما هو («أظن أنه… سمكة!»). قل نعم أو اختر من القائمة: يتحوّل رسمك إلى الحقيقي!'),
      nom3('Lumi épelle le mot, le dit, donne sa couleur et le mot en anglais et en arabe. Touche le mot pour le réécouter.', 'Lumi spells the word, says it, gives its color and the word in other languages. Tap the word to hear it again.', 'لومي يتهجّى الكلمة ويقولها ويذكر لونها وبلغات أخرى. المس الكلمة لتسمعها من جديد.'),
-     nom3('En bas : choisis comment il bouge, ajoute des amis, ou change d’image.', 'At the bottom: choose how it moves, add friends, or change picture.', 'في الأسفل: اختر كيف يتحرك، أضف أصدقاء، أو غيّر الصورة.')], ['doigt']),
+     nom3('En bas : ajoute des amis, transforme-le en autre chose, ou change d’image.', 'At the bottom: add friends, turn it into something else, or change picture.', 'في الأسفل: أضف أصدقاء، أو حوّله إلى شيء آخر، أو غيّر الصورة.')], ['doigt']),
   coffre: A(nom3('Le coffre aux trésors : tes étoiles débloquent des surprises.', 'The treasure chest: your stars unlock surprises.', 'صندوق الكنوز: نجومك تفتح المفاجآت.'),
     [nom3('Chaque jeu gagné te donne des étoiles ⭐.', 'Every game you win gives you stars ⭐.', 'كل لعبة تربحها تعطيك نجومًا ⭐.'),
      nom3('Ouvre le coffre du jour, et échange tes étoiles contre des tenues pour Lumi, des chapeaux et des autocollants.', 'Open today’s chest, and swap your stars for Lumi outfits, hats and stickers.', 'افتح صندوق اليوم، واستبدل نجومك بملابس للومي وقبعات وملصقات.')], ['doigt', 'telecommande']),
