@@ -2379,6 +2379,107 @@
     filter: grayscale(.85) brightness(.55); animation: av-appel 1.8s ease-in-out infinite; transition: filter .4s; }
   .av-cible.pose.allumee { filter: none; animation: none; background: radial-gradient(circle, rgba(255,200,110,.75), rgba(255,140,60,0) 70%); }
   @keyframes av-appel { 50% { transform: translate(-50%, -88%) scale(1.12); filter: grayscale(.6) brightness(.8); } }
+  /* ===== Fenêtres (aides, porte des parents, abonnement, bienvenue) : tout se voit d'un coup, centré, sans défiler ===== */
+  @media (orientation: landscape) and (max-height: 560px) {
+    html:not(.tele) .fa-fond, html:not(.tele) .aide-fond { padding: 8px 12px; }
+    html:not(.tele) .fa-fenetre { max-height: calc(100dvh - 16px); padding: 14px 18px; border-radius: 22px; }
+    /* fiche « Comment on joue ? » : le but à gauche, les étapes à droite */
+    html:not(.tele) .aide-carte { width: min(960px, 100%); max-height: calc(100dvh - 16px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      column-gap: 22px; row-gap: 8px; align-content: center; padding: 16px 20px 14px; border-radius: 22px; }
+    html:not(.tele) .aide-carte > * { grid-column: 1; }
+    html:not(.tele) .aide-lumi { display: none; }
+    html:not(.tele) .aide-carte h2 { font-size: 22px; }
+    html:not(.tele) .aide-but { font-size: 14px; line-height: 1.35; }
+    html:not(.tele) .aide-etapes { grid-column: 2; grid-row: 1 / span 6; align-self: center; gap: 6px; }
+    html:not(.tele) .aide-etapes li { font-size: 13.5px; line-height: 1.3; padding: 7px 10px; gap: 9px; grid-template-columns: 24px 1fr; border-radius: 12px; }
+    html:not(.tele) .aide-etapes li::before { width: 24px; height: 24px; font-size: 13px; }
+    html:not(.tele) .aide-avec span { font-size: 12.5px; padding: 4px 10px; }
+    html:not(.tele) .aide-avec b { font-size: 11px; }
+    html:not(.tele) .aide-actions { margin-top: 2px; }
+    html:not(.tele) .aide-actions button { height: 42px; padding: 0 18px; font-size: 15px; }
+    /* porte des parents : la consigne à gauche, le pavé à droite */
+    html:not(.tele) .fa-t-porte { width: min(700px, 100%); display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-items: center; align-content: center; }
+    html:not(.tele) .fa-t-porte > :not(.fa-pave):not(.fa-fermer) { grid-column: 1; }
+    html:not(.tele) .fa-t-porte .fa-pave { grid-column: 2; grid-row: 1 / span 4; margin: 0; gap: 8px; }
+    html:not(.tele) .fa-t-porte .fa-pave button { height: 52px; font-size: 22px; }
+    /* abonnement : ce qu'on a à gauche, l'offre à droite */
+    html:not(.tele) .fa-t-achat { width: min(980px, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto auto auto; column-gap: 22px; row-gap: 6px; align-items: center; }
+    html:not(.tele) .fa-t-achat .pw-haut { grid-column: 1; grid-row: 1; gap: 2px; }
+    html:not(.tele) .fa-t-achat .pw-lumi { display: none; }
+    html:not(.tele) .fa-t-achat .pw-haut h2 { font-size: 20px; margin: 0; }
+    html:not(.tele) .fa-t-achat .pw-sous { font-size: 12.5px; margin: 0; }
+    html:not(.tele) .fa-t-achat .pw-liste { grid-column: 1; grid-row: 2 / span 4; margin: 0; gap: 5px; align-self: start; }
+    html:not(.tele) .fa-t-achat .pw-liste li { padding: 5px 8px; gap: 8px; font-size: 12.5px; line-height: 1.25; border-radius: 10px; }
+    html:not(.tele) .fa-t-achat .pw-liste .e { width: 26px; height: 26px; font-size: 15px; border-radius: 8px; }
+    html:not(.tele) .fa-t-achat .pw-offre { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+    html:not(.tele) .fa-t-achat .pw-option { padding: 10px 8px 8px; }
+    html:not(.tele) .fa-t-achat .pw-msg, html:not(.tele) .fa-t-achat .pw-legal, html:not(.tele) .fa-t-achat .pw-liens { grid-column: 2; margin: 0; font-size: 11.5px; }
+    html:not(.tele) .fa-t-achat .pw-msg { grid-row: 3; } html:not(.tele) .fa-t-achat .pw-legal { grid-row: 4; } html:not(.tele) .fa-t-achat .pw-liens { grid-row: 5; }
+    /* bienvenue : Lumi plus petit */
+    html:not(.tele) .fa-t-bienvenue .bv-orbe { width: 64px; height: 64px; }
+    html:not(.tele) .fa-t-bienvenue .bv-lumi { font-size: 44px; }
+    html:not(.tele) .fa-t-bienvenue h2 { font-size: 22px; margin: 4px 0; }
+    html:not(.tele) .fa-t-bienvenue .bv-corps { min-height: 0; gap: 8px; }
+  }
+  /* petits téléphones debout : fiches plus compactes */
+  @media (orientation: portrait) and (max-height: 760px) {
+    html:not(.tele) .aide-lumi { display: none; }
+    html:not(.tele) .aide-carte { gap: 9px; padding: 18px 16px 14px; max-height: calc(100dvh - 24px); }
+    html:not(.tele) .aide-carte h2 { font-size: 23px; }
+    html:not(.tele) .aide-but { font-size: 15px; line-height: 1.35; }
+    html:not(.tele) .aide-etapes { gap: 6px; }
+    html:not(.tele) .aide-etapes li { font-size: 14px; line-height: 1.3; padding: 7px 10px; gap: 9px; grid-template-columns: 26px 1fr; }
+    html:not(.tele) .aide-etapes li::before { width: 26px; height: 26px; }
+    html:not(.tele) .aide-actions button { height: 46px; }
+    html:not(.tele) .fa-t-achat .pw-lumi { width: 54px; height: 54px; }
+    html:not(.tele) .fa-t-achat .pw-liste { margin: 10px 0; gap: 6px; }
+    html:not(.tele) .fa-t-achat .pw-liste li { padding: 6px 10px; font-size: 13.5px; }
+    html:not(.tele) .fa-t-achat .pw-liste .e { width: 30px; height: 30px; font-size: 17px; }
+  }
+  /* boutons des fiches côte à côte ; l'abonnement en portrait : avantages en liste serrée, offre bien visible */
+  html:not(.tele) .aide-actions { flex-wrap: nowrap; }
+  html:not(.tele) .aide-actions button { flex: 1 1 auto; min-width: 0; padding: 0 14px; }
+  @media (orientation: portrait) {
+    html:not(.tele) .fa-t-achat { padding: 16px 14px; }
+    html:not(.tele) .fa-t-achat .pw-lumi { width: 48px; height: 48px; }
+    html:not(.tele) .fa-t-achat .pw-haut { gap: 2px; }
+    html:not(.tele) .fa-t-achat .pw-haut h2 { font-size: 22px; margin: 2px 0; }
+    html:not(.tele) .fa-t-achat .pw-sous { font-size: 13px; }
+    html:not(.tele) .fa-t-achat .pw-liste { margin: 10px 0; gap: 5px; }
+    html:not(.tele) .fa-t-achat .pw-liste li { padding: 5px 9px; gap: 9px; font-size: 13px; line-height: 1.25; border-radius: 12px; }
+    html:not(.tele) .fa-t-achat .pw-liste .e { width: 28px; height: 28px; font-size: 16px; border-radius: 9px; }
+    html:not(.tele) .fa-t-achat .pw-option { padding: 10px 8px 8px; }
+    html:not(.tele) .fa-t-achat .pw-legal, html:not(.tele) .fa-t-achat .pw-liens { font-size: 11.5px; margin: 4px 0 0; }
+  }
+  @media (orientation: landscape) and (max-height: 560px) {
+    html:not(.tele) .fa-t-achat { padding: 12px 18px; }
+    html:not(.tele) .fa-t-achat .pw-liste li { padding: 4px 8px; }
+  }
+  @media (orientation: portrait) and (max-height: 760px) {
+    html:not(.tele) .fa-t-achat .pw-lumi { display: none; }
+    html:not(.tele) .fa-t-achat .pw-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    html:not(.tele) .fa-t-achat .pw-liste li { font-size: 12px; padding: 5px 7px; gap: 6px; }
+    html:not(.tele) .fa-t-achat .pw-liste .e { width: 24px; height: 24px; font-size: 14px; }
+  }
+  html:not(.tele) .fa-t-achat .pw-o-prix { font-size: clamp(22px, 6.4vw, 28px); white-space: nowrap; }
+  @media (orientation: portrait) and (max-height: 760px), (orientation: landscape) and (max-height: 560px) {
+    html:not(.tele) .fa-t-achat .pw-o-prix { font-size: 24px; }
+    html:not(.tele) .fa-t-achat .pw-o-detail { font-size: 11.5px; }
+    html:not(.tele) .fa-t-achat .pw-acheter { height: 48px; font-size: 16px; margin-top: 6px; }
+    html:not(.tele) .fa-t-achat .pw-sous { font-size: 12.5px; }
+  }
+  @media (orientation: portrait) and (max-height: 700px) {
+    html:not(.tele) .fa-t-achat { padding: 12px 12px; }
+    html:not(.tele) .fa-t-achat .pw-haut h2 { font-size: 19px; }
+    html:not(.tele) .fa-t-achat .pw-liste { margin: 8px 0; }
+    html:not(.tele) .fa-t-achat .pw-offre { padding: 10px; }
+  }
+  @media (orientation: landscape) and (max-height: 400px) {
+    html:not(.tele) .fa-t-achat { row-gap: 3px; padding: 10px 16px; }
+    html:not(.tele) .fa-t-achat .pw-liste { gap: 4px; }
+    html:not(.tele) .fa-t-achat .pw-liste li { padding: 3px 8px; }
+  }
+  @media (orientation: landscape) and (max-height: 560px) { html:not(.tele) .fa-t-porte { padding-inline-end: 66px; } }
 </style>
 </head>
 <body>
@@ -6328,12 +6429,12 @@ const Paywall = (() => {
   function avantages() {
     const n = { h: HISTOIRES.length, c: CHANSONS.length };
     return [
-      ['🎬', { fr: 'Les grands films interactifs en entier, et un nouveau à chaque fête', en: 'The full interactive films, and a new one every holiday', ar: 'الأفلام التفاعلية الكبيرة كاملة، وفيلم جديد في كل عيد' }],
-      ['🤸', { fr: 'Tous les jeux devant la caméra et à deux avec les téléphones', en: 'Every camera game, and two players with phones', ar: 'كل ألعاب الكاميرا، ولاعبان بالهواتف' }],
-      ['🌙', { fr: `${n.h} histoires et ${n.c} comptines en 3 langues, avec la voix de maman ou papa`, en: `${n.h} stories and ${n.c} songs in 3 languages, in Mum’s or Dad’s voice`, ar: `${n.h} حكاية و${n.c} أنشودة بثلاث لغات، بصوت ماما أو بابا` }],
-      ['📸', { fr: 'Les jeux photo de la famille : memory, puzzle, musée, livre', en: 'Family photo games: memory, puzzle, museum, book', ar: 'ألعاب صور العائلة: الذاكرة والأحجية والمتحف والكتاب' }],
-      ['🌍', { fr: 'Nos cultures : comptines, contes et jeux de cour de chez nous', en: 'Our cultures: songs, tales and playground games from home', ar: 'ثقافاتنا: أناشيد وحكايات وألعاب الساحة من بلادنا' }],
-      ['🔒', { fr: 'Sans pub, sans traçage, un profil par enfant', en: 'No ads, no tracking, a profile per child', ar: 'بلا إعلانات ولا تتبّع، وملف لكل طفل' }],
+      ['🎬', { fr: 'Tous les grands films interactifs', en: 'All the big interactive films', ar: 'كل الأفلام التفاعلية الكبيرة' }],
+      ['🤸', { fr: 'Tous les jeux caméra et à deux', en: 'Every camera and two-player game', ar: 'كل ألعاب الكاميرا واللعب بشخصين' }],
+      ['🌙', { fr: `${n.h} histoires, ${n.c} comptines, ta voix`, en: `${n.h} stories, ${n.c} songs, your voice`, ar: `${n.h} حكاية و${n.c} أنشودة بصوتك` }],
+      ['📸', { fr: 'Les jeux photo de la famille', en: 'Family photo games', ar: 'ألعاب صور العائلة' }],
+      ['🌍', { fr: 'Contes et jeux de chez nous', en: 'Tales and games from home', ar: 'حكايات وألعاب من بلادنا' }],
+      ['🔒', { fr: 'Sans pub, un profil par enfant', en: 'No ads, a profile per child', ar: 'بلا إعلانات، وملف لكل طفل' }],
     ];
   }
   const LIEN_GERER = { android: 'https://play.google.com/store/account/subscriptions?package=com.lumiole.app', ios: 'https://apps.apple.com/account/subscriptions' };
@@ -12635,10 +12736,10 @@ const AIDES = {
      nom3('Trouve un objet de cette couleur dans la maison.', 'Find an object of that color at home.', 'جد شيئًا بهذا اللون في البيت.'),
      nom3('Montre-le au milieu de la caméra : elle vérifie !', 'Show it in the middle of the camera: it checks!', 'أرِه في وسط الكاميرا: هي تتحقق!')], ['camera', 'espace']),
   vivant: A(nom3('Ton dessin prend vie : il nage, vole, saute ou danse !', 'Your drawing comes to life: it swims, flies, jumps or dances!', 'رسمك يصبح حيًّا: يسبح أو يطير أو يقفز أو يرقص!'),
-    [nom3('Choisis un de tes dessins, ou dessines-en un nouveau.', 'Pick one of your drawings, or draw a new one.', 'اختر أحد رسوماتك أو ارسم رسمًا جديدًا.'),
-     nom3('Lumi devine ce que c’est (« Je crois que c’est… un poisson ! »). Dis oui, ou choisis dans la liste : ton dessin se transforme en vrai !', 'Lumi guesses what it is (“I think it’s… a fish!”). Say yes, or pick from the list: your drawing turns into the real thing!', 'لومي يخمّن ما هو («أظن أنه… سمكة!»). قل نعم أو اختر من القائمة: يتحوّل رسمك إلى الحقيقي!'),
-     nom3('Lumi épelle le mot, le dit, donne sa couleur et le mot en anglais et en arabe. Touche le mot pour le réécouter.', 'Lumi spells the word, says it, gives its color and the word in other languages. Tap the word to hear it again.', 'لومي يتهجّى الكلمة ويقولها ويذكر لونها وبلغات أخرى. المس الكلمة لتسمعها من جديد.'),
-     nom3('En bas : ajoute des amis, transforme-le en autre chose, ou change d’image.', 'At the bottom: add friends, turn it into something else, or change picture.', 'في الأسفل: أضف أصدقاء، أو حوّله إلى شيء آخر، أو غيّر الصورة.')], ['doigt']),
+    [nom3('Choisis un dessin, ou dessines-en un nouveau.', 'Pick a drawing, or draw a new one.', 'اختر رسمًا أو ارسم رسمًا جديدًا.'),
+     nom3('Lumi devine ce que c’est : dis oui, ou choisis dans la liste. Il se transforme en vrai !', 'Lumi guesses what it is: say yes, or pick from the list. It turns into the real thing!', 'لومي يخمّن ما هو: قل نعم أو اختر من القائمة. يتحوّل إلى الحقيقي!'),
+     nom3('Lumi te dit le mot, sa couleur et le mot dans d’autres langues.', 'Lumi tells you the word, its color and the word in other languages.', 'لومي يقول لك الكلمة ولونها وبلغات أخرى.'),
+     nom3('En bas : ajoute des amis ou change d’image.', 'At the bottom: add friends or change picture.', 'في الأسفل: أضف أصدقاء أو غيّر الصورة.')], ['doigt']),
   coffre: A(nom3('Le coffre aux trésors : tes étoiles débloquent des surprises.', 'The treasure chest: your stars unlock surprises.', 'صندوق الكنوز: نجومك تفتح المفاجآت.'),
     [nom3('Chaque jeu gagné te donne des étoiles ⭐.', 'Every game you win gives you stars ⭐.', 'كل لعبة تربحها تعطيك نجومًا ⭐.'),
      nom3('Ouvre le coffre du jour, et échange tes étoiles contre des tenues pour Lumi, des chapeaux et des autocollants.', 'Open today’s chest, and swap your stars for Lumi outfits, hats and stickers.', 'افتح صندوق اليوم، واستبدل نجومك بملابس للومي وقبعات وملصقات.')], ['doigt', 'telecommande']),
