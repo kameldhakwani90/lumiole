@@ -2022,6 +2022,20 @@
   .vt-onglets svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .vt-onglets .on { color: #2EE6C5; }
   @media (prefers-reduced-motion: reduce) { .vt-carte.f .e0, .vt-heros.entre * { animation: none !important; } }
+
+  /* ----- Lumiole Famille : choix de l'offre (an, mois, à vie) ----- */
+  .pw-choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; width: 100%; }
+  .pw-option { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px 12px; border-radius: 18px; border: 2px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.05); color: inherit; font: inherit; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
+  .pw-option.on { border-color: #2EE6C5; background: rgba(46,230,197,.12); }
+  .pw-option:focus-visible, .tele .pw-option:focus { outline: none; transform: scale(1.04); box-shadow: 0 0 0 4px #fff; }
+  .pw-o-nom { font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--soleil); }
+  .pw-o-prix { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: 28px; line-height: 1.05; }
+  .pw-o-detail { font-size: 12.5px; color: var(--doux); min-height: 1.2em; }
+  .pw-o-eco { position: absolute; top: -10px; right: 10px; padding: 3px 8px; border-radius: 8px; background: #FF8FB8; color: #2A0B1A; font: 800 12px/1.2 system-ui, sans-serif; }
+  .pw-liens { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+  .pw-liens a[hidden] { display: none; }
+  .vt-ico.vt-famille { color: #2EE6C5; font-size: calc(var(--vu) * 28); }
 </style>
 </head>
 <body>
@@ -2981,7 +2995,8 @@ const CONFIG_APP = {
   droit: 'complet',                  // « entitlement » RevenueCat qui débloque tout
   // Compte parent (optionnel) : projet Supabase, clé publique « anon »
   supabase: { url: 'https://paxkqwkuztsgsnzmeskp.supabase.co', cle: 'sb_publishable_cINA5PHkblwM2P38bKbmyg_O7IEdvVs' },
-  webToutOuvert: true,               // sur le site web (démo), tout reste ouvert
+  webToutOuvert: true,
+  abonnement: { essai: 7, mois: '4,99 €', an: '34,99 €' }, // affichés sur le site ; dans l'app, les prix viennent du store               // sur le site web (démo), tout reste ouvert
   confidentialite: 'https://kameldhakwani90.github.io/lumiole/confidentialite.html',
 };
 // Dans l'app iPhone / Android, Capacitor fournit les modules natifs (voir essais/…-lumi-app-mobile)
@@ -5729,7 +5744,7 @@ $('ecrire').addEventListener('submit', (e) => {
 // =====================================================================
 // ---------- Famille : version gratuite / complète, zone parents, profils, compte ----------
 // =====================================================================
-// Ce qui reste gratuit sans achat (le reste s'ouvre avec l'achat unique « Lumiole complet »)
+// Ce qui reste gratuit sans abonnement (le reste s'ouvre avec l'abonnement « Lumiole Famille »)
 const GRATUIT = new Set(['accueil', 'animaux', 'ferme', 'ocean', 'sauvages', 'oiseaux', 'insectes', 'couleurs', 'lettres', 'nombres',
   'dessin', 'parler', 'jeux', 'formes', 'compter', 'bulles', 'devine', 'album', 'coloriage', 'col-maison', 'col-poisson', 'chansons', 'histoires']);
 const CHANSONS_LIBRES = new Set(['frere-jacques', 'twinkle', 'najma', 'berceuse-fr', 'lullaby-en']);
@@ -5739,13 +5754,13 @@ const TXT_FA = {
   parents: { fr: 'Espace parents', en: 'Parents', ar: 'ركن الأولياء' },
   porte: { fr: 'Pour les parents : touche', en: 'For parents: tap', ar: 'للأولياء: المس' },
   chiffres: { fr: ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'], en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'], ar: ['صفر', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'] },
-  verrou: { fr: 'C’est dans Lumiole complet. Demande à papa ou maman !', en: 'This is in Lumiole Full. Ask a grown-up!', ar: 'هذا في لوميول الكامل. اطلب من بابا أو ماما!' },
-  complet: { fr: 'Lumiole complet', en: 'Lumiole Full', ar: 'لوميول الكامل' },
-  completTxt: { fr: 'Un seul achat, pour toujours : tous les thèmes, jeux, coloriages, comptines et histoires, et toutes les mises à jour. Pas de pub, pas d’abonnement.', en: 'One purchase, forever: every theme, game, coloring page, song and story, plus all updates. No ads, no subscription.', ar: 'شراء واحد وإلى الأبد: كل المواضيع والألعاب والتلوين والأناشيد والحكايات، وكل التحديثات. بلا إعلانات ولا اشتراك.' },
+  verrou: { fr: 'C’est dans Lumiole Famille. Demande à papa ou maman !', en: 'This is in Lumiole Family. Ask a grown-up!', ar: 'هذا في لوميول العائلة. اطلب من بابا أو ماما!' },
+  complet: { fr: 'Lumiole Famille', en: 'Lumiole Family', ar: 'لوميول العائلة' },
+  completTxt: { fr: 'Tout Lumiole pour toute la famille : tous les jeux, les grands films, les histoires, les comptines et le nouveau contenu chaque mois. 7 jours gratuits, puis 4,99 € par mois ou 34,99 € par an. Sans pub, résiliable à tout moment.', en: 'All of Lumiole for the whole family: every game, the big films, stories, songs and new content every month. 7 days free, then €4.99 a month or €34.99 a year. No ads, cancel anytime.', ar: 'كل لوميول لكل العائلة: كل الألعاب والأفلام الكبيرة والحكايات والأناشيد ومحتوى جديد كل شهر. ٧ أيام مجانًا، ثم ٤٫٩٩ € شهريًا أو ٣٤٫٩٩ € سنويًا. بلا إعلانات، ويمكن الإلغاء في أي وقت.' },
   acheter: { fr: 'Tout débloquer', en: 'Unlock everything', ar: 'افتح كل شيء' },
   restaurer: { fr: 'Restaurer mes achats', en: 'Restore purchases', ar: 'استرجاع مشترياتي' },
-  debloque: { fr: '✅ Tout est débloqué. Merci !', en: '✅ Everything is unlocked. Thank you!', ar: '✅ كل شيء مفتوح. شكرًا!' },
-  webAchat: { fr: 'L’achat se fait dans l’app iPhone ou Android.', en: 'Purchases are made in the iPhone or Android app.', ar: 'الشراء يتم من تطبيق آيفون أو أندرويد.' },
+  debloque: { fr: '✅ Lumiole Famille est actif. Merci !', en: '✅ Lumiole Family is active. Thank you!', ar: '✅ لوميول العائلة مفعّل. شكرًا!' },
+  webAchat: { fr: 'L’abonnement se prend dans l’app iPhone ou Android.', en: 'Subscribe in the iPhone or Android app.', ar: 'الاشتراك يتم من تطبيق آيفون أو أندرويد.' },
   enfants: { fr: 'Les enfants', en: 'Children', ar: 'الأطفال' },
   ajouter: { fr: '➕ Ajouter un enfant', en: '➕ Add a child', ar: '➕ أضف طفلًا' },
   prenom: { fr: 'Prénom', en: 'First name', ar: 'الاسم' },
@@ -5769,10 +5784,10 @@ const TXT_FA = {
 };
 const tf = (k) => TXT_FA[k][langue] ?? TXT_FA[k].fr;
 
-// ----- Achat unique (App Store / Google Play via RevenueCat) -----
+// ----- Abonnement Lumiole Famille (App Store / Google Play via RevenueCat) : mois, an, et « à vie » si l'offre existe -----
 const Achat = (() => {
   const P = PLUGINS.Purchases;
-  let ouvert = !NATIF && CONFIG_APP.webToutOuvert, paquet = null, pret = false;
+  let ouvert = !NATIF && CONFIG_APP.webToutOuvert, paquets = [], pret = false;
   try { if (localStorage.getItem('lumi-complet') === 'oui') ouvert = true; } catch {}
   const noter = (info) => {
     const oui = !!info?.entitlements?.active?.[CONFIG_APP.droit];
@@ -5787,13 +5802,15 @@ const Achat = (() => {
       else if (idCompte) await P.logIn({ appUserID: idCompte });
       noter((await P.getCustomerInfo()).customerInfo);
       const off = await P.getOfferings();
-      paquet = off?.current?.availablePackages?.[0] || null;
+      paquets = off?.current?.availablePackages || [];
     } catch (e) { console.warn('Achats', e); }
   }
   return {
-    init, get ouvert() { return ouvert; }, get dispo() { return !!(P && pret && paquet); },
-    get prix() { return paquet?.product?.priceString || ''; },
-    async acheter() { const r = await P.purchasePackage({ aPackage: paquet }); noter(r.customerInfo); return ouvert; },
+    init, get ouvert() { return ouvert; }, get dispo() { return !!(P && pret && paquets.length); },
+    // type : 'ANNUAL', 'MONTHLY' ou 'LIFETIME'
+    offre: (type) => paquets.find((x) => x.packageType === type) || null,
+    get paquets() { return paquets; },
+    async acheter(paquet) { const r = await P.purchasePackage({ aPackage: paquet || paquets[0] }); noter(r.customerInfo); return ouvert; },
     async restaurer() { const r = await P.restorePurchases(); noter(r.customerInfo); return ouvert; },
   };
 })();
@@ -5928,60 +5945,103 @@ function fenetre(type) {
 function fermerFenetre() { $('fa-fond')?.remove(); }
 
 // Un enfant touche un contenu fermé : Lumi l'explique, un parent peut ouvrir
-// ----- Lumiole Famille : l'écran d'achat (achat unique via l'App Store ou Google Play) -----
+// ----- Lumiole Famille : l'écran d'abonnement (essai gratuit, mois, an, via l'App Store ou Google Play) -----
 const PW_TXT = {
   titre: { fr: 'Tout Lumiole, pour toute la famille', en: 'All of Lumiole, for the whole family', ar: 'كل لوميول، لكل العائلة' },
-  sous: { fr: 'Un seul achat. Pas d’abonnement, pas de pub, pour toujours.', en: 'One purchase. No subscription, no ads, forever.', ar: 'شراء واحد. بلا اشتراك ولا إعلانات، للأبد.' },
+  sous: { fr: '7 jours gratuits, puis résiliable à tout moment. Sans pub.', en: '7 days free, then cancel anytime. No ads.', ar: '٧ أيام مجانًا، ثم يمكن الإلغاء في أي وقت. بلا إعلانات.' },
+  an: { fr: 'Par an', en: 'Yearly', ar: 'سنويًا' },
+  mois: { fr: 'Par mois', en: 'Monthly', ar: 'شهريًا' },
+  vie: { fr: 'À vie', en: 'Lifetime', ar: 'مدى الحياة' },
+  parMois: { fr: 'soit {p} par mois', en: '{p} a month', ar: 'أي {p} شهريًا' },
+  eco: { fr: '−{n} %', en: '−{n}%', ar: '−{n}٪' },
+  unSeul: { fr: 'un seul paiement', en: 'one payment', ar: 'دفعة واحدة' },
+  essai: { fr: 'Commencer les 7 jours gratuits', en: 'Start the 7-day free trial', ar: 'ابدأ ٧ أيام مجانية' },
   acheter: { fr: 'Débloquer', en: 'Unlock', ar: 'افتح الكل' },
-  unique: { fr: 'Achat unique', en: 'One-time purchase', ar: 'شراء لمرة واحدة' },
   restaurer: { fr: 'Restaurer mes achats', en: 'Restore purchases', ar: 'استعادة المشتريات' },
-  legal: { fr: 'Paiement sécurisé par {store}. Valable sur tous vos appareils avec le même compte {store}.', en: 'Secure payment through {store}. Works on all your devices with the same {store} account.', ar: 'دفع آمن عبر {store}. صالح على كل أجهزتكم بنفس حساب {store}.' },
-  web: { fr: 'Lumiole s’achète dans l’application, sur l’App Store et Google Play.', en: 'Lumiole is bought in the app, on the App Store and Google Play.', ar: 'يُشترى لوميول داخل التطبيق، على App Store وGoogle Play.' },
-  merci: { fr: 'Merci ! Tout est débloqué ✨', en: 'Thank you! Everything is unlocked ✨', ar: 'شكرًا! كل شيء مفتوح ✨' },
+  gerer: { fr: 'Gérer mon abonnement', en: 'Manage my subscription', ar: 'إدارة اشتراكي' },
+  legal: { fr: 'Gratuit pendant 7 jours, puis {prix}. L’abonnement se renouvelle automatiquement sauf résiliation au moins 24 h avant la fin de la période, depuis votre compte {store}. Valable sur tous vos appareils avec le même compte.', en: 'Free for 7 days, then {prix}. The subscription renews automatically unless cancelled at least 24 hours before the end of the period, from your {store} account. Works on all your devices with the same account.', ar: 'مجاني لمدة ٧ أيام، ثم {prix}. يتجدد الاشتراك تلقائيًا ما لم يُلغَ قبل ٢٤ ساعة على الأقل من نهاية المدة، من حسابكم في {store}. صالح على كل أجهزتكم بنفس الحساب.' },
+  legalVie: { fr: 'Paiement unique de {prix} via {store}, valable sur tous vos appareils avec le même compte.', en: 'One payment of {prix} through {store}, on all your devices with the same account.', ar: 'دفعة واحدة بقيمة {prix} عبر {store}، على كل أجهزتكم بنفس الحساب.' },
+  web: { fr: 'Lumiole Famille se prend dans l’application, sur l’App Store et Google Play.', en: 'Get Lumiole Family in the app, on the App Store and Google Play.', ar: 'يُشترك في لوميول العائلة من التطبيق، على App Store وGoogle Play.' },
+  merci: { fr: 'Merci ! Lumiole Famille est actif ✨', en: 'Thank you! Lumiole Family is active ✨', ar: 'شكرًا! لوميول العائلة مفعّل ✨' },
   charge: { fr: 'Connexion à la boutique…', en: 'Connecting to the store…', ar: 'جارٍ الاتصال بالمتجر…' },
   confid: { fr: 'Confidentialité', en: 'Privacy', ar: 'الخصوصية' },
+  conditions: { fr: 'Conditions d’utilisation', en: 'Terms of use', ar: 'شروط الاستخدام' },
 };
 const tp = (k) => PW_TXT[k][langue] ?? PW_TXT[k].fr;
 const Paywall = (() => {
   function avantages() {
-    const n = { h: HISTOIRES.length, c: CHANSONS.length, m: TOUS.length };
+    const n = { h: HISTOIRES.length, c: CHANSONS.length };
     return [
-      ['🌙', { fr: `${n.h} histoires du soir en 3 langues, au théâtre`, en: `${n.h} bedtime stories in 3 languages, at the theatre`, ar: `${n.h} حكاية بثلاث لغات، في المسرح` }],
-      ['🎙️', { fr: 'Le studio : les histoires avec la voix de maman et papa', en: 'The studio: stories in Mum’s and Dad’s voice', ar: 'الاستوديو: الحكايات بصوت ماما وبابا' }],
-      ['👫', { fr: 'Tous les jeux, à deux sur la télé avec les téléphones', en: 'Every game, two players on the TV with phones', ar: 'كل الألعاب، لاعبان على التلفاز بالهواتف' }],
-      ['🎵', { fr: `${n.c} comptines et ${n.m} mots dessinés par Lumi`, en: `${n.c} songs and ${n.m} words drawn by Lumi`, ar: `${n.c} أنشودة و${n.m} كلمة يرسمها لومي` }],
-      ['🧒', { fr: 'Un profil par enfant, sur tous vos appareils', en: 'A profile per child, on all your devices', ar: 'ملف لكل طفل، على كل أجهزتكم' }],
-      ['🔒', { fr: 'Sans pub, sans traçage, données gardées pour la famille', en: 'No ads, no tracking, data kept for your family', ar: 'بلا إعلانات ولا تتبّع، والبيانات للعائلة فقط' }],
+      ['🎬', { fr: 'Les grands films interactifs en entier, et un nouveau à chaque fête', en: 'The full interactive films, and a new one every holiday', ar: 'الأفلام التفاعلية الكبيرة كاملة، وفيلم جديد في كل عيد' }],
+      ['🤸', { fr: 'Tous les jeux devant la caméra et à deux avec les téléphones', en: 'Every camera game, and two players with phones', ar: 'كل ألعاب الكاميرا، ولاعبان بالهواتف' }],
+      ['🌙', { fr: `${n.h} histoires et ${n.c} comptines en 3 langues, avec la voix de maman ou papa`, en: `${n.h} stories and ${n.c} songs in 3 languages, in Mum’s or Dad’s voice`, ar: `${n.h} حكاية و${n.c} أنشودة بثلاث لغات، بصوت ماما أو بابا` }],
+      ['📸', { fr: 'Les jeux photo de la famille : memory, puzzle, musée, livre', en: 'Family photo games: memory, puzzle, museum, book', ar: 'ألعاب صور العائلة: الذاكرة والأحجية والمتحف والكتاب' }],
+      ['🌍', { fr: 'Nos cultures : comptines, contes et jeux de cour de chez nous', en: 'Our cultures: songs, tales and playground games from home', ar: 'ثقافاتنا: أناشيد وحكايات وألعاب الساحة من بلادنا' }],
+      ['🔒', { fr: 'Sans pub, sans traçage, un profil par enfant', en: 'No ads, no tracking, a profile per child', ar: 'بلا إعلانات ولا تتبّع، وملف لكل طفل' }],
     ];
   }
+  const LIEN_GERER = { android: 'https://play.google.com/store/account/subscriptions?package=com.lumiole.app', ios: 'https://apps.apple.com/account/subscriptions' };
+  const CONDITIONS = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+  const nombre = (p) => (typeof p === 'number' ? p : parseFloat(String(p).replace(/[^\d,.]/g, '').replace(',', '.')) || 0);
+  const formater = (v, modele) => { const dev = String(modele).replace(/[\d\s.,]/g, '').trim() || '€'; return `${v.toFixed(2).replace('.', langue === 'en' ? '.' : ',')} ${dev}`; };
   async function ouvrir() {
     const f = fenetre('achat');
-    const store = PLATEFORME === 'ios' ? 'l’App Store' : 'Google Play';
+    const store = PLATEFORME === 'ios' ? 'App Store' : 'Google Play';
     f.innerHTML = `<button class="fa-fermer" aria-label="${tf('fermer')}">✕</button>
       <div class="pw-haut"><div class="pw-lumi"></div><span class="pw-marque">Lumiole <b>Famille</b></span><h2></h2><p class="pw-sous"></p></div>
       <ul class="pw-liste"></ul>
-      <div class="pw-offre"><span class="pw-unique"></span><span class="pw-prix"></span><button class="pw-acheter"></button><button class="fa-lien pw-restaurer"></button></div>
-      <p class="fa-msg pw-msg"></p><p class="pw-legal"></p><p class="pw-liens"><a target="_blank" rel="noopener"></a></p>`;
+      <div class="pw-offre"><div class="pw-choix" role="radiogroup"></div><button class="pw-acheter"></button><button class="fa-lien pw-restaurer"></button></div>
+      <p class="fa-msg pw-msg"></p><p class="pw-legal"></p><p class="pw-liens"><a class="pw-gerer" target="_blank" rel="noopener"></a><a class="pw-confid" target="_blank" rel="noopener"></a><a class="pw-cond" target="_blank" rel="noopener"></a></p>`;
     f.querySelector('h2').textContent = tp('titre');
     f.querySelector('.pw-sous').textContent = tp('sous');
-    f.querySelector('.pw-liste').innerHTML = avantages().map(([e, t]) => `<li><span class="e">${e}</span><span></span></li>`).join('');
+    f.querySelector('.pw-liste').innerHTML = avantages().map(([e]) => `<li><span class="e">${e}</span><span></span></li>`).join('');
     f.querySelectorAll('.pw-liste li span:last-child').forEach((x, i) => { x.textContent = avantages()[i][1][langue] || avantages()[i][1].fr; });
     f.querySelector('.fa-fermer').onclick = fermerFenetre;
-    const lien = f.querySelector('.pw-liens a'); lien.href = CONFIG_APP.confidentialite; lien.textContent = tp('confid');
-    const msg = f.querySelector('.pw-msg'), btn = f.querySelector('.pw-acheter'), rest = f.querySelector('.pw-restaurer'), prix = f.querySelector('.pw-prix');
-    f.querySelector('.pw-unique').textContent = tp('unique');
+    const confid = f.querySelector('.pw-confid'); confid.href = CONFIG_APP.confidentialite; confid.textContent = tp('confid');
+    const cond = f.querySelector('.pw-cond'); cond.href = CONDITIONS; cond.textContent = tp('conditions');
+    const gerer = f.querySelector('.pw-gerer'); gerer.href = LIEN_GERER[PLATEFORME] || LIEN_GERER.android; gerer.textContent = tp('gerer');
+    const msg = f.querySelector('.pw-msg'), btn = f.querySelector('.pw-acheter'), rest = f.querySelector('.pw-restaurer'), choix = f.querySelector('.pw-choix'), legal = f.querySelector('.pw-legal');
     rest.textContent = tp('restaurer');
     if (Achat.ouvert && NATIF) { f.querySelector('.pw-offre').hidden = true; msg.textContent = tp('merci'); return; }
-    if (!NATIF) { prix.textContent = '2,99 €'; btn.textContent = tp('acheter'); btn.disabled = true; rest.hidden = true; f.querySelector('.pw-legal').textContent = tp('web'); return; }
-    f.querySelector('.pw-legal').textContent = tp('legal').replaceAll('{store}', store);
-    const maj = () => { prix.textContent = Achat.prix || '…'; btn.textContent = `${tp('acheter')}${Achat.prix ? ' · ' + Achat.prix : ''}`; btn.disabled = !Achat.dispo; };
-    if (!Achat.dispo) { msg.textContent = tp('charge'); try { await Achat.init(Famille.id); } catch {} msg.textContent = ''; }
-    maj();
+    // les offres : prix du store dans l'app, prix indicatifs sur le site
+    let offres;
+    if (NATIF) {
+      if (!Achat.dispo) { msg.textContent = tp('charge'); try { await Achat.init(Famille.id); } catch {} msg.textContent = ''; }
+      offres = [['ANNUAL', 'an'], ['MONTHLY', 'mois'], ['LIFETIME', 'vie']].map(([t, k]) => { const p = Achat.offre(t); return p && { k, paquet: p, prix: p.product.priceString, valeur: nombre(p.product.price ?? p.product.priceString) }; }).filter(Boolean);
+    } else {
+      const a = CONFIG_APP.abonnement;
+      offres = [{ k: 'an', prix: a.an, valeur: nombre(a.an) }, { k: 'mois', prix: a.mois, valeur: nombre(a.mois) }];
+    }
+    const mois = offres.find((o) => o.k === 'mois'), an = offres.find((o) => o.k === 'an');
+    let choisie = an || offres[0];
+    const dessiner = () => {
+      choix.innerHTML = '';
+      offres.forEach((o) => {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', o === choisie);
+        b.className = 'pw-option' + (o === choisie ? ' on' : '');
+        let detail = '';
+        if (o.k === 'an' && o.valeur) detail = tp('parMois').replace('{p}', formater(o.valeur / 12, o.prix));
+        if (o.k === 'vie') detail = tp('unSeul');
+        const eco = o.k === 'an' && mois?.valeur && o.valeur ? Math.round((1 - o.valeur / (mois.valeur * 12)) * 100) : 0;
+        b.innerHTML = `<span class="pw-o-nom"></span><span class="pw-o-prix"></span><span class="pw-o-detail"></span>${eco > 0 ? '<span class="pw-o-eco"></span>' : ''}`;
+        b.querySelector('.pw-o-nom').textContent = tp(o.k); b.querySelector('.pw-o-prix').textContent = o.prix; b.querySelector('.pw-o-detail').textContent = detail;
+        if (eco > 0) b.querySelector('.pw-o-eco').textContent = tp('eco').replace('{n}', eco);
+        b.onclick = () => { choisie = o; son('tic'); dessiner(); };
+        choix.appendChild(b);
+      });
+      const vie = choisie?.k === 'vie';
+      btn.textContent = vie ? `${tp('acheter')} · ${choisie.prix}` : tp('essai');
+      const prixTxt = choisie ? `${choisie.prix} ${choisie.k === 'an' ? '/ ' + tp('an').toLowerCase() : choisie.k === 'mois' ? '/ ' + tp('mois').toLowerCase() : ''}` : '';
+      legal.textContent = NATIF ? (vie ? tp('legalVie') : tp('legal')).replace('{prix}', prixTxt.trim()).replaceAll('{store}', store) : tp('web');
+    };
+    dessiner();
+    if (!NATIF) { btn.disabled = true; rest.hidden = true; gerer.hidden = true; return; }
+    btn.disabled = !choisie;
     const faire = async (fn) => {
       try { msg.textContent = '…'; const ok = await fn(); msg.textContent = ok ? tp('merci') : ''; if (ok) { fete(); jingle(); setTimeout(() => { fermerFenetre(); afficher(); }, 1800); } }
       catch (e) { msg.textContent = e?.userCancelled || /cancel/i.test(e?.message || '') ? '' : tf('erreur'); }
     };
-    btn.onclick = () => faire(Achat.acheter); rest.onclick = () => faire(Achat.restaurer);
+    btn.onclick = () => faire(() => Achat.acheter(choisie.paquet)); rest.onclick = () => faire(Achat.restaurer);
     setTimeout(() => btn.focus({ preventScroll: true }), 50);
   }
   return { ouvrir };
@@ -8347,7 +8407,8 @@ function appliquerSaison() {
 }
 appliquerSaison();
 // la version gratuite : de quoi bien goûter à tout (la fête du moment est offerte)
-['cherche', 'creer', 'en-famille', 'apprendre', 'fetes', 'coffre', 'miroir', 'memory', 'imite', 'statues', 'vivant', 'musee'].forEach((id) => GRATUIT.add(id));
+// version gratuite = les bases (les menus, 3 jeux caméra, le dessin, la fête du moment) ; le reste est dans Lumiole Famille
+['cherche', 'creer', 'en-famille', 'apprendre', 'fetes', 'coffre', 'miroir', 'imite', 'statues'].forEach((id) => GRATUIT.add(id));
 // les rangées de l'accueil (mobile et télé)
 function rangeesAccueil() {
   const s = Saisons.courante;
@@ -10612,7 +10673,7 @@ Object.entries(CULTURES).forEach(([k, c]) => {
   c.contes.filter(titreConte).forEach((id) => { NOEUDS['ct-' + id] = { emoji: HISTOIRES.find((x) => x.id === id).emoji, nom: nom3(titreConte(id), titreConte(id), titreConte(id)), desc: nom3('Conte traditionnel', 'Traditional tale', 'حكاية تقليدية'), tags: ['histoire', 'calme'], lancer: () => ouvrirConte(id) }; });
   NOEUDS['cu-' + k] = { emoji: c.e, nom: c.nom, desc: nom3(`${c.drapeaux || c.e} Comptines, contes, jeux de cour`, `${c.drapeaux || c.e} Songs, tales, playground games`, `${c.drapeaux || c.e} أناشيد وحكايات وألعاب`), tags: ['culture'],
     groupes: [['jeuxCour', '🏃', c.jeux.map((j) => 'jc-' + j)], ['comptines', '🎵', c.chansons.filter(titreChanson).map((id) => 'cc-' + id)], ['contes', '📖', c.contes.filter(titreConte).map((id) => 'ct-' + id)], ['mots', '💬', [`cu-${k}-mots`, c.fete].filter(Boolean)]] };
-  ['cu-' + k, `cu-${k}-mots`, ...c.jeux.map((j) => 'jc-' + j)].forEach((id) => GRATUIT.add(id));
+  ['cu-' + k, `cu-${k}-mots`, ...c.jeux.slice(0, 1).map((j) => 'jc-' + j)].forEach((id) => GRATUIT.add(id));
 });
 Object.assign(FM_TXT, { jeuxCour: CU_TXT.jeuxCour, comptines: CU_TXT.comptines, contes: CU_TXT.contes, mots: CU_TXT.mots });
 NOEUDS.cultures = { emoji: '🌍', nom: CU_TXT.cultures, desc: CU_TXT.culturesDesc, enfants: [], tags: ['culture'] };
@@ -11351,6 +11412,8 @@ const Vitrine = (() => {
     if (grand) ajout(`<span class="vt-ico">${icone('telephone')}</span>`, vt('telephone'), () => (typeof GuideTel !== 'undefined' ? GuideTel.ouvrir() : DuoEcran.demarrer()));
     ajout(`<span class="vt-ico">${icone('langue')}</span>`, `${vt('langue')} · ${langue.toUpperCase()}`, () => $('btn-langue').click());
     ajout(`<span class="vt-ico">${icone('reglages')}</span>`, vt('parents'), () => porteParents(() => espaceParents()));
+    // pour les parents qui n'ont pas encore Lumiole Famille : une entrée discrète, derrière la porte des parents (jamais de pub)
+    if (!Achat.ouvert) ajout(`<span class="vt-ico vt-famille">✦</span>`, 'Lumiole Famille', () => porteParents(() => Paywall.ouvrir()));
     r.appendChild(bas);
   }
   function haut() {
