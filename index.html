@@ -1773,6 +1773,81 @@
   .ci-pont b { position: absolute; left: 0; right: 0; bottom: 0; height: .14em; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: repeating-linear-gradient(90deg, #8A5A34 0 .16em, #5E3A1E .16em .2em); box-shadow: 0 .05em .1em rgba(0,0,0,.6); }
   .ci-pont i { position: absolute; left: 0; right: 0; top: 0; height: .4em; border-top: .03em solid #C9A27A; border-radius: 50% 50% 0 0 / 30% 30% 0 0; background: repeating-linear-gradient(90deg, transparent 0 .28em, rgba(201,162,122,.8) .28em .3em); -webkit-mask-image: linear-gradient(#000 0 70%, transparent); mask-image: linear-gradient(#000 0 70%, transparent); }
   @media (orientation: portrait) { .ci.joue::after { content: '📱↻'; position: absolute; left: 14px; top: 16px; font: 700 15px system-ui; color: rgba(255,255,255,.5); pointer-events: none; z-index: 5; } }
+  /* les rangées qui défilent ne doivent jamais élargir la page (grilles et flex : min-width 0) */
+  .corps > *, .cote-activite, .cote-activite > section, .accueil-rangees, .rangee-m, .mod, .mod-corps { min-width: 0; max-width: 100%; }
+  .rm-defile { max-width: calc(100% + 32px); }
+  @media (min-width: 900px) { .rm-defile { margin: 0; padding: 2px 0 8px; } .rm-defile .univers { width: 168px; } }
+  .pz-plateau { position: relative; }
+  .pz-plateau.apercu { box-shadow: 0 0 0 4px #2EE6C5, 0 0 40px rgba(46,230,197,.5); }
+  .pz-plateau.montre::after { content: ''; position: absolute; inset: 0; border-radius: 18px; background: var(--img) center / cover; opacity: .92; pointer-events: none; animation: av-entre .3s ease-out; }
+  .pz-piece.choisi { animation: pz-clignote .9s ease-in-out infinite; }
+  @keyframes pz-clignote { 50% { box-shadow: 0 0 0 6px #fff, 0 0 30px rgba(46,230,197,.9); } }
+
+  /* ======================= Première connexion ======================= */
+  .fond-bienvenue { background: radial-gradient(ellipse at 50% 30%, #1E2A6B, #0B1030 70%) !important; backdrop-filter: none !important; }
+  .fa-t-bienvenue { width: min(100%, 760px); background: transparent; border: none; box-shadow: none; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; color: #F4FBF8; }
+  .bv-points { display: flex; gap: 8px; } .bv-points i { width: 10px; height: 10px; border-radius: 99px; background: rgba(255,255,255,.2); transition: .3s; } .bv-points i.on { width: 30px; background: var(--degrade); } .bv-points i.fait { background: #2EE6C5; }
+  .bv-corps { display: flex; flex-direction: column; align-items: center; gap: 14px; min-height: 360px; justify-content: center; animation: av-entre .5s ease-out; }
+  .bv-lumi { font-size: 76px; line-height: 1; filter: drop-shadow(0 10px 30px rgba(46,230,197,.35)); }
+  .bv-orbe { display: block; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #fff 0 12%, #BFFBEA 24%, rgba(46,230,197,.5) 46%, transparent 70%); animation: ci-flotte 3s ease-in-out infinite; }
+  .fa-t-bienvenue h2 { margin: 0; font: 800 34px/1.15 'Baloo 2', system-ui; }
+  .bv-sous { margin: 0; max-width: 560px; color: #BFD8D5 !important; font-size: 17px; line-height: 1.45; text-align: center !important; }
+  .bv-astuce { margin: 4px 0 0; max-width: 560px; color: #9FF5DF !important; font-size: 14px; text-align: center !important; }
+  .bv-langues { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .bv-puce { height: 50px; padding: 0 22px; border-radius: 99px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.07); color: #fff; font: 800 16px system-ui; cursor: pointer; }
+  .bv-puce.on { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; }
+  .bv-puce.grand { height: 56px; font-size: 17px; }
+  .bv-google b { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-inline-end: 8px; border-radius: 50%; background: #fff; color: #4285F4; font: 800 16px system-ui; }
+  .bv-champ { width: min(100%, 360px); height: 56px; padding: 0 20px; border-radius: 99px; border: 1px solid rgba(46,230,197,.5); background: rgba(255,255,255,.06); color: #fff; font: 700 20px system-ui; text-align: center; }
+  .bv-avatars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .bv-avatars button { width: 64px; height: 64px; border-radius: 20px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); font-size: 36px; cursor: pointer; transition: transform .15s; }
+  .bv-avatars button.on { background: var(--degrade); transform: scale(1.12); border-color: transparent; }
+  .bv-actions { display: flex; gap: 12px; }
+  .bv-b { height: 56px; padding: 0 34px; border-radius: 99px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; font: 800 18px system-ui; cursor: pointer; }
+  .bv-b.principal { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; box-shadow: 0 12px 30px rgba(46,230,197,.35); }
+  .tele .fa-t-bienvenue { width: 70vw; gap: 3vh; } .tele .fa-t-bienvenue h2 { font-size: 6vh; } .tele .bv-sous { font-size: 2.6vh; max-width: 60vw; } .tele .bv-lumi { font-size: 14vh; }
+  .tele .bv-puce, .tele .bv-b { height: 7vh; font-size: 2.6vh; padding: 0 3vw; } .tele .bv-avatars button { width: 11vh; height: 11vh; font-size: 6vh; }
+  .tele .fa-t-bienvenue button:focus { outline: none; box-shadow: 0 0 0 .5vh #fff, 0 0 3vh rgba(255,255,255,.4); transform: scale(1.08); }
+  @media (max-width: 500px) { .bv-avatars { grid-template-columns: repeat(4, 1fr); } .fa-t-bienvenue h2 { font-size: 28px; } .bv-corps { min-height: 300px; } }
+  /* annonce du super admin */
+  .annonce-admin { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 20px; background: linear-gradient(135deg, rgba(255,184,107,.22), rgba(255,143,184,.18)); border: 1px solid rgba(255,184,107,.45); color: #FFF2E2; font: 700 16px/1.35 system-ui; }
+  .annonce-admin .e { font-size: 28px; }
+  .tv-annonce { display: inline-flex; align-self: flex-start; margin-bottom: 1.4vh; padding: 1vh 1.6vw; border-radius: 99px; background: rgba(255,184,107,.25); border: 1px solid rgba(255,184,107,.55); color: #FFF2E2; font: 800 2.2vh system-ui; }
+  /* ======================= Super admin ======================= */
+  .mode-admin body > *:not(#admin) { display: none !important; }
+  #admin { position: fixed; inset: 0; z-index: 9999; overflow: auto; background: #0B1030; color: #EEF6FF; font: 15px/1.45 system-ui, sans-serif; }
+  .adm-boite { width: min(92%, 420px); margin: 12vh auto; display: flex; flex-direction: column; gap: 12px; padding: 32px; border-radius: 24px; background: #141B48; border: 1px solid #26306A; }
+  .adm-boite h1 { margin: 0; font: 800 24px 'Baloo 2', system-ui; }
+  .adm-doux { color: #9AA7C8; } .adm-ou { text-align: center; color: #6E7BA0; margin: 0; } .adm-msg { color: #9FF5DF; min-height: 1.4em; }
+  .adm-champ { height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid #2E3A78; background: #0E1438; color: #fff; font: 600 15px system-ui; }
+  textarea.adm-champ { height: auto; padding: 10px 14px; resize: vertical; width: 100%; }
+  .adm-champ.court { width: 160px; }
+  .adm-b { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 16px; border-radius: 12px; border: 1px solid #2E3A78; background: #18205A; color: #EEF6FF; font: 700 14px system-ui; cursor: pointer; text-decoration: none; }
+  .adm-b.principal { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; }
+  .adm-b b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; color: #4285F4; }
+  .adm-haut { position: sticky; top: 0; display: flex; align-items: center; gap: 14px; padding: 14px 24px; background: #0E1438; border-bottom: 1px solid #222C66; z-index: 2; flex-wrap: wrap; }
+  .adm-haut b { font: 800 18px 'Baloo 2', system-ui; margin-inline-end: auto; }
+  .adm-onglets { display: flex; gap: 6px; padding: 12px 24px; overflow-x: auto; border-bottom: 1px solid #1C2559; }
+  .adm-onglet { flex: none; height: 38px; padding: 0 14px; border-radius: 10px; border: none; background: transparent; color: #9AA7C8; font: 700 14px system-ui; cursor: pointer; }
+  .adm-onglet.on { background: #1F2970; color: #fff; }
+  .adm-page { max-width: 1200px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .adm-page h2 { margin: 8px 0 0; font: 800 22px 'Baloo 2', system-ui; } .adm-page h3 { margin: 10px 0 0; font-size: 16px; }
+  .adm-cartes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .adm-carte { display: flex; flex-direction: column; gap: 4px; padding: 18px; border-radius: 16px; background: #141B48; border: 1px solid #26306A; }
+  .adm-carte b { font: 800 34px 'Baloo 2', system-ui; color: #7FF3CB; } .adm-carte small { color: #9AA7C8; }
+  .adm-barres { display: flex; align-items: flex-end; gap: 4px; height: 160px; padding: 10px; border-radius: 16px; background: #141B48; }
+  .adm-barres div { flex: 1; min-width: 6px; border-radius: 4px 4px 0 0; background: var(--degrade); position: relative; } .adm-barres span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #9AA7C8; }
+  .adm-table { overflow: auto; border-radius: 14px; border: 1px solid #26306A; }
+  .adm-table table { width: 100%; border-collapse: collapse; } .adm-table th, .adm-table td { padding: 10px 12px; text-align: start; border-bottom: 1px solid #1C2559; white-space: nowrap; } .adm-table th { background: #141B48; color: #9AA7C8; font-size: 13px; position: sticky; top: 0; }
+  .adm-table code { color: #9FF5DF; font-size: 12px; }
+  .adm-ligne { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .adm-col { display: flex; flex-direction: column; gap: 6px; }
+  .adm-puces { display: flex; flex-wrap: wrap; gap: 8px; } .adm-puce { height: 38px; padding: 0 14px; border-radius: 99px; border: 1px solid #2E3A78; background: #141B48; color: #EEF6FF; font: 700 14px system-ui; cursor: pointer; } .adm-puce.on { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; }
+  .adm-nouv { display: flex; flex-wrap: wrap; gap: 8px; } .adm-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; background: #18205A; } .adm-tag button { border: none; background: none; color: #FF8FB8; cursor: pointer; }
+  .adm-liens { display: flex; flex-wrap: wrap; gap: 10px; }
+  .adm-pre { padding: 14px; border-radius: 12px; background: #0E1438; overflow: auto; font-size: 12px; color: #BFD8D5; }
+  .adm-charge { padding: 40px; text-align: center; color: #9AA7C8; }
+  .annonce-admin.apercu { max-width: 600px; }
+  .adm-page > .adm-b { align-self: flex-start; min-width: 200px; }
 </style>
 </head>
 <body>
@@ -6430,7 +6505,7 @@ Famille = (() => {
     if (r?.[0]?.donnees) fusionner(r[0].donnees);
   }
   return {
-    dispo, get email() { return s?.user?.email || null; }, get id() { return s?.user?.id || null; }, get derniereSynchro() { return derniere; },
+    dispo, requete: (chemin, opts) => api(chemin, opts), get connecte() { return !!s; }, get email() { return s?.user?.email || null; }, get id() { return s?.user?.id || null; }, get derniereSynchro() { return derniere; },
     envoyerCode: (email) => api('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ email, create_user: true }) }, false),
     async verifier(email, token) {
       s = await api('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'email', email, token }) }, false); garder();
@@ -6463,7 +6538,7 @@ Famille = (() => {
       return n;
     },
     // connexion Google (page web) : Supabase renvoie ici avec les jetons dans l'adresse
-    google() { location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`; },
+    google() { location.href = `${url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(location.origin + location.pathname + location.search)}`; },
     async retourOAuth() {
       const h = new URLSearchParams(location.hash.slice(1));
       if (!h.get('access_token') || !h.get('refresh_token')) return false;
@@ -8296,13 +8371,39 @@ function imagesFamille() {
   const dessins = Profils.liste.flatMap((p) => lireJSON(Profils.cle('lumi-dessins', p.id)).map((d) => ({ src: d.img, t: d.t, type: 'dessin', qui: p })));
   return [...photos, ...dessins].sort((a, b) => b.t - a.t);
 }
+// Chrome (Mac) n'arrive pas à dessiner un très grand emoji en couleur sur un canevas : on le dessine petit, puis on l'agrandit
+const cacheEmoji = new Map();
+function emojiCanvas(e) {
+  if (cacheEmoji.has(e)) return cacheEmoji.get(e);
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); g.font = '100px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 64, 70);
+  cacheEmoji.set(e, c); return c;
+}
+function dessinerEmoji(g, e, x, y, taille) { g.drawImage(emojiCanvas(e), x - taille / 2, y - taille / 2, taille, taille); }
 function imageEmoji(e, taille = 512, fondCouleur) {
   const c = document.createElement('canvas'); c.width = c.height = taille;
   const g = c.getContext('2d');
   const gr = g.createLinearGradient(0, 0, taille, taille); (fondCouleur || ['#5BF0B8', '#22D8C4', '#17B5D9']).forEach((x, i, a) => gr.addColorStop(i / (a.length - 1), x));
   g.fillStyle = gr; g.fillRect(0, 0, taille, taille);
-  g.font = `${taille * .62}px "Apple Color Emoji","Noto Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(e, taille / 2, taille * .54);
+  dessinerEmoji(g, e, taille / 2, taille / 2, taille * .7);
+  return c.toDataURL('image/jpeg', .9);
+}
+// de petites scènes colorées, faciles à reconnaître (puzzle, coloriage, livre…)
+const SCENES_LUMI = [
+  { e: '🐄', ciel: ['#7CC8FF', '#DDF3FF'], sol: ['#7BD389', '#4CAF6A'], el: [['☀️', .82, .16, .2], ['☁️', .35, .14, .18], ['🏡', .3, .5, .36], ['🌳', .74, .5, .32], ['🐄', .58, .78, .24], ['🐔', .16, .84, .15], ['🌻', .9, .86, .15]] },
+  { e: '🐬', ciel: ['#5EC8FF', '#BDEBFF'], sol: ['#1E88E5', '#0D47A1'], horizon: .5, el: [['☀️', .15, .15, .18], ['⛵', .7, .38, .22], ['🐬', .3, .64, .26], ['🐠', .72, .72, .16], ['🐙', .5, .9, .18], ['🐚', .1, .92, .12]] },
+  { e: '🚀', ciel: ['#160B44', '#3A1F8A'], sol: ['#4B3A8C', '#2A1F55'], horizon: .82, el: [['🌍', .78, .2, .26], ['⭐', .2, .14, .1], ['✨', .5, .3, .1], ['🚀', .38, .5, .32], ['🪐', .14, .62, .2], ['👽', .8, .78, .18]] },
+  { e: '🦁', ciel: ['#FFC877', '#FFE9B8'], sol: ['#D9B26A', '#B8893D'], el: [['☀️', .8, .14, .22], ['🌴', .15, .44, .36], ['🦒', .82, .5, .36], ['🦁', .45, .72, .3], ['🐘', .2, .86, .2]] },
+  { e: '🏰', ciel: ['#C8A8FF', '#FFD6EC'], sol: ['#8FD48F', '#5DA85D'], el: [['🌈', .5, .2, .4], ['🏰', .5, .54, .44], ['🦄', .16, .82, .22], ['🌸', .84, .86, .14], ['🦋', .82, .4, .12]] },
+  { e: '🏙️', ciel: ['#9AD7FF', '#E6F7FF'], sol: ['#9E9E9E', '#616161'], el: [['🏢', .18, .48, .34], ['🏫', .5, .5, .3], ['🏠', .82, .54, .28], ['🚌', .3, .82, .22], ['🚲', .74, .86, .16], ['🌳', .55, .76, .16]] },
+];
+function imageScene(sc, taille = 720) {
+  const c = document.createElement('canvas'); c.width = c.height = taille;
+  const g = c.getContext('2d'), h = sc.horizon || .62;
+  let gr = g.createLinearGradient(0, 0, 0, taille * h); gr.addColorStop(0, sc.ciel[0]); gr.addColorStop(1, sc.ciel[1]); g.fillStyle = gr; g.fillRect(0, 0, taille, taille * h);
+  gr = g.createLinearGradient(0, taille * h, 0, taille); gr.addColorStop(0, sc.sol[0]); gr.addColorStop(1, sc.sol[1]); g.fillStyle = gr;
+  g.beginPath(); g.moveTo(0, taille * h); g.quadraticCurveTo(taille / 2, taille * (h - .06), taille, taille * h); g.lineTo(taille, taille); g.lineTo(0, taille); g.fill();
+  sc.el.forEach(([e, x, y, t]) => dessinerEmoji(g, e, x * taille, y * taille, t * taille));
   return c.toDataURL('image/jpeg', .9);
 }
 const chargerImage = (src) => new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ko; im.src = src; });
@@ -8314,7 +8415,7 @@ function choisirImage(rappel, { titre = fm('choisirImage'), lumi = true, photo =
   const prendre = (src) => { fermerFenetre(); chargerImage(src).then(rappel); };
   if (photo) g.appendChild(bouton(`<span class="ci-ic">📸</span><b>${fm('photoNeuve').replace('📸 ', '')}</b>`, () => { fermerFenetre(); Photo.prendre((im) => { Album.ajouter(im); rappel(im); }); }, 'ci-tuile ci-nouvelle principal'));
   imagesFamille().slice(0, 23).forEach((x) => g.appendChild(bouton(`<img alt="" src="${x.src}"><span class="ci-type">${x.type === 'photo' ? '📸' : '🖍️'}</span>`, () => prendre(x.src), 'ci-tuile')));
-  if (lumi) ['🦁', '🐶', '🦄', '🚀', '🏰', '🐬', '🦋', '🦕'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => prendre(imageEmoji(e)), 'ci-tuile ci-lumi')));
+  if (lumi) SCENES_LUMI.forEach((sc) => { const src = imageScene(sc, 360); g.appendChild(bouton(`<img alt="" src="${src}"><span class="ci-type">✨</span>`, () => prendre(imageScene(sc)), 'ci-tuile ci-lumi')); });
   focusPremier(f);
 }
 const ilYa = (t) => {
@@ -8450,7 +8551,9 @@ const JX = {
   rejouer: { fr: 'Rejouer', en: 'Play again', ar: 'العب مجددًا' },
   autreImage: { fr: 'Une autre image', en: 'Another picture', ar: 'صورة أخرى' },
   facile: { fr: 'Facile', en: 'Easy', ar: 'سهل' }, moyen: { fr: 'Moyen', en: 'Medium', ar: 'متوسط' }, dur: { fr: 'Difficile', en: 'Hard', ar: 'صعب' },
-  puzzleAide: { fr: 'Touche deux morceaux pour les échanger', en: 'Tap two pieces to swap them', ar: 'المس قطعتين لتبديلهما' },
+  puzzleAide: { fr: 'Touche un morceau, puis l’endroit où il va : ils s’échangent !', en: 'Tap a piece, then where it goes: they swap!', ar: 'المس قطعة ثم مكانها: تتبادلان!' },
+  regarde: { fr: 'Regarde bien l’image… elle va se mélanger !', en: 'Look carefully… it’s going to get mixed up!', ar: 'انظر جيدًا… ستختلط الصورة!' },
+  modele: { fr: 'Voir le modèle', en: 'See the picture', ar: 'شاهد الصورة' },
   puzzleBravo: { fr: 'Le puzzle est fini, bravo !', en: 'Puzzle done, well done!', ar: 'اكتمل اللغز، أحسنت!' },
   memoryAide: { fr: 'Retourne deux cartes : trouve les paires !', en: 'Turn two cards: find the pairs!', ar: 'اقلب بطاقتين: جد الأزواج!' },
   aToi: { fr: 'À toi', en: 'Your turn', ar: 'دورك' },
@@ -8600,6 +8703,7 @@ const Puzzle = (() => {
   function demarrer(zone) {
     z = zone;
     if (prochaine) { const src = prochaine; prochaine = null; chargerImage(src).then(jouer); return; }
+    if (!imagesFamille().length) { chargerImage(imageScene(hasard(SCENES_LUMI))).then(jouer); return; }
     choisirImage((im) => jouer(im), { titre: '🧩 ' + fm('choisirImage') });
     const s = salle(z, { titre: '🧩 ' + t3(NOEUDS.puzzle.nom), sous: t3(NOEUDS.puzzle.desc) });
     s.bas.appendChild(bouton('🖼️ ' + fm('choisirImage'), () => choisirImage(jouer), 'mod-b principal'));
@@ -8619,12 +8723,17 @@ const Puzzle = (() => {
     s.corps.innerHTML = `<div class="pz-plateau" style="--n:${niveau}"></div>`;
     const niv = document.createElement('div'); niv.className = 'mod-puces';
     [[2, 'facile'], [3, 'moyen'], [4, 'dur']].forEach(([k, t]) => niv.appendChild(bouton(jx(t), () => { niveau = k; chargerImage(image).then(jouer); }, 'puce' + (k === niveau ? ' on' : ''))));
-    s.bas.append(niv, bouton('🖼️ ' + jx('autreImage'), () => choisirImage(jouer), 'mod-b'));
-    dessiner();
-    focusPremier(s.corps);
+    const modele = bouton('👀 ' + jx('modele'), () => { const p = z.querySelector('.pz-plateau'); p.classList.toggle('montre'); }, 'mod-b');
+    s.bas.append(niv, modele, bouton('🖼️ ' + jx('autreImage'), () => choisirImage(jouer), 'mod-b'));
+    // d'abord l'image entière : « Regarde bien ! », puis elle se mélange sous nos yeux
+    const vrai = ordre; ordre = [...Array(n).keys()]; dessiner();
+    const p = z.querySelector('.pz-plateau'); p.classList.add('fini', 'apercu');
+    s.sous.textContent = '👀 ' + jx('regarde'); parler(jx('regarde'));
+    setTimeout(() => { if (!z?.isConnected || !p.isConnected) return; p.classList.remove('fini', 'apercu'); ordre = vrai; dessiner(); son('pop'); s.sous.textContent = jx('puzzleAide'); parler(jx('puzzleAide')); focusPremier(z.querySelector('.pz-plateau')); }, 3200);
   }
   function dessiner() {
     const p = z.querySelector('.pz-plateau'), focus = [...p.children].indexOf(document.activeElement);
+    p.style.setProperty('--img', `url(${image})`);
     p.innerHTML = '';
     ordre.forEach((piece, i) => {
       const b = bouton('', () => toucher(i), 'pz-piece' + (i === choix ? ' choisi' : '') + (piece === i ? ' bien' : ''));
@@ -9146,7 +9255,7 @@ const Vivant = (() => {
     const g = s.corps.querySelector('.ci-grille'), l = lireJSON(Profils.cle('lumi-dessins', Profils.actif.id));
     g.appendChild(bouton(`<span class="ci-ic">✍️</span><b>${jx('dessinerMaintenant').replace('✍️ ', '')}</b>`, () => { aller('dessin'); dessinLibre(); }, 'ci-tuile ci-nouvelle principal'));
     l.forEach((d) => g.appendChild(bouton(`<img alt="" src="${d.img}">`, () => chargerImage(d.img).then((im) => { sprite = detourer(im); scene(); }), 'ci-tuile')));
-    ['🐟', '🚀', '🦋', '🚗'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => { const c = document.createElement('canvas'); c.width = c.height = 300; const x = c.getContext('2d'); x.font = '240px "Apple Color Emoji","Noto Color Emoji",sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 150, 160); sprite = c; mvt = { '🐟': 'nage', '🚀': 'fusee', '🦋': 'vole', '🚗': 'roule' }[e]; scene(); }, 'ci-tuile ci-lumi')));
+    ['🐟', '🚀', '🦋', '🚗'].forEach((e) => g.appendChild(bouton(`<span class="ci-ic">${e}</span>`, () => { const c = document.createElement('canvas'); c.width = c.height = 300; dessinerEmoji(c.getContext('2d'), e, 150, 150, 280); sprite = c; mvt = { '🐟': 'nage', '🚀': 'fusee', '🦋': 'vole', '🚗': 'roule' }[e]; scene(); }, 'ci-tuile ci-lumi')));
     focusPremier(g);
   }
   function scene() {
@@ -10476,6 +10585,283 @@ rangeesAccueil = function () { // eslint-disable-line no-func-assign
   return l;
 };
 
+// =====================================================================
+// ---------- Première connexion, configuration à distance et espace super admin ----------
+// =====================================================================
+const AD_TXT = {
+  bienvenue: { fr: 'Bonjour ! Je suis Lumi', en: 'Hello! I’m Lumi', ar: 'مرحبًا! أنا لومي' },
+  bienvenueSous: { fr: 'Une petite lumière pour jouer, créer et vivre des histoires en famille.', en: 'A little light to play, create and live stories as a family.', ar: 'ضوء صغير للعب والإبداع وعيش الحكايات مع العائلة.' },
+  langue: { fr: 'Dans quelle langue on parle ?', en: 'Which language shall we speak?', ar: 'بأي لغة نتحدث؟' },
+  qui: { fr: 'Qui va jouer avec moi ?', en: 'Who’s going to play with me?', ar: 'من سيلعب معي؟' },
+  prenom: { fr: 'Le prénom de l’enfant', en: 'The child’s first name', ar: 'اسم الطفل' },
+  choisisAnimal: { fr: 'Choisis ton animal', en: 'Pick your animal', ar: 'اختر حيوانك' },
+  appareil: { fr: 'Ton appareil', en: 'Your device', ar: 'جهازك' },
+  detecte: { fr: 'J’ai reconnu', en: 'I recognised', ar: 'تعرّفت على' },
+  tele: { fr: 'une télé 📺', en: 'a TV 📺', ar: 'تلفاز 📺' }, ordi: { fr: 'un ordinateur 💻', en: 'a computer 💻', ar: 'حاسوب 💻' },
+  tablette: { fr: 'une tablette', en: 'a tablet', ar: 'لوح' }, telephone: { fr: 'un téléphone 📱', en: 'a phone 📱', ar: 'هاتف 📱' },
+  camOui: { fr: 'Il y a une caméra : on peut jouer avec les mains et le corps (imite Lumi, danse, statues, défis des films). Les images restent sur l’appareil.', en: 'There’s a camera: you can play with your hands and body (copy Lumi, dance, statues, film challenges). Images stay on the device.', ar: 'توجد كاميرا: يمكن اللعب باليدين والجسم (قلّد لومي، الرقص، التماثيل، تحديات الأفلام). الصور تبقى على الجهاز.' },
+  camNon: { fr: 'Pas de caméra ici. Pas grave : on joue au doigt, à la télécommande, ou avec un téléphone comme manette.', en: 'No camera here. No problem: play with your finger, the remote, or a phone as a controller.', ar: 'لا كاميرا هنا. لا بأس: نلعب بالإصبع أو جهاز التحكم أو الهاتف.' },
+  autoriserCam: { fr: '📷 Autoriser la caméra', en: '📷 Allow the camera', ar: '📷 اسمح بالكاميرا' },
+  camOk: { fr: '✓ Caméra prête', en: '✓ Camera ready', ar: '✓ الكاميرا جاهزة' },
+  camRefus: { fr: 'Caméra refusée : vous pourrez l’autoriser plus tard dans le navigateur.', en: 'Camera refused: you can allow it later in the browser.', ar: 'رُفضت الكاميرا: يمكنكم السماح بها لاحقًا.' },
+  autoriserMicro: { fr: '🎤 Autoriser le micro (Parle à Lumi)', en: '🎤 Allow the microphone (Talk to Lumi)', ar: '🎤 اسمح بالميكروفون' },
+  microOk: { fr: '✓ Micro prêt', en: '✓ Microphone ready', ar: '✓ الميكروفون جاهز' },
+  telTele: { fr: 'Astuce : à la télé, un téléphone devient manette ou caméra (bouton « Jouer avec mon téléphone »).', en: 'Tip: on the TV, a phone becomes a controller or camera (“Play with my phone” button).', ar: 'نصيحة: على التلفاز يصبح الهاتف جهاز تحكم أو كاميرا.' },
+  parents: { fr: 'Pour les parents', en: 'For parents', ar: 'للأولياء' },
+  parentsSous: { fr: 'Un compte famille (facultatif) garde les progrès, les dessins et vos voix sur tous vos appareils, même la télé.', en: 'A family account (optional) keeps progress, drawings and your voices on all your devices, even the TV.', ar: 'حساب العائلة (اختياري) يحفظ التقدم والرسومات وأصواتكم على كل أجهزتكم.' },
+  plusTard: { fr: 'Plus tard', en: 'Later', ar: 'لاحقًا' },
+  suivant: { fr: 'Suivant →', en: 'Next →', ar: 'التالي ←' },
+  parti: { fr: 'C’est parti !', en: 'Let’s go!', ar: 'هيا بنا!' },
+  pret: { fr: 'Tout est prêt', en: 'All set', ar: 'كل شيء جاهز' },
+  pretSous: { fr: 'Les parents retrouvent tout dans l’espace parents (👨‍👩‍👧) : profils, heure du coucher, fêtes, cultures, achat.', en: 'Parents find everything in the parents area (👨‍👩‍👧): profiles, bedtime, celebrations, cultures, purchase.', ar: 'يجد الأولياء كل شيء في ركن الأولياء (👨‍👩‍👧).' },
+  revoir: { fr: '✨ Revoir l’accueil de Lumi', en: '✨ Replay Lumi’s welcome', ar: '✨ أعد ترحيب لومي' },
+};
+const ad = (k) => t3(AD_TXT[k]);
+
+// ---------- Configuration pilotée par le super admin (annonce, fête, modules masqués ou offerts, nouveautés) ----------
+const ConfigDistante = (() => {
+  let conf = {}; try { conf = JSON.parse(localStorage.getItem('lumi-config') || '{}'); } catch {}
+  const origine = {};
+  async function charger() {
+    const { url, cle } = CONFIG_APP.supabase; if (!url) return;
+    try {
+      const r = await fetch(`${url}/rest/v1/app_config?select=cle,valeur`, { headers: { apikey: cle } });
+      if (!r.ok) return;
+      const l = await r.json(); conf = Object.fromEntries(l.map((x) => [x.cle, x.valeur]));
+      try { localStorage.setItem('lumi-config', JSON.stringify(conf)); } catch {}
+      appliquer(); if (!document.documentElement.classList.contains('mode-admin')) afficher();
+    } catch {}
+  }
+  function appliquer() {
+    const caches = new Set(conf.modules_caches || []);
+    // les listes des menus, à partir de leur version d'origine
+    Object.entries(NOEUDS).forEach(([id, n]) => {
+      if (n.enfants) { origine[id] = origine[id] || { enfants: [...n.enfants] }; n.enfants = origine[id].enfants.filter((x) => !caches.has(x)); }
+      if (n.groupes) { origine[id] = origine[id] || { groupes: n.groupes.map((g) => [g[0], g[1], [...g[2]]]) }; n.groupes = origine[id].groupes.map((g) => [g[0], g[1], g[2].filter((x) => !caches.has(x))]); }
+    });
+    (conf.gratuit_en_plus || []).forEach((id) => GRATUIT.add(id));
+    if (conf.saison && conf.saison !== 'auto' && Saisons.reglage() === 'auto') { try { localStorage.setItem('lumi-saison-admin', conf.saison); } catch {} } else { try { localStorage.removeItem('lumi-saison-admin'); } catch {} }
+    (conf.nouveautes || []).forEach(([id, d]) => { if (!NOUVEAUTES.some((x) => x[0] === id)) NOUVEAUTES.unshift([id, d]); });
+  }
+  return { charger, appliquer, get conf() { return conf; }, cache: (id) => (conf.modules_caches || []).includes(id) };
+})();
+// la fête choisie par l'admin s'applique quand les parents ont laissé « automatique »
+const activeSaisonAvant = Saisons.active;
+Saisons.active = function (d) { const r = Saisons.reglage(); if (r === 'auto') { let a = null; try { a = localStorage.getItem('lumi-saison-admin'); } catch {} if (a === 'aucune') return null; if (a && SAISONS[a]) return a; } return activeSaisonAvant(d); };
+// rangées de l'accueil : sans les modules masqués, et avec l'annonce en tête
+const rangeesAccueilAvantAdmin = rangeesAccueil;
+rangeesAccueil = function () { return rangeesAccueilAvantAdmin().map((r) => ({ ...r, ids: r.ids.filter((x) => !ConfigDistante.cache(x)) })).filter((r) => r.ids.length); }; // eslint-disable-line no-func-assign
+const accueilRangeesAvant = accueilRangees;
+accueilRangees = function (zone) { // eslint-disable-line no-func-assign
+  accueilRangeesAvant(zone);
+  const a = ConfigDistante.conf.annonce;
+  if (a?.actif && t3(a.texte)) { const b = document.createElement('div'); b.className = 'annonce-admin'; b.innerHTML = '<span class="e"></span><span class="t"></span>'; b.querySelector('.e').textContent = a.emoji || '📣'; b.querySelector('.t').textContent = t3(a.texte); zone.prepend(b); }
+};
+const montrerTVAdmin = TV.montrer;
+TV.montrer = (id) => {
+  montrerTVAdmin(id);
+  const r = TV.racine, a = ConfigDistante.conf.annonce; if (!r) return;
+  r.querySelector('.tv-annonce')?.remove();
+  if (id === 'accueil' && a?.actif && t3(a.texte)) { const b = document.createElement('div'); b.className = 'tv-annonce'; b.textContent = `${a.emoji || '📣'} ${t3(a.texte)}`; r.querySelector('.tv-hero').prepend(b); }
+};
+
+// ---------- Première connexion : bienvenue, langue, profil, appareil et caméra, parents ----------
+const Bienvenue = (() => {
+  const fait = () => { try { return !!localStorage.getItem('lumi-bienvenue'); } catch { return true; } };
+  function appareil() {
+    const ua = navigator.userAgent, w = Math.min(screen.width, screen.height);
+    if (modeTele || /Android TV|AFT|BRAVIA|SmartTV|Tizen|Web0S|SHIELD/i.test(ua)) return 'tele';
+    if (/Mobi|iPhone|Android.+Mobile/i.test(ua) || w < 600) return 'telephone';
+    if (/iPad|Tablet|Android/i.test(ua) || (navigator.maxTouchPoints > 1 && !matchMedia('(pointer: fine)').matches)) return 'tablette';
+    return 'ordi';
+  }
+  async function cameras() { try { const l = await navigator.mediaDevices?.enumerateDevices?.(); return { cam: (l || []).some((d) => d.kind === 'videoinput'), micro: (l || []).some((d) => d.kind === 'audioinput') }; } catch { return { cam: false, micro: false }; } }
+  let etape = 0;
+  function ouvrir(force) {
+    if (!force && fait()) return;
+    etape = 0;
+    const f = fenetre('bienvenue'); $('fa-fond').onclick = null; $('fa-fond').classList.add('fond-bienvenue');
+    f.innerHTML = '<div class="bv-points"></div><div class="bv-corps"></div><div class="bv-actions"></div>';
+    dessiner(f);
+  }
+  const POINTS = 5;
+  function dessiner(f) {
+    f.querySelector('.bv-points').innerHTML = Array.from({ length: POINTS }, (_, i) => `<i class="${i === etape ? 'on' : i < etape ? 'fait' : ''}"></i>`).join('');
+    const c = f.querySelector('.bv-corps'), a = f.querySelector('.bv-actions'); c.innerHTML = ''; a.innerHTML = '';
+    const suivant = (txt = ad('suivant')) => a.appendChild(bouton(txt, () => { etape++; son('tic'); etape >= POINTS ? finir() : dessiner(f); }, 'bv-b principal'));
+    const titre = (e, t, sous) => { c.insertAdjacentHTML('beforeend', `<div class="bv-lumi">${e}</div><h2></h2>${sous ? '<p class="bv-sous"></p>' : ''}`); c.querySelector('h2').textContent = t; if (sous) c.querySelector('.bv-sous').textContent = sous; parler(t); };
+    if (etape === 0) {
+      titre('<span class="bv-orbe"></span>', ad('bienvenue'), ad('bienvenueSous'));
+      const l = document.createElement('div'); l.className = 'bv-langues'; c.appendChild(l);
+      [['fr', '🇫🇷 Français'], ['en', '🇬🇧 English'], ['ar', '🇹🇳 العربية']].forEach(([k, txt]) => l.appendChild(bouton(txt, () => { choisirLangue(k); try { localStorage.setItem('lumi-langue', k); } catch {} dessiner(f); }, 'bv-puce' + (langue === k ? ' on' : ''))));
+      suivant();
+    } else if (etape === 1) {
+      titre('👧🧒', ad('qui'));
+      const p = Profils.actif;
+      const i = document.createElement('input'); i.className = 'bv-champ'; i.placeholder = ad('prenom'); i.value = p.nom || ''; i.maxLength = 20; i.autocomplete = 'off';
+      i.oninput = () => Profils.modifier(p.id, { nom: i.value.trim() });
+      if (!modeTele) c.appendChild(i);
+      const h = document.createElement('p'); h.className = 'bv-sous'; h.textContent = ad('choisisAnimal'); c.appendChild(h);
+      const g = document.createElement('div'); g.className = 'bv-avatars'; c.appendChild(g);
+      AVATARS.forEach((e) => g.appendChild(bouton(e, () => { Profils.modifier(p.id, { avatar: e }); g.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.textContent === e)); son('pop'); avatar?.forme(e); }, p.avatar === e ? 'on' : '')));
+      suivant();
+    } else if (etape === 2) {
+      const type = appareil();
+      titre(type === 'tele' ? '📺' : type === 'telephone' ? '📱' : type === 'tablette' ? '📲' : '💻', `${ad('detecte')} ${ad(type)}`);
+      const zone = document.createElement('div'); zone.className = 'bv-capacites'; c.appendChild(zone);
+      zone.innerHTML = '<p class="bv-sous">…</p>';
+      cameras().then(({ cam, micro }) => {
+        if (!f.isConnected) return;
+        zone.innerHTML = '';
+        const t = document.createElement('p'); t.className = 'bv-sous'; t.textContent = cam ? ad('camOui') : ad('camNon'); zone.appendChild(t);
+        const ligne = document.createElement('div'); ligne.className = 'bv-langues'; zone.appendChild(ligne);
+        const demander = (b, contraintes, ok) => async () => {
+          try { const flux = await navigator.mediaDevices.getUserMedia(contraintes); flux.getTracks().forEach((x) => x.stop()); b.textContent = ok; b.classList.add('on'); b.disabled = true; son('juste'); try { localStorage.setItem('lumi-perm-' + Object.keys(contraintes)[0], 'oui'); } catch {} }
+          catch { b.textContent = ad('camRefus'); }
+        };
+        if (cam) { const b = bouton(ad('autoriserCam'), null, 'bv-puce grand'); b.onclick = demander(b, { video: true }, ad('camOk')); ligne.appendChild(b); }
+        if (micro && type !== 'tele') { const b = bouton(ad('autoriserMicro'), null, 'bv-puce grand'); b.onclick = demander(b, { audio: true }, ad('microOk')); ligne.appendChild(b); }
+        if (type === 'tele' || type === 'ordi') { const tt = document.createElement('p'); tt.className = 'bv-astuce'; tt.textContent = ad('telTele'); zone.appendChild(tt); }
+        try { localStorage.setItem('lumi-appareil', JSON.stringify({ type, cam, micro })); } catch {}
+        focusPremier(f);
+      });
+      suivant();
+    } else if (etape === 3) {
+      titre('👨‍👩‍👧', ad('parents'), ad('parentsSous'));
+      const l = document.createElement('div'); l.className = 'bv-langues'; c.appendChild(l);
+      if (Famille.dispo && !Famille.connecte) {
+        if (!NATIF) l.appendChild(bouton('<b>G</b> ' + ({ fr: 'Continuer avec Google', en: 'Continue with Google', ar: 'المتابعة مع Google' }[langue] || 'Google'), () => { try { localStorage.setItem('lumi-bienvenue', String(Date.now())); } catch {} Famille.google(); }, 'bv-puce grand bv-google'));
+        l.appendChild(bouton('✉️ ' + ({ fr: 'Avec un e-mail', en: 'With an email', ar: 'بالبريد الإلكتروني' }[langue] || 'E-mail'), () => { finir(); setTimeout(() => porteParents(() => espaceParents('compte')), 300); }, 'bv-puce grand'));
+      } else if (Famille.connecte) { const p = document.createElement('p'); p.className = 'bv-sous'; p.textContent = '✅ ' + Famille.email; c.appendChild(p); }
+      suivant(ad('plusTard') + ' →');
+    } else {
+      const p = Profils.actif;
+      titre(p.avatar, `${ad('pret')}${p.nom ? ', ' + p.nom : ''} !`, ad('pretSous'));
+      suivant(ad('parti'));
+    }
+    focusPremier(f.querySelector('.bv-actions'));
+  }
+  function finir() { try { localStorage.setItem('lumi-bienvenue', String(Date.now())); } catch {} fermerFenetre(); fete(); jingle(); afficher(); accueillir(); }
+  return { ouvrir, appareil };
+})();
+// dans l'espace parents : revoir l'accueil
+const espaceParentsAvantBv = espaceParents;
+espaceParents = function (section) { // eslint-disable-line no-func-assign
+  espaceParentsAvantBv(section);
+  const f = $('fa-fond')?.querySelector('.fa-t-parents'); if (!f) return;
+  const b = document.createElement('section'); b.className = 'fa-bloc';
+  b.appendChild(bouton(ad('revoir'), () => Bienvenue.ouvrir(true), 'fa-bouton'));
+  f.querySelector('.fa-pied')?.before(b);
+};
+
+// ---------- Espace super admin : …/lumiole/?admin ----------
+const SuperAdmin = (() => {
+  let racine = null, onglet = 'tableau', conf = {};
+  const T = {
+    titre: 'Lumiole · Super admin', connexion: 'Connexion administrateur', email: 'Adresse e-mail', envoyer: 'Recevoir un code', code: 'Code reçu par e-mail', valider: 'Valider',
+    pasAdmin: 'Ce compte n’est pas administrateur.', sortir: 'Se déconnecter', enreg: 'Enregistrer', enregistre: '✓ Enregistré — les familles le verront au prochain lancement', erreur: 'Erreur : ',
+  };
+  const rpc = (nom, corps = {}) => Famille.requete('/rest/v1/rpc/' + nom, { method: 'POST', body: JSON.stringify(corps) });
+  async function lireConf() { const l = await Famille.requete('/rest/v1/app_config?select=cle,valeur'); conf = Object.fromEntries((l || []).map((x) => [x.cle, x.valeur])); }
+  async function ecrire(cle, valeur) { await Famille.requete('/rest/v1/app_config', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ cle, valeur, maj: new Date().toISOString() }) }); conf[cle] = valeur; }
+  function ouvrir() {
+    document.documentElement.classList.add('mode-admin');
+    racine = document.createElement('div'); racine.id = 'admin'; document.body.appendChild(racine);
+    afficherPage();
+  }
+  async function afficherPage() {
+    if (!Famille.connecte) return connexion();
+    racine.innerHTML = '<div class="adm-charge">…</div>';
+    let ok = false; try { ok = await rpc('est_admin'); } catch {}
+    if (!ok) { racine.innerHTML = `<div class="adm-boite"><h1>${T.titre}</h1><p>${T.pasAdmin}</p><p class="adm-doux">${Famille.email || ''}</p><button class="adm-b" data-a="s">${T.sortir}</button></div>`; racine.querySelector('[data-a=s]').onclick = () => { Famille.sortir(); afficherPage(); }; return; }
+    await lireConf().catch(() => {});
+    racine.innerHTML = `<header class="adm-haut"><b>✦ ${T.titre}</b><span class="adm-doux">${Famille.email}</span><a class="adm-b" href="./" target="_blank">Ouvrir l’app ↗</a><button class="adm-b" data-a="s">${T.sortir}</button></header>
+      <nav class="adm-onglets"></nav><main class="adm-page"></main>`;
+    racine.querySelector('[data-a=s]').onclick = () => { Famille.sortir(); afficherPage(); };
+    const nav = racine.querySelector('.adm-onglets');
+    [['tableau', '📊 Tableau de bord'], ['familles', '👨‍👩‍👧 Familles'], ['annonce', '📣 Annonce'], ['contenu', '🧩 Contenu'], ['fetes', '🎉 Fêtes et nouveautés'], ['outils', '🛠️ Outils']].forEach(([k, t]) => nav.appendChild(bouton(t, () => { onglet = k; dessiner(); }, 'adm-onglet' + (k === onglet ? ' on' : ''))).dataset.k = k);
+    dessiner();
+  }
+  function connexion() {
+    racine.innerHTML = `<div class="adm-boite"><h1>✦ ${T.titre}</h1><p class="adm-doux">${T.connexion}</p>
+      <input class="adm-champ" type="email" autocomplete="email" placeholder="${T.email}"><button class="adm-b principal" data-a="e">${T.envoyer}</button>
+      <div class="adm-code" hidden><input class="adm-champ" inputmode="numeric" autocomplete="one-time-code" placeholder="${T.code}"><button class="adm-b principal" data-a="v">${T.valider}</button></div>
+      <p class="adm-ou">ou</p><button class="adm-b" data-a="g"><b>G</b> Continuer avec Google</button><p class="adm-msg"></p></div>`;
+    const [em, co] = racine.querySelectorAll('.adm-champ'), msg = racine.querySelector('.adm-msg');
+    racine.querySelector('[data-a=e]').onclick = async () => { try { await Famille.envoyerCode(em.value.trim()); racine.querySelector('.adm-code').hidden = false; co.focus(); msg.textContent = '✉️ Code envoyé'; } catch (e) { msg.textContent = T.erreur + e.message; } };
+    racine.querySelector('[data-a=v]').onclick = async () => { try { await Famille.verifier(em.value.trim(), co.value.trim()); afficherPage(); } catch (e) { msg.textContent = T.erreur + e.message; } };
+    racine.querySelector('[data-a=g]').onclick = () => Famille.google();
+  }
+  const page = () => racine.querySelector('.adm-page');
+  const carte = (titre, valeur, sous = '') => `<div class="adm-carte"><span class="adm-doux">${titre}</span><b>${valeur}</b><small>${sous}</small></div>`;
+  async function dessiner() {
+    racine.querySelectorAll('.adm-onglet').forEach((b) => b.classList.toggle('on', b.dataset.k === onglet));
+    const p = page(); p.innerHTML = '<div class="adm-charge">…</div>';
+    try { await ({ tableau, familles, annonce, contenu, fetes, outils }[onglet])(p); } catch (e) { p.innerHTML = `<p class="adm-msg">${T.erreur}${e.message}</p>`; }
+  }
+  async function tableau(p) {
+    const s = await rpc('admin_stats');
+    const max = Math.max(1, ...s.par_jour.map((x) => x.n));
+    p.innerHTML = `<h2>Tableau de bord</h2><div class="adm-cartes">${carte('Comptes parents', s.comptes, `+${s.comptes_7j} cette semaine · +${s.comptes_30j} ce mois`)}${carte('Actifs (7 jours)', s.actifs_7j, 'connexions récentes')}${carte('Familles synchronisées', s.familles, `${s.familles_synchro_7j} cette semaine`)}${carte('Profils enfants', s.enfants, 'dans les familles synchronisées')}${carte('Voix enregistrées', s.voix, 'histoires lues par les parents')}${carte('Contenus', Object.keys(NOEUDS).length, `${FILMS.length} film(s) · ${HISTOIRES.length} histoires · ${CHANSONS.length} comptines`)}</div>
+      <h3>Inscriptions des 30 derniers jours</h3><div class="adm-barres">${s.par_jour.length ? s.par_jour.map((x) => `<div title="${x.jour} : ${x.n}" style="height:${Math.round(x.n / max * 100)}%"><span>${x.n}</span></div>`).join('') : '<p class="adm-doux">Pas encore d’inscription.</p>'}</div>
+      <p class="adm-doux">Les statistiques ne contiennent aucune donnée personnelle des enfants. Les familles sans compte (jeu sans connexion) ne sont pas comptées.</p>`;
+  }
+  async function familles(p) {
+    const l = await rpc('admin_familles', { n: 200 });
+    const d = (x) => (x ? new Date(x).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' }) : '—');
+    p.innerHTML = `<h2>Familles (${l.length})</h2><div class="adm-table"><table><tr><th>Compte parent</th><th>Inscrit</th><th>Dernière connexion</th><th>Enfants</th><th>Dernière synchro</th></tr>${l.map((x) => `<tr><td>${x.email || '—'}</td><td>${d(x.inscrit)}</td><td>${d(x.derniere_connexion)}</td><td>${x.enfants}</td><td>${d(x.synchro)}</td></tr>`).join('')}</table></div>`;
+  }
+  function msgEnreg(p, promesse) { const m = p.querySelector('.adm-msg'); m.textContent = '…'; promesse.then(() => { m.textContent = T.enregistre; }).catch((e) => { m.textContent = T.erreur + e.message; }); }
+  async function annonce(p) {
+    const a = conf.annonce || { actif: false, emoji: '📣', texte: { fr: '', en: '', ar: '' } };
+    p.innerHTML = `<h2>Annonce aux familles</h2><p class="adm-doux">Un bandeau en haut de l’accueil (téléphone, tablette, télé), dans la langue de chaque famille.</p>
+      <label class="adm-ligne"><input type="checkbox" data-k="actif" ${a.actif ? 'checked' : ''}> Afficher l’annonce</label>
+      <label class="adm-ligne">Emoji <input class="adm-champ court" data-k="emoji" value="${a.emoji || '📣'}"></label>
+      ${['fr', 'en', 'ar'].map((l) => `<label class="adm-col">${{ fr: 'Français', en: 'English', ar: 'العربية' }[l]}<textarea class="adm-champ" data-l="${l}" ${l === 'ar' ? 'dir="rtl"' : ''} rows="2">${a.texte?.[l] || ''}</textarea></label>`).join('')}
+      <div class="annonce-admin apercu"><span class="e"></span><span class="t"></span></div>
+      <button class="adm-b principal" data-a="ok">${T.enreg}</button><p class="adm-msg"></p>`;
+    const lire = () => ({ actif: p.querySelector('[data-k=actif]').checked, emoji: p.querySelector('[data-k=emoji]').value, texte: Object.fromEntries([...p.querySelectorAll('[data-l]')].map((x) => [x.dataset.l, x.value.trim()])) });
+    const ap = () => { const v = lire(); p.querySelector('.apercu .e').textContent = v.emoji; p.querySelector('.apercu .t').textContent = v.texte.fr || '…'; };
+    p.oninput = ap; ap();
+    p.querySelector('[data-a=ok]').onclick = () => msgEnreg(p, ecrire('annonce', lire()));
+  }
+  async function contenu(p) {
+    const caches = new Set(conf.modules_caches || []), offerts = new Set(conf.gratuit_en_plus || []);
+    const ids = Object.entries(NOEUDS).filter(([id, n]) => n.nom && id !== 'accueil' && !/^col-|^cc-|^ct-|-mots$|-conte$|-chant$|-miroir$|-memory$/.test(id) && n.type !== 'colorier');
+    p.innerHTML = `<h2>Contenu</h2><p class="adm-doux">Masquer un module le retire des menus, de l’accueil et de la recherche. « Offert » l’ouvre aux familles sans achat (promotion).</p>
+      <input class="adm-champ" placeholder="Filtrer…" data-a="f"><div class="adm-table"><table><tr><th>Module</th><th>Identifiant</th><th>Visible</th><th>Offert</th><th>Gratuit d’origine</th></tr>
+      ${ids.map(([id, n]) => `<tr data-id="${id}"><td>${n.emoji} ${t3(n.nom)}</td><td><code>${id}</code></td><td><input type="checkbox" data-k="v" ${caches.has(id) ? '' : 'checked'}></td><td><input type="checkbox" data-k="o" ${offerts.has(id) ? 'checked' : ''}></td><td>${GRATUIT.has(id) && !offerts.has(id) ? '✓' : ''}</td></tr>`).join('')}</table></div>
+      <button class="adm-b principal" data-a="ok">${T.enreg}</button><p class="adm-msg"></p>`;
+    p.querySelector('[data-a=f]').oninput = (e) => { const q = e.target.value.toLowerCase(); p.querySelectorAll('tr[data-id]').forEach((tr) => { tr.hidden = !tr.textContent.toLowerCase().includes(q); }); };
+    p.querySelector('[data-a=ok]').onclick = () => {
+      const c = [...p.querySelectorAll('tr[data-id]')].filter((tr) => !tr.querySelector('[data-k=v]').checked).map((tr) => tr.dataset.id);
+      const o = [...p.querySelectorAll('tr[data-id]')].filter((tr) => tr.querySelector('[data-k=o]').checked).map((tr) => tr.dataset.id);
+      msgEnreg(p, Promise.all([ecrire('modules_caches', c), ecrire('gratuit_en_plus', o)]));
+    };
+  }
+  async function fetes(p) {
+    const s = conf.saison || 'auto', n = conf.nouveautes || [];
+    p.innerHTML = `<h2>Fête du moment</h2><p class="adm-doux">« Automatique » suit la date. Un choix ici s’applique à toutes les familles qui n’ont pas choisi elles-mêmes.</p><div class="adm-puces"></div>
+      <h2>Nouveautés mises en avant</h2><p class="adm-doux">S’ajoutent à la rangée « Nouveau ! » pendant 45 jours après la date.</p>
+      <div class="adm-nouv"></div><div class="adm-ligne"><select class="adm-champ" data-a="id">${Object.entries(NOEUDS).filter(([, x]) => x.nom).map(([id, x]) => `<option value="${id}">${x.emoji} ${t3(x.nom)}</option>`).join('')}</select><input class="adm-champ court" type="date" data-a="d" value="${new Date().toISOString().slice(0, 10)}"><button class="adm-b" data-a="plus">Ajouter</button></div>
+      <button class="adm-b principal" data-a="ok">${T.enreg}</button><p class="adm-msg"></p>`;
+    let choix = s; const puces = p.querySelector('.adm-puces');
+    [['auto', '✨ Automatique'], ...Object.entries(SAISONS).map(([k, x]) => [k, `${x.emoji} ${t3(x.nom)}`]), ['aucune', 'Aucune']].forEach(([k, t]) => puces.appendChild(bouton(t, (e) => { choix = k; puces.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === e.currentTarget)); }, 'adm-puce' + (k === s ? ' on' : ''))));
+    let liste = [...n];
+    const dess = () => { p.querySelector('.adm-nouv').innerHTML = liste.length ? liste.map(([id, d], i) => `<span class="adm-tag">${NOEUDS[id]?.emoji || ''} ${t3(NOEUDS[id]?.nom) || id} · ${d} <button data-i="${i}">✕</button></span>`).join('') : '<p class="adm-doux">Aucune (les nouveautés du code restent affichées).</p>'; p.querySelectorAll('.adm-tag button').forEach((b) => { b.onclick = () => { liste.splice(+b.dataset.i, 1); dess(); }; }); };
+    dess();
+    p.querySelector('[data-a=plus]').onclick = () => { liste.unshift([p.querySelector('[data-a=id]').value, p.querySelector('[data-a=d]').value]); dess(); };
+    p.querySelector('[data-a=ok]').onclick = () => msgEnreg(p, Promise.all([ecrire('saison', choix), ecrire('nouveautes', liste)]));
+  }
+  async function outils(p) {
+    const l = [['🌐 Le site (version web)', './'], ['📱 Télécharger l’APK Android', 'https://github.com/kameldhakwani90/lumiole/releases/download/android/lumiole.apk'], ['🗄️ Tableau de bord Supabase', 'https://supabase.com/dashboard/project/paxkqwkuztsgsnzmeskp'], ['🔑 Fournisseurs de connexion (Google)', 'https://supabase.com/dashboard/project/paxkqwkuztsgsnzmeskp/auth/providers'], ['💳 RevenueCat (achats)', 'https://app.revenuecat.com/'], ['📄 Politique de confidentialité', CONFIG_APP.confidentialite]];
+    p.innerHTML = `<h2>Outils</h2><div class="adm-liens">${l.map(([t, u]) => `<a class="adm-b" target="_blank" rel="noopener" href="${u}">${t} ↗</a>`).join('')}</div>
+      <h3>Version de l’app sur cet appareil</h3><p class="adm-doux">${FILMS.length} film(s) · ${Object.keys(NOEUDS).length} activités · ${HISTOIRES.length} histoires · ${CHANSONS.length} comptines · ${MOTS.length} mots</p>
+      <h3>Configuration actuelle</h3><pre class="adm-pre">${JSON.stringify(conf, null, 2).replace(/</g, '&lt;')}</pre>`;
+  }
+  return { ouvrir };
+})();
+
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
 accueillir();
@@ -10487,6 +10873,9 @@ if (/^\d{4}$/.test(codeManette || '')) { document.documentElement.classList.add(
 else if (modeTele && CONFIG_APP.supabase.url) setTimeout(() => DuoEcran.ecouter().then(() => TV.petitQr()).catch(() => {}), 1200);
 // à la télé et sur grand écran : un bouton « téléphone » pour jouer sans passer par l'espace parents
 $('btn-duo').onclick = () => DuoEcran.demarrer();
+// espace super admin (…/?admin), sinon : configuration à distance et accueil de la première connexion
+if (paramsUrl.has('admin')) (async () => { try { await Famille.init(); } catch {} SuperAdmin.ouvrir(); })();
+else { ConfigDistante.appliquer(); ConfigDistante.charger(); if (!/^\d{4}$/.test(codeManette || '')) setTimeout(() => Bienvenue.ouvrir(), 700); }
 setTimeout(() => { avatar?.mode(paletteAmb); avatar?.forme(duJour().mot.emoji); revenirAuNuage(8000); }, 600);
 
 </script>
