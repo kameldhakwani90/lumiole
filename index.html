@@ -2105,6 +2105,19 @@
   }
   .hi-mode button { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 420px) { .hi-mode button { font-size: 14px; padding: 10px 4px; } }
+
+  .vi-devine { width: 100%; max-width: 640px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px; border-radius: 20px; background: rgba(46,230,197,.08); border: 1px solid rgba(46,230,197,.35); }
+  .vi-devine[hidden] { display: none; }
+  .vi-d-txt { margin: 0; font: 800 19px/1.3 'Baloo 2', system-ui, sans-serif; text-align: center; }
+  .vi-devine.cherche .vi-d-txt { animation: vi-pulse 1.2s ease-in-out infinite; }
+  @keyframes vi-pulse { 50% { opacity: .45; } }
+  .vi-d-choix { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .vi-d-oui { display: flex; align-items: center; gap: 10px; height: 64px; padding: 0 26px; border-radius: 34px; border: none; background: var(--degrade); color: var(--primaire-encre); font: 900 20px system-ui, sans-serif; cursor: pointer; box-shadow: 0 8px 24px rgba(46,230,197,.35); }
+  .vi-d-oui .e { font-size: 34px; }
+  .vi-d-oui:focus-visible, .tele .vi-d-oui:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 4px #fff; }
+  .vi-d-choix .vi-forme { width: 96px; }
+  .vi-sinon { margin: 4px 0 0; color: #A9BCD0; font-weight: 700; font-size: 14px; }
+  .tele .vi-d-txt { font-size: 3vh; } .tele .vi-d-oui { height: 8vh; font-size: 3vh; } .tele .vi-sinon { font-size: 2vh; }
 </style>
 </head>
 <body>
@@ -8923,6 +8936,11 @@ const JX = {
   abracadabra: { fr: 'Abracadabra ! Ton dessin devient', en: 'Abracadabra! Your drawing becomes', ar: 'أبرا كادابرا! رسمك يصبح' },
   transformer: { fr: 'Transformer', en: 'Transform', ar: 'حوّل' },
   monDessin: { fr: 'Mon dessin', en: 'My drawing', ar: 'رسمي' },
+  reflechit: { fr: 'Lumi regarde ton dessin…', en: 'Lumi is looking at your drawing…', ar: 'لومي ينظر إلى رسمك…' },
+  jeCrois: { fr: 'Je crois que c’est', en: 'I think it’s', ar: 'أظن أنه' },
+  peutEtre: { fr: 'Ou peut-être', en: 'Or maybe', ar: 'أو ربما' },
+  oui: { fr: 'Oui !', en: 'Yes!', ar: 'نعم!' },
+  sinon: { fr: 'Sinon, choisis ici :', en: 'If not, pick here:', ar: 'وإلا، اختر هنا:' },
 };
 const jx = (k) => t3(JX[k]);
 
@@ -9538,6 +9556,152 @@ MODULES.coffre = (() => {
 })();
 
 // ---------- Mon dessin prend vie : il nage, vole, saute, roule, décolle ou danse ----------
+// ---------- Lumi devine le dessin, sur l'appareil (modèle « Quick, Draw! » de Google, rien n'est envoyé) ----------
+const CLASSES_DOODLE = ["flashlight", "belt", "mushroom", "pond", "strawberry", "pineapple", "sun", "cow", "ear", "bush", "pliers", "watermelon", "apple", "baseball", "feather", "shoe", "leaf", "lollipop", "crown", "ocean", "horse", "mountain", "mosquito", "mug", "hospital", "saw", "castle", "angel", "underwear", "traffic_light", "cruise_ship", "marker", "blueberry", "flamingo", "face", "hockey_stick", "bucket", "campfire", "asparagus", "skateboard", "door", "suitcase", "skull", "cloud", "paint_can", "hockey_puck", "steak", "house_plant", "sleeping_bag", "bench", "snowman", "arm", "crayon", "fan", "shovel", "leg", "washing_machine", "harp", "toothbrush", "tree", "bear", "rake", "megaphone", "knee", "guitar", "calculator", "hurricane", "grapes", "paintbrush", "couch", "nose", "square", "wristwatch", "penguin", "bridge", "octagon", "submarine", "screwdriver", "rollerskates", "ladder", "wine_bottle", "cake", "bracelet", "broom", "yoga", "finger", "fish", "line", "truck", "snake", "bus", "stitches", "snorkel", "shorts", "bowtie", "pickup_truck", "tooth", "snail", "foot", "crab", "school_bus", "train", "dresser", "sock", "tractor", "map", "hedgehog", "coffee_cup", "computer", "matches", "beard", "frog", "crocodile", "bathtub", "rain", "moon", "bee", "knife", "boomerang", "lighthouse", "chandelier", "jail", "pool", "stethoscope", "frying_pan", "cell_phone", "binoculars", "purse", "lantern", "birthday_cake", "clarinet", "palm_tree", "aircraft_carrier", "vase", "eraser", "shark", "skyscraper", "bicycle", "sink", "teapot", "circle", "tornado", "bird", "stereo", "mouth", "key", "hot_dog", "spoon", "laptop", "cup", "bottlecap", "The_Great_Wall_of_China", "The_Mona_Lisa", "smiley_face", "waterslide", "eyeglasses", "ceiling_fan", "lobster", "moustache", "carrot", "garden", "police_car", "postcard", "necklace", "helmet", "blackberry", "beach", "golf_club", "car", "panda", "alarm_clock", "t-shirt", "dog", "bread", "wine_glass", "lighter", "flower", "bandage", "drill", "butterfly", "swan", "owl", "raccoon", "squiggle", "calendar", "giraffe", "elephant", "trumpet", "rabbit", "trombone", "sheep", "onion", "church", "flip_flops", "spreadsheet", "pear", "clock", "roller_coaster", "parachute", "kangaroo", "duck", "remote_control", "compass", "monkey", "rainbow", "tennis_racquet", "lion", "pencil", "string_bean", "oven", "star", "cat", "pizza", "soccer_ball", "syringe", "flying_saucer", "eye", "cookie", "floor_lamp", "mouse", "toilet", "toaster", "The_Eiffel_Tower", "airplane", "stove", "cello", "stop_sign", "tent", "diving_board", "light_bulb", "hammer", "scorpion", "headphones", "basket", "spider", "paper_clip", "sweater", "ice_cream", "envelope", "sea_turtle", "donut", "hat", "hourglass", "broccoli", "jacket", "backpack", "book", "lightning", "drums", "snowflake", "radio", "banana", "camel", "canoe", "toothpaste", "chair", "picture_frame", "parrot", "sandwich", "lipstick", "pants", "violin", "brain", "power_outlet", "triangle", "hamburger", "dragon", "bulldozer", "cannon", "dolphin", "zebra", "animal_migration", "camouflage", "scissors", "basketball", "elbow", "umbrella", "windmill", "table", "rifle", "hexagon", "potato", "anvil", "sword", "peanut", "axe", "television", "rhinoceros", "baseball_bat", "speedboat", "sailboat", "zigzag", "garden_hose", "river", "house", "pillow", "ant", "tiger", "stairs", "cooler", "see_saw", "piano", "fireplace", "popsicle", "dumbbell", "mailbox", "barn", "hot_tub", "teddy-bear", "fork", "dishwasher", "peas", "hot_air_balloon", "keyboard", "microwave", "wheel", "fire_hydrant", "van", "camera", "whale", "candle", "octopus", "pig", "swing_set", "helicopter", "saxophone", "passport", "bat", "ambulance", "diamond", "goatee", "fence", "grass", "mermaid", "motorbike", "microphone", "toe", "cactus", "nail", "telephone", "hand", "squirrel", "streetlight", "bed", "firetruck"];
+const DOODLE_EMOJI = {
+  'octopus': ['🐙', 'nage', nom3("pieuvre", "octopus", "أخطبوط")],
+  'fish': ['🐟', 'nage', nom3("poisson", "fish", "سمكة")],
+  'crab': ['🦀', 'nage', nom3("crabe", "crab", "سلطعون")],
+  'dolphin': ['🐬', 'nage', nom3("dauphin", "dolphin", "دلفين")],
+  'whale': ['🐋', 'nage', nom3("baleine", "whale", "حوت")],
+  'shark': ['🦈', 'nage', nom3("requin", "shark", "قرش")],
+  'sea_turtle': ['🐢', 'nage', nom3("tortue", "sea turtle", "سلحفاة")],
+  'lobster': ['🦞', 'nage', nom3("homard", "lobster", "كركند")],
+  'mermaid': ['🧜', 'nage', nom3("sirène", "mermaid", "حورية البحر")],
+  'crocodile': ['🐊', 'nage', nom3("crocodile", "crocodile", "تمساح")],
+  'sailboat': ['⛵', 'nage', nom3("voilier", "sailboat", "مركب شراعي")],
+  'speedboat': ['🚤', 'nage', nom3("bateau", "speedboat", "قارب")],
+  'swan': ['🦢', 'nage', nom3("cygne", "swan", "بجعة")],
+  'duck': ['🦆', 'nage', nom3("canard", "duck", "بطة")],
+  'butterfly': ['🦋', 'vole', nom3("papillon", "butterfly", "فراشة")],
+  'bird': ['🐦', 'vole', nom3("oiseau", "bird", "عصفور")],
+  'bee': ['🐝', 'vole', nom3("abeille", "bee", "نحلة")],
+  'owl': ['🦉', 'vole', nom3("hibou", "owl", "بومة")],
+  'parrot': ['🦜', 'vole', nom3("perroquet", "parrot", "ببغاء")],
+  'bat': ['🦇', 'vole', nom3("chauve-souris", "bat", "خفاش")],
+  'airplane': ['✈️', 'vole', nom3("avion", "airplane", "طائرة")],
+  'helicopter': ['🚁', 'vole', nom3("hélicoptère", "helicopter", "مروحية")],
+  'hot_air_balloon': ['🎈', 'vole', nom3("montgolfière", "hot air balloon", "منطاد")],
+  'star': ['⭐', 'vole', nom3("étoile", "star", "نجمة")],
+  'cloud': ['☁️', 'vole', nom3("nuage", "cloud", "غيمة")],
+  'angel': ['👼', 'vole', nom3("ange", "angel", "ملاك")],
+  'dragon': ['🐉', 'vole', nom3("dragon", "dragon", "تنين")],
+  'flamingo': ['🦩', 'vole', nom3("flamant rose", "flamingo", "فلامنغو")],
+  'mosquito': ['🦟', 'vole', nom3("moustique", "mosquito", "بعوضة")],
+  'moon': ['🌙', 'vole', nom3("lune", "moon", "قمر")],
+  'rainbow': ['🌈', 'vole', nom3("arc-en-ciel", "rainbow", "قوس قزح")],
+  'snowflake': ['❄️', 'vole', nom3("flocon", "snowflake", "ندفة ثلج")],
+  'lantern': ['🏮', 'vole', nom3("lanterne", "lantern", "فانوس")],
+  'umbrella': ['☂️', 'vole', nom3("parapluie", "umbrella", "مظلة")],
+  'flying_saucer': ['🛸', 'fusee', nom3("soucoupe volante", "flying saucer", "صحن طائر")],
+  'frog': ['🐸', 'saute', nom3("grenouille", "frog", "ضفدع")],
+  'rabbit': ['🐰', 'saute', nom3("lapin", "rabbit", "أرنب")],
+  'kangaroo': ['🦘', 'saute', nom3("kangourou", "kangaroo", "كنغر")],
+  'monkey': ['🐒', 'saute', nom3("singe", "monkey", "قرد")],
+  'squirrel': ['🐿️', 'saute', nom3("écureuil", "squirrel", "سنجاب")],
+  'horse': ['🐴', 'saute', nom3("cheval", "horse", "حصان")],
+  'penguin': ['🐧', 'saute', nom3("pingouin", "penguin", "بطريق")],
+  'spider': ['🕷️', 'saute', nom3("araignée", "spider", "عنكبوت")],
+  'soccer_ball': ['⚽', 'saute', nom3("ballon", "soccer ball", "كرة")],
+  'basketball': ['🏀', 'saute', nom3("ballon", "basketball", "كرة")],
+  'tiger': ['🐯', 'saute', nom3("tigre", "tiger", "نمر")],
+  'lion': ['🦁', 'saute', nom3("lion", "lion", "أسد")],
+  'car': ['🚗', 'roule', nom3("voiture", "car", "سيارة")],
+  'train': ['🚂', 'roule', nom3("train", "train", "قطار")],
+  'bus': ['🚌', 'roule', nom3("bus", "bus", "حافلة")],
+  'school_bus': ['🚌', 'roule', nom3("bus", "school bus", "حافلة")],
+  'truck': ['🚚', 'roule', nom3("camion", "truck", "شاحنة")],
+  'pickup_truck': ['🛻', 'roule', nom3("camionnette", "pickup truck", "شاحنة صغيرة")],
+  'police_car': ['🚓', 'roule', nom3("voiture de police", "police car", "سيارة شرطة")],
+  'firetruck': ['🚒', 'roule', nom3("camion de pompiers", "firetruck", "سيارة إطفاء")],
+  'ambulance': ['🚑', 'roule', nom3("ambulance", "ambulance", "سيارة إسعاف")],
+  'tractor': ['🚜', 'roule', nom3("tracteur", "tractor", "جرار")],
+  'bicycle': ['🚲', 'roule', nom3("vélo", "bicycle", "دراجة")],
+  'motorbike': ['🏍️', 'roule', nom3("moto", "motorbike", "دراجة نارية")],
+  'van': ['🚐', 'roule', nom3("camionnette", "van", "حافلة صغيرة")],
+  'snail': ['🐌', 'roule', nom3("escargot", "snail", "حلزون")],
+  'snake': ['🐍', 'roule', nom3("serpent", "snake", "ثعبان")],
+  'ant': ['🐜', 'roule', nom3("fourmi", "ant", "نملة")],
+  'mouse': ['🐭', 'roule', nom3("souris", "mouse", "فأر")],
+  'hedgehog': ['🦔', 'roule', nom3("hérisson", "hedgehog", "قنفذ")],
+  'cat': ['🐱', 'danse', nom3("chat", "cat", "قط")],
+  'dog': ['🐶', 'danse', nom3("chien", "dog", "كلب")],
+  'flower': ['🌸', 'danse', nom3("fleur", "flower", "زهرة")],
+  'sun': ['☀️', 'danse', nom3("soleil", "sun", "شمس")],
+  'house': ['🏠', 'danse', nom3("maison", "house", "بيت")],
+  'tree': ['🌳', 'danse', nom3("arbre", "tree", "شجرة")],
+  'palm_tree': ['🌴', 'danse', nom3("palmier", "palm tree", "نخلة")],
+  'cactus': ['🌵', 'danse', nom3("cactus", "cactus", "صبار")],
+  'snowman': ['⛄', 'danse', nom3("bonhomme de neige", "snowman", "رجل الثلج")],
+  'smiley_face': ['😊', 'danse', nom3("sourire", "smiley face", "وجه مبتسم")],
+  'face': ['🙂', 'danse', nom3("visage", "face", "وجه")],
+  'apple': ['🍎', 'danse', nom3("pomme", "apple", "تفاحة")],
+  'banana': ['🍌', 'danse', nom3("banane", "banana", "موزة")],
+  'strawberry': ['🍓', 'danse', nom3("fraise", "strawberry", "فراولة")],
+  'pineapple': ['🍍', 'danse', nom3("ananas", "pineapple", "أناناس")],
+  'ice_cream': ['🍦', 'danse', nom3("glace", "ice cream", "مثلجات")],
+  'cake': ['🍰', 'danse', nom3("gâteau", "cake", "كعكة")],
+  'birthday_cake': ['🎂', 'danse', nom3("gâteau d’anniversaire", "birthday cake", "كعكة عيد ميلاد")],
+  'pizza': ['🍕', 'danse', nom3("pizza", "pizza", "بيتزا")],
+  'donut': ['🍩', 'danse', nom3("beignet", "donut", "دونات")],
+  'lollipop': ['🍭', 'danse', nom3("sucette", "lollipop", "مصاصة")],
+  'mushroom': ['🍄', 'danse', nom3("champignon", "mushroom", "فطر")],
+  'crown': ['👑', 'danse', nom3("couronne", "crown", "تاج")],
+  'castle': ['🏰', 'danse', nom3("château", "castle", "قلعة")],
+  'pig': ['🐷', 'danse', nom3("cochon", "pig", "خنزير")],
+  'cow': ['🐮', 'danse', nom3("vache", "cow", "بقرة")],
+  'sheep': ['🐑', 'danse', nom3("mouton", "sheep", "خروف")],
+  'elephant': ['🐘', 'danse', nom3("éléphant", "elephant", "فيل")],
+  'giraffe': ['🦒', 'danse', nom3("girafe", "giraffe", "زرافة")],
+  'zebra': ['🦓', 'danse', nom3("zèbre", "zebra", "حمار وحشي")],
+  'panda': ['🐼', 'danse', nom3("panda", "panda", "باندا")],
+  'bear': ['🐻', 'danse', nom3("ours", "bear", "دب")],
+  'teddy-bear': ['🧸', 'danse', nom3("nounours", "teddy bear", "دبدوب")],
+  'camel': ['🐫', 'danse', nom3("chameau", "camel", "جمل")],
+  'guitar': ['🎸', 'danse', nom3("guitare", "guitar", "قيثارة")],
+  'candle': ['🕯️', 'danse', nom3("bougie", "candle", "شمعة")],
+  'scorpion': ['🦂', 'roule', nom3("scorpion", "scorpion", "عقرب")],
+  'raccoon': ['🦝', 'danse', nom3("raton laveur", "raccoon", "راكون")],
+  'rhinoceros': ['🦏', 'danse', nom3("rhinocéros", "rhinoceros", "وحيد القرن")],
+  'lightning': ['⚡', 'vole', nom3("éclair", "lightning", "برق")],
+  'hat': ['🎩', 'danse', nom3("chapeau", "hat", "قبعة")],
+};
+const Devin = (() => {
+  const TFJS = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
+  const MODELE = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models@master/models/doodlenet/model.json';
+  let modele = null, charge = null;
+  const script = (src) => new Promise((ok, ko) => { if (window.tf) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+  function charger() {
+    if (!charge) charge = (async () => { await script(TFJS); modele = await window.tf.loadLayersModel(MODELE); return modele; })().catch((e) => { charge = null; throw e; });
+    return charge;
+  }
+  // le dessin → une image 28×28 comme celles de Quick, Draw! (traits noirs épais sur blanc, centrés)
+  function preparer(src) {
+    const T = 280, noir = document.createElement('canvas'); noir.width = noir.height = T;
+    const g = noir.getContext('2d'), k = (T * .82) / Math.max(src.width, src.height), w = src.width * k, h = src.height * k;
+    g.drawImage(src, (T - w) / 2, (T - h) / 2, w, h);
+    g.globalCompositeOperation = 'source-in'; g.fillStyle = '#000'; g.fillRect(0, 0, T, T);
+    const epais = document.createElement('canvas'); epais.width = epais.height = T; const ge = epais.getContext('2d');
+    ge.fillStyle = '#fff'; ge.fillRect(0, 0, T, T);
+    for (let a = 0; a < 12; a++) for (const r of [0, 4, 8]) ge.drawImage(noir, Math.cos(a / 12 * 6.283) * r, Math.sin(a / 12 * 6.283) * r);
+    const p = document.createElement('canvas'); p.width = p.height = 28; const gp = p.getContext('2d', { willReadFrequently: true });
+    gp.imageSmoothingEnabled = true; gp.drawImage(epais, 0, 0, 28, 28);
+    const d = gp.getImageData(0, 0, 28, 28).data, v = new Float32Array(784);
+    for (let i = 0; i < 784; i++) v[i] = 1 - (d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2]) / 765 > .3 ? 1 : 0;
+    return v;
+  }
+  // les 3 meilleures idées que Lumi sait transformer (ou [] si le modèle n'est pas disponible)
+  async function deviner(src, n = 3) {
+    try {
+      const m = await Promise.race([charger(), attendre(12000).then(() => { throw new Error('trop long'); })]);
+      const tf = window.tf, entree = tf.tensor4d(preparer(src), [1, 28, 28, 1]);
+      const sortie = m.predict(entree), p = await sortie.data(); entree.dispose(); sortie.dispose();
+      return [...p].map((x, i) => [CLASSES_DOODLE[i], x]).sort((a, b) => b[1] - a[1]).filter(([c]) => DOODLE_EMOJI[c]).slice(0, n)
+        .map(([c, x]) => ({ classe: c, e: DOODLE_EMOJI[c][0], mvt: DOODLE_EMOJI[c][1], nom: t3(DOODLE_EMOJI[c][2]), confiance: x }));
+    } catch (e) { console.warn('Devin', e); return []; }
+  }
+  return { deviner, charger, preparer };
+})();
 // ce que l'enfant peut avoir dessiné : Lumi transforme le dessin en vrai, puis le fait bouger comme il faut
 const FORMES_VIVANT = [['🪼', 'nage'], ['🐟', 'nage'], ['🐙', 'nage'], ['🐢', 'nage'], ['🐬', 'nage'], ['🦀', 'nage'], ['🦋', 'vole'], ['🐦', 'vole'], ['🐝', 'vole'], ['⭐', 'vole'],
   ['🐸', 'saute'], ['🐰', 'saute'], ['🦖', 'saute'], ['🚗', 'roule'], ['🚂', 'roule'], ['🚀', 'fusee'], ['🐱', 'danse'], ['🐶', 'danse'], ['🌸', 'danse'], ['☀️', 'danse'], ['❤️', 'danse'], ['🏠', 'danse']];
@@ -9602,19 +9766,35 @@ const Vivant = (() => {
     cancelAnimationFrame(raf); Musiquette.arreter();
     dessinOriginal = sprite;
     const s = salle(z, { titre: '✨ ' + jx('cestQuoi'), sous: jx('cestQuoiSous'), classe: 'vi-choix' });
-    s.corps.innerHTML = '<div class="vi-apercu"><img alt=""></div><div class="vi-formes"></div>';
+    s.corps.innerHTML = '<div class="vi-apercu"><img alt=""></div><div class="vi-devine"><p class="vi-d-txt"></p><div class="vi-d-choix"></div></div><p class="vi-sinon"></p><div class="vi-formes"></div>';
     s.corps.querySelector('img').src = sprite.toDataURL();
     const g = s.corps.querySelector('.vi-formes');
     FORMES_VIVANT.forEach(([e, m]) => { const b = bouton(`<span class="e">${e}</span><span class="n"></span>`, () => transformer(e, m), 'vi-forme'); b.querySelector('.n').textContent = nomEmoji(e); g.appendChild(b); });
     s.bas.appendChild(bouton(jx('garderDessin'), () => { morph = null; scene(); }, 'mod-b'));
-    avatar?.forme('🪄'); parler(jx('cestQuoi'));
+    s.corps.querySelector('.vi-sinon').textContent = jx('sinon');
+    const dv = s.corps.querySelector('.vi-devine'), txt = dv.querySelector('.vi-d-txt'), ch = dv.querySelector('.vi-d-choix');
+    txt.textContent = '🔎 ' + jx('reflechit'); dv.classList.add('cherche');
+    avatar?.forme('🪄');
     focusPremier(g);
+    // Lumi devine, sur l'appareil ; si le modèle n'est pas là (hors ligne), il reste la liste
+    const moi = sprite;
+    Devin.deviner(sprite).then((idees) => {
+      if (!z?.isConnected || dessinOriginal !== moi) return;
+      dv.classList.remove('cherche');
+      if (!idees.length) { dv.hidden = true; parler(jx('cestQuoi')); return; }
+      const [a, ...autres] = idees;
+      txt.textContent = `${jx('jeCrois')}… ${a.nom} ${a.e} ?`;
+      const oui = bouton(`<span class="e">${a.e}</span><b>${jx('oui')}</b>`, () => transformer(a.e, a.mvt, a.nom), 'vi-d-oui principal'); ch.appendChild(oui);
+      autres.forEach((x) => { const b = bouton(`<span class="e">${x.e}</span><span class="n"></span>`, () => transformer(x.e, x.mvt, x.nom), 'vi-forme'); b.querySelector('.n').textContent = x.nom; ch.appendChild(b); });
+      parler(`${jx('jeCrois')} ${a.nom} !`);
+      setTimeout(() => oui.focus({ preventScroll: true }), 50);
+    });
   }
-  function transformer(e, m) {
+  function transformer(e, m, nom) {
     const cible = document.createElement('canvas'); cible.width = cible.height = 300; dessinerEmoji(cible.getContext('2d'), e, 150, 150, 290);
     morph = { de: dessinOriginal || sprite, vers: cible, a: pointsDe(dessinOriginal || sprite), b: pointsDe(cible), t0: 0 };
     sprite = cible; mvt = m; son('juste');
-    parler(`${jx('abracadabra')} ${nomEmoji(e) || e} !`);
+    parler(`${jx('abracadabra')} ${nom || nomEmoji(e) || e} !`);
     scene();
   }
   function scene() {
@@ -11897,7 +12077,7 @@ const AIDES = {
      nom3('Montre-le au milieu de la caméra : elle vérifie !', 'Show it in the middle of the camera: it checks!', 'أرِه في وسط الكاميرا: هي تتحقق!')], ['camera', 'espace']),
   vivant: A(nom3('Ton dessin prend vie : il nage, vole, saute ou danse !', 'Your drawing comes to life: it swims, flies, jumps or dances!', 'رسمك يصبح حيًّا: يسبح أو يطير أو يقفز أو يرقص!'),
     [nom3('Choisis un de tes dessins, ou dessines-en un nouveau.', 'Pick one of your drawings, or draw a new one.', 'اختر أحد رسوماتك أو ارسم رسمًا جديدًا.'),
-     nom3('Dis à Lumi ce que c’est (une méduse, un poisson…) : ton dessin se transforme en vrai ! Ou garde ton dessin tel quel.', 'Tell Lumi what it is (a jellyfish, a fish…): your drawing turns into the real thing! Or keep your drawing as it is.', 'قل للومي ما هو (قنديل بحر، سمكة…): يتحوّل رسمك إلى الحقيقي! أو أبقِ رسمك كما هو.'),
+     nom3('Lumi devine ce que c’est (« Je crois que c’est… un poisson ! »). Dis oui, ou choisis dans la liste : ton dessin se transforme en vrai !', 'Lumi guesses what it is (“I think it’s… a fish!”). Say yes, or pick from the list: your drawing turns into the real thing!', 'لومي يخمّن ما هو («أظن أنه… سمكة!»). قل نعم أو اختر من القائمة: يتحوّل رسمك إلى الحقيقي!'),
      nom3('En bas : choisis comment il bouge, ajoute des amis, ou change d’image.', 'At the bottom: choose how it moves, add friends, or change picture.', 'في الأسفل: اختر كيف يتحرك، أضف أصدقاء، أو غيّر الصورة.')], ['doigt']),
   coffre: A(nom3('Le coffre aux trésors : tes étoiles débloquent des surprises.', 'The treasure chest: your stars unlock surprises.', 'صندوق الكنوز: نجومك تفتح المفاجآت.'),
     [nom3('Chaque jeu gagné te donne des étoiles ⭐.', 'Every game you win gives you stars ⭐.', 'كل لعبة تربحها تعطيك نجومًا ⭐.'),
