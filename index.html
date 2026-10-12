@@ -2259,9 +2259,21 @@
     html:not(.tele) .col-bulle .txt { font-size: 19px; }
   }
   /* ----- Histoire ou comptine en cours : on ne voit qu'elle (la liste revient avec 📚) ----- */
-  html:not(.tele) #ecran-histoires .chansons:has(#hi-lecteur:not(.vide)) > :is(#hi-mode, #hi-reglage-voix, #hi-filtres, #hi-compte, #hi-liste),
   html:not(.tele) #ecran-chansons .chansons:has(#ch-lecteur:not(.vide)) > :is(#ch-filtres, #ch-compte, #ch-liste) { display: none !important; }
   #hi-autres, #ch-autres { background: linear-gradient(135deg, var(--ciel), var(--lilas, #c3a6ff)); color: #1b1030; }
+  /* ----- Lecteur d'histoire seul (téléphone, tablette) : le catalogue est dans la vitrine, les réglages derrière ⚙️ ----- */
+  #btn-reglages-hi { display: none; }
+  html:not(.tele) .app[data-ecran="histoires"] #btn-reglages-hi { display: block; }
+  html.hi-reglages:not(.tele) #btn-reglages-hi { background: var(--soleil); border-color: var(--soleil); }
+  html:not(.tele) #ecran-histoires :is(#hi-filtres, #hi-compte, #hi-liste) { display: none !important; }
+  html:not(.tele):not(.hi-reglages) #ecran-histoires :is(#hi-mode, #hi-reglage-voix) { display: none !important; }
+  html.hi-reglages:not(.tele) #ecran-histoires .chansons > #hi-mode { order: -2; }
+  html.hi-reglages:not(.tele) #ecran-histoires .chansons > #hi-reglage-voix { order: -1; }
+  @media (orientation: portrait) {
+    html:not(.tele) #hi-lecteur .ch-haut { flex-direction: column; align-items: stretch; gap: 10px; }
+    html:not(.tele) #hi-lecteur .ch-titre { text-align: center; font-size: 19px; }
+    html:not(.tele) #hi-lecteur .ch-commandes { justify-content: center; }
+  }
 </style>
 </head>
 <body>
@@ -11810,6 +11822,7 @@ const UNIVERS_VT = ['aventures', 'jeux', 'creer', 'en-famille', 'soir', 'culture
 function rangeesVitrine(id) {
   const R = [], items = (ids) => ids.filter(visible).map(itemNoeud).filter(Boolean);
   const lc = langueContenu();
+  if (id === 'histoires') return rangeesHistoiresVt();
   if (id === 'accueil') {
     const rec = Recents.liste().map(itemCle).filter(Boolean).slice(0, 12);
     if (rec.length) R.push({ titre: vt('reprendre'), sous: vt('reprendreSous'), forme: 'paysage', items: rec });
@@ -11896,7 +11909,7 @@ const Vitrine = (() => {
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const pour = (id) => {
     const h = document.documentElement.classList;
-    return !h.contains('mode-admin') && !h.contains('mode-manette') && (id === 'accueil' || id === 'soir' || estHub(id));
+    return !h.contains('mode-admin') && !h.contains('mode-manette') && (id === 'accueil' || id === 'soir' || estHub(id) || (id === 'histoires' && !modeTele && !conte && !lectureDemandee));
   };
   // ----- composition d'une affiche : image ou vidéo si elle existe, sinon décor d'émojis -----
   function art(it, cadre, enGrand) {
@@ -12200,6 +12213,69 @@ const afficherAvantVitrine = afficher;
 afficher = function () { afficherAvantVitrine(); Vitrine.suivre(); }; // eslint-disable-line no-func-assign
 const montrerTVAvantVitrine = TV.montrer;
 TV.montrer = (id) => { if (Vitrine.pour(id)) return; montrerTVAvantVitrine(id); };
+
+
+// ---------- Histoires (téléphone, tablette) : un catalogue rangé par thèmes, puis le lecteur tout seul ----------
+let lectureDemandee = false; // une histoire va s'ouvrir : on ne remontre pas le catalogue entre-temps
+const THEMES_HIST = [
+  ['fetes', { fr: 'Histoires de fêtes', en: 'Holiday stories', ar: 'حكايات الأعياد' }, (h) => ['halloween', 'noel', 'ecole', 'ramadan', 'ete'].includes(h.amb)],
+  ['jha', { fr: 'Les histoires de Jha', en: 'Juha’s stories', ar: 'نوادر جحا' }, (h) => /jha|juha/.test(h.id)],
+  ['fees', { fr: 'Contes de fées et magie', en: 'Fairy tales and magic', ar: 'حكايات سحرية' }, (h) => /cendrillon|cinderella|belle-au-bois|princess|aladdin|chat-botte|puss|haricot|beanstalk|elves|sindbad/.test(h.id)],
+  ['classiques', { fr: 'Les grands classiques', en: 'Classic tales', ar: 'حكايات مشهورة' }, (h) => /chaperon|boucle|goldilocks|pigs|cochons|musiciens|navet|turnip|moufle|hen|rousse|gingerbread|pain-epice|chevreaux|billy|chicken|duckling|canard|ommi/.test(h.id)],
+  ['fables', { fr: 'Fables d’animaux', en: 'Animal fables', ar: 'حكايات الحيوانات' }, () => true],
+];
+const themeHist = (h) => THEMES_HIST.find(([, , f]) => f(h))[0];
+const langueHist = () => { const p = ReglesConte.get().langue; return ['fr', 'en', 'ar', 'toutes'].includes(p) ? p : (['fr', 'en', 'ar'].includes(langue) ? langue : 'fr'); };
+function rangeesHistoiresVt() {
+  const choix = langueHist(), R = [];
+  const puces = [['toutes', '🌍 ' + t3({ fr: 'Toutes', en: 'All', ar: 'الكل' })], ['fr', '🇫🇷 Français'], ['en', '🇬🇧 English'], ['ar', 'ع العربية']];
+  R.push({ forme: 'filtres', items: puces.map(([k, nom]) => ({ cle: 'l-' + k, nom, on: k === choix, action: () => { ReglesConte.set('langue', k); son('tic'); Vitrine.montrer('histoires'); } })) });
+  const rec = Recents.liste().filter((k) => k.startsWith('h:')).map(itemCle).filter(Boolean).slice(0, 10);
+  if (rec.length) R.push({ titre: vt('reprendre'), forme: 'paysage', items: rec });
+  const fam = HISTOIRES.filter((h) => aVoix(h, 'maman') || aVoix(h, 'papa'));
+  if (fam.length) R.push({ titre: '🎙️ ' + t3({ fr: 'Racontées par papa ou maman', en: 'Told by mum or dad', ar: 'بصوت ماما أو بابا' }), forme: 'paysage', items: fam.map(itemConte) });
+  const dansLangue = (h) => choix === 'toutes' || h.langue === choix;
+  // les histoires de fêtes passent en premier pendant une fête (celle du moment en tête), sinon à la fin
+  const s = Saisons.courante, ambS = s && (s.id === 'rentree' ? 'ecole' : s.id), themes = [];
+  THEMES_HIST.forEach(([k, titre]) => {
+    const l = HISTOIRES.filter((h) => dansLangue(h) && themeHist(h) === k);
+    if (k === 'fetes') l.sort((a, b) => (b.amb === ambS) - (a.amb === ambS));
+    if (l.length) themes.push({ titre: t3(titre), forme: 'paysage', items: l.map(itemConte), fetes: k === 'fetes' });
+  });
+  if (!s) themes.push(...themes.splice(themes.findIndex((r) => r.fetes), 1).filter(Boolean));
+  return [...R, ...themes];
+}
+// ouvrir une histoire : le lecteur prend toute la place (le catalogue se cache)
+const ouvrirHistoireAvantCatalogue = ouvrirHistoire;
+ouvrirHistoire = function (h, opts) { // eslint-disable-line no-func-assign
+  ouvrirHistoireAvantCatalogue(h, opts);
+  lectureDemandee = false; document.documentElement.classList.remove('hi-reglages');
+  if (!modeTele) Vitrine.suivre();
+};
+const ouvrirConteAvantCatalogue = ouvrirConte;
+ouvrirConte = function (id) { // eslint-disable-line no-func-assign
+  if (!modeTele && pile[pile.length - 1] === 'histoires') { // déjà dans le catalogue : on ouvre le lecteur sans empiler l'écran
+    const h = HISTOIRES.find((x) => x.id === id) || HISTOIRES.find((x) => x.id === id.replace(/-\w\w$/, '-fr'));
+    if (!h) return;
+    if (!(Achat.ouvert || HISTOIRES_LIBRES.has(h.id))) return proposerAchat();
+    lectureDemandee = true; return ouvrirHistoire(h);
+  }
+  if (!modeTele) lectureDemandee = true; ouvrirConteAvantCatalogue(id); setTimeout(() => { if (lectureDemandee && !conte) { lectureDemandee = false; Vitrine.suivre(); } }, 1500); }; // eslint-disable-line no-func-assign
+// retour depuis le lecteur : on revient au catalogue des histoires
+const retourAvantCatalogue = retour;
+retour = function () { // eslint-disable-line no-func-assign
+  if (!modeTele && pile[pile.length - 1] === 'histoires' && conte) { arreterHistoire(); lectureDemandee = false; son('tic'); afficher(); return; }
+  retourAvantCatalogue();
+};
+$('btn-retour').onclick = () => retour();
+const autresAvantCatalogue = $('hi-autres').onclick;
+$('hi-autres').onclick = () => (modeTele ? autresAvantCatalogue() : retour());
+// ⚙️ dans l'entête du lecteur : « Lumi raconte / Je lis » et la voix
+(() => {
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'btn-reglages-hi'; b.className = 'bouton-son'; b.textContent = '⚙️';
+  b.setAttribute('aria-label', 'Réglages'); b.onclick = () => { son('tic'); document.documentElement.classList.toggle('hi-reglages'); };
+  $('btn-son').before(b);
+})();
 
 // =====================================================================
 // ---------- « Comment on joue ? » : une fiche courte pour chaque jeu ----------
