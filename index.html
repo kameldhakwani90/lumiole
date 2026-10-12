@@ -2258,6 +2258,10 @@
     html:not(.tele) .col-bulle { min-height: 0; padding: 6px 10px 6px 6px; }
     html:not(.tele) .col-bulle .txt { font-size: 19px; }
   }
+  /* ----- Histoire ou comptine en cours : on ne voit qu'elle (la liste revient avec 📚) ----- */
+  html:not(.tele) #ecran-histoires .chansons:has(#hi-lecteur:not(.vide)) > :is(#hi-mode, #hi-reglage-voix, #hi-filtres, #hi-compte, #hi-liste),
+  html:not(.tele) #ecran-chansons .chansons:has(#ch-lecteur:not(.vide)) > :is(#ch-filtres, #ch-compte, #ch-liste) { display: none !important; }
+  #hi-autres, #ch-autres { background: linear-gradient(135deg, var(--ciel), var(--lilas, #c3a6ff)); color: #1b1030; }
 </style>
 </head>
 <body>
@@ -5001,7 +5005,7 @@ function construireChansons() {
   $('ch-boucle').classList.toggle('on', r.boucle);
 }
 let dernier = null;
-$('ch-autres').onclick = () => { arreterChanson(); son('tic'); setTimeout(() => $('ch-liste')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); };
+$('ch-autres').onclick = () => { arreterChanson(); $('ch-lecteur').classList.add('vide'); $('ch-titre').textContent = TXT_CH.choisis[langue]; son('tic'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 $('ch-lecture').onclick = () => { if (chant) arreterChanson(); else if (dernier) chanter(dernier); else $('ch-liste').firstElementChild?.click(); };
 $('ch-lent').onclick = () => { ReglesChant.set('lent', !ReglesChant.get().lent); construireChansons(); if (chant && dernier) chanter(dernier); };
 $('ch-boucle').onclick = () => { ReglesChant.set('boucle', !ReglesChant.get().boucle); construireChansons(); };
@@ -5399,7 +5403,7 @@ const Theatre = (() => {
 })();
 $('hi-theatre').onclick = () => (Theatre.actif ? Theatre.quitter() : Theatre.entrer());
 // 📚 revenir aux autres histoires : on arrête celle-ci et on montre la liste
-$('hi-autres').onclick = () => { arreterHistoire(); $('hi-lecteur').classList.add('vide'); $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; son('tic'); setTimeout(() => $('hi-liste')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); };
+$('hi-autres').onclick = () => { arreterHistoire(); $('hi-lecteur').classList.add('vide'); $('hi-lecture').textContent = '▶'; $('hi-titre').textContent = TXT_HI.choisis[langue]; $('hi-titre').dir = LANGUES[langue].dir; son('tic'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 // ----- Enregistrer sa voix, page par page -----
 let enreg = null; // { rec, flux, cle }
 async function commencerEnregistrement() {
