@@ -1068,6 +1068,89 @@
   .fin-etoiles span { filter: hue-rotate(100deg) saturate(.85) brightness(1.05) drop-shadow(0 0 14px rgba(46,230,197,.5)); }
   .pw-lumi { background: radial-gradient(circle at 40% 35%, #fff 0%, #C2FFF2 25%, #2EE6C5 55%, rgba(23,181,217,0) 72%); }
   .pw-acheter { background: var(--degrade); box-shadow: 0 8px 24px rgba(46,230,197,.35); color: var(--primaire-encre); }
+  /* =================== Atelier de dessin : plein écran, télé et mobile =================== */
+  .atelier body { overflow: hidden; }
+  .atelier #scene { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; max-height: none !important; aspect-ratio: auto !important; z-index: 80; margin: 0;
+    -webkit-mask-image: none !important; mask-image: none !important;
+    background: radial-gradient(70% 60% at 50% 45%, #182358 0%, #0C1235 60%, #070A1F 100%); }
+  .atelier #scene::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.5px) 0 0 / 28px 28px; }
+  .atelier #rendu { opacity: 0; }
+  .atelier .repli { display: none; }
+  .atelier canvas#trace { inset: auto; left: 4vw; top: 12vh; width: 83vw; height: 82vh; border-radius: 3vh; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 0 80px rgba(46,230,197,.06); }
+  .atelier .trace-fermer { position: absolute; top: 3vh; inset-inline-end: 2.4vw; left: auto; width: 6vh; height: 6vh; min-width: 44px; min-height: 44px; border-radius: 50%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); color: #EEF6FF; font-size: 2.4vh; z-index: 5; }
+  .atelier-ui { display: none; }
+  .atelier .atelier-ui { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 4; font-family: 'Baloo 2', system-ui, sans-serif; color: #EEF6FF; }
+  .atelier-ui button { pointer-events: auto; }
+  .at-haut { position: absolute; left: 4vw; right: 13vw; top: 3.4vh; display: flex; align-items: center; gap: 2vw; }
+  .at-titre { font-size: clamp(20px, 3.6vh, 40px); font-weight: 800; white-space: nowrap; }
+  .at-barre { flex: 1; max-width: 40vw; height: 1vh; min-height: 6px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .at-barre span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--degrade); box-shadow: 0 0 14px rgba(46,230,197,.6); transition: width .2s; }
+  [data-mode="libre"] .at-barre { display: none; }
+  .at-outils { position: absolute; right: 2.4vw; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 1.6vh; padding: 1.8vh .9vw; border-radius: 99px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(10px); }
+  .at-couleurs { display: flex; flex-direction: column; gap: 1.4vh; }
+  .at-couleur { width: 5.4vh; height: 5.4vh; min-width: 40px; min-height: 40px; border-radius: 50%; border: none; background: radial-gradient(circle at 35% 30%, #fff 0, var(--c) 45%, color-mix(in srgb, var(--c) 60%, #000) 100%); box-shadow: 0 0 14px color-mix(in srgb, var(--c) 50%, transparent); transition: transform .15s; }
+  .at-couleur.on { transform: scale(1.18); box-shadow: 0 0 0 3px #0C1235, 0 0 0 5px var(--c), 0 0 22px var(--c); }
+  [data-mode="lettre"] .at-couleurs { display: none; }
+  .at-b { display: flex; align-items: center; justify-content: center; gap: .6vw; height: 5.4vh; min-height: 40px; padding: 0 1.4vw; border-radius: 99px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #EEF6FF; font: 700 clamp(13px, 1.9vh, 20px) system-ui; }
+  .at-b svg { width: 2.6vh; height: 2.6vh; min-width: 18px; min-height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .at-outils .at-b { width: 5.4vh; min-width: 40px; padding: 0; } .at-outils .at-b span { display: none; }
+  .at-b.principal { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; box-shadow: 0 8px 26px rgba(46,230,197,.35); }
+  .at-fin { position: absolute; left: 50%; bottom: 8vh; transform: translateX(-50%); display: flex; gap: 1vw; padding: 1.2vh; border-radius: 99px; background: rgba(12,18,53,.75); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(10px); }
+  .at-fin[hidden] { display: none; }
+  .at-aide { position: absolute; left: 0; right: 13vw; bottom: 1.4vh; margin: 0; text-align: center; font: 700 clamp(12px, 1.7vh, 18px) system-ui; color: #8C9BB8; }
+  .tele .atelier-ui button:focus, .tele .trace-fermer:focus { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 20px rgba(255,255,255,.4); transform: scale(1.08); }
+  .atelier .duo-curseur.crayon .main { transform: scale(.7); }
+  .atelier .duo-curseur.crayon.appui::before { transform: scale(.35); background: var(--c); }
+  @media (max-width: 700px) {
+    .atelier canvas#trace { left: 4vw; top: 11vh; width: 92vw; height: 74vh; }
+    .at-haut { right: 16vw; }
+    .at-outils { top: auto; bottom: 2vh; right: 50%; transform: translateX(50%); flex-direction: row; padding: 8px 12px; }
+    .at-couleurs { flex-direction: row; gap: 8px; }
+    .at-aide { right: 0; bottom: auto; top: 8vh; }
+    .at-fin { bottom: 12vh; }
+  }
+  .atelier.tv-on .app, .atelier .app { pointer-events: auto; }
+  .atelier.tv-on #scene { pointer-events: auto; }
+  @media (max-width: 700px) {
+    .at-haut { flex-direction: column; align-items: flex-start; gap: 8px; right: 18vw; }
+    .at-barre { width: 60vw; max-width: none; flex: none; }
+    .atelier canvas#trace { top: 13vh; height: 72vh; }
+  }
+  /* =================== Cache-cache des objets =================== */
+  #ecran-chasse .chasse { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: auto 1fr auto; justify-items: center; gap: 2vh; padding: 3vh 4vw 3.4vh; font-family: 'Baloo 2', system-ui, sans-serif; color: #EEF6FF;
+    background: radial-gradient(60vw 50vh at 50% 40%, rgba(34,216,196,.14), transparent 70%), linear-gradient(180deg, #0D1336 0%, #080B22 100%); }
+  .chs-progres { display: flex; gap: 10px; margin-top: 1vh; }
+  .chs-progres span { width: 34px; height: 8px; border-radius: 99px; background: rgba(255,255,255,.14); }
+  .chs-progres span.ok { background: var(--degrade); } .chs-progres span.on { background: rgba(46,230,197,.45); box-shadow: 0 0 12px rgba(46,230,197,.5); }
+  .chs-carte { align-self: center; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1vh; }
+  .chs-objet { position: relative; width: min(38vh, 62vw); aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,230,197,.18) 0%, rgba(46,230,197,.04) 55%, transparent 70%); }
+  .chs-objet .e { font-size: min(19vh, 30vw); line-height: 1; filter: drop-shadow(0 10px 30px rgba(0,0,0,.4)); animation: chs-flotte 3s ease-in-out infinite alternate; }
+  @keyframes chs-flotte { to { transform: translateY(-1.4vh) rotate(4deg); } }
+  .chs-anneau { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .chs-anneau circle { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 2; }
+  .chs-anneau .v { stroke: url(#chs-deg); stroke: #2EE6C5; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 352; stroke-dashoffset: 352; transition: stroke-dashoffset .5s linear; opacity: .8; }
+  .chs-va { margin: 0; font: 700 clamp(15px, 2.4vh, 26px) system-ui; color: #A9B8D4; }
+  .chs-nom { margin: 0; font-size: clamp(30px, 7vh, 84px); line-height: 1.02; font-weight: 800; }
+  .chs-indice { margin: 0; font: 700 clamp(15px, 2.4vh, 26px) system-ui; color: #7FF3CB; }
+  .chs-carte.gagne .e { animation: chs-gagne .7s cubic-bezier(.3,1.6,.6,1); }
+  .chs-carte.gagne .chs-nom { background: var(--degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  @keyframes chs-gagne { 0% { transform: scale(.6); } 60% { transform: scale(1.25) rotate(-8deg); } }
+  .chs-bas { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+  .chs-etat { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 99px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); font: 700 14px system-ui; color: #A9B8D4; }
+  .chs-etat i { width: 10px; height: 10px; border-radius: 50%; background: #FF8FB8; }
+  .chs-etat.ok i { background: #2EE6C5; box-shadow: 0 0 10px #2EE6C5; animation: chs-pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes chs-pulse { to { opacity: .4; } }
+  .chs-b { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 99px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #EEF6FF; font: 700 14px system-ui; }
+  .chs-b svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .chs-b.principal { background: var(--degrade); color: var(--primaire-encre); border-color: transparent; box-shadow: 0 8px 24px rgba(46,230,197,.3); }
+  .tele .chs-b:focus { outline: none; transform: scale(1.06); box-shadow: 0 0 0 3px #fff, 0 0 22px rgba(255,255,255,.35); }
+  .tele .chs-b, .tele .chs-etat { height: 5.4vh; font-size: 1.9vh; padding: 0 1.4vw; }
+  .chs-video { position: fixed; right: 2vw; top: 2.4vh; width: min(22vw, 200px); border-radius: 16px; overflow: hidden; border: 1px solid rgba(46,230,197,.5); box-shadow: 0 10px 30px rgba(0,0,0,.4); background: #000; }
+  .chs-video video { display: block; width: 100%; transform: scaleX(-1); }
+  .chs-video p { margin: 0; padding: 6px 8px; font: 700 11px system-ui; color: #BFFBEA; background: rgba(4,20,30,.8); }
+  .fa-t-manette.objets .duo-camera video { object-fit: cover; }
+  .tele #ecran-compter .col-bulle { justify-content: center; text-align: center; } .tele #ecran-compter .col-bulle .lumi { display: none; }
 </style>
 </head>
 <body>
@@ -1153,6 +1236,7 @@
           <div class="co-choix" id="co-choix" hidden></div>
         </div>
       </section>
+      <section id="ecran-chasse" hidden><div class="chasse" id="chasse"></div></section>
       <section id="ecran-formes" hidden>
         <div class="formes">
           <div class="col-bulle fo-bulle" id="fo-bulle"><span class="lumi"></span><span class="txt"></span><canvas id="fo-modele" width="64" height="68" hidden></canvas></div>
@@ -1883,9 +1967,10 @@ const NOEUDS = {
   nombres:   { emoji: '🔢', nom: { fr: 'Les nombres', en: 'Numbers', ar: 'الأرقام' }, desc: { fr: 'Compter jusqu’à 10', en: 'Count to 10', ar: 'العد حتى ١٠' }, type: 'nombres' },
   dessin:    { emoji: '✍️', nom: { fr: 'Dessine', en: 'Draw', ar: 'ارسم' }, desc: { fr: 'Trace les lettres', en: 'Trace the letters', ar: 'ارسم الحروف' }, type: 'dessin' },
   jeux:      { emoji: '🎮', nom: { fr: 'Les jeux', en: 'Games', ar: 'الألعاب' }, desc: { fr: 'Devine, écoute, range…', en: 'Guess, listen, sort…', ar: 'خمّن، استمع، رتّب…' },
-               enfants: ['formes', 'compter', 'bulles', 'devine', 'ecoute', 'range', 'intrus'] },
+               enfants: ['chasse', 'formes', 'compter', 'bulles', 'devine', 'ecoute', 'range', 'intrus'] },
   compter:   { emoji: '🔢', nom: { fr: 'Compte avec Lumi', en: 'Count with Lumi', ar: 'عُدّ مع لومي' }, desc: { fr: 'Touche et compte : 1, 2, 3…', en: 'Tap and count: 1, 2, 3…', ar: 'المس وعُدّ: ١، ٢، ٣…' }, type: 'compter' },
   formes:    { emoji: '🔷', nom: { fr: 'Pluie de formes', en: 'Shape rain', ar: 'مطر الأشكال' }, desc: { fr: 'Tranche les formes, compte avec Lumi !', en: 'Slice the shapes, count with Lumi!', ar: 'اقطع الأشكال وعُدّ مع لومي!' }, type: 'formes' },
+  chasse:    { emoji: '🔎', nom: { fr: 'Cache-cache des objets', en: 'Hide-and-seek objects', ar: 'غميضة الأشياء' }, desc: { fr: 'Lumi demande un objet : trouve-le dans la maison et montre-le à la caméra !', en: 'Lumi asks for an object: find it at home and show it to the camera!', ar: 'لومي يطلب شيئًا: ابحث عنه في البيت وأرِه للكاميرا!' }, type: 'chasse' },
   bulles:    { emoji: '🫧', nom: { fr: 'Attrape les bulles', en: 'Catch the bubbles', ar: 'التقط الفقاعات' }, desc: { fr: 'Vite, éclate les bonnes !', en: 'Quick, pop the right ones!', ar: 'بسرعة، فرقع الصحيحة!' }, type: 'jeu', jeu: 'bulles' },
   coloriage: { emoji: '🖍️', nom: { fr: 'Colorie !', en: 'Coloring', ar: 'لوّن' }, desc: { fr: 'De vrais dessins à colorier', en: 'Real pictures to color', ar: 'رسومات حقيقية للتلوين' },
                enfants: ['col-maison', 'col-poisson', 'col-fleur', 'col-papillon', 'col-voiture', 'col-chat', 'col-glace', 'col-fusee'] },
@@ -2493,7 +2578,7 @@ async function montrerNombre(n) {
 const Trace = (() => {
   const cv = $('trace'), g = cv.getContext('2d');
   // Même matière que Lumi : des grains de lumière ronds et doux, en lumière additive
-  const TEINTES = [[255, 255, 255], [160, 205, 255], [255, 170, 205], [150, 235, 210], [255, 225, 160]];
+  const TEINTES = [[255, 255, 255], [46, 230, 197], [255, 143, 184], [124, 198, 254], [195, 166, 255], [140, 245, 160]];
   const sprites = TEINTES.map(([r, v, b]) => {
     const c = document.createElement('canvas'); c.width = c.height = 32;
     const x = c.getContext('2d'), d = x.createRadialGradient(16, 16, 0, 16, 16, 16);
@@ -2556,12 +2641,12 @@ const Trace = (() => {
     for (const p of grains) if (!p.allume && Math.hypot(p.x - x, p.y - y) < rayon) { p.allume = true; nouveaux++; }
     if (nouveaux) { avatar?.syllabe(); try { navigator.vibrate?.(4); } catch {} }
     const faites = grains.filter((p) => p.allume).length / grains.length;
-    $('trace-progres').firstElementChild.style.width = Math.round(faites * 100) + '%';
+    if (ui) maj();
     if (!fini && faites >= .88) reussite();
   }
 
   function reussite() {
-    fini = true;
+    fini = true; if (ui) ui.querySelector('.at-fin').hidden = false;
     grains.forEach((p) => { p.allume = true; });
     for (let i = 0; i < grains.length; i += 6) poussiere(grains[i].x, grains[i].y, 2, 1.6);
     apresReussite?.(lettre);
@@ -2577,7 +2662,7 @@ const Trace = (() => {
         const scint = .6 + .4 * Math.sin(t * 2.5 + p.ph);
         const dx = Math.sin(t * .8 + p.ph) * 1.2 * p.on, dy = Math.cos(t * .7 + p.ph) * 1.2 * p.on;
         // éteint : grain pâle ; allumé : grain vif qui respire
-        grain(p.x + dx, p.y + dy, p.t * (1.6 + p.on * 1.2), (.22 + .78 * p.on) * scint, p.on > .5 ? p.s : 0);
+        grain(p.x + dx, p.y + dy, p.t * (1.6 + p.on * 1.2), (.36 + .64 * p.on) * scint, p.on > .5 ? p.s : 0);
       }
     }
     for (const d of dessin) grain(d.x, d.y, d.t * 2.2, .75 + .25 * Math.sin(t * 3 + d.ph), d.s);
@@ -2591,22 +2676,60 @@ const Trace = (() => {
   }
 
   const point = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  cv.addEventListener('pointerdown', (e) => { appui = true; cv.setPointerCapture?.(e.pointerId); toucher(...point(e)); });
+  let dernierPt = null;
+  const versPoint = (x, y) => {
+    if (dernierPt) { const [a, b] = dernierPt, d = Math.hypot(x - a, y - b), n = Math.min(40, Math.floor(d / 7)); for (let k = 1; k < n; k++) toucher(a + (x - a) * k / n, b + (y - b) * k / n); }
+    toucher(x, y); dernierPt = [x, y];
+  };
+  cv.addEventListener('pointerdown', (e) => { appui = true; dernierPt = null; cv.setPointerCapture?.(e.pointerId); versPoint(...point(e)); });
   cv.addEventListener('pointermove', (e) => {
     if (!appui) return;
-    for (const ev of e.getCoalescedEvents?.() || [e]) toucher(...point(ev));
+    for (const ev of e.getCoalescedEvents?.() || [e]) versPoint(...point(ev));
   });
-  ['pointerup', 'pointercancel'].forEach((n) => cv.addEventListener(n, () => {
-    appui = false;
-    if (mode === 'libre') teinte = 1 + (teinte % (TEINTES.length - 1)); // chaque trait a sa couleur
-  }));
+  ['pointerup', 'pointercancel'].forEach((n) => cv.addEventListener(n, () => { appui = false; dernierPt = null; }));
+  // ----- l'atelier : plein écran, couleurs, gomme, lettre suivante (doigt, téléphone ou main devant la caméra) -----
+  const AT_TXT = {
+    trace: { fr: 'Trace la lettre', en: 'Trace the letter', ar: 'ارسم الحرف' },
+    libre: { fr: 'Dessin libre', en: 'Free drawing', ar: 'رسم حر' },
+    effacer: { fr: 'Effacer', en: 'Clear', ar: 'امسح' },
+    encore: { fr: 'Encore', en: 'Again', ar: 'مرة أخرى' },
+    suivante: { fr: 'Lettre suivante', en: 'Next letter', ar: 'الحرف التالي' },
+    main: { fr: '☝️ Un doigt pour dessiner · ✋ main ouverte pour lever le crayon', en: '☝️ One finger to draw · ✋ open hand to lift the pen', ar: '☝️ إصبع للرسم · ✋ يد مفتوحة لرفع القلم' },
+  };
+  const ta = (k) => AT_TXT[k][langue] ?? AT_TXT[k].fr;
+  let ui = null;
+  function construireUI() {
+    ui = document.createElement('div'); ui.className = 'atelier-ui';
+    ui.innerHTML = `<div class="at-haut"><span class="at-titre"></span><div class="at-barre"><span></span></div></div>
+      <div class="at-outils"><div class="at-couleurs"></div><button type="button" class="at-b" data-a="effacer"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span></span></button></div>
+      <div class="at-fin" hidden><button type="button" class="at-b" data-a="encore"></button><button type="button" class="at-b principal" data-a="suivante"></button></div>
+      <p class="at-aide"></p>`;
+    TEINTES.forEach((c, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'at-couleur'; b.style.setProperty('--c', `rgb(${c.join(',')})`); b.setAttribute('aria-label', 'couleur ' + (i + 1));
+      b.onclick = () => { teinte = i; marquer(); son('tic'); };
+      ui.querySelector('.at-couleurs').appendChild(b);
+    });
+    ui.querySelector('[data-a=effacer]').onclick = () => { dessin = []; particules = []; if (mode === 'lettre') { grains.forEach((p) => { p.allume = false; }); fini = false; maj(); } son('pop'); };
+    ui.querySelector('[data-a=encore]').onclick = () => ouvrir('lettre', lettre, apresReussite);
+    ui.querySelector('[data-a=suivante]').onclick = () => { const L = LANGUES[langue].alphabet.split(' ').map((x) => x.split(':')[0]); const n = L[(L.indexOf(lettre) + 1) % L.length]; tracer(n); };
+    $('scene').appendChild(ui);
+  }
+  function marquer() { ui.querySelectorAll('.at-couleur').forEach((b, i) => b.classList.toggle('on', i === teinte)); }
+  function maj() { const faites = grains.length ? grains.filter((p) => p.allume).length / grains.length : 0; ui.querySelector('.at-barre span').style.width = Math.round(faites * 100) + '%'; }
 
   function ouvrir(nouveauMode, l, quandReussi) {
     mode = nouveauMode; lettre = l || ''; apresReussite = quandReussi; fini = false;
     particules = []; dessin = []; teinte = 1;
+    document.documentElement.classList.add('atelier');
+    if (!ui) construireUI();
+    ui.dataset.mode = mode;
+    ui.querySelector('.at-titre').textContent = mode === 'lettre' ? `${ta('trace')} ${lettre}` : ta('libre');
+    ui.querySelector('[data-a=effacer] span').textContent = ta('effacer');
+    ui.querySelector('[data-a=encore]').textContent = '↻ ' + ta('encore'); ui.querySelector('[data-a=suivante]').textContent = ta('suivante') + ' →';
+    ui.querySelector('.at-aide').textContent = DuoEcran.nbJoueurs ? ta('main') : '';
+    ui.querySelector('.at-fin').hidden = true; marquer(); maj();
     ['trace', 'trace-fermer'].forEach((id) => { $(id).hidden = false; });
-    $('trace-progres').hidden = mode !== 'lettre';
-    $('trace-progres').firstElementChild.style.width = '0%';
+    $('trace-progres').hidden = true;
     dimensionner();
     if (mode === 'lettre') preparerLettre(lettre); else { grains = []; guide = null; }
     avatar?.forme(null); avatar?.mode('fin'); // la poussière de Lumi se fait discrète pendant le dessin
@@ -2614,6 +2737,7 @@ const Trace = (() => {
   }
   function fermer() {
     actif = false; cancelAnimationFrame(raf);
+    document.documentElement.classList.remove('atelier');
     ['trace', 'trace-fermer', 'trace-progres'].forEach((id) => { $(id).hidden = true; });
   }
   $('trace-fermer').onclick = fermer;
@@ -2626,13 +2750,7 @@ async function tracer(lettre) {
   $('btn-tracer').hidden = true;
   carte('✍️', lettre, LANGUES[langue].tracer, false);
   parler(LANGUES[langue].tracer);
-  Trace.ouvrir('lettre', lettre, async () => {
-    const j = ++jeton;
-    celebrer();
-    try { await pause(1800, j); } catch { return; }
-    Trace.fermer();
-    montrerLettre(lettre);
-  });
+  Trace.ouvrir('lettre', lettre, () => { celebrer(); jingle(); });
 }
 function dessinLibre() {
   diapo++; ++jeton;
@@ -4299,8 +4417,8 @@ function arreterFormes() {
 
 function afficher() {
   const id = pile[pile.length - 1], n = NOEUDS[id], L = LANGUES[langue];
-  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : n.type === 'compter' ? 'compter' : 'liste';
-  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes', 'compter'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
+  const ecran = id === 'accueil' ? 'accueil' : n.type === 'parler' ? 'parler' : n.type === 'jeu' ? 'jeu' : n.type === 'colorier' ? 'coloriage' : n.type === 'chansons' ? 'chansons' : n.type === 'histoires' ? 'histoires' : n.type === 'formes' ? 'formes' : n.type === 'compter' ? 'compter' : n.type === 'chasse' ? 'chasse' : 'liste';
+  ['accueil', 'liste', 'parler', 'jeu', 'coloriage', 'chansons', 'histoires', 'formes', 'compter', 'chasse'].forEach((e) => { $('ecran-' + e).hidden = e !== ecran; });
   $('app').dataset.ecran = ecran;
   $('btn-retour').hidden = pile.length < 2;
   $('btn-maison').hidden = pile.length < 3;
@@ -4317,6 +4435,7 @@ function afficher() {
   else if (ecran === 'histoires') construireHistoires();
   else if (ecran === 'formes') setTimeout(demarrerFormes, 50);
   else if (ecran === 'compter') setTimeout(demarrerCompter, 50);
+  else if (ecran === 'chasse') setTimeout(() => Chasse.demarrer(), 50);
   else if (ecran === 'jeu') { jeuType = n.jeu; $('btn-reecouter').lastElementChild.textContent = L.reecouter; if (!jeuEnCours) nouvelleManche(); }
   else construireListe(id);
   const sansTV = SceneChant.actif || Theatre.actif || (ecran === 'liste' && n.type === 'album');
@@ -4328,7 +4447,7 @@ function afficher() {
 function aller(id, montrerCarte = true) {
   if (!libre(id)) return proposerAchat();
   if (typeof SceneChant !== 'undefined' && SceneChant.actif) SceneChant.quitter();
-  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter(); Chasse?.arreter?.();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles);
   if (Trace.actif) Trace.fermer();
   pile.push(id);
@@ -4346,7 +4465,7 @@ function aller(id, montrerCarte = true) {
 }
 function retour() {
   if (pile.length < 2) return;
-  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+  arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter(); Chasse?.arreter?.();
   diapo++; jeuEnCours = false; quiz = null; bulles = null; clearInterval(minuteurBulles); ++jeton;
   if (Trace.actif) Trace.fermer();
   pile.pop();
@@ -4934,6 +5053,145 @@ function blocAchat() {
 }
 
 
+
+// =====================================================================
+// ---------- Cache-cache des objets : Lumi, comme une grande sœur, demande un objet de la maison ----------
+// L'enfant va le chercher et le montre à la caméra (le téléphone, ou la caméra de cet appareil).
+// Tout est reconnu sur l'appareil, aucune image n'est envoyée. Sans caméra : « Je l'ai trouvé ! ».
+// =====================================================================
+const CH_OBJETS = [
+  { c: 'cup', e: '☕️', l: 'cuisine', fr: ['une tasse', 'La tasse'], en: ['a cup', 'The cup'], ar: ['كوبًا', 'الكوب'] },
+  { c: 'spoon', e: '🥄', l: 'cuisine', fr: ['une cuillère', 'La cuillère'], en: ['a spoon', 'The spoon'], ar: ['ملعقة', 'الملعقة'] },
+  { c: 'bowl', e: '🥣', l: 'cuisine', fr: ['un bol', 'Le bol'], en: ['a bowl', 'The bowl'], ar: ['وعاءً', 'الوعاء'] },
+  { c: 'banana', e: '🍌', l: 'cuisine', fr: ['une banane', 'La banane'], en: ['a banana', 'The banana'], ar: ['موزة', 'الموزة'] },
+  { c: 'apple', e: '🍎', l: 'cuisine', fr: ['une pomme', 'La pomme'], en: ['an apple', 'The apple'], ar: ['تفاحة', 'التفاحة'] },
+  { c: 'orange', e: '🍊', l: 'cuisine', fr: ['une orange', 'L’orange'], en: ['an orange', 'The orange'], ar: ['برتقالة', 'البرتقالة'] },
+  { c: 'carrot', e: '🥕', l: 'cuisine', fr: ['une carotte', 'La carotte'], en: ['a carrot', 'The carrot'], ar: ['جزرة', 'الجزرة'] },
+  { c: 'bottle', e: '🧴', l: 'cuisine', fr: ['une bouteille', 'La bouteille'], en: ['a bottle', 'The bottle'], ar: ['قارورة', 'القارورة'] },
+  { c: 'teddy bear', e: '🧸', l: 'chambre', fr: ['un nounours', 'Le nounours'], en: ['a teddy bear', 'The teddy bear'], ar: ['دبًا محشوًا', 'الدب'] },
+  { c: 'book', e: '📖', l: 'chambre', fr: ['un livre', 'Le livre'], en: ['a book', 'The book'], ar: ['كتابًا', 'الكتاب'] },
+  { c: 'sports ball', e: '⚽', l: 'chambre', fr: ['un ballon', 'Le ballon'], en: ['a ball', 'The ball'], ar: ['كرة', 'الكرة'] },
+  { c: 'clock', e: '⏰', l: 'chambre', fr: ['un réveil ou une horloge', 'Le réveil'], en: ['a clock', 'The clock'], ar: ['ساعة', 'الساعة'] },
+  { c: 'toothbrush', e: '🪥', l: 'bain', fr: ['une brosse à dents', 'La brosse à dents'], en: ['a toothbrush', 'The toothbrush'], ar: ['فرشاة أسنان', 'فرشاة الأسنان'] },
+  { c: 'remote', e: '📺', l: 'salon', fr: ['une télécommande', 'La télécommande'], en: ['a remote', 'The remote'], ar: ['جهاز تحكّم', 'جهاز التحكّم'] },
+  { c: 'potted plant', e: '🪴', l: 'salon', fr: ['une plante', 'La plante'], en: ['a plant', 'The plant'], ar: ['نبتة', 'النبتة'] },
+  { c: 'backpack', e: '🎒', l: 'entree', fr: ['un sac à dos', 'Le sac à dos'], en: ['a backpack', 'The backpack'], ar: ['حقيبة ظهر', 'الحقيبة'] },
+  { c: 'umbrella', e: '☂️', l: 'entree', fr: ['un parapluie', 'Le parapluie'], en: ['an umbrella', 'The umbrella'], ar: ['مظلة', 'المظلة'] },
+];
+const CH_TXT = {
+  va: { fr: 'Va chercher', en: 'Go and find', ar: 'اذهب وابحث عن' },
+  montre: { fr: 'puis montre-moi ce que tu as trouvé !', en: 'then show me what you found!', ar: 'ثم أرِني ما وجدت!' },
+  indice: { fr: 'Regarde', en: 'Look', ar: 'انظر' },
+  lieux: { cuisine: { fr: 'dans la cuisine…', en: 'in the kitchen…', ar: 'في المطبخ…' }, chambre: { fr: 'dans ta chambre…', en: 'in your bedroom…', ar: 'في غرفتك…' }, bain: { fr: 'dans la salle de bain…', en: 'in the bathroom…', ar: 'في الحمّام…' }, salon: { fr: 'dans le salon…', en: 'in the living room…', ar: 'في الصالون…' }, entree: { fr: 'près de la porte d’entrée…', en: 'near the front door…', ar: 'قرب باب الدخول…' } },
+  regarde: { fr: 'La caméra regarde…', en: 'The camera is looking…', ar: 'الكاميرا تنظر…' },
+  pasCam: { fr: 'Pas encore de caméra', en: 'No camera yet', ar: 'لا كاميرا بعد' },
+  tel: { fr: 'Caméra du téléphone', en: 'Phone camera', ar: 'كاميرا الهاتف' },
+  ici: { fr: 'Caméra de cet appareil', en: 'This device’s camera', ar: 'كاميرا هذا الجهاز' },
+  trouve: { fr: 'Je l’ai trouvé !', en: 'I found it!', ar: 'وجدته!' },
+  autre: { fr: 'Un autre objet', en: 'Another object', ar: 'شيء آخر' },
+  bravo: { fr: 'Trouvé !', en: 'Found it!', ar: 'وجدته!' },
+};
+const tch = (k) => CH_TXT[k][langue] ?? CH_TXT[k].fr;
+const nomObjet = (o, i = 0) => (o[langue] || o.fr)[i];
+const Chasse = (() => {
+  let etat = null, offTel = null, camIci = null;
+  const racine = () => $('chasse');
+  function demarrer() {
+    arreter();
+    const liste = melanger([...CH_OBJETS]).slice(0, 5);
+    etat = { liste, i: 0, trouves: 0, vus: {}, debut: 0, fini: false };
+    const r = racine();
+    r.innerHTML = `<div class="chs-progres"></div>
+      <div class="chs-carte"><div class="chs-objet"><svg class="chs-anneau" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/><circle class="v" cx="60" cy="60" r="56"/></svg><span class="e"></span></div>
+        <p class="chs-va"></p><h2 class="chs-nom"></h2><p class="chs-indice"></p></div>
+      <div class="chs-bas"><span class="chs-etat"><i></i><span></span></span>
+        <button type="button" class="chs-b" data-a="tel"></button><button type="button" class="chs-b" data-a="ici"></button>
+        <button type="button" class="chs-b" data-a="autre"></button><button type="button" class="chs-b principal" data-a="trouve"></button></div>
+      <div class="chs-video" hidden><video playsinline muted></video><p class="ch-aide-cam"></p></div>`;
+    r.querySelector('[data-a=tel]').innerHTML = `<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>${tch('tel')}`;
+    r.querySelector('[data-a=ici]').innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg>${tch('ici')}`;
+    r.querySelector('[data-a=autre]').textContent = '↻ ' + tch('autre');
+    r.querySelector('[data-a=trouve]').textContent = '✓ ' + tch('trouve');
+    r.querySelector('[data-a=tel]').onclick = () => { DuoEcran.nbJoueurs ? DuoEcran.dire('mode', { mode: 'objets' }) : GuideTel.ouvrir(); };
+    r.querySelector('[data-a=ici]').onclick = cameraLocale;
+    r.querySelector('[data-a=autre]').onclick = () => { etat.liste[etat.i] = hasardDe(CH_OBJETS.filter((o) => !etat.liste.includes(o))); question(); };
+    r.querySelector('[data-a=trouve]').onclick = () => trouve();
+    // le téléphone devient « l'œil » dès qu'il est relié
+    if (DuoEcran.nbJoueurs) DuoEcran.dire('mode', { mode: 'objets' });
+    offTel = DuoEcran.sur('objets', voir);
+    DuoEcran.sur('joueur', () => { if (etat) DuoEcran.dire('mode', { mode: 'objets' }); });
+    question();
+    etat.minuteur = setInterval(tic, 500);
+  }
+  function majEtat() {
+    const r = racine(); if (!r) return;
+    const cam = DuoEcran.nbJoueurs || camIci;
+    r.querySelector('.chs-etat').classList.toggle('ok', !!cam);
+    r.querySelector('.chs-etat span').textContent = cam ? tch('regarde') : tch('pasCam');
+    r.querySelector('[data-a=tel]').hidden = !!DuoEcran.nbJoueurs || !modeTele; r.querySelector('[data-a=ici]').hidden = !!camIci || !!DuoEcran.nbJoueurs;
+  }
+  function question() {
+    const o = etat.liste[etat.i], r = racine();
+    etat.debut = performance.now(); etat.vus = {}; etat.indice = false; etat.pause = false;
+    r.querySelector('.chs-progres').innerHTML = etat.liste.map((_, k) => `<span class="${k < etat.i ? 'ok' : k === etat.i ? 'on' : ''}"></span>`).join('');
+    r.querySelector('.chs-carte').classList.remove('gagne');
+    r.querySelector('.chs-objet .e').textContent = o.e;
+    r.querySelector('.chs-va').textContent = tch('va');
+    r.querySelector('.chs-nom').textContent = nomObjet(o);
+    r.querySelector('.chs-indice').textContent = tch('montre');
+    majEtat();
+    parler(`${tch('va')} ${nomObjet(o)}, ${tch('montre')}`);
+    setTimeout(() => r.querySelector('[data-a=trouve]')?.focus({ preventScroll: true }), 80);
+  }
+  function tic() {
+    if (!etat || etat.pause) return;
+    const r = racine(); if (!r) return arreter();
+    const t = (performance.now() - etat.debut) / 1000;
+    r.querySelector('.chs-anneau .v').style.strokeDashoffset = 352 * (1 - Math.min(1, t / 75));
+    if (t > 22 && !etat.indice) { etat.indice = true; const l = tch('lieux')[etat.liste[etat.i].l]; const txt = `${tch('indice')} ${l[langue] || l.fr}`; r.querySelector('.chs-indice').textContent = txt; parler(txt); }
+    if (t > 75) { r.querySelector('[data-a=autre]').click(); }
+    majEtat();
+  }
+  // ce que voit la caméra : il faut voir le bon objet 3 fois de suite (score ≥ 0,5)
+  function voir(labels) {
+    if (!etat || etat.pause) return;
+    const o = etat.liste[etat.i];
+    const bon = labels.some(([c, sc]) => c === o.c && sc >= .5);
+    etat.vus[o.c] = bon ? (etat.vus[o.c] || 0) + 1 : 0;
+    if (etat.vus[o.c] >= 3) trouve();
+  }
+  async function trouve() {
+    if (!etat || etat.pause) return;
+    etat.pause = true; etat.trouves++;
+    const o = etat.liste[etat.i], r = racine();
+    r.querySelector('.chs-carte').classList.add('gagne');
+    r.querySelector('.chs-va').textContent = '✨';
+    r.querySelector('.chs-nom').textContent = tch('bravo');
+    r.querySelector('.chs-indice').textContent = nomObjet(o, 1);
+    fete(); jingle(); Progres.gagner(null);
+    setTimeout(() => parler(nomObjet(o, 1) + ' !'), 500);
+    await new Promise((ok) => setTimeout(ok, 3200));
+    if (!etat) return;
+    etat.i++;
+    if (etat.i >= etat.liste.length) { const n = etat.trouves; arreter(false); return finDePartie({ scores: [], rejouer: () => demarrer() }); }
+    question();
+  }
+  async function cameraLocale() {
+    const r = racine(), boite = r.querySelector('.chs-video');
+    boite.hidden = false; boite.querySelector('.ch-aide-cam').textContent = td('montreObjet');
+    camIci = await suivreObjets(boite, voir);
+    if (!camIci) boite.hidden = true;
+    majEtat();
+  }
+  function arreter(relacher = true) {
+    if (!etat && !camIci) return;
+    clearInterval(etat?.minuteur); etat = null;
+    offTel?.(); offTel = null;
+    camIci?.stop(); camIci = null;
+    if (relacher && DuoEcran.nbJoueurs) DuoEcran.dire('mode', { mode: 'manette' });
+  }
+  return { demarrer, arreter };
+})();
 // ----- Fin de partie : des étoiles, le score de chacun, et on choisit la suite -----
 const FIN_TXT = {
   seul: { fr: 'Réussi !', en: 'You did it!', ar: 'نجحت!' },
@@ -4986,7 +5244,7 @@ const Coucher = (() => {
     return m >= H * 60 + M || m < 6 * 60;
   }
   function montrer() {
-    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter(); Chasse?.arreter?.();
     if (!debut) debut = Date.now();
     const reste = Math.max(1, Math.round(r.duree - (Date.now() - debut) / 60000));
     const f = fenetre('coucher');
@@ -5430,7 +5688,7 @@ const PauseDouce = (() => {
   }, 5000);
   function montrer() {
     ouverte = true;
-    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter();
+    arreterChanson(); arreterHistoire(); arreterFormes(); arreterCompter(); Chasse?.arreter?.();
     const f = fenetre('pause');
     f.innerHTML = `<div class="fa-cadenas">😴🌙</div><h2></h2><p class="fa-grand"></p><button class="fa-bouton fa-principal" data-a="h"></button><button class="fa-lien" data-a="p">👨‍👩‍👧 ${tf('parents')}</button>`;
     f.querySelector('h2').textContent = PAUSE_TXT.titre[langue];
@@ -5498,6 +5756,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' || e.key === 'GoBack' || e.key === 'BrowserBack') {
     if ($('tv-fiche')) { Fiche.fermer(); e.preventDefault(); return; }
     if (SceneChant.actif && !$('fa-fond')) { SceneChant.quitter(); e.preventDefault(); return; }
+    if (Trace.actif && !$('fa-fond')) { Trace.fermer(); e.preventDefault(); return; }
     if (Theatre.actif) { Theatre.quitter(); e.preventDefault(); return; }
     if ($('fa-fond')) { fermerFenetre(); e.preventDefault(); return; }
     if (pile.length > 1) { retour(); e.preventDefault(); }
@@ -5522,6 +5781,7 @@ if (modeTele) document.documentElement.classList.add('tele');
 PLUGINS.App?.addListener?.('backButton', () => {
   if ($('tv-fiche')) return Fiche.fermer();
   if (SceneChant.actif) return SceneChant.quitter();
+  if (Trace.actif) return Trace.fermer();
   if (Theatre.actif) return Theatre.quitter();
   if ($('fa-fond')) return fermerFenetre();
   if (pile.length > 1) return retour();
@@ -5571,6 +5831,7 @@ const DUO_TXT = {
   aidePave: { fr: 'Bouge ton doigt : la main bouge sur la télé', en: 'Move your finger: the hand moves on the TV', ar: 'حرّك إصبعك: اليد تتحرك على التلفاز' },
   tourne: { fr: 'Tourne ton téléphone à l’horizontale', en: 'Turn your phone sideways', ar: 'أدِر هاتفك أفقيًا' },
   poser: { fr: 'Pose le téléphone debout contre un objet, écran vers toi, à 1 mètre. Ta main pilote la télé.', en: 'Stand the phone up against something, screen facing you, about 1 m away. Your hand drives the TV.', ar: 'ضع الهاتف واقفًا مستندًا إلى شيء، والشاشة نحوك، على بعد متر. يدك تتحكم في التلفاز.' },
+  montreObjet: { fr: '🔎 Montre l’objet à la caméra, bien en face', en: '🔎 Show the object to the camera, right in front', ar: '🔎 أرِ الشيء للكاميرا من الأمام' },
   lier: { fr: 'Connecter la télé à mon compte', en: 'Sign the TV in to my account', ar: 'اربط التلفاز بحسابي' },
   joueur: { fr: 'Joueur', en: 'Player', ar: 'اللاعب' },
   attente: { fr: 'En attente du téléphone…', en: 'Waiting for the phone…', ar: 'في انتظار الهاتف…' },
@@ -5628,17 +5889,30 @@ const DuoEcran = (() => {
     const x = nx * innerWidth, y = ny * innerHeight; j.x = x; j.y = y;
     // caméra : pas de pince à faire. On garde la main immobile, un cercle se remplit, et ça touche.
     // Dans la pluie de formes, la main tranche dès qu'elle bouge.
+    j.curseur.classList.toggle('crayon', cam && Trace.actif);
     if (cam) {
       if (fo && !$('fa-fond')) appui = true;
+      else if (Trace.actif && !$('fa-fond')) { /* atelier : on dessine tant que l'index est tendu */ }
       else {
+        // la main est « aimantée » par le bouton le plus proche : il s'allume, et on le touche en restant dessus
         const t = performance.now();
-        if (!j.dw || Math.hypot(x - j.dw.x, y - j.dw.y) > innerWidth * .025) j.dw = { x, y, t, fait: false };
-        const p = j.dw.fait ? 0 : Math.min(1, (t - j.dw.t) / 1000);
+        let cible = cibleProche(x, y);
+        // la main tremble : si elle sort de la cible moins de 300 ms, on garde le compte
+        if (!cible && j.dw?.el && t - (j.dw.vu || 0) < 300) cible = j.dw.el;
+        if (cible) {
+          if (!j.dw || j.dw.el !== cible) { j.dw = { el: cible, t, fait: false }; survol(cible, x, y, j); }
+          j.dw.vu = t;
+          // aimantation : la main est attirée vers le centre du bouton
+          const r = cible.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          j.curseur.style.transform = `translate(${x + (cx - x) * .4}px, ${y + (cy - y) * .4}px)`;
+        } else if (!j.dw || j.dw.el || Math.hypot(x - j.dw.x, y - j.dw.y) > innerWidth * .025) j.dw = { x, y, t, fait: false };
+        const repos = t < (j.pause || 0); // une seconde de calme après chaque toucher
+        const p = j.dw.fait || repos ? 0 : Math.min(1, (t - j.dw.t) / 1100);
         j.curseur.style.setProperty('--dwell', p.toFixed(2));
-        if (p >= 1) { j.dw.fait = true; tape(j, x, y); son('pop'); }
+        if (p >= 1) { j.dw.fait = true; j.pause = t + 1000; if (j.dw.el) { onde(x, y, j.couleur); j.dw.el.click(); } else tape(j, x, y); son('pop'); }
         appui = false;
       }
-    }
+    } else if (!appui) { const cible = cibleProche(x, y); if (cible && cible !== j.survole) survol(cible, x, y, j); }
     j.curseur.style.transform = `translate(${x}px, ${y}px)`;
     j.curseur.classList.toggle('appui', appui);
     clearTimeout(j.cache); j.curseur.classList.remove('cache');
@@ -5655,6 +5929,24 @@ const DuoEcran = (() => {
         j.appui = false;
       }
     }
+  }
+  // le bouton le plus proche de la main (dans un rayon de 6 % de l'écran), parmi ceux qu'on peut toucher
+  function cibleProche(x, y) {
+    const R = innerWidth * .06; let mieux = null, dmin = R;
+    for (const el of focusables()) {
+      if (el.closest('.duo-curseur') || el.id === 'tv-retour' && !el.offsetParent) continue;
+      const r = el.getBoundingClientRect();
+      const dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom), d = Math.hypot(dx, dy);
+      if (d < dmin || (d === 0 && mieux && r.width * r.height < mieux.r)) { dmin = d; mieux = { el, r: r.width * r.height }; if (d === 0) dmin = -1; }
+    }
+    return mieux?.el || null;
+  }
+  // survol : la tuile s'allume comme à la télécommande (et Lumi dit son nom)
+  function survol(el, x, y, j) {
+    j.survole = el;
+    el.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x, clientY: y, pointerId: 70 + j.n, pointerType: 'touch' }));
+    if (!el.closest('.tv-tuile, .tv-pilule')) el.focus({ preventScroll: true });
+    son('tic');
   }
   function tape(j, x, y) {
     const el = document.elementFromPoint(x, y), o = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 70 + j.n, pointerType: 'touch', isPrimary: j.n === 1 };
@@ -5705,6 +5997,7 @@ const DuoEcran = (() => {
         ch.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d, payload.id, payload.cam))
           .on('broadcast', { event: 'orient' }, ({ payload }) => emettre('orient', payload))
           .on('broadcast', { event: 'squelette' }, ({ payload }) => emettre('squelette', payload))
+          .on('broadcast', { event: 'objets' }, ({ payload }) => emettre('objets', payload.l || []))
           .on('broadcast', { event: 'r' }, ({ payload }) => relatif(payload.dx, payload.dy, payload.d, payload.id))
           .on('broadcast', { event: 'k' }, ({ payload }) => touche(payload.k))
           .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
@@ -5751,9 +6044,9 @@ const DuoManette = (() => {
   const monId = Math.random().toString(36).slice(2, 9);
   const vibrer = (ms = 12) => { try { navigator.vibrate?.(ms); } catch {} };
   const dire = (event, payload) => canal?.send({ type: 'broadcast', event, payload: { id: monId, ...payload } });
-  const envoyer = (x, y) => { // caméra : position absolue de la main (le toucher se fait en restant immobile)
-    const t = performance.now(); if (t - envoi < 33) return; envoi = t;
-    dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: false, cam: true });
+  const envoyer = (x, y, pointe = false) => { // caméra : position de la main ; « pointe » = index tendu (crayon posé)
+    const t = performance.now(); if (t - envoi < 33 && pointe === envoyer.p) return; envoi = t; envoyer.p = pointe;
+    dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: pointe, cam: true });
   };
   const squelette = (pts, taille) => { // pour l'écran de réglage sur la télé, quelques fois par seconde
     const t = performance.now(); if (t - envoiSq < 160) return; envoiSq = t;
@@ -5772,7 +6065,11 @@ const DuoManette = (() => {
       vibrer(60); son('juste');
       dire('orient', { paysage: paysage() });
     }).on('broadcast', { event: 'ecran' }, ({ payload }) => choisirMode(payload.pointeur ? 'pave' : 'menu', f))
-      .on('broadcast', { event: 'mode' }, ({ payload }) => { if (payload.mode === 'camera' && !camera) basculerCamera(f, true); else if (payload.mode === 'manette' && camera) basculerCamera(f, false); })
+      .on('broadcast', { event: 'mode' }, ({ payload }) => {
+        if (payload.mode === 'objets') return basculerObjets(f, true);
+        if (objets) basculerObjets(f, false);
+        if (payload.mode === 'camera' && !camera) basculerCamera(f, true); else if (payload.mode === 'manette' && camera) basculerCamera(f, false);
+      })
       .on('broadcast', { event: 'compte-ok' }, ({ payload }) => { f.querySelector('.mn-compte').textContent = '✅ ' + (payload.email || ''); vibrer(60); })
       .on('broadcast', { event: 'compte-ko' }, () => { f.querySelector('.mn-compte').textContent = '❌ ' + td('erreur'); });
     await new Promise((ok, ko) => { canal.subscribe((st) => { if (st === 'SUBSCRIBED') ok(); }); setTimeout(() => ko(new Error('délai')), 8000); });
@@ -5786,6 +6083,16 @@ const DuoManette = (() => {
     mode = m; f.dataset.mode = m;
     if (camera) return; // la caméra garde la main tant qu'elle est allumée
     f.querySelector('.mn-aide').textContent = m === 'pave' ? td('aidePave') : td('aideMenu');
+  }
+  // le téléphone devient « l'œil » du cache-cache : il dit à la télé quels objets il voit
+  let objets = null;
+  async function basculerObjets(f, oui) {
+    if (camera) basculerCamera(f, false);
+    objets?.stop(); objets = null;
+    f.classList.toggle('objets', oui);
+    f.querySelector('.mn-surface').hidden = oui; f.querySelector('.duo-camera').hidden = !oui;
+    f.querySelector('.duo-camera .fa-aide').textContent = oui ? td('montreObjet') : td('poser');
+    if (oui) objets = await suivreObjets(f.querySelector('.duo-camera'), (l) => dire('objets', { l }));
   }
   function basculerCamera(f, oui) {
     f.querySelector('[data-a=camera]').classList.toggle('on', oui);
@@ -5883,22 +6190,56 @@ const DuoManette = (() => {
   function arreter() { arreterCamera(); if (canal) { canal.send({ type: 'broadcast', event: 'aurevoir', payload: { id: monId } }); clientSupa?.removeChannel(canal); canal = null; } relie = false; }
   return { ouvrir, arreter, set camera(c) { camera = c; } };
 })();
+// ----- MediaPipe (Google), tout sur l'appareil : aucune image ne quitte le téléphone -----
+let visionCharge = null;
+const vision = () => visionCharge || (visionCharge = (async () => {
+  const v = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+  return { v, fichiers: await v.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm') };
+})());
+// Cache-cache des objets : on reconnaît des objets courants de la maison (modèle EfficientDet-Lite0, classes COCO)
+let detecteur = null;
+async function suivreObjets(boite, rappel) {
+  const video = boite.querySelector('video');
+  try {
+    if (!detecteur) {
+      const { v, fichiers } = await vision();
+      detecteur = await v.ObjectDetector.createFromOptions(fichiers, {
+        baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/1/efficientdet_lite0.tflite', delegate: 'GPU' },
+        runningMode: 'VIDEO', scoreThreshold: .4, maxResults: 5,
+      });
+    }
+    const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
+    video.srcObject = flux; await video.play();
+    let actif = true, dernier = 0;
+    const arret = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
+    const boucle = (t) => {
+      if (!actif) return;
+      if (t - dernier > 220) { // environ 4 à 5 fois par seconde
+        dernier = t;
+        const r = detecteur.detectForVideo(video, performance.now());
+        rappel((r.detections || []).map((d) => [d.categories[0].categoryName, +d.categories[0].score.toFixed(2)]));
+      }
+      requestAnimationFrame(boucle);
+    };
+    requestAnimationFrame(boucle);
+    return arret;
+  } catch (e) { console.warn(e); boite.querySelector('.fa-aide, .ch-aide-cam') && (boite.querySelector('.fa-aide, .ch-aide-cam').textContent = td('erreur')); return null; }
+}
 // ----- Suivre le doigt avec la caméra (MediaPipe, sur l'appareil : seule la position du doigt part vers la télé) -----
 let repereMain = null;
 async function suivreDoigt(boite, rappel, squelette) {
   const video = boite.querySelector('video'), point = boite.querySelector('.duo-point');
   try {
     if (!repereMain) {
-      const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
-      const fichiers = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
-      repereMain = await vision.HandLandmarker.createFromOptions(fichiers, {
+      const { v, fichiers } = await vision();
+      repereMain = await v.HandLandmarker.createFromOptions(fichiers, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
         runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: .5, minTrackingConfidence: .5,
       });
     }
     const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
     video.srcObject = flux; await video.play();
-    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0;
+    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0; const etatPointe = { v: false, n: 0 };
     DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
     const boucle = () => {
       if (!actif) return;
@@ -5914,7 +6255,13 @@ async function suivreDoigt(boite, rappel, squelette) {
         const v = Math.hypot(x - lisse.x, y - lisse.y) / Math.max(1, t - dernierT) * 1000, a = Math.min(.85, .12 + v * .9);
         lisse = { x: lisse.x + (x - lisse.x) * a, y: lisse.y + (y - lisse.y) * a };
         point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.hidden = false;
-        rappel(lisse.x, lisse.y);
+        // index tendu, les autres doigts repliés = « je pointe » (crayon posé pour dessiner)
+        const loin = (b, a) => Math.hypot(m[b].x - m[0].x, m[b].y - m[0].y) > Math.hypot(m[a].x - m[0].x, m[a].y - m[0].y) * 1.12;
+        const brut = loin(8, 6) && !loin(12, 10) && !loin(16, 14) && !loin(20, 18);
+        if (brut !== etatPointe.v) { if (++etatPointe.n >= 3) { etatPointe.v = brut; etatPointe.n = 0; } } else etatPointe.n = 0;
+        const pointe = etatPointe.v;
+        point.classList.toggle('appui', pointe);
+        rappel(lisse.x, lisse.y, pointe);
         // taille de la main (poignet → base du majeur) : sert à dire « recule » ou « approche »
         const taille = Math.hypot(m[0].x - m[9].x, m[0].y - m[9].y);
         squelette?.(m.map((q) => [1 - q.x, q.y]), taille);
@@ -6062,7 +6409,7 @@ function cameraIci() {
   boite.querySelector('.fa-aide').textContent = td('aide');
   document.body.appendChild(boite);
   boite.querySelector('button').onclick = () => { DuoManette.arreter(); boite.remove(); DuoEcran.arreter(); };
-  suivreDoigt(boite, (x, y) => DuoEcran.pointeur(x, y, false, 'camera', true));
+  suivreDoigt(boite, (x, y, pointe) => DuoEcran.pointeur(x, y, pointe, 'camera', true));
 }
 function blocDuo() {
   const b = $('fa-duo'); if (!b) return;
@@ -6146,7 +6493,7 @@ const TV = (() => {
         { id: 'j-mot', emoji: dj.mot.emoji, nom: L.motJour, desc: nomComplet(dj.mot), action: () => montrerEntree(dj.mot) },
         item('histoires'), item('chansons'),
       ] },
-      { titre: '👫 ' + tt('aDeux'), items: ['formes', 'compter', 'bulles'].map((e) => item(e, { deux: true })) },
+      { titre: '👫 ' + tt('aDeux'), items: [item('chasse', { tel: true }), ...['formes', 'compter', 'bulles'].map((e) => item(e, { deux: true }))] },
       { titre: '🌍 ' + tt('decouvrir'), items: ['animaux', 'manger', 'monde', 'couleurs', 'lettres', 'nombres', 'dessin', 'coloriage'].map((e) => item(e, e === 'dessin' || e === 'coloriage' ? { tel: true } : {})) },
       { titre: '🌙 ' + tt('soir'), items: [...contes, item('chansons')] },
       { titre: '🎲 ' + tt('jeux'), items: ['devine', 'ecoute', 'range', 'intrus'].map((e) => item(e)) },
