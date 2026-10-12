@@ -2200,6 +2200,64 @@
     .vitrine:not(.vt-grand) .vt-onglets button { flex-direction: row; gap: 6px; font-size: 12px; }
     .vitrine:not(.vt-grand) .vt-page { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 54px); }
   }
+
+  /* ----- iPhone couché : rien sous l'encoche ni sous les bords arrondis (zones sûres à gauche et à droite) ----- */
+  body { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .haut { margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
+  .fa-fond { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .theatre #theatre { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .fa-t-coucher, .fa-t-dodo { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .fa-t-guide { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele .fa-t-enfants { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele #ecran-formes .formes { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele #ecran-compter .compter { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele #ecran-coloriage .coloriage { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  #ecran-chasse .chasse { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .fa-t-photo { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele #ecran-photo .album-photos { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele .mod { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele .mu-scene { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .tele .vi-scene { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .mod-aventure { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  #admin { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .vitrine { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .aide-fond { left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px); }
+  .atelier #scene { left: env(safe-area-inset-left, 0px) !important; right: env(safe-area-inset-right, 0px) !important; width: auto !important; height: 100dvh !important; }
+  .aide-q { left: calc(14px + env(safe-area-inset-left, 0px)); }
+  .vitrine:not(.vt-grand) .vt-onglets { padding-left: 6px; padding-right: 6px; }
+  /* ----- Téléphone couché (peu de hauteur) : barre du haut fine, Lumi plus étroit, tuiles plus compactes ----- */
+  @media (orientation: landscape) and (max-height: 520px) {
+    html:not(.tele) .haut { min-height: 52px; padding-top: max(6px, env(safe-area-inset-top, 0px)); padding-bottom: 6px; }
+    html:not(.tele) .haut h1 { font-size: 24px; }
+    html:not(.tele) .corps { grid-template-columns: 1fr 2fr; }
+    html:not(.tele) [data-ecran="coloriage"] .corps { grid-template-columns: 1fr; }
+    html:not(.tele) .scene, html:not(.tele) [data-ecran="accueil"] .scene { max-height: calc(100dvh - 76px); }
+    html:not(.tele) .panneau { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+    html:not(.tele) .objet { min-height: 96px; border-radius: 18px; }
+    html:not(.tele) .objet .e { font-size: 40px; }
+    html:not(.tele) .objet .n { font-size: 15px; }
+  }
+  /* ----- Téléphone couché : jeux à choix, formes, compter et coloriage tiennent dans la hauteur ----- */
+  @media (orientation: landscape) and (max-height: 520px) {
+    html:not(.tele) .choix button { aspect-ratio: auto; height: min(132px, calc((100dvh - 130px) / 2)); font-size: 54px; }
+    html:not(.tele) .choix[data-n="4"] button { aspect-ratio: auto; }
+    html:not(.tele) [data-ecran="jeu"] .aire-bulles, html:not(.tele) [data-ecran="jeu"][data-jeu="bulles"] .aire-bulles { height: calc(100dvh - 124px); }
+    html:not(.tele) [data-ecran="formes"] .corps, html:not(.tele) [data-ecran="compter"] .corps { grid-template-columns: 1fr; }
+    html:not(.tele) .formes { display: grid; grid-template-columns: 230px 1fr; align-items: start; gap: 10px 14px; }
+    html:not(.tele) .formes > * { grid-column: 1; }
+    html:not(.tele) .formes > .fo-ciel { grid-column: 2; grid-row: 1 / span 6; height: calc(100dvh - 72px); }
+    html:not(.tele) .compter { display: grid; grid-template-columns: 1fr 250px; align-items: start; gap: 10px 14px; }
+    html:not(.tele) .compter > * { grid-column: 2; }
+    html:not(.tele) .compter > .co-zone { grid-column: 1; grid-row: 1 / span 6; height: calc(100dvh - 72px); }
+    html:not(.tele) .co-objet { font-size: 52px; }
+    html:not(.tele) .co-chiffre { height: 72px; font-size: 40px; }
+    html:not(.tele) .coloriage { grid-template-columns: 1fr 300px; grid-template-rows: auto auto auto 1fr auto;
+                                 grid-template-areas: "feuille bulle" "feuille palette" "feuille actions" "feuille ." "autres autres"; align-items: start; }
+    html:not(.tele) .palette { grid-template-columns: repeat(5, 1fr); }
+    html:not(.tele) .feuille svg { max-height: calc(100dvh - 96px); }
+    html:not(.tele) .col-bulle { min-height: 0; padding: 6px 10px 6px 6px; }
+    html:not(.tele) .col-bulle .txt { font-size: 19px; }
+  }
 </style>
 </head>
 <body>
@@ -11882,7 +11940,8 @@ const Vitrine = (() => {
     racine.querySelector('.vt-rail').onpointerleave = () => { if (zone !== 'rail') racine.classList.remove('rail-ouvert'); };
     addEventListener('resize', () => { if (actif) { const g = calculerGrand(); if (g !== grand) rendre(); } });
   }
-  const calculerGrand = () => modeTele || (innerWidth >= 900 && innerWidth > innerHeight * 1.15);
+  // barre de gauche (télé, ordinateur, grande tablette) ; un téléphone couché garde la version téléphone (assez haut pour être lisible)
+  const calculerGrand = () => modeTele || (innerWidth >= 900 && innerWidth > innerHeight * 1.15 && innerHeight >= 600);
   const actifMenu = () => { for (let i = pile.length - 1; i >= 0; i--) { const k = MENU_VT.findIndex(([, id]) => id === pile[i]); if (k >= 0) return k; } return 1; };
   function allerRacine(id) {
     if (pile[pile.length - 1] === id) return;
