@@ -10354,6 +10354,7 @@ const BG = {
   energie: { fr: 'Énergie', en: 'Energy', ar: 'الطاقة' },
   couleurAide: { fr: 'Montre-la au milieu de la caméra', en: 'Show it in the middle of the camera', ar: 'أرِها في وسط الكاميرا' },
   ramene: { fr: 'Ramène-moi quelque chose de', en: 'Bring me something', ar: 'أحضر لي شيئًا' },
+  suivante: { fr: 'Pas grave, on essaie la suivante !', en: 'Never mind, let’s try the next one!', ar: 'لا بأس، لنجرّب التالية!' },
   commencer: FM_TXT.commencer, ok: FM_TXT.ok, trouve: FM_TXT.trouve,
 };
 const bg = (k) => t3(BG[k]);
@@ -10397,9 +10398,12 @@ function svgPose(os, couleur = '#2EE6C5') {
   const L = OS_LIENS.map(([a, b]) => `<line x1="${os[a][0] * 100}" y1="${os[a][1] * 100}" x2="${os[b][0] * 100}" y2="${os[b][1] * 100}"/>`).join('');
   return `<svg viewBox="0 0 100 100" class="bg-svg" style="--c:${couleur}"><g>${L}</g><circle cx="${os[0][0] * 100}" cy="${os[0][1] * 100 - 4}" r="7"/></svg>`;
 }
+// les points dont chaque pose a besoin : s'ils sortent de l'image, la caméra devine leur place, on ne juge pas
+const POINTS_POSE = { bras: [0, 1, 2, 5, 6], avion: [1, 2, 5, 6], tete: [0, 1, 2, 5, 6], pied: [7, 8, 9, 10, 11, 12], grenouille: [1, 2, 7, 8, 9, 10], etoile: [1, 2, 5, 6, 11, 12], hanches: [1, 2, 3, 4, 5, 6, 7, 8] };
 // une pose est-elle faite ? (e = largeur des épaules, sert d'échelle)
 function poseFaite(p, cle) {
   if (!p || p[1][2] < .4 || p[2][2] < .4) return false;
+  if ((POINTS_POSE[cle] || []).some((i) => !p[i] || p[i][2] < .55)) return false;
   const e = Math.max(.04, Math.hypot(p[1][0] - p[2][0], p[1][1] - p[2][1]));
   try { return POSES[cle].test(p, e); } catch { return false; }
 }
@@ -10423,14 +10427,14 @@ MODULES.imite = (() => {
     s.consigne.textContent = t3(p.nom); s.jauge.style.width = '0%';
     s.sous.textContent = `${i + 1} / ${liste.length}`;
     avatar?.forme(p.e); parler(t3(p.nom));
-    clearTimeout(minuteur); minuteur = setTimeout(() => { if (!fini && cam !== 'aucune') { parler(bg('bravo')); reussi([]); } }, 14000);
+    clearTimeout(minuteur); minuteur = setTimeout(() => { if (!fini && cam !== 'aucune') { fini = true; parler(bg('suivante')); setTimeout(suivante, 1800); } }, 16000);
   }
   function recu(d, id) {
     if (!z || !d.poses) return;
     derniere = d.poses; dessinerOs(s.ov, d.poses);
     if (fini) return;
     const k = liste[i];
-    d.poses.slice(0, 2).forEach((p, j) => { tenue[j] = poseFaite(p, k) ? tenue[j] + 1 : Math.max(0, tenue[j] - 1); });
+    d.poses.slice(0, 2).forEach((p, j) => { tenue[j] = poseFaite(p, k) ? tenue[j] + 1 : Math.max(0, tenue[j] - 2); });
     const max = Math.max(...tenue); s.jauge.style.width = Math.min(100, max / 7 * 100) + '%';
     if (max >= 7) reussi(tenue.map((t, j) => (t >= 5 ? j + 1 : 0)).filter(Boolean));
   }
@@ -10458,7 +10462,7 @@ MODULES.statues = (() => {
     s.modele.innerHTML = '<span class="bg-e grand">🗿</span>';
     s.bas.append(bouton('▶ ' + bg('commencer'), () => danser(), 'mod-b principal'), bouton('✓ ' + bg('toutFige'), () => { if (phase === 'statue') finStatue(true); }, 'mod-b'));
     s.consigne.textContent = bg('pret');
-    cam = await brancherCamera(s.cam, 'mouvement', (d) => { mvt = d; if (phase === 'statue') { bouge[0] = Math.max(bouge[0], d.g || 0); bouge[1] = Math.max(bouge[1], d.d || 0); } s.jauge.style.width = Math.min(100, ((d.g || 0) + (d.d || 0)) * 120) + '%'; });
+    cam = await brancherCamera(s.cam, 'mouvement', (d) => { mvt = d; if (phase === 'statue') { bouge[0] += (d.g || 0) > .14 ? 1 : 0; bouge[1] += (d.d || 0) > .14 ? 1 : 0; } s.jauge.style.width = Math.min(100, ((d.g || 0) + (d.d || 0)) * 120) + '%'; });
     focusPremier(s.bas);
   }
   function danser() {
@@ -10478,10 +10482,10 @@ MODULES.statues = (() => {
   }
   function finStatue(force) {
     if (phase !== 'statue') return; clearTimeout(minuteur); phase = 'pause';
-    const seuil = .16, vu = cam !== 'aucune' && !force && (bouge[0] > seuil || bouge[1] > seuil);
+    const seuil = 3, vu = cam !== 'aucune' && !force && (bouge[0] >= seuil || bouge[1] >= seuil); // au moins 3 images où ça bouge vraiment
     if (vu) { parler(bg('bouge')); avatar?.forme('👀'); son('pop'); }
     else { parler(bg('immobiles')); fete(); }
-    [0, 1].forEach((j) => { if (cam === 'aucune' || force || bouge[j] <= seuil) scores[j + 1]++; });
+    [0, 1].forEach((j) => { if (cam === 'aucune' || force || bouge[j] < seuil) scores[j + 1]++; });
     Progres.gagner(null);
     minuteur = setTimeout(() => { if (++manche >= 6) return finDePartie({ scores: DuoEcran.nbJoueurs >= 2 ? scores : [0, 0, 0], rejouer: () => demarrer(z) }); danser(); }, 2600);
   }
@@ -11638,7 +11642,7 @@ MODULES.jeucour = (() => {
     const vivant = () => moi === actif && z?.isConnected;
     if (j.anim === 'soleil') {
       const cam = zoneCamera(z.querySelector('.jc-plus')); let regarde = false, bouge = 0;
-      brancherCamera(cam, 'mouvement', (d) => { if (regarde) bouge = Math.max(bouge, (d.g || 0) + (d.d || 0)); });
+      brancherCamera(cam, 'mouvement', (d) => { if (regarde && (d.g || 0) + (d.d || 0) > .25) bouge++; }); // plusieurs images où ça bouge, pas une seule
       const tour = async () => {
         if (!vivant()) return;
         regarde = false; scene('🙈', ''); avatar?.forme('🙈');
@@ -11649,7 +11653,7 @@ MODULES.jeucour = (() => {
         scene('👀', t3(nom3('Soleil !', 'Sunshine!', 'شمس!'))); parler(t3(nom3('Soleil !', 'Sunshine!', 'شمس!'))); avatar?.forme('👀');
         await attendre(900); bouge = 0; regarde = true; await attendre(2600); regarde = false;
         if (!vivant()) return;
-        if (cam.boite.dataset.etat !== 'aucune' && bouge > .35) { scene('😄', cu('vuBouger')); parler(cu('vuBouger')); son('pop'); await attendre(2600); }
+        if (cam.boite.dataset.etat !== 'aucune' && bouge >= 3) { scene('😄', cu('vuBouger')); parler(cu('vuBouger')); son('pop'); await attendre(2600); }
         plus(tour, 600);
       };
       tour(); return;
