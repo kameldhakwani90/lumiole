@@ -2539,6 +2539,12 @@
   .tele .ci-carte { width: 86vw; padding: 3.5vh 2.5vw; gap: 2.5vw; }
   .tele .ci-poser { font-size: 2.3vh; } .tele .ci-liste li { font-size: 2.3vh; padding: 1vh 1vw; } .tele .ci-conseil { font-size: 3vh; } .tele .ci-sur { font-size: 1.8vh; }
   .tele .ci-quand { height: 6vh; font-size: 2.2vh; padding: 0 2vw; border-radius: 3vh; }
+  /* la main qui dirige : « lève la main » sur la télé, la prise de contrôle se remplit sur le téléphone */
+  #duo-leve { position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; display: flex; align-items: center; gap: 14px; padding: 12px 26px; border-radius: 99px;
+    background: rgba(8,10,30,.88); border: 2px solid rgba(46,230,197,.6); color: #EFFFFA; font: 800 clamp(16px, 2.6vh, 28px) 'Baloo 2', system-ui, sans-serif; pointer-events: none; animation: entre .3s ease-out; }
+  #duo-leve .m { font-size: 1.5em; animation: ci-flotte 1.6s ease-in-out infinite; }
+  .duo-point { --prise: 1; opacity: calc(.35 + var(--prise) * .65); transform: scale(calc(.6 + var(--prise) * .4)); transition: opacity .15s, transform .15s; }
+  html:has(.ci.joue) #duo-leve, .theatre #duo-leve, html:has(.cam-installe) #duo-leve { display: none; }
 </style>
 </head>
 <body>
@@ -7561,6 +7567,8 @@ const DUO_TXT = {
   aideMenu: { fr: 'Glisse pour choisir, tape pour lancer', en: 'Swipe to choose, tap to start', ar: 'اسحب للاختيار، والمس للبدء' },
   aideDessin: { fr: 'Dessine ici : ton dessin apparaît sur la télé !', en: 'Draw here: your drawing appears on the TV!', ar: 'ارسم هنا: يظهر رسمك على التلفاز!' },
   aidePave: { fr: 'Bouge ton doigt : la main bouge sur la télé', en: 'Move your finger: the hand moves on the TV', ar: 'حرّك إصبعك: اليد تتحرك على التلفاز' },
+  leveMain: { fr: 'Lève la main, bien ouverte, face au téléphone, pour diriger', en: 'Raise your open hand towards the phone to take control', ar: 'ارفع يدك مفتوحة أمام الهاتف لتتحكم' },
+  dirige: { fr: 'C’est toi qui diriges ! Reste sur un bouton pour le choisir', en: 'You’re in control! Hold over a button to choose it', ar: 'أنت المتحكم! ابقَ على زر لتختاره' },
   tourne: { fr: 'Tourne ton téléphone à l’horizontale', en: 'Turn your phone sideways', ar: 'أدِر هاتفك أفقيًا' },
   poser: { fr: 'Pose le téléphone debout contre un objet, écran vers toi, à 1 mètre. Ta main pilote la télé.', en: 'Stand the phone up against something, screen facing you, about 1 m away. Your hand drives the TV.', ar: 'ضع الهاتف واقفًا مستندًا إلى شيء، والشاشة نحوك، على بعد متر. يدك تتحكم في التلفاز.' },
   montreObjet: { fr: '🔎 Montre l’objet à la caméra, bien en face', en: '🔎 Show the object to the camera, right in front', ar: '🔎 أرِ الشيء للكاميرا من الأمام' },
@@ -7670,11 +7678,12 @@ const DuoEcran = (() => {
           // aimantation : la main est attirée vers le centre du bouton
           const r = cible.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
           j.curseur.style.transform = `translate(${x + (cx - x) * .4}px, ${y + (cy - y) * .4}px)`;
-        } else if (!j.dw || j.dw.el || Math.hypot(x - j.dw.x, y - j.dw.y) > innerWidth * .025) j.dw = { x, y, t, fait: false };
-        const repos = t < (j.pause || 0); // une seconde de calme après chaque toucher
-        const p = j.dw.fait || repos ? 0 : Math.min(1, (t - j.dw.t) / 1100);
+        } else j.dw = null; // dans le vide : on ne touche jamais rien
+        const repos = t < (j.pause || 0); // un moment de calme après chaque toucher et après la prise de contrôle
+        if (repos && j.dw) j.dw.t = t;
+        const p = !j.dw || j.dw.fait || repos ? 0 : Math.min(1, (t - j.dw.t) / 1400);
         j.curseur.style.setProperty('--dwell', p.toFixed(2));
-        if (p >= 1) { j.dw.fait = true; j.pause = t + 1000; if (j.dw.el) { onde(x, y, j.couleur); j.dw.el.click(); } else tape(j, x, y); son('pop'); }
+        if (p >= 1) { j.dw.fait = true; j.pause = t + 1200; onde(x, y, j.couleur); j.dw.el.click(); son('pop'); }
         appui = false;
       }
     } else if (!appui) { const cible = cibleProche(x, y); if (cible && cible !== j.survole) survol(cible, x, y, j); }
@@ -7718,6 +7727,17 @@ const DuoEcran = (() => {
     onde(x, y, j.couleur);
     el?.dispatchEvent(new PointerEvent('pointerdown', o)); el?.dispatchEvent(new PointerEvent('pointerup', o));
     (el?.closest('button, a, [tabindex], input, select') || null)?.click();
+  }
+  // la caméra du téléphone attend une main levée : on le dit en bas de l'écran
+  function mainLevee(m) {
+    let b = $('duo-leve');
+    if (m?.on === false) {
+      if (!b) { b = document.createElement('div'); b.id = 'duo-leve'; b.innerHTML = '<span class="m">✋</span><span class="t"></span>'; document.body.appendChild(b); }
+      b.querySelector('.t').textContent = td('leveMain');
+    } else b?.remove();
+    const j = m?.id && joueurs.get(m.id);
+    if (j && m.on) { j.pause = performance.now() + 900; j.dw = null; }
+    if (j && !m.on) j.curseur.classList.add('cache');
   }
   // pavé « relatif » : le doigt pousse la main, comme le pavé d'un ordinateur portable
   function relatif(dx, dy, appui, id) {
@@ -7763,7 +7783,8 @@ const DuoEcran = (() => {
         // sécurité : sur le canal à 4 chiffres (devinable), seulement les commandes ; images, textes, dessins et caméra
         // n'arrivent que par le canal secret du QR code, pour qu'un inconnu ne puisse rien afficher sur la télé d'un enfant
         const H = {
-          p: (payload) => pointeur(payload.x, payload.y, payload.d, payload.id, prive && payload.cam),
+          p: (payload) => (Trace.actif && payload.tx != null ? pointeur(payload.tx, payload.ty, payload.d, payload.id, prive && payload.cam) : pointeur(payload.x, payload.y, payload.d, payload.id, prive && payload.cam)),
+          main: (payload) => mainLevee(payload),
           orient: (payload) => emettre('orient', payload),
           r: (payload) => relatif(payload.dx, payload.dy, payload.d, payload.id),
           k: (payload) => touche(payload.k),
@@ -7831,9 +7852,9 @@ const DuoManette = (() => {
     canal?.send({ type: 'broadcast', event, payload: d });
   };
   const direct = () => dc?.readyState === 'open';
-  const envoyer = (x, y, pointe = false) => { // caméra : position de la main ; « pointe » = index tendu (crayon posé)
+  const envoyer = (x, y, pointe = false, tx, ty) => { // caméra : centre de la paume (menus) et bout de l'index (dessin) ; « pointe » = index tendu
     const t = performance.now(); if (t - envoi < 33 && pointe === envoyer.p) return; envoi = t; envoyer.p = pointe;
-    dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: pointe, cam: true });
+    dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: pointe, cam: true, ...(tx != null ? { tx: +tx.toFixed(4), ty: +ty.toFixed(4) } : {}) });
   };
   const squelette = (pts, taille) => { // pour l'écran de réglage sur la télé, quelques fois par seconde
     const t = performance.now(); if (t - envoiSq < 160) return; envoiSq = t;
@@ -8000,7 +8021,7 @@ const DuoManette = (() => {
     f.querySelector('[data-a=camera]').classList.toggle('on', oui);
     f.classList.toggle('cam', oui);
     f.querySelector('.mn-surface').hidden = oui; f.querySelector('.duo-camera').hidden = !oui;
-    if (oui) { suivreDoigt(f.querySelector('.duo-camera'), envoyer, squelette); try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch {} }
+    if (oui) { suivreDoigt(f.querySelector('.duo-camera'), envoyer, squelette, (on) => { dire('main', { on }); const aide = f.querySelector('.duo-camera .fa-aide'); if (aide && on !== null) aide.textContent = on ? '✅ ' + td('dirige') : '✋ ' + td('leveMain'); }); try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch {} }
     else { arreterCamera(); squelette(null, 0); choisirMode(mode, f); }
   }
   function ouvrir(codeQr, secretQr) {
@@ -8134,56 +8155,64 @@ async function suivreObjets(boite, rappel) {
 }
 // ----- Suivre le doigt avec la caméra (MediaPipe, sur l'appareil : seule la position du doigt part vers la télé) -----
 let repereMain = null;
-async function suivreDoigt(boite, rappel, squelette) {
+async function suivreDoigt(boite, rappel, squelette, etat) {
   const video = boite.querySelector('video'), point = boite.querySelector('.duo-point');
   try {
     if (!repereMain) {
       const { v, fichiers } = await vision();
       repereMain = await v.HandLandmarker.createFromOptions(fichiers, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
-        runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: .55, minTrackingConfidence: .5,
+        runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: .6, minHandPresenceConfidence: .6, minTrackingConfidence: .55,
       });
     }
     const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
     video.srcObject = flux; await video.play();
-    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0, brut0 = null; const etatPointe = { v: false, n: 0 };
-    DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
+    // Comme sur les consoles : personne ne dirige tant qu'une main ne s'est pas levée, ouverte, une demi-seconde.
+    // Ensuite on suit CETTE main seulement (le centre de la paume, plus stable que le bout du doigt) ; si elle disparaît, on rend la main.
+    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0, paume0 = null, engage = false, nOuverte = 0; const etatPointe = { v: false, n: 0 };
+    DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); etat?.(null); } };
+    const tailleDe = (q) => Math.hypot(q[0].x - q[9].x, q[0].y - q[9].y);
+    const loin = (m, b, a) => Math.hypot(m[b].x - m[0].x, m[b].y - m[0].y) > Math.hypot(m[a].x - m[0].x, m[a].y - m[0].y) * 1.12;
+    const ouverte = (m) => [[8, 6], [12, 10], [16, 14], [20, 18]].every(([b, a]) => loin(m, b, a));
+    const paume = (m) => { const l = [0, 5, 9, 13, 17]; return { x: l.reduce((s, i) => s + m[i].x, 0) / 5, y: l.reduce((s, i) => s + m[i].y, 0) / 5 }; };
+    const rendre = () => { engage = false; nOuverte = 0; paume0 = null; lisse = null; point.hidden = true; squelette?.(null, 0); etat?.(false); };
+    etat?.(false);
     const boucle = () => {
       if (!actif) return;
-      const t = performance.now(), r = repereMain.detectForVideo(video, t);
-      // plusieurs personnes devant la caméra : on garde la même main (la plus proche de la précédente),
-      // et au départ la plus grande (celle de la personne la plus près du téléphone)
-      const mains = r.landmarks || [], tailleDe = (q) => Math.hypot(q[0].x - q[9].x, q[0].y - q[9].y);
-      let m = null;
-      if (mains.length === 1) m = mains[0];
-      else if (mains.length > 1) m = brut0 ? mains.reduce((a, q) => (Math.hypot(q[8].x - brut0.x, q[8].y - brut0.y) < Math.hypot(a[8].x - brut0.x, a[8].y - brut0.y) ? q : a))
-        : mains.reduce((a, q) => (tailleDe(q) > tailleDe(a) ? q : a));
-      if (m && brut0 && mains.length > 1 && Math.hypot(m[8].x - brut0.x, m[8].y - brut0.y) > .35) m = null; // l'autre main est trop loin : on attend la nôtre
-      if (m) brut0 = { x: m[8].x, y: m[8].y }; else if (perdu > 20) brut0 = null;
-      if (m) {
-        perdu = 0;
-        const bout = m[8];
-        // image en miroir ; la zone utile est le centre de l'image (on atteint les bords sans tendre le bras)
-        const x = Math.min(1, Math.max(0, ((1 - bout.x) - .5) * 1.6 + .5)), y = Math.min(1, Math.max(0, (bout.y - .45) * 1.7 + .5));
-        // lissage adaptatif : très stable quand la main est presque immobile, réactif quand elle bouge vite
-        if (!lisse) lisse = { x, y };
-        const v = Math.hypot(x - lisse.x, y - lisse.y) / Math.max(1, t - dernierT) * 1000, a = Math.min(.85, .12 + v * .9);
-        lisse = { x: lisse.x + (x - lisse.x) * a, y: lisse.y + (y - lisse.y) * a };
-        point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.hidden = false;
-        // index tendu, les autres doigts repliés = « je pointe » (crayon posé pour dessiner)
-        const loin = (b, a) => Math.hypot(m[b].x - m[0].x, m[b].y - m[0].y) > Math.hypot(m[a].x - m[0].x, m[a].y - m[0].y) * 1.12;
-        const brut = loin(8, 6) && !loin(12, 10) && !loin(16, 14) && !loin(20, 18);
-        if (brut !== etatPointe.v) { if (++etatPointe.n >= 3) { etatPointe.v = brut; etatPointe.n = 0; } } else etatPointe.n = 0;
-        const pointe = etatPointe.v;
-        point.classList.toggle('appui', pointe);
-        rappel(lisse.x, lisse.y, pointe);
-        // taille de la main (poignet → base du majeur) : sert à dire « recule » ou « approche »
-        const taille = Math.hypot(m[0].x - m[9].x, m[0].y - m[9].y);
-        squelette?.(m.map((q) => [1 - q.x, q.y]), taille);
-      } else if (++perdu === 8) { point.hidden = true; squelette?.(null, 0); }
-      if (m) perdu = 0;
-      dernierT = t;
       requestAnimationFrame(boucle);
+      const t = performance.now(); let r; try { r = repereMain.detectForVideo(video, t); } catch { return; }
+      const mains = r.landmarks || [];
+      if (!engage) {
+        // la main qui se lève ouverte (la plus proche du téléphone si plusieurs) prend le contrôle
+        const cand = mains.filter(ouverte).sort((a, c) => tailleDe(c) - tailleDe(a))[0];
+        if (cand && (!paume0 || Math.hypot(paume(cand).x - paume0.x, paume(cand).y - paume0.y) < .12)) { nOuverte++; paume0 = paume(cand); }
+        else { nOuverte = Math.max(0, nOuverte - 2); if (!cand) paume0 = null; }
+        point.hidden = !cand; if (cand) { point.style.left = ((1 - paume(cand).x) * 100) + '%'; point.style.top = (paume(cand).y * 100) + '%'; }
+        point.style.setProperty('--prise', Math.min(1, nOuverte / 14).toFixed(2));
+        if (nOuverte >= 14) { engage = true; perdu = 0; lisse = null; etat?.(true); try { navigator.vibrate?.(40); } catch {} }
+        dernierT = t; return;
+      }
+      // la même main que tout à l'heure (paume la plus proche), sinon rien
+      let m = mains.length ? mains.reduce((a, q) => (Math.hypot(paume(q).x - paume0.x, paume(q).y - paume0.y) < Math.hypot(paume(a).x - paume0.x, paume(a).y - paume0.y) ? q : a)) : null;
+      if (m && Math.hypot(paume(m).x - paume0.x, paume(m).y - paume0.y) > .2) m = null;
+      if (!m) { if (++perdu > 24) rendre(); dernierT = t; return; } // ~0,8 s sans la main : on rend le contrôle
+      perdu = 0;
+      const P = paume(m); paume0 = P;
+      // image en miroir ; la zone utile est le centre de l'image (on atteint les bords sans tendre le bras)
+      const x = Math.min(1, Math.max(0, ((1 - P.x) - .5) * 1.8 + .5)), y = Math.min(1, Math.max(0, (P.y - .5) * 1.9 + .5));
+      const tx = Math.min(1, Math.max(0, ((1 - m[8].x) - .5) * 1.6 + .5)), ty = Math.min(1, Math.max(0, (m[8].y - .45) * 1.7 + .5));
+      // lissage adaptatif + zone morte : immobile quand la main tremble, réactif quand elle bouge vraiment
+      if (!lisse) lisse = { x, y };
+      const ecart = Math.hypot(x - lisse.x, y - lisse.y), v = ecart / Math.max(1, t - dernierT) * 1000, a = ecart < .006 ? 0 : Math.min(.8, .1 + v * .8);
+      lisse = { x: lisse.x + (x - lisse.x) * a, y: lisse.y + (y - lisse.y) * a };
+      point.style.left = (lisse.x * 100) + '%'; point.style.top = (lisse.y * 100) + '%'; point.hidden = false; point.style.setProperty('--prise', 1);
+      // index tendu, les autres doigts repliés = « je pointe » (crayon posé pour dessiner)
+      const brut = loin(m, 8, 6) && !loin(m, 12, 10) && !loin(m, 16, 14) && !loin(m, 20, 18);
+      if (brut !== etatPointe.v) { if (++etatPointe.n >= 3) { etatPointe.v = brut; etatPointe.n = 0; } } else etatPointe.n = 0;
+      point.classList.toggle('appui', etatPointe.v);
+      rappel(lisse.x, lisse.y, etatPointe.v, tx, ty);
+      squelette?.(m.map((q) => [1 - q.x, q.y]), tailleDe(m));
+      dernierT = t;
     };
     boucle();
   } catch (e) { boite.querySelector('.fa-aide').textContent = td('erreur'); console.warn(e); }
