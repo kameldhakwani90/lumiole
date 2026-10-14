@@ -2486,6 +2486,15 @@
     html:not(.tele).theatre .hi-texte { font-size: 18px; line-height: 1.35; }
     html:not(.tele).theatre #scene { top: 14vh; bottom: 30vh; }
   }
+  /* manette du téléphone : jamais décalée sur le côté, caméra entière (pas de zoom) en portrait */
+  html.mode-manette, html.mode-manette body { overflow-x: hidden; max-width: 100vw; }
+  .mode-manette .fa-fond { overflow: hidden; }
+  .mode-manette .fa-t-manette { max-width: 100%; min-width: 0; }
+  .mode-manette .duo-camera { max-width: 100%; overflow: hidden; border-radius: 18px; background: #000; }
+  @media (orientation: portrait) {
+    .cam .duo-camera { height: auto; flex: none; }
+    .cam .duo-camera video { height: auto; max-height: 52vh; width: 100%; object-fit: contain; }
+  }
 </style>
 </head>
 <body>
@@ -6269,7 +6278,7 @@ const Achat = (() => {
     } catch (e) { console.warn('Achats', e); }
   }
   return {
-    init, get ouvert() { return ouvert; }, get dispo() { return !!(P && pret && paquets.length); },
+    init, get ouvert() { return ouvert || window.LUMI_TOUT_OUVERT === true; }, // période de test : tout est ouvert (réglage admin « tout_ouvert ») get dispo() { return !!(P && pret && paquets.length); },
     // type : 'ANNUAL', 'MONTHLY' ou 'LIFETIME'
     offre: (type) => paquets.find((x) => x.packageType === type) || null,
     get paquets() { return paquets; },
@@ -7772,7 +7781,7 @@ const DuoManette = (() => {
     canal.send({ type: 'broadcast', event: 'bonjour', payload: { id: monId } });
     try { localStorage.setItem('lumi-manette', JSON.stringify({ code, secret })); } catch {}
     addEventListener('pagehide', () => canal?.send({ type: 'broadcast', event: 'aurevoir', payload: { id: monId } }));
-    matchMedia('(orientation: landscape)').addEventListener?.('change', () => dire('orient', { paysage: paysage() }));
+    matchMedia('(orientation: landscape)').addEventListener?.('change', () => { dire('orient', { paysage: paysage() }); setTimeout(() => scrollTo(0, 0), 300); }); // après avoir tourné le téléphone, la page revient en place
     resterAllume();
   }
   // ardoise : on voit son trait sur le téléphone, et il part en direct sur la télé
@@ -8019,17 +8028,25 @@ async function suivreDoigt(boite, rappel, squelette) {
       const { v, fichiers } = await vision();
       repereMain = await v.HandLandmarker.createFromOptions(fichiers, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
-        runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: .5, minTrackingConfidence: .5,
+        runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: .55, minTrackingConfidence: .5,
       });
     }
     const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
     video.srcObject = flux; await video.play();
-    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0; const etatPointe = { v: false, n: 0 };
+    let actif = true, lisse = null, dernierT = performance.now(), perdu = 0, brut0 = null; const etatPointe = { v: false, n: 0 };
     DuoManette.camera = { stop() { actif = false; flux.getTracks().forEach((t) => t.stop()); } };
     const boucle = () => {
       if (!actif) return;
       const t = performance.now(), r = repereMain.detectForVideo(video, t);
-      const m = r.landmarks?.[0];
+      // plusieurs personnes devant la caméra : on garde la même main (la plus proche de la précédente),
+      // et au départ la plus grande (celle de la personne la plus près du téléphone)
+      const mains = r.landmarks || [], tailleDe = (q) => Math.hypot(q[0].x - q[9].x, q[0].y - q[9].y);
+      let m = null;
+      if (mains.length === 1) m = mains[0];
+      else if (mains.length > 1) m = brut0 ? mains.reduce((a, q) => (Math.hypot(q[8].x - brut0.x, q[8].y - brut0.y) < Math.hypot(a[8].x - brut0.x, a[8].y - brut0.y) ? q : a))
+        : mains.reduce((a, q) => (tailleDe(q) > tailleDe(a) ? q : a));
+      if (m && brut0 && mains.length > 1 && Math.hypot(m[8].x - brut0.x, m[8].y - brut0.y) > .35) m = null; // l'autre main est trop loin : on attend la nôtre
+      if (m) brut0 = { x: m[8].x, y: m[8].y }; else if (perdu > 20) brut0 = null;
       if (m) {
         perdu = 0;
         const bout = m[8];
@@ -8051,6 +8068,7 @@ async function suivreDoigt(boite, rappel, squelette) {
         const taille = Math.hypot(m[0].x - m[9].x, m[0].y - m[9].y);
         squelette?.(m.map((q) => [1 - q.x, q.y]), taille);
       } else if (++perdu === 8) { point.hidden = true; squelette?.(null, 0); }
+      if (m) perdu = 0;
       dernierT = t;
       requestAnimationFrame(boucle);
     };
@@ -11792,6 +11810,7 @@ const ad = (k) => t3(AD_TXT[k]);
 // ---------- Configuration pilotée par le super admin (annonce, fête, modules masqués ou offerts, nouveautés) ----------
 const ConfigDistante = (() => {
   let conf = {}; try { conf = JSON.parse(localStorage.getItem('lumi-config') || '{}'); } catch {}
+  window.LUMI_TOUT_OUVERT = conf.tout_ouvert === true;
   const origine = {};
   async function charger() {
     const { url, cle } = CONFIG_APP.supabase; if (!url) return;
@@ -11804,6 +11823,7 @@ const ConfigDistante = (() => {
     } catch {}
   }
   function appliquer() {
+    window.LUMI_TOUT_OUVERT = conf.tout_ouvert === true;
     const caches = new Set(conf.modules_caches || []);
     // les listes des menus, à partir de leur version d'origine
     Object.entries(NOEUDS).forEach(([id, n]) => {
@@ -11999,7 +12019,8 @@ const SuperAdmin = (() => {
   async function contenu(p) {
     const caches = new Set(conf.modules_caches || []), offerts = new Set(conf.gratuit_en_plus || []);
     const ids = Object.entries(NOEUDS).filter(([id, n]) => n.nom && id !== 'accueil' && !/^col-|^cc-|^ct-|-mots$|-conte$|-chant$|-miroir$|-memory$/.test(id) && n.type !== 'colorier');
-    p.innerHTML = `<h2>Contenu</h2><p class="adm-doux">Masquer un module le retire des menus, de l’accueil et de la recherche. « Offert » l’ouvre aux familles sans achat (promotion).</p>
+    p.innerHTML = `<h2>Contenu</h2><label class="adm-ligne"><input type="checkbox" data-a="tout" ${conf.tout_ouvert ? 'checked' : ''}> <b>Tout ouvert</b> (période de test : tous les jeux, histoires et films sans achat, pour tout le monde)</label>
+      <p class="adm-doux">Masquer un module le retire des menus, de l’accueil et de la recherche. « Offert » l’ouvre aux familles sans achat (promotion).</p>
       <input class="adm-champ" placeholder="Filtrer…" data-a="f"><div class="adm-table"><table><tr><th>Module</th><th>Identifiant</th><th>Visible</th><th>Offert</th><th>Gratuit d’origine</th></tr>
       ${ids.map(([id, n]) => `<tr data-id="${id}"><td>${n.emoji} ${t3(n.nom)}</td><td><code>${id}</code></td><td><input type="checkbox" data-k="v" ${caches.has(id) ? '' : 'checked'}></td><td><input type="checkbox" data-k="o" ${offerts.has(id) ? 'checked' : ''}></td><td>${GRATUIT.has(id) && !offerts.has(id) ? '✓' : ''}</td></tr>`).join('')}</table></div>
       <button class="adm-b principal" data-a="ok">${T.enreg}</button><p class="adm-msg"></p>`;
@@ -12007,7 +12028,7 @@ const SuperAdmin = (() => {
     p.querySelector('[data-a=ok]').onclick = () => {
       const c = [...p.querySelectorAll('tr[data-id]')].filter((tr) => !tr.querySelector('[data-k=v]').checked).map((tr) => tr.dataset.id);
       const o = [...p.querySelectorAll('tr[data-id]')].filter((tr) => tr.querySelector('[data-k=o]').checked).map((tr) => tr.dataset.id);
-      msgEnreg(p, Promise.all([ecrire('modules_caches', c), ecrire('gratuit_en_plus', o)]));
+      msgEnreg(p, Promise.all([ecrire('modules_caches', c), ecrire('gratuit_en_plus', o), ecrire('tout_ouvert', p.querySelector('[data-a=tout]').checked)]));
     };
   }
   async function fetes(p) {
