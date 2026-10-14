@@ -2545,6 +2545,30 @@
   #duo-leve .m { font-size: 1.5em; animation: ci-flotte 1.6s ease-in-out infinite; }
   .duo-point { --prise: 1; opacity: calc(.35 + var(--prise) * .65); transform: scale(calc(.6 + var(--prise) * .4)); transition: opacity .15s, transform .15s; }
   html:has(.ci.joue) #duo-leve, .theatre #duo-leve, html:has(.cam-installe) #duo-leve { display: none; }
+  /* installation : en portrait, l'image en grand d'abord, puis les vérifications en pastilles */
+  @media (orientation: portrait) {
+    .cam-installe { align-items: start; overflow-y: auto; }
+    .ci-carte { grid-template-columns: 1fr; gap: 14px; padding: 16px; }
+    .ci-droite { order: -1; }
+    .ci-vue { aspect-ratio: 4 / 3; border-radius: 16px; }
+    .ci-liste { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .ci-liste li { padding: 7px 9px; font-size: 13px; gap: 7px; border-radius: 10px; }
+    .ci-liste li i { width: 20px; height: 20px; font-size: 12px; }
+    .ci-conseil { font-size: 19px; text-align: center; padding: 10px 12px; border-radius: 14px; background: rgba(255,211,77,.1); border: 1px solid rgba(255,211,77,.35); }
+    .ci-conseil:empty { display: none; }
+    .ci-quand { align-self: center; }
+    .ci-poser { font-size: 13px; color: #A9B6CF; text-align: center; }
+  }
+  @media (orientation: landscape) and (max-height: 560px) {
+    .cam-installe { padding: 8px 12px; }
+    .ci-carte { padding: 12px 14px; gap: 14px; }
+    .ci-poser { display: none; }
+    .ci-liste { grid-template-columns: 1fr 1fr; gap: 5px; }
+    .ci-liste li { padding: 6px 8px; font-size: 12.5px; gap: 6px; border-radius: 10px; }
+    .ci-liste li i { width: 18px; height: 18px; font-size: 11px; }
+    .ci-conseil { font-size: 16px; }
+    .ci-quand { height: 38px; font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -10531,10 +10555,14 @@ const OS_LIENS = [[1, 2], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [7, 8]
 function dessinerOs(c, poses) {
   const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height;
   const g = c.getContext('2d'); g.lineCap = 'round'; g.lineWidth = Math.max(4, r.width * .008);
+  // l'image de la caméra remplit la boîte en étant recadrée (jamais étirée) : le squelette suit le même recadrage
+  const s = c.parentElement?.querySelector('video.on, img.on'), vw = s?.videoWidth || s?.naturalWidth || 0, vh = s?.videoHeight || s?.naturalHeight || 0;
+  const k = vw ? Math.max(r.width / vw, r.height / vh) : 0, dw = vw ? vw * k : r.width, dh = vh ? vh * k : r.height, dx = (r.width - dw) / 2, dy = (r.height - dh) / 2;
+  const X = (q) => dx + q[0] * dw, Y = (q) => dy + q[1] * dh;
   (poses || []).forEach((p, j) => {
     const coul = JOUEURS_STYLE[j % 2].couleur; g.strokeStyle = coul; g.fillStyle = coul; g.shadowColor = coul; g.shadowBlur = 12;
-    OS_LIENS.forEach(([a, b]) => { if (p[a][2] < .4 || p[b][2] < .4) return; g.beginPath(); g.moveTo(p[a][0] * r.width, p[a][1] * r.height); g.lineTo(p[b][0] * r.width, p[b][1] * r.height); g.stroke(); });
-    if (p[0][2] > .4) { g.beginPath(); g.arc(p[0][0] * r.width, p[0][1] * r.height, r.width * .025, 0, 7); g.fill(); }
+    OS_LIENS.forEach(([a, b]) => { if (p[a][2] < .4 || p[b][2] < .4) return; g.beginPath(); g.moveTo(X(p[a]), Y(p[a])); g.lineTo(X(p[b]), Y(p[b])); g.stroke(); });
+    if (p[0][2] > .4) { g.beginPath(); g.arc(X(p[0]), Y(p[0]), dw * .025, 0, 7); g.fill(); }
   });
 }
 // ---- Les poses (points : 0 nez, 1-2 épaules, 3-4 coudes, 5-6 poignets, 7-8 hanches, 9-10 genoux, 11-12 chevilles) ----
@@ -13162,6 +13190,7 @@ const CAM_TXT = {
   titre: nom3('On installe la caméra', 'Let’s set up the camera', 'لنجهّز الكاميرا'),
   poser: nom3('Pose le téléphone (ou la tablette) couché, sur un meuble, à hauteur de ventre, face aux enfants, à 2 ou 3 grands pas.', 'Lay the phone (or tablet) sideways on a piece of furniture, at tummy height, facing the children, 2 or 3 big steps away.', 'ضع الهاتف (أو اللوح) أفقيًا على قطعة أثاث، بارتفاع البطن، مقابل الأطفال، على بُعد خطوتين أو ثلاث.'),
   paysage: nom3('Appareil couché', 'Device sideways', 'الجهاز أفقي'),
+  couche: nom3('Couche le téléphone, à l’horizontale', 'Turn the phone sideways', 'ضع الهاتف أفقيًا'),
   joueurs: nom3('Joueurs vus', 'Players seen', 'اللاعبون'),
   entier: nom3('Corps entier, de la tête aux pieds', 'Whole body, head to feet', 'الجسم كاملًا من الرأس إلى القدمين'),
   distance: nom3('Bonne distance', 'Right distance', 'مسافة مناسبة'),
@@ -13293,7 +13322,8 @@ const Installation = (() => {
     const loin = n > 0 && hauteurs.some((h) => h < .42), pres = n > 0 && hauteurs.some((h) => h > .95);
     const lumiere = (d?.lum ?? 128) > 50;
     let conseil = '';
-    if (!n) conseil = ct('personne');
+    if (!paysage) conseil = ct('couche');
+    else if (!n) conseil = ct('personne');
     else if (cs.some((c) => !c.tete)) conseil = ct('tete');
     else if (cs.some((c) => !c.pieds)) conseil = ct('pieds');
     else if (pres) conseil = ct('recule');
@@ -13314,19 +13344,24 @@ const Installation = (() => {
     const source = () => cam.apercu();
     const dessiner = () => {
       if (fini) return; raf = requestAnimationFrame(dessiner);
-      const r = vue.getBoundingClientRect(); if (vue.width !== Math.round(r.width)) { vue.width = Math.round(r.width); vue.height = Math.round(r.height); }
+      const r = vue.getBoundingClientRect(), kp = Math.min(2, devicePixelRatio || 1); if (vue.width !== Math.round(r.width * kp)) { vue.width = Math.round(r.width * kp); vue.height = Math.round(r.height * kp); } // net sur les écrans fins
       const W = vue.width, H = vue.height, s = source();
       gv.fillStyle = '#070918'; gv.fillRect(0, 0, W, H);
+      // l'image garde ses vraies proportions (jamais étirée) ; le squelette est posé exactement dessus
+      const vw = s?.videoWidth || s?.naturalWidth || 0, vh = s?.videoHeight || s?.naturalHeight || 0;
+      const k = vw ? Math.min(W / vw, H / vh) : 1, dw = vw ? vw * k : W, dh = vh ? vh * k : H, dx = (W - dw) / 2, dy = (H - dh) / 2;
       try {
-        if (s?.tagName === 'VIDEO' && s.videoWidth) { gv.save(); gv.translate(W, 0); gv.scale(-1, 1); gv.drawImage(s, 0, 0, W, H); gv.restore(); f.querySelector('.ci-attente').hidden = true; }
-        else if (s?.tagName === 'IMG' && s.naturalWidth) { gv.drawImage(s, 0, 0, W, H); f.querySelector('.ci-attente').hidden = true; }
+        if (s?.tagName === 'VIDEO' && vw) { gv.save(); gv.translate(dx + dw, dy); gv.scale(-1, 1); gv.drawImage(s, 0, 0, dw, dh); gv.restore(); f.querySelector('.ci-attente').hidden = true; }
+        else if (s?.tagName === 'IMG' && vw) { gv.drawImage(s, dx, dy, dw, dh); f.querySelector('.ci-attente').hidden = true; }
       } catch {}
-      // la zone idéale : un cadre où le corps doit tenir
-      gv.strokeStyle = 'rgba(255,255,255,.35)'; gv.setLineDash([10, 8]); gv.lineWidth = 2; gv.strokeRect(W * .08, H * .04, W * .84, H * .92); gv.setLineDash([]);
+      // la zone idéale : le corps doit tenir dans ce cadre
+      gv.strokeStyle = 'rgba(255,255,255,.4)'; gv.setLineDash([10, 8]); gv.lineWidth = 2; gv.strokeRect(dx + dw * .06, dy + dh * .04, dw * .88, dh * .92); gv.setLineDash([]);
       (dern?.poses || []).forEach((p, j) => { // le squelette par-dessus, couleur du joueur
-        const coul = JOUEURS_STYLE[j % 2].couleur; gv.strokeStyle = coul; gv.fillStyle = coul; gv.lineWidth = Math.max(3, W * .008); gv.lineCap = 'round';
-        OS_LIENS.forEach(([a, b]) => { if (p[a][2] < .4 || p[b][2] < .4) return; gv.beginPath(); gv.moveTo(p[a][0] * W, p[a][1] * H); gv.lineTo(p[b][0] * W, p[b][1] * H); gv.stroke(); });
-        if (p[0][2] > .4) { gv.beginPath(); gv.arc(p[0][0] * W, p[0][1] * H, W * .02, 0, 7); gv.fill(); }
+        const coul = JOUEURS_STYLE[j % 2].couleur, X = (q) => dx + q[0] * dw, Y = (q) => dy + q[1] * dh;
+        gv.strokeStyle = coul; gv.fillStyle = coul; gv.lineWidth = Math.max(3, dw * .008); gv.lineCap = 'round'; gv.shadowColor = coul; gv.shadowBlur = 10;
+        OS_LIENS.forEach(([a, b]) => { if (p[a][2] < .4 || p[b][2] < .4) return; gv.beginPath(); gv.moveTo(X(p[a]), Y(p[a])); gv.lineTo(X(p[b]), Y(p[b])); gv.stroke(); });
+        if (p[0][2] > .4) { gv.beginPath(); gv.arc(X(p[0]), Y(p[0]), dw * .022, 0, 7); gv.fill(); }
+        gv.shadowBlur = 0;
       });
     };
     dessiner();
