@@ -2495,6 +2495,19 @@
     .cam .duo-camera { height: auto; flex: none; }
     .cam .duo-camera video { height: auto; max-height: 52vh; width: 100%; object-fit: contain; }
   }
+  /* manette du téléphone : l'app est figée (pas de glissement, pas de rebond, pas de zoom), hauteur = écran visible */
+  html.mode-manette, html.mode-manette body { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+  .mode-manette .fa-fond { position: fixed; inset: 0; overscroll-behavior: none; touch-action: none; }
+  .mode-manette .fa-t-manette { overflow: hidden; overscroll-behavior: none; }
+  .mode-manette .fa-t-manette input { touch-action: manipulation; -webkit-user-select: text; user-select: text; }
+  .mode-manette .fa-t-manette button { touch-action: manipulation; }
+  @media (orientation: landscape) {
+    .mode-manette .fa-fond { padding: max(6px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+    .mode-manette .fa-t-manette { height: calc(100dvh - 12px); max-height: calc(100dvh - 12px); }
+    .mode-manette .fa-t-manette .mn-haut { min-height: 0; }
+    .cam .duo-camera video { object-fit: cover; }
+  }
+  @media (orientation: portrait) { .mode-manette .fa-t-manette { max-height: calc(100dvh - 24px); } }
 </style>
 </head>
 <body>
@@ -7783,6 +7796,10 @@ const DuoManette = (() => {
     addEventListener('pagehide', () => canal?.send({ type: 'broadcast', event: 'aurevoir', payload: { id: monId } }));
     matchMedia('(orientation: landscape)').addEventListener?.('change', () => { dire('orient', { paysage: paysage() }); setTimeout(() => scrollTo(0, 0), 300); }); // après avoir tourné le téléphone, la page revient en place
     resterAllume();
+    // l'app ne doit pas glisser sous le doigt : on bloque le défilement de la page (sauf le champ du code)
+    document.addEventListener('touchmove', (e) => { if (!e.target.closest?.('input, textarea')) e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    addEventListener('resize', () => scrollTo(0, 0));
   }
   // ardoise : on voit son trait sur le téléphone, et il part en direct sur la télé
   function ardoise(f, effacer) {
