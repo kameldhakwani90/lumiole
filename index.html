@@ -2508,6 +2508,37 @@
     .cam .duo-camera video { object-fit: cover; }
   }
   @media (orientation: portrait) { .mode-manette .fa-t-manette { max-height: calc(100dvh - 24px); } }
+  /* ===== Caméra pro : installation guidée, bandeau « reviens » ===== */
+  .cam-installe { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top, 0px)) 14px max(12px, env(safe-area-inset-bottom, 0px)); background: rgba(6,8,26,.86); backdrop-filter: blur(6px); animation: entre .3s ease-out; }
+  .cam-installe.sort { opacity: 0; transition: opacity .3s; }
+  .ci-carte { width: min(1200px, 100%); max-height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 22px; align-items: center; padding: 22px; border-radius: 26px; background: linear-gradient(180deg, #151A44, #0B0E2A); border: 1px solid rgba(46,230,197,.35); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .ci-gauche { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .ci-sur { font: 800 13px/1 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #2EE6C5; }
+  .ci-schema svg { width: 100%; max-width: 360px; height: auto; display: block; }
+  .ci-poser { margin: 0; font-size: 15px; line-height: 1.4; color: #D8E2F2; }
+  .ci-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .ci-liste li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,.05); font: 700 15px system-ui, sans-serif; color: #A9B6CF; transition: background .3s, color .3s; }
+  .ci-liste li i { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-style: normal; background: rgba(255,255,255,.1); flex: none; }
+  .ci-liste li.ok { color: #EFFFFA; background: rgba(46,230,197,.14); }
+  .ci-liste li.ok i { background: #2EE6C5; color: #08201c; }
+  .ci-liste li b { margin-inline-start: auto; }
+  .ci-conseil { margin: 0; min-height: 1.4em; font: 800 18px 'Baloo 2', system-ui, sans-serif; color: #FFD34D; }
+  .ci-quand { align-self: flex-start; height: 44px; padding: 0 18px; border-radius: 22px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); color: #fff; font: 700 15px system-ui, sans-serif; }
+  .ci-quand:focus { outline: none; box-shadow: 0 0 0 3px #fff; }
+  .ci-droite { position: relative; min-width: 0; }
+  .ci-vue { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 18px; background: #070918; }
+  .ci-attente { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #A9B6CF; font: 700 16px system-ui, sans-serif; }
+  .cam-hors { position: fixed; left: 50%; top: 14vh; transform: translateX(-50%); z-index: 90; padding: 14px 26px; border-radius: 99px; background: rgba(8,10,30,.88); border: 2px solid #FFD34D; color: #FFE9A6; font: 800 clamp(18px, 3vh, 30px) 'Baloo 2', system-ui, sans-serif; animation: entre .3s ease-out; pointer-events: none; }
+  @media (orientation: portrait), (max-height: 560px) {
+    .ci-carte { grid-template-columns: 1fr; gap: 12px; padding: 14px; overflow-y: auto; }
+    .ci-schema { display: none; }
+    .ci-poser { font-size: 13.5px; }
+    .ci-liste li { padding: 5px 10px; font-size: 13.5px; }
+  }
+  @media (orientation: landscape) and (max-height: 560px) { .ci-carte { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } .ci-vue { max-height: calc(100dvh - 60px); } }
+  .tele .ci-carte { width: 86vw; padding: 3.5vh 2.5vw; gap: 2.5vw; }
+  .tele .ci-poser { font-size: 2.3vh; } .tele .ci-liste li { font-size: 2.3vh; padding: 1vh 1vw; } .tele .ci-conseil { font-size: 3vh; } .tele .ci-sur { font-size: 1.8vh; }
+  .tele .ci-quand { height: 6vh; font-size: 2.2vh; padding: 0 2vw; border-radius: 3vh; }
 </style>
 </head>
 <body>
@@ -7556,6 +7587,39 @@ async function qrSvg(texte, taille = 220) {
   const q = window.qrcode(0, 'M'); q.addData(texte); q.make();
   return q.createSvgTag({ cellSize: Math.max(2, Math.floor(taille / (q.getModuleCount() + 8))), margin: 4, scalable: true });
 }
+// ----- Lien direct télé ↔ téléphone (WebRTC) : sur le même Wi-Fi, les messages ne passent plus par Internet -----
+// Supabase sert seulement à se présenter (offre, réponse, adresses) ; ensuite tout passe en direct, en quelques millisecondes.
+// Si le lien direct ne s'établit pas (réseau d'invités, routeur strict), on reste sur Supabase : rien ne casse.
+const RTC_CONF = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+const LienDirect = (() => {
+  const pairs = new Map(); // id du téléphone → { pc, dc, attente: [] }
+  async function offrir(ch, id, H) {
+    if (!window.RTCPeerConnection) return;
+    fermer(id);
+    const pc = new RTCPeerConnection(RTC_CONF), dc = pc.createDataChannel('lumi', { ordered: true });
+    const p = { pc, dc, attente: [], pret: false }; pairs.set(id, p);
+    dc.onmessage = (e) => { try { const { ev, d } = JSON.parse(e.data); H[ev]?.(d); } catch {} };
+    dc.onopen = () => { p.pret = true; DuoEcran.dire?.('direct', { ok: true }); };
+    dc.onclose = () => { p.pret = false; };
+    pc.onicecandidate = (e) => { if (e.candidate) ch.send({ type: 'broadcast', event: 'rtc', payload: { to: id, ice: e.candidate.toJSON() } }); };
+    try { await pc.setLocalDescription(await pc.createOffer()); ch.send({ type: 'broadcast', event: 'rtc', payload: { to: id, sdp: pc.localDescription.toJSON() } }); } catch (e) { console.warn('rtc', e); fermer(id); }
+  }
+  async function recu(m) {
+    const p = pairs.get(m?.from); if (!p) return;
+    try {
+      if (m.sdp) { await p.pc.setRemoteDescription(m.sdp); p.attente.splice(0).forEach((c) => p.pc.addIceCandidate(c).catch(() => {})); }
+      else if (m.ice) { if (p.pc.remoteDescription) await p.pc.addIceCandidate(m.ice); else p.attente.push(m.ice); }
+    } catch (e) { console.warn('rtc', e); }
+  }
+  function fermer(id) { const p = pairs.get(id); if (!p) return; try { p.dc.close(); p.pc.close(); } catch {} pairs.delete(id); }
+  // la télé vers tous les téléphones reliés en direct ; vrai si tous l'ont reçu ainsi
+  function envoyerTous(ev, d) {
+    if (!pairs.size || ev === 'ok') return false;
+    let tous = true; pairs.forEach((p) => { if (p.pret && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify({ ev, d })); } catch { tous = false; } } else tous = false; });
+    return tous;
+  }
+  return { offrir, recu, fermer, envoyerTous, get directs() { return [...pairs.values()].filter((p) => p.pret).length; } };
+})();
 const DuoEcran = (() => {
   let canaux = [], code = null, secret = null, branche = null;
   const joueurs = new Map(); // id → { n, couleur, curseur, appui, x, y }
@@ -7698,27 +7762,33 @@ const DuoEcran = (() => {
         const ch = c.channel(nom, { config: { broadcast: { self: false } } });
         // sécurité : sur le canal à 4 chiffres (devinable), seulement les commandes ; images, textes, dessins et caméra
         // n'arrivent que par le canal secret du QR code, pour qu'un inconnu ne puisse rien afficher sur la télé d'un enfant
-        const seulPrive = (f) => (arg) => { if (prive) f(arg); };
-        ch.on('broadcast', { event: 'p' }, ({ payload }) => pointeur(payload.x, payload.y, payload.d, payload.id, prive && payload.cam))
-          .on('broadcast', { event: 'orient' }, ({ payload }) => emettre('orient', payload))
-          .on('broadcast', { event: 'squelette' }, seulPrive(({ payload }) => emettre('squelette', payload)))
-          .on('broadcast', { event: 'objets' }, seulPrive(({ payload }) => emettre('objets', payload.l || [])))
-          .on('broadcast', { event: 'photo' }, seulPrive(({ payload }) => emettre('photo', payload.img)))
-          .on('broadcast', { event: 'decompte' }, seulPrive(({ payload }) => emettre('decompte', payload.n)))
-          .on('broadcast', { event: 'apercu' }, seulPrive(({ payload }) => emettre('apercu', payload.img)))
-          .on('broadcast', { event: 'capteur' }, seulPrive(({ payload }) => emettre('capteur', payload)))
-          .on('broadcast', { event: 'texte' }, seulPrive(({ payload }) => emettre('texte', payload.v || '')))
-          .on('broadcast', { event: 'dessin' }, seulPrive(({ payload }) => { const j = joueurDe(payload.id); if (j) Trace.depuisTel('j' + j.n, payload.x, payload.y, payload.d); }))
-          .on('broadcast', { event: 'r' }, ({ payload }) => relatif(payload.dx, payload.dy, payload.d, payload.id))
-          .on('broadcast', { event: 'k' }, ({ payload }) => touche(payload.k))
-          .on('broadcast', { event: 'bonjour' }, ({ payload }) => {
+        const H = {
+          p: (payload) => pointeur(payload.x, payload.y, payload.d, payload.id, prive && payload.cam),
+          orient: (payload) => emettre('orient', payload),
+          r: (payload) => relatif(payload.dx, payload.dy, payload.d, payload.id),
+          k: (payload) => touche(payload.k),
+        };
+        if (prive) Object.assign(H, {
+          squelette: (payload) => emettre('squelette', payload),
+          objets: (payload) => emettre('objets', payload.l || []),
+          photo: (payload) => emettre('photo', payload.img),
+          decompte: (payload) => emettre('decompte', payload.n),
+          apercu: (payload) => emettre('apercu', payload.img),
+          capteur: (payload) => emettre('capteur', payload),
+          texte: (payload) => emettre('texte', payload.v || ''),
+          dessin: (payload) => { const j = joueurDe(payload.id); if (j) Trace.depuisTel('j' + j.n, payload.x, payload.y, payload.d); },
+        });
+        Object.entries(H).forEach(([ev, fn]) => ch.on('broadcast', { event: ev }, ({ payload }) => fn(payload)));
+        ch.on('broadcast', { event: 'bonjour' }, ({ payload }) => {
             const j = joueurDe(payload?.id || 'x');
             if ($('fa-fond')?.querySelector('.fa-t-duo')) fermerFenetre();
             jingle(); resterAllume(); majPetitQr(); Trace.joueursTel?.();
             ch.send({ type: 'broadcast', event: 'ok', payload: { id: payload?.id, n: j?.n || 0, couleur: j?.couleur, prive } });
             setTimeout(signaler, 200);
+            if (prive && payload?.id) LienDirect.offrir(ch, payload.id, H); // puis on se parle en direct sur le Wi-Fi
           })
-          .on('broadcast', { event: 'aurevoir' }, ({ payload }) => { const j = joueurs.get(payload?.id); if (j) { j.curseur.remove(); joueurs.delete(payload.id); majPetitQr(); } });
+          .on('broadcast', { event: 'rtc' }, ({ payload }) => { if (prive) LienDirect.recu(payload); })
+          .on('broadcast', { event: 'aurevoir' }, ({ payload }) => { const j = joueurs.get(payload?.id); if (j) { j.curseur.remove(); joueurs.delete(payload.id); majPetitQr(); } LienDirect.fermer(payload?.id); });
         // seul le QR (avec son secret) permet de connecter la télé au compte des parents
         if (prive) ch.on('broadcast', { event: 'compte' }, async ({ payload }) => {
           try { await Famille.depuisJeton(payload.jeton); ch.send({ type: 'broadcast', event: 'compte-ok', payload: { email: Famille.email } }); jingle(); afficher(); }
@@ -7744,17 +7814,23 @@ const DuoEcran = (() => {
     try { await ecouter(); } catch { f.querySelector('.fa-msg').textContent = td('erreur'); }
   }
   function arreter() { joueurs.forEach((j) => j.curseur.remove()); joueurs.clear(); $('duo-petit-qr')?.remove(); }
-  const dire = (event, payload) => canaux.forEach((ch) => ch.send({ type: 'broadcast', event, payload }));
+  const dire = (event, payload) => { if (LienDirect.envoyerTous(event, payload)) return; canaux.forEach((ch) => ch.send({ type: 'broadcast', event, payload })); };
   const sur = (e, fn) => { (ecouteurs[e] = ecouteurs[e] || []).push(fn); return () => { ecouteurs[e] = ecouteurs[e].filter((x) => x !== fn); }; };
   return { demarrer, arreter, ecouter, pointeur, signaler, lienManette, dire, sur, get code() { if (!code) identifiants(); return code; }, get nbJoueurs() { return joueurs.size; }, joueurDuPointeur: (pid) => pid - 70, couleurJoueur: (n) => JOUEURS_STYLE[n - 1]?.couleur };
 })();
 // ----- Manette : une grande surface. Menus : on glisse pour choisir, on tape pour lancer.
 //       Jeux : le doigt pousse la main sur la télé (pavé relatif). Caméra en option. -----
 const DuoManette = (() => {
-  let canal = null, envoi = 0, envoiSq = 0, camera = null, mode = 'menu', relie = false, fen = null;
+  let canal = null, envoi = 0, envoiSq = 0, camera = null, mode = 'menu', relie = false, fen = null, pc = null, dc = null;
   const monId = Math.random().toString(36).slice(2, 9);
   const vibrer = (ms = 12) => { try { navigator.vibrate?.(ms); } catch {} };
-  const dire = (event, payload) => canal?.send({ type: 'broadcast', event, payload: { id: monId, ...payload } });
+  // en direct sur le Wi-Fi quand le lien est ouvert, sinon par Supabase
+  const dire = (event, payload) => {
+    const d = { id: monId, ...payload };
+    if (dc?.readyState === 'open') { try { dc.send(JSON.stringify({ ev: event, d })); return; } catch {} }
+    canal?.send({ type: 'broadcast', event, payload: d });
+  };
+  const direct = () => dc?.readyState === 'open';
   const envoyer = (x, y, pointe = false) => { // caméra : position de la main ; « pointe » = index tendu (crayon posé)
     const t = performance.now(); if (t - envoi < 33 && pointe === envoyer.p) return; envoi = t; envoyer.p = pointe;
     dire('p', { x: +x.toFixed(4), y: +y.toFixed(4), d: pointe, cam: true });
@@ -7763,11 +7839,29 @@ const DuoManette = (() => {
     const t = performance.now(); if (t - envoiSq < 160) return; envoiSq = t;
     dire('squelette', { pts: pts ? pts.map(([x, y]) => [+x.toFixed(3), +y.toFixed(3)]) : null, taille: taille ? +taille.toFixed(3) : 0 });
   };
-  const k = (x) => { vibrer(); canal?.send({ type: 'broadcast', event: 'k', payload: { k: x } }); };
+  const k = (x) => { vibrer(); dire('k', { k: x }); };
   const paysage = () => matchMedia('(orientation: landscape)').matches;
   async function relier(code, secret, f) {
     const c = await supa();
     canal = c.channel(secret ? `lumi-duo-${code}-${secret}` : 'lumi-duo-' + code, { config: { broadcast: { self: false } } });
+    // chaque écouteur est gardé : les messages de la télé arrivés en direct (WebRTC) vont au même endroit
+    const surEv = {}, onOrig = canal.on.bind(canal);
+    canal.on = (type, filtre, fn) => { if (type === 'broadcast') surEv[filtre.event] = fn; onOrig(type, filtre, fn); return canal; };
+    canal.on('broadcast', { event: 'rtc' }, async ({ payload }) => {
+      if (payload?.to !== monId || !window.RTCPeerConnection) return;
+      try {
+        if (payload.sdp) {
+          try { pc?.close(); } catch {}
+          pc = new RTCPeerConnection(RTC_CONF); dc = null; const attente = [];
+          pc.ondatachannel = (e) => { dc = e.channel; dc.onmessage = (m) => { try { const { ev, d } = JSON.parse(m.data); surEv[ev]?.({ payload: d }); } catch {} }; dc.onopen = () => f.classList.add('direct'); dc.onclose = () => f.classList.remove('direct'); };
+          pc.onicecandidate = (e) => { if (e.candidate) canal.send({ type: 'broadcast', event: 'rtc', payload: { from: monId, ice: e.candidate.toJSON() } }); };
+          pc.attente = attente;
+          await pc.setRemoteDescription(payload.sdp); attente.splice(0).forEach((x) => pc.addIceCandidate(x).catch(() => {}));
+          await pc.setLocalDescription(await pc.createAnswer());
+          canal.send({ type: 'broadcast', event: 'rtc', payload: { from: monId, sdp: pc.localDescription.toJSON() } });
+        } else if (payload.ice && pc) { if (pc.remoteDescription) await pc.addIceCandidate(payload.ice); else pc.attente?.push(payload.ice); }
+      } catch (e) { console.warn('rtc', e); }
+    });
     canal.on('broadcast', { event: 'ok' }, ({ payload }) => {
       if (payload?.id && payload.id !== monId) return;
       relie = true;
@@ -7874,11 +7968,13 @@ const DuoManette = (() => {
     if (!type) return;
     if (camera) basculerCamera(f, false);
     const boite = f.querySelector('.duo-camera'), video = boite.querySelector('video');
-    boite.querySelector('.fa-aide').textContent = type === 'couleur' ? '🌈 ' + bg('couleurAide') : '🤸 ' + bg('pret');
+    boite.querySelector('.fa-aide').textContent = '📱 ' + (typeof ct === 'function' ? ct('poser') : bg('pret'));
     try {
-      const a = await analyser(type, (d) => dire('capteur', { d }), video);
+      let derCap = 0; // en direct : 15 fois par seconde ; par Internet : 8 fois par seconde au plus
+      const a = await analyser(type, (d) => { const t = performance.now(); if (!direct() && t - derCap < 120) return; derCap = t; dire('capteur', { d }); }, video);
       const pc = document.createElement('canvas');
-      const apercu = setInterval(() => { if (!video.videoWidth) return; pc.width = 320; pc.height = Math.round(320 * video.videoHeight / video.videoWidth); const g = pc.getContext('2d'); g.translate(320, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, pc.width, pc.height); dire('apercu', { img: pc.toDataURL('image/jpeg', .45) }); }, 400);
+      let derApercu = 0; // petit aperçu pour l'installation : 5 images/s en direct sur le Wi-Fi, 1 image/s sinon
+      const apercu = setInterval(() => { if (!video.videoWidth || performance.now() - derApercu < (direct() ? 190 : 950)) return; derApercu = performance.now(); pc.width = 240; pc.height = Math.round(240 * video.videoHeight / video.videoWidth); const g = pc.getContext('2d'); g.translate(240, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, pc.width, pc.height); dire('apercu', { img: pc.toDataURL('image/jpeg', .5) }); }, 100);
       capteurTel = { stop() { clearInterval(apercu); a.stop(); } };
     } catch { boite.querySelector('.fa-aide').textContent = td('erreur'); }
   }
@@ -10497,7 +10593,7 @@ MODULES.statues = (() => {
     s.modele.innerHTML = '<span class="bg-e grand">🗿</span>';
     s.bas.append(bouton('▶ ' + bg('commencer'), () => danser(), 'mod-b principal'), bouton('✓ ' + bg('toutFige'), () => { if (phase === 'statue') finStatue(true); }, 'mod-b'));
     s.consigne.textContent = bg('pret');
-    cam = await brancherCamera(s.cam, 'mouvement', (d) => { mvt = d; if (phase === 'statue') { bouge[0] += (d.g || 0) > .14 ? 1 : 0; bouge[1] += (d.d || 0) > .14 ? 1 : 0; } s.jauge.style.width = Math.min(100, ((d.g || 0) + (d.d || 0)) * 120) + '%'; });
+    cam = await brancherCamera(s.cam, 'mouvement', (d) => { mvt = d; if (phase === 'statue') { bouge[0] += (d.g || 0) > .22 ? 1 : 0; bouge[1] += (d.d || 0) > .22 ? 1 : 0; } s.jauge.style.width = Math.min(100, ((d.g || 0) + (d.d || 0)) * 120) + '%'; });
     focusPremier(s.bas);
   }
   function danser() {
@@ -10517,7 +10613,7 @@ MODULES.statues = (() => {
   }
   function finStatue(force) {
     if (phase !== 'statue') return; clearTimeout(minuteur); phase = 'pause';
-    const seuil = 3, vu = cam !== 'aucune' && !force && (bouge[0] >= seuil || bouge[1] >= seuil); // au moins 3 images où ça bouge vraiment
+    const seuil = 4, vu = cam !== 'aucune' && !force && (bouge[0] >= seuil || bouge[1] >= seuil); // au moins 3 images où ça bouge vraiment
     if (vu) { parler(bg('bouge')); avatar?.forme('👀'); son('pop'); }
     else { parler(bg('immobiles')); fete(); }
     [0, 1].forEach((j) => { if (cam === 'aucune' || force || bouge[j] < seuil) scores[j + 1]++; });
@@ -13023,6 +13119,247 @@ const DecorConte = (() => {
 // chaque page d'histoire met à jour le décor (il ne se voit qu'au théâtre)
 const pageHistoireAvantDecor = pageHistoire;
 pageHistoire = function () { pageHistoireAvantDecor(); if (conte) DecorConte.montrer(conte.h, conte.page); }; // eslint-disable-line no-func-assign
+
+// =====================================================================
+// ---------- Lumiole caméra « pro » : un téléphone ou une tablette posé sur un support ----------
+// Comme les consoles à caméra : l'appareil est posé (paysage, à hauteur de ventre, 2 à 3 m), il voit le corps entier.
+// 1. Analyse du corps sur l'appareil (modèle « full » si possible), chaque enfant garde sa place (gauche / droite),
+//    les points sont lissés, le mouvement est mesuré sur le corps (pas sur les pixels : insensible à la lumière).
+// 2. Installation guidée avant chaque jeu : corps entier, bonne distance, lumière, joueurs ; on démarre quand tout est vert.
+// 3. Pendant le jeu : si un enfant sort du cadre, le jeu attend (« Reviens ! ») au lieu de se tromper.
+// Aucune image ne part sur Internet : seulement des chiffres (et un petit aperçu pour l'installation, en direct sur le Wi-Fi).
+// =====================================================================
+const CAM_TXT = {
+  titre: nom3('On installe la caméra', 'Let’s set up the camera', 'لنجهّز الكاميرا'),
+  poser: nom3('Pose le téléphone (ou la tablette) couché, sur un meuble, à hauteur de ventre, face aux enfants, à 2 ou 3 grands pas.', 'Lay the phone (or tablet) sideways on a piece of furniture, at tummy height, facing the children, 2 or 3 big steps away.', 'ضع الهاتف (أو اللوح) أفقيًا على قطعة أثاث، بارتفاع البطن، مقابل الأطفال، على بُعد خطوتين أو ثلاث.'),
+  paysage: nom3('Appareil couché', 'Device sideways', 'الجهاز أفقي'),
+  joueurs: nom3('Joueurs vus', 'Players seen', 'اللاعبون'),
+  entier: nom3('Corps entier, de la tête aux pieds', 'Whole body, head to feet', 'الجسم كاملًا من الرأس إلى القدمين'),
+  distance: nom3('Bonne distance', 'Right distance', 'مسافة مناسبة'),
+  lumiere: nom3('Assez de lumière', 'Enough light', 'إضاءة كافية'),
+  recule: nom3('Recule un peu !', 'Step back a little!', 'ارجع قليلًا!'),
+  approche: nom3('Approche un peu !', 'Come a little closer!', 'اقترب قليلًا!'),
+  pieds: nom3('On ne voit pas tes pieds : recule, ou baisse le téléphone', 'Can’t see your feet: step back or lower the phone', 'لا نرى قدميك: ارجع أو أنزل الهاتف'),
+  tete: nom3('On ne voit pas ta tête : monte un peu le téléphone', 'Can’t see your head: raise the phone a little', 'لا نرى رأسك: ارفع الهاتف قليلًا'),
+  personne: nom3('Mettez-vous devant la caméra !', 'Stand in front of the camera!', 'قفوا أمام الكاميرا!'),
+  lumi: nom3('Allume la lumière', 'Turn the light on', 'أشعل الضوء'),
+  pret: nom3('C’est parti !', 'Let’s go!', 'هيا بنا!'),
+  quandMeme: nom3('Jouer quand même', 'Play anyway', 'العب على أي حال'),
+  reviens: nom3('Reviens devant la caméra !', 'Come back in front of the camera!', 'عد أمام الكاميرا!'),
+  attente: nom3('La caméra se prépare…', 'The camera is getting ready…', 'الكاميرا تستعد…'),
+};
+const ct = (k) => t3(CAM_TXT[k]);
+
+// ---------- 1. L'analyse du corps ----------
+let reperePosePro = null;
+async function chargerPosePro() {
+  if (reperePosePro) return reperePosePro;
+  const { v, fichiers } = await vision();
+  const options = (modele, delegate) => ({ baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${modele}/float16/1/pose_landmarker_${modele}.task`, delegate },
+    runningMode: 'VIDEO', numPoses: 2, minPoseDetectionConfidence: .5, minPosePresenceConfidence: .5, minTrackingConfidence: .5 });
+  // le modèle « full » voit mieux les enfants de loin ; s'il ne passe pas (vieil appareil), on prend « lite »
+  for (const [m, d] of [['full', 'GPU'], ['lite', 'GPU'], ['lite', 'CPU']]) {
+    try { reperePosePro = await v.PoseLandmarker.createFromOptions(fichiers, options(m, d)); reperePosePro.modele = m; return reperePosePro; } catch (e) { console.warn('pose', m, d, e); }
+  }
+  throw new Error('pose');
+}
+const PTS_MVT = [0, 3, 4, 5, 6, 9, 10, 11, 12]; // nez, coudes, poignets, genoux, chevilles : ce qui bouge quand on danse
+const largeurEpaules = (p) => Math.max(.04, Math.hypot(p[1][0] - p[2][0], p[1][1] - p[2][1]));
+const centreX = (p) => ((p[7][2] > .4 && p[8][2] > .4) ? (p[7][0] + p[8][0]) / 2 : (p[1][0] + p[2][0]) / 2);
+// le cadre d'un joueur : entier ? trop près ? trop loin ?
+function cadreJoueur(p) {
+  const tete = p[0][2] > .5, pieds = p[11][2] > .5 || p[12][2] > .5, epaules = p[1][2] > .5 && p[2][2] > .5;
+  const bas = Math.max(p[11][2] > .3 ? p[11][1] : 0, p[12][2] > .3 ? p[12][1] : 0, p[9][1], p[10][1]);
+  const haut = p[0][1] - largeurEpaules(p) * .9; // le haut de la tête, au-dessus du nez
+  const hauteur = bas - haut;
+  return { tete, pieds, epaules, hauteur, entier: tete && pieds && epaules && haut > -.02 && bas < 1.02, cx: centreX(p) };
+}
+async function analyserPro(type, rappel, video) {
+  const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 30 } }, audio: false });
+  video = video || Object.assign(document.createElement('video'), { muted: true, playsInline: true });
+  video.srcObject = flux; video.muted = true; video.playsInline = true; await video.play();
+  const detecteur = await chargerPosePro();
+  const c = document.createElement('canvas'); c.width = 96; c.height = 54;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  let actif = true, dernier = 0, derLum = 0, lum = 128, pistes = [];
+  const boucle = (t) => {
+    if (!actif) return;
+    requestAnimationFrame(boucle);
+    if (video.readyState < 2 || t - dernier < 66) return; // 15 analyses par seconde
+    dernier = t;
+    let r; try { r = detecteur.detectForVideo(video, performance.now()); } catch { return; }
+    const brutes = (r.landmarks || []).map((m) => SUJETS.map((i) => [1 - m[i].x, m[i].y, m[i].visibility ?? 1]));
+    // chaque enfant garde sa piste (la plus proche de là où il était), au plus deux
+    const libres = new Set(pistes.map((_, i) => i)), vues = new Set();
+    brutes.forEach((p) => {
+      const cx = centreX(p); let k = -1, dmin = .22;
+      libres.forEach((i) => { const d = Math.abs(pistes[i].cx - cx); if (d < dmin) { dmin = d; k = i; } });
+      if (k < 0 && pistes.length < 2) { pistes.push({ cx, lisse: null, mvt: 0, perdu: 0 }); k = pistes.length - 1; }
+      if (k < 0) return;
+      libres.delete(k); vues.add(k);
+      const pi = pistes[k], avant = pi.lisse;
+      // lissage : les points ne tremblent plus, mais suivent vite un vrai geste
+      pi.lisse = avant ? p.map(([x, y, v], j) => { const a = Math.min(.85, .35 + Math.hypot(x - avant[j][0], y - avant[j][1]) * 6); return [avant[j][0] + (x - avant[j][0]) * a, avant[j][1] + (y - avant[j][1]) * a, v]; }) : p;
+      pi.cx = centreX(pi.lisse); pi.perdu = 0;
+      if (avant) {
+        const e = largeurEpaules(pi.lisse); let s = 0, n = 0;
+        PTS_MVT.forEach((j) => { if (pi.lisse[j][2] > .6 && avant[j][2] > .6) { s += Math.hypot(pi.lisse[j][0] - avant[j][0], pi.lisse[j][1] - avant[j][1]) / e; n++; } });
+        pi.mvt = pi.mvt * .5 + Math.min(1, n ? (s / n) * 4 : 0) * .5;
+      }
+    });
+    pistes.forEach((pi, i) => { if (!vues.has(i)) { pi.perdu++; pi.mvt *= .6; } });
+    pistes = pistes.filter((pi) => pi.perdu < 12);
+    pistes.sort((a, b) => a.cx - b.cx); // joueur 1 à gauche de l'écran, joueur 2 à droite
+    const visibles = pistes.filter((pi) => pi.perdu === 0 && pi.lisse);
+    const poses = visibles.map((pi) => pi.lisse.map(([x, y, v]) => [+x.toFixed(3), +y.toFixed(3), +v.toFixed(2)])); // compact : ça voyage vite
+    const cadres = poses.map(cadreJoueur).map((c) => ({ ...c, hauteur: +c.hauteur.toFixed(3), cx: +c.cx.toFixed(3) }));
+    // compatibilité avec les jeux « mouvement » : g = ce qui bouge à gauche de l'écran, d = à droite
+    let gm = 0, dm = 0; visibles.forEach((pi) => { if (pi.cx < .5) gm = Math.max(gm, pi.mvt); else dm = Math.max(dm, pi.mvt); });
+    if (t - derLum > 1000) { // lumière : une fois par seconde
+      derLum = t; g.drawImage(video, 0, 0, 96, 54); const px = g.getImageData(0, 0, 96, 54).data; let s = 0; for (let i = 0; i < px.length; i += 16) s += px[i] * .3 + px[i + 1] * .59 + px[i + 2] * .11; lum = Math.round(s / (px.length / 16));
+    }
+    const d = { poses, cadres, mvts: visibles.map((pi) => +pi.mvt.toFixed(3)), g: +gm.toFixed(3), d: +dm.toFixed(3), lum, joueurs: poses.length };
+    if (type === 'couleur') Object.assign(d, couleurDansLaMain(video, g, poses));
+    rappel(d);
+  };
+  requestAnimationFrame(boucle);
+  return { video, stop() { actif = false; flux.getTracks().forEach((x) => x.stop()); } };
+}
+// la couleur : on regarde dans la main de l'enfant (au bout de l'avant-bras), pas au milieu de l'image
+function couleurDansLaMain(video, g, poses) {
+  g.save(); g.translate(96, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, 96, 54); g.restore();
+  const px = g.getImageData(0, 0, 96, 54).data;
+  const zone = (cx, cy, r) => {
+    const votes = {}; let n = 0, rr = 0, vv = 0, bb = 0;
+    for (let y = Math.max(0, Math.round(cy - r)); y <= Math.min(53, Math.round(cy + r)); y++) for (let x = Math.max(0, Math.round(cx - r)); x <= Math.min(95, Math.round(cx + r)); x++) {
+      const i = (y * 96 + x) * 4; n++; rr += px[i]; vv += px[i + 1]; bb += px[i + 2];
+      const k = couleurPixel(px[i], px[i + 1], px[i + 2]); if (k) votes[k] = (votes[k] || 0) + 1;
+    }
+    const [k, nb] = Object.entries(votes).sort((a, b) => b[1] - a[1])[0] || [null, 0];
+    return { couleur: n && nb / n >= .3 ? k : null, rgb: n ? [rr / n | 0, vv / n | 0, bb / n | 0] : [0, 0, 0] };
+  };
+  const couleurs = [];
+  poses.forEach((p) => {
+    const e = largeurEpaules(p), r = Math.max(2, e * 96 * .35);
+    [[5, 3], [6, 4]].forEach(([poignet, coude]) => {
+      if (p[poignet][2] < .4) return;
+      const hx = p[poignet][0] + (p[poignet][0] - p[coude][0]) * .45, hy = p[poignet][1] + (p[poignet][1] - p[coude][1]) * .45; // la main, un peu après le poignet
+      couleurs.push(zone(hx * 96, hy * 54, r));
+    });
+  });
+  const vu = couleurs.find((x) => x.couleur);
+  if (vu) return { couleur: vu.couleur, rgb: vu.rgb, couleurs: couleurs.map((x) => x.couleur) };
+  // personne de visible : on regarde au centre (un objet tendu tout près de la caméra)
+  const centre = zone(48, 27, 9);
+  return { couleur: poses.length ? null : centre.couleur, rgb: centre.rgb, couleurs: [] };
+}
+
+// ---------- 2. L'installation guidée ----------
+const Installation = (() => {
+  let derniereReussite = -Infinity;
+  function verifier(d, paysage) {
+    const n = d?.joueurs || 0, cs = d?.cadres || [];
+    const entier = n > 0 && cs.every((c) => c.entier);
+    const hauteurs = cs.map((c) => c.hauteur);
+    const loin = n > 0 && hauteurs.some((h) => h < .42), pres = n > 0 && hauteurs.some((h) => h > .95);
+    const lumiere = (d?.lum ?? 128) > 50;
+    let conseil = '';
+    if (!n) conseil = ct('personne');
+    else if (cs.some((c) => !c.tete)) conseil = ct('tete');
+    else if (cs.some((c) => !c.pieds)) conseil = ct('pieds');
+    else if (pres) conseil = ct('recule');
+    else if (loin) conseil = ct('approche');
+    else if (!lumiere) conseil = ct('lumi');
+    return { lignes: [['paysage', paysage], ['joueurs', n > 0, n ? `${n} 🧒` : ''], ['entier', entier], ['distance', n > 0 && !loin && !pres], ['lumiere', lumiere]], ok: paysage && n > 0 && entier && !loin && !pres && lumiere, conseil };
+  }
+  // l'écran d'installation (par-dessus le jeu) ; se ferme tout seul quand tout est vert 1,5 s
+  function ouvrir(cam, type, quandPret) {
+    const z = document.body;
+    const f = document.createElement('div'); f.className = 'cam-installe';
+    f.innerHTML = `<div class="ci-carte"><div class="ci-gauche"><span class="ci-sur">📷 ${ct('titre')}</span><div class="ci-schema">${SCHEMA_SUPPORT}</div><p class="ci-poser"></p><ul class="ci-liste"></ul><p class="ci-conseil"></p>
+      <button type="button" class="ci-quand">${ct('quandMeme')}</button></div><div class="ci-droite"><canvas class="ci-vue"></canvas><p class="ci-attente">${ct('attente')}</p></div></div>`;
+    f.querySelector('.ci-poser').textContent = ct('poser');
+    z.appendChild(f);
+    const vue = f.querySelector('.ci-vue'), gv = vue.getContext('2d');
+    let dern = null, depuisOk = 0, fini = false, dernConseil = '', tParle = 0, raf = 0;
+    const source = () => cam.apercu();
+    const dessiner = () => {
+      if (fini) return; raf = requestAnimationFrame(dessiner);
+      const r = vue.getBoundingClientRect(); if (vue.width !== Math.round(r.width)) { vue.width = Math.round(r.width); vue.height = Math.round(r.height); }
+      const W = vue.width, H = vue.height, s = source();
+      gv.fillStyle = '#070918'; gv.fillRect(0, 0, W, H);
+      try {
+        if (s?.tagName === 'VIDEO' && s.videoWidth) { gv.save(); gv.translate(W, 0); gv.scale(-1, 1); gv.drawImage(s, 0, 0, W, H); gv.restore(); f.querySelector('.ci-attente').hidden = true; }
+        else if (s?.tagName === 'IMG' && s.naturalWidth) { gv.drawImage(s, 0, 0, W, H); f.querySelector('.ci-attente').hidden = true; }
+      } catch {}
+      // la zone idéale : un cadre où le corps doit tenir
+      gv.strokeStyle = 'rgba(255,255,255,.35)'; gv.setLineDash([10, 8]); gv.lineWidth = 2; gv.strokeRect(W * .08, H * .04, W * .84, H * .92); gv.setLineDash([]);
+      (dern?.poses || []).forEach((p, j) => { // le squelette par-dessus, couleur du joueur
+        const coul = JOUEURS_STYLE[j % 2].couleur; gv.strokeStyle = coul; gv.fillStyle = coul; gv.lineWidth = Math.max(3, W * .008); gv.lineCap = 'round';
+        OS_LIENS.forEach(([a, b]) => { if (p[a][2] < .4 || p[b][2] < .4) return; gv.beginPath(); gv.moveTo(p[a][0] * W, p[a][1] * H); gv.lineTo(p[b][0] * W, p[b][1] * H); gv.stroke(); });
+        if (p[0][2] > .4) { gv.beginPath(); gv.arc(p[0][0] * W, p[0][1] * H, W * .02, 0, 7); gv.fill(); }
+      });
+    };
+    dessiner();
+    const etat = () => {
+      const paysage = DuoEcran.nbJoueurs && modeTele ? (orient ?? true) : innerWidth > innerHeight;
+      const v = verifier(dern, paysage);
+      f.querySelector('.ci-liste').innerHTML = v.lignes.map(([k, ok, extra]) => `<li class="${ok ? 'ok' : ''}"><i>${ok ? '✓' : '•'}</i>${ct(k)}${extra ? ` <b>${extra}</b>` : ''}</li>`).join('');
+      f.querySelector('.ci-conseil').textContent = v.conseil;
+      if (v.conseil && v.conseil !== dernConseil && performance.now() - tParle > 3500) { dernConseil = v.conseil; tParle = performance.now(); parler(v.conseil); }
+      if (v.ok) { if (!depuisOk) depuisOk = performance.now(); if (performance.now() - depuisOk > 1500) terminer(true); } else depuisOk = 0;
+    };
+    let orient = null; const offOrient = DuoEcran.sur?.('orient', (o) => { orient = o.paysage; });
+    const minuteur = setInterval(etat, 250);
+    function terminer(ok) {
+      if (fini) return; fini = true; cancelAnimationFrame(raf); clearInterval(minuteur); offOrient?.();
+      if (ok) { derniereReussite = performance.now(); son('juste'); parler(ct('pret')); }
+      f.classList.add('sort'); setTimeout(() => f.remove(), 350); quandPret();
+    }
+    f.querySelector('.ci-quand').onclick = () => terminer(false);
+    if (modeTele) setTimeout(() => f.querySelector('.ci-quand').focus({ preventScroll: true }), 50);
+    return { donnees(d) { dern = d; }, fermer() { terminer(false); }, get fini() { return fini; } };
+  }
+  return { ouvrir, verifier, get recente() { return performance.now() - derniereReussite < 8 * 60000; } };
+})();
+// un petit schéma : le téléphone couché sur un meuble, les enfants à 2-3 pas
+const SCHEMA_SUPPORT = `<svg viewBox="0 0 240 90" aria-hidden="true"><g fill="none" stroke="#9fb3d9" stroke-width="2" stroke-linecap="round">
+  <path d="M8 84 H232"/><rect x="14" y="52" width="46" height="32" rx="3"/><rect x="22" y="40" width="30" height="13" rx="3" stroke="#2EE6C5"/><circle cx="37" cy="46.5" r="2" fill="#2EE6C5"/>
+  <path d="M60 46 L160 30 M60 46 L160 84" stroke="#2EE6C5" stroke-dasharray="4 5" opacity=".7"/>
+  <circle cx="172" cy="36" r="7"/><path d="M172 43 V64 M172 64 L164 82 M172 64 L180 82 M172 50 L160 42 M172 50 L184 42"/>
+  <circle cx="206" cy="42" r="6"/><path d="M206 48 V66 M206 66 L199 82 M206 66 L213 82 M206 54 L196 48 M206 54 L216 48"/>
+  <path d="M74 76 H150" stroke="#FFD34D"/><path d="M144 72 L150 76 L144 80 M80 72 L74 76 L80 80" stroke="#FFD34D"/></g>
+  <text x="112" y="72" fill="#FFD34D" font-size="10" font-family="system-ui" text-anchor="middle">2–3 m</text></svg>`;
+
+// ---------- 3. Brancher la caméra d'un jeu : installation d'abord, puis le jeu reçoit les données ----------
+analyser = analyserPro; // eslint-disable-line no-func-assign
+const brancherCameraAvantPro = brancherCamera;
+brancherCamera = async function (cam, type, rappel) { // eslint-disable-line no-func-assign
+  let pret = false, horsDepuis = 0, bandeau = null, inst = null, quandPret = null;
+  const attendre = new Promise((ok) => { quandPret = ok; });
+  const r = await brancherCameraAvantPro(cam, type === 'couleur' ? 'couleur' : 'pose', (d, id) => {
+    inst?.donnees(d);
+    if (!pret) return;
+    // personne dans le cadre depuis plus d'une seconde : on le dit, et le jeu ne reçoit rien (il ne se trompe pas)
+    if (!d.joueurs) {
+      if (!horsDepuis) horsDepuis = performance.now();
+      if (performance.now() - horsDepuis > 1200 && !bandeau && cam.boite.isConnected) { bandeau = document.createElement('div'); bandeau.className = 'cam-hors'; bandeau.textContent = '👀 ' + ct('reviens'); document.body.appendChild(bandeau); parler(ct('reviens')); }
+      return;
+    }
+    horsDepuis = 0; bandeau?.remove(); bandeau = null;
+    if (!cam.boite.isConnected) return;
+    rappel(d, id);
+  });
+  if (!r) return r; // pas de caméra : on joue sans (les grands disent bravo)
+  if (Installation.recente) { pret = true; return r; }
+  inst = Installation.ouvrir(cam, type, () => { pret = true; quandPret(); });
+  await attendre;
+  return r;
+};
+// quitter le jeu : on retire l'installation et le bandeau
+let installationEnCours = null;
+const capteursArreterAvantPro = Capteurs.arreter;
+Capteurs.arreter = function () { document.querySelectorAll('.cam-hors, .cam-installe').forEach((x) => x.remove()); capteursArreterAvantPro(); };
 
 // ---------- Au démarrage : l'accueil, et le mot du jour dessiné en silence ----------
 choisirLangue(langue);
