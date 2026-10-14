@@ -2480,6 +2480,12 @@
     html:not(.tele) .fa-t-achat .pw-liste li { padding: 3px 8px; }
   }
   @media (orientation: landscape) and (max-height: 560px) { html:not(.tele) .fa-t-porte { padding-inline-end: 66px; } }
+  /* théâtre en téléphone debout : un sous-titre discret en bas, l'histoire reste visible */
+  @media (orientation: portrait) {
+    html:not(.tele).theatre #hi-lecteur { min-width: 0; width: calc(100vw - 28px); max-width: none; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding: 10px 14px 8px; background: rgba(8,4,16,.62); }
+    html:not(.tele).theatre .hi-texte { font-size: 18px; line-height: 1.35; }
+    html:not(.tele).theatre #scene { top: 14vh; bottom: 30vh; }
+  }
 </style>
 </head>
 <body>
@@ -9020,9 +9026,15 @@ async function analyser(type, rappel, video) {
     g.save(); g.translate(64, 0); g.scale(-1, 1); g.drawImage(video, 0, 0, 64, 48); g.restore();
     const px = g.getImageData(0, 0, 64, 48).data;
     if (type === 'couleur') {
-      let r = 0, v = 0, b = 0, n = 0;
-      for (let y = 17; y < 31; y++) for (let x = 25; x < 39; x++) { const i = (y * 64 + x) * 4; r += px[i]; v += px[i + 1]; b += px[i + 2]; n++; }
-      rappel({ rgb: [r / n | 0, v / n | 0, b / n | 0] }); return;
+      // chaque point du centre est classé un par un (la peau, le noir, le blanc et le gris ne comptent pas) :
+      // la couleur gagnante doit couvrir une bonne part du centre, sinon on ne voit « rien »
+      let r = 0, v = 0, b = 0, n = 0; const votes = {};
+      for (let y = 15; y < 33; y++) for (let x = 23; x < 41; x++) {
+        const i = (y * 64 + x) * 4; r += px[i]; v += px[i + 1]; b += px[i + 2]; n++;
+        const k = typeof couleurPixel === 'function' ? couleurPixel(px[i], px[i + 1], px[i + 2]) : null; if (k) votes[k] = (votes[k] || 0) + 1;
+      }
+      const [meilleure, nb] = Object.entries(votes).sort((a, c) => c[1] - a[1])[0] || [null, 0];
+      rappel({ rgb: [r / n | 0, v / n | 0, b / n | 0], couleur: nb / n >= .4 ? meilleure : null, part: nb / n }); return;
     }
     const gris = new Uint8Array(64 * 48);
     for (let i = 0; i < gris.length; i++) gris[i] = (px[i * 4] * .3 + px[i * 4 + 1] * .59 + px[i * 4 + 2] * .11) | 0;
@@ -10541,6 +10553,17 @@ function couleurVue([r, g, b]) {
   h = (h * 60 + 360) % 360;
   return Object.keys(COULEURS_CHASSE).find((k) => COULEURS_CHASSE[k].h.some(([a, z]) => h >= a && h <= z)) || null;
 }
+// un seul point : couleur franche seulement ; la peau (orangé peu saturé), le noir, le blanc et le gris ne comptent pas
+function couleurPixel(r, g, b) {
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), v = mx / 255, s = mx ? (mx - mn) / mx : 0;
+  if (v < .28 || s < .42) return null;
+  let h = 0; const d = mx - mn || 1;
+  if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  if (h >= 5 && h <= 40 && s < .62) return null; // teinte de peau
+  return Object.keys(COULEURS_CHASSE).find((k) => COULEURS_CHASSE[k].h.some(([a, z]) => h >= a && h <= z)) || null;
+}
+const couleurCamera = (d) => (d.couleur !== undefined ? d.couleur : couleurVue(d.rgb));
 MODULES.couleurs = (() => {
   let z = null, s = null, liste = [], i = 0, tenue = 0, fini = false, cam = 'aucune';
   async function demarrer(zone) {
@@ -10560,11 +10583,11 @@ MODULES.couleurs = (() => {
   }
   function recu(d) {
     if (!z || fini || !d.rgb) return;
-    const vue = couleurVue(d.rgb);
+    const vue = couleurCamera(d);
     s.cam.boite.style.setProperty('--vue', `rgb(${d.rgb.join(',')})`);
-    tenue = vue === liste[i] ? tenue + 1 : Math.max(0, tenue - 1);
-    s.jauge.style.width = Math.min(100, tenue / 5 * 100) + '%';
-    if (tenue >= 5) reussi();
+    tenue = vue === liste[i] ? tenue + 1 : Math.max(0, tenue - 2);
+    s.jauge.style.width = Math.min(100, tenue / 7 * 100) + '%';
+    if (tenue >= 7) reussi();
   }
   function reussi() {
     if (fini) return; fini = true; Progres.gagner(null); fete(); parler(bg('bravo'));
@@ -10986,7 +11009,7 @@ MODULES.aventure = (() => {
     const monter = (v) => { if (fini) return; niveau = Math.max(0, Math.min(1, v)); jauge.style.width = Math.round(niveau * 100) + '%'; if (niveau >= 1) reussi(); };
     const os = () => cam.boite.querySelector('.av-os') || Object.assign(cam.boite.appendChild(document.createElement('canvas')), { className: 'bg-os av-os' });
     if (d.type === 'pose') brancherCamera(cam, 'pose', (x) => { if (x.poses) { dessinerOs(os(), x.poses); monter(niveau + (x.poses.some((p) => poseFaite(p, d.pose)) ? .16 : -.05)); } });
-    if (d.type === 'couleur') { cam.boite.insertAdjacentHTML('beforeend', '<span class="bg-cible" style="--cible:#fb923c"></span>'); brancherCamera(cam, 'couleur', (x) => { if (x.rgb) monter(niveau + (couleurVue(x.rgb) === d.couleur ? .2 : -.06)); }); }
+    if (d.type === 'couleur') { cam.boite.insertAdjacentHTML('beforeend', '<span class="bg-cible" style="--cible:#fb923c"></span>'); brancherCamera(cam, 'couleur', (x) => { if (x.rgb) monter(niveau + (couleurCamera(x) === d.couleur ? .2 : -.06)); }); }
     if (d.type === 'mouvement') brancherCamera(cam, 'mouvement', (x) => monter(niveau + ((x.g || 0) + (x.d || 0) > .3 ? .06 : -.01)));
     if (d.type === 'danse') {
       Musiquette.jouer(128, null, 'fete'); const t0 = performance.now();
