@@ -13333,7 +13333,8 @@ const animeeDe = (id) => ANIMEE_DE[id] || ANIMEE_DE[String(id).replace(/^h-/, ''
 // ouvrir une histoire : le lecteur prend toute la place (le catalogue se cache)
 const ouvrirHistoireAvantCatalogue = ouvrirHistoire;
 ouvrirHistoire = function (h, opts) { // eslint-disable-line no-func-assign
-  if (h && animeeDe(h.id)) return aller(animeeDe(h.id));
+  if (!h) return; // une histoire qui n'existe plus (remplacée par sa version animée)
+  if (animeeDe(h.id)) return aller(animeeDe(h.id));
   ouvrirHistoireAvantCatalogue(h, opts);
   // directement au théâtre : pas d'écran intermédiaire
   setTimeout(() => { if (conte && !Theatre.actif) Theatre.entrer(); }, 60);
