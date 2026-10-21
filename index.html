@@ -2569,6 +2569,23 @@
     .ci-conseil { font-size: 16px; }
     .ci-quand { height: 38px; font-size: 14px; }
   }
+  /* valeurs de la famille : 4 questions courtes, tout visible sans défiler */
+  .va-questions { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: start; }
+  .va-q h4 { margin: 0 0 6px; font-size: 15px; font-weight: 800; opacity: .9; }
+  .va-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+  .va-puces .bv-puce { height: 42px; padding: 0 16px; font-size: 15px; }
+  .va-puces .puce { flex: none; padding: 8px 14px; }
+  .fa-t-valeurs .bv-corps, .fa-t-bienvenue .bv-corps:has(.va-questions) { gap: 8px; }
+  .bv-corps:has(.va-questions) .bv-lumi { font-size: 40px; margin: 0; }
+  .tele .va-questions { gap: 2vh; }
+  .tele .va-q h4 { font-size: 2.4vh; margin-bottom: 1vh; }
+  .tele .va-puces .bv-puce { height: 6vh; font-size: 2.3vh; padding: 0 2.2vw; }
+  @media (orientation: landscape) and (max-height: 500px) {
+    .va-questions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+    .va-puces .bv-puce { height: 36px; font-size: 13px; padding: 0 12px; }
+    .va-q h4 { font-size: 13px; margin-bottom: 4px; }
+    .bv-corps:has(.va-questions) .bv-lumi { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -3753,6 +3770,7 @@ const JINGLES = [
 const ECLATS = [['✨', '⭐', '💫'], ['🌟', '✨', '💖'], ['🎉', '✨', '⭐'], ['💫', '🌈', '✨'], ['⭐', '💛', '✨']];
 let dernierJingle = -1;
 function jingle() {
+  if (window.Valeurs && Valeurs.musique() !== 'tout') return;
   try {
     audio = audio || new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === 'suspended') audio.resume();
@@ -4396,6 +4414,7 @@ const Ambiance = (() => {
 
   const plus = (s) => ctx.currentTime + s;
   function note(f, duree = 1.4, vol = .05, type = 'sine', quand = 0) {
+    if (window.Valeurs && Valeurs.musique() !== 'tout') return; // famille « voix seule » ou « sans musique »
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = f;
     g.gain.setValueAtTime(.0001, plus(quand)); g.gain.exponentialRampToValueAtTime(vol, plus(quand + .02));
@@ -8877,7 +8896,7 @@ const Saisons = (() => {
     return ['ramadan', 'halloween', 'noel', 'rentree', 'ete'].find((k) => dans(d, SAISONS[k])) || null;
   }
   const regler = (v) => { try { localStorage.setItem('lumi-saison', v); } catch {} };
-  return { active, regler, reglage, get courante() { const k = active(); return k ? { id: k, ...SAISONS[k] } : null; } };
+  return { active, regler, reglage, get courante() { const k = Saisons.active(); return k ? { id: k, ...SAISONS[k] } : null; } };
 })();
 
 // ----- Ambiances et décors des fêtes (palette de Lumi, fond, éléments qui flottent) -----
@@ -9127,7 +9146,7 @@ Object.entries(SAISONS).forEach(([k, s]) => {
 function appliquerSaison() {
   const a = Saisons.active(), l = Object.keys(SAISONS);
   NOEUDS.fetes.enfants = a ? [a, ...l.filter((x) => x !== a)] : l;
-  NOEUDS.accueil.enfants = [...(a ? [a] : []), 'aventures', 'jeux', 'creer', 'en-famille', 'histoires', 'chansons', 'apprendre', 'coffre', 'fetes', 'cherche'];
+  NOEUDS.accueil.enfants = [...(a ? [a] : []), 'aventures', 'jeux', 'creer', 'en-famille', 'histoires', 'chansons', ...(NOEUDS.cultures ? ['cultures'] : []), 'apprendre', 'coffre', 'fetes', 'cherche'];
   AMB_THEME.accueil = a ? SAISONS[a].ambiance : undefined;
   if (a) NOEUDS[a].enfants.concat(a).forEach((id) => GRATUIT.add(id));
 }
@@ -9215,6 +9234,7 @@ const Musiquette = (() => {
   const GAMMES = [[60, 64, 67, 72, 67, 64, 62, 65], [57, 60, 64, 69, 64, 60, 59, 62], [53, 57, 60, 65, 60, 57, 55, 59], [55, 59, 62, 67, 62, 59, 57, 60]];
   const hz = (m) => 440 * 2 ** ((m - 69) / 12);
   function note(m, t, d, type = 'triangle', v = .12) {
+    if (window.Valeurs && Valeurs.musique() !== 'tout') return; // pas d'instruments si la famille l'a choisi
     const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = hz(m);
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
     o.connect(g).connect(gain); o.start(t); o.stop(t + d + .05);
@@ -9225,7 +9245,7 @@ const Musiquette = (() => {
     aventure: [[50, 53, 57, 62, 57, 53, 55, 57], [46, 50, 53, 58, 53, 50, 52, 53], [48, 52, 55, 60, 55, 52, 53, 55], [45, 49, 52, 57, 52, 49, 50, 52]],
     berceuse: [[60, 64, 67, 72, 67, 64, 65, 64], [57, 60, 64, 69, 64, 60, 62, 60], [53, 57, 60, 65, 60, 57, 59, 57], [55, 59, 62, 67, 62, 59, 60, 62]],
   };
-  function clap(t) { const n = ctx.createBuffer(1, ctx.sampleRate * .06, ctx.sampleRate), x = n.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / x.length); const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = n; g.gain.value = .12; s.connect(g).connect(gain); s.start(t); }
+  function clap(t) { if (window.Valeurs && Valeurs.musique() === 'aucune') return; const n = ctx.createBuffer(1, ctx.sampleRate * .06, ctx.sampleRate), x = n.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / x.length); const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = n; g.gain.value = .12; s.connect(g).connect(gain); s.start(t); }
   function jouer(bpm = 116, surTemps, style = 'joyeux') {
     arreter();
     try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume?.(); } catch { return; }
@@ -9237,6 +9257,7 @@ const Musiquette = (() => {
       else if (style === 'berceuse') { if (i % 2 === 0) note(g[(i / 2) % 8] + 12, t, croche * 2.6, 'sine', .06); if (i % 8 === 0) note(g[0] - 12, t, croche * 7, 'sine', .1); }
       else if (style === 'aventure') { note(g[i % 8] + 12, t, croche * .8, 'triangle', .05); if (i % 2 === 0) note(g[0] - 12, t, croche * 1.2, 'sawtooth', .025); if (i % 4 === 0) note(g[0] - 24, t, croche * 2, 'sine', .14); }
       else { note(g[i % 8] + 12, t, croche * .9, 'triangle', .07); if (i % 4 === 2) note(g[2] - 12, t, croche * 1.5, 'sine', .08); if (style === 'fete' && i % 4 === 2) clap(t); }
+      if (i % 4 === 0 && window.Valeurs?.musique() === 'voix') clap(t); // voix et percussions : on garde le rythme
       if (i % 4 === 0) { if (style === 'joyeux' || style === 'fete') note(g[0] - 12, t, croche * 3, 'sine', .16); surTemps?.(Math.floor(pas / 4)); }
       pas++;
     }, croche * 1000);
@@ -11477,7 +11498,7 @@ const CINE = (() => {
 (() => {
 const T = nom3;
 FILMS.push({
-  id: 'chateau-citrouilles', emoji: '🏰', saison: 'halloween', palette: 'halloween', debut: 'ouverture',
+  id: 'chateau-citrouilles', emoji: '🏰', saison: 'halloween', peur: true, palette: 'halloween', debut: 'ouverture',
   gratuit: ['ouverture'], // la bande-annonce : tout le premier chapitre
   titre: T('Lumi et le château des citrouilles', 'Lumi and the Pumpkin Castle', 'لومي وقلعة اليقطين'),
   resume: T('La nuit d’Halloween, le Grand Brouillard a emporté la lumière du château. Avec Potiron et Réglisse, c’est vous qui décidez du chemin… et de la fin !',
@@ -12058,7 +12079,7 @@ const ConfigDistante = (() => {
   }
   function appliquer() {
     window.LUMI_TOUT_OUVERT = conf.tout_ouvert === true;
-    const caches = new Set(conf.modules_caches || []);
+    const caches = new Set([...(conf.modules_caches || []), ...(window.Valeurs?.caches?.() || [])]);
     // les listes des menus, à partir de leur version d'origine
     Object.entries(NOEUDS).forEach(([id, n]) => {
       if (n.enfants) { origine[id] = origine[id] || { enfants: [...n.enfants] }; n.enfants = origine[id].enfants.filter((x) => !caches.has(x)); }
@@ -12067,8 +12088,9 @@ const ConfigDistante = (() => {
     (conf.gratuit_en_plus || []).forEach((id) => GRATUIT.add(id));
     if (conf.saison && conf.saison !== 'auto' && Saisons.reglage() === 'auto') { try { localStorage.setItem('lumi-saison-admin', conf.saison); } catch {} } else { try { localStorage.removeItem('lumi-saison-admin'); } catch {} }
     (conf.nouveautes || []).forEach(([id, d]) => { if (!NOUVEAUTES.some((x) => x[0] === id)) NOUVEAUTES.unshift([id, d]); });
+    appliquerSaison(); // l'accueil et les fêtes dépendent de la fête du moment : recalculés, puis filtrés
   }
-  return { charger, appliquer, get conf() { return conf; }, cache: (id) => (conf.modules_caches || []).includes(id) };
+  return { charger, appliquer, get conf() { return conf; }, cache: (id) => (conf.modules_caches || []).includes(id) || !!window.Valeurs?.cacheSet?.().has(id) };
 })();
 // la fête choisie par l'admin s'applique quand les parents ont laissé « automatique »
 const activeSaisonAvant = Saisons.active;
@@ -12109,18 +12131,18 @@ const Bienvenue = (() => {
     f.innerHTML = '<div class="bv-points"></div><div class="bv-corps"></div><div class="bv-actions"></div>';
     dessiner(f);
   }
-  const POINTS = 5;
+  const ETAPES = ['langue', 'enfant', 'valeurs', 'appareil', 'parents', 'pret'], POINTS = ETAPES.length;
   function dessiner(f) {
     f.querySelector('.bv-points').innerHTML = Array.from({ length: POINTS }, (_, i) => `<i class="${i === etape ? 'on' : i < etape ? 'fait' : ''}"></i>`).join('');
     const c = f.querySelector('.bv-corps'), a = f.querySelector('.bv-actions'); c.innerHTML = ''; a.innerHTML = '';
     const suivant = (txt = ad('suivant')) => a.appendChild(bouton(txt, () => { etape++; son('tic'); etape >= POINTS ? finir() : dessiner(f); }, 'bv-b principal'));
     const titre = (e, t, sous) => { c.insertAdjacentHTML('beforeend', `<div class="bv-lumi">${e}</div><h2></h2>${sous ? '<p class="bv-sous"></p>' : ''}`); c.querySelector('h2').textContent = t; if (sous) c.querySelector('.bv-sous').textContent = sous; parler(t); };
-    if (etape === 0) {
+    if (ETAPES[etape] === 'langue') {
       titre('<span class="bv-orbe"></span>', ad('bienvenue'), ad('bienvenueSous'));
       const l = document.createElement('div'); l.className = 'bv-langues'; c.appendChild(l);
       [['fr', '🇫🇷 Français'], ['en', '🇬🇧 English'], ['ar', '🇹🇳 العربية']].forEach(([k, txt]) => l.appendChild(bouton(txt, () => { choisirLangue(k); try { localStorage.setItem('lumi-langue', k); } catch {} dessiner(f); }, 'bv-puce' + (langue === k ? ' on' : ''))));
       suivant();
-    } else if (etape === 1) {
+    } else if (ETAPES[etape] === 'enfant') {
       titre('👧🧒', ad('qui'));
       const p = Profils.actif;
       const i = document.createElement('input'); i.className = 'bv-champ'; i.placeholder = ad('prenom'); i.value = p.nom || ''; i.maxLength = 20; i.autocomplete = 'off';
@@ -12130,7 +12152,11 @@ const Bienvenue = (() => {
       const g = document.createElement('div'); g.className = 'bv-avatars'; c.appendChild(g);
       AVATARS.forEach((e) => g.appendChild(bouton(e, () => { Profils.modifier(p.id, { avatar: e }); g.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.textContent === e)); son('pop'); avatar?.forme(e); }, p.avatar === e ? 'on' : '')));
       suivant();
-    } else if (etape === 2) {
+    } else if (ETAPES[etape] === 'valeurs') {
+      titre('🏡', t3(VA_TXT.titre), t3(VA_TXT.sous));
+      Valeurs.formulaire(c);
+      suivant();
+    } else if (ETAPES[etape] === 'appareil') {
       const type = appareil();
       titre(type === 'tele' ? '📺' : type === 'telephone' ? '📱' : type === 'tablette' ? '📲' : '💻', `${ad('detecte')} ${ad(type)}`);
       const zone = document.createElement('div'); zone.className = 'bv-capacites'; c.appendChild(zone);
@@ -12151,7 +12177,7 @@ const Bienvenue = (() => {
         focusPremier(f);
       });
       suivant();
-    } else if (etape === 3) {
+    } else if (ETAPES[etape] === 'parents') {
       titre('👨‍👩‍👧', ad('parents'), ad('parentsSous'));
       const l = document.createElement('div'); l.className = 'bv-langues'; c.appendChild(l);
       if (Famille.dispo && !Famille.connecte) {
@@ -12455,6 +12481,7 @@ function rangeesVitrine(id) {
       if (r.ids.includes('histoires')) {
         soir.push(R.length);
         R.push({ titre: titrePropre(r.titre), forme: 'paysage', items: HISTOIRES.filter((h) => h.langue === lc).slice(0, 12).map(itemConte) });
+        if (Valeurs.musique() === 'aucune') return;
         return R.push({ titre: vt('comptines'), forme: 'paysage', items: CHANSONS.filter((c) => c.langue === (lc === 'ar' ? 'ar' : lc)).slice(0, 12).map(itemChant) });
       }
       const ids = r.ids.filter((x) => x !== 'cherche');
@@ -12898,6 +12925,133 @@ $('hi-autres').onclick = () => (modeTele ? autresAvantCatalogue() : retour());
 // Lumi ne sait pas dessiner les émojis « photo » (carrés) : on lui donne une forme qui lui va
 const FORME_DE_CARRE = { '🌉': '🎶', '🌌': '✨', '🖼': '🎨', '🖼️': '🎨', '🌅': '☀️', '🌄': '☀️', '🌆': '🌙', '🌃': '🌙', '🏙': '🏢', '🏙️': '🏢', '🎆': '✨', '🎇': '✨', '🏞': '🌳', '🏞️': '🌳' };
 if (typeof avatar !== 'undefined' && avatar?.forme) { const formeAvantCarre = avatar.forme.bind(avatar); avatar.forme = (e, ...r) => formeAvantCarre(FORME_DE_CARRE[e] || e, ...r); }
+
+// ---------- Valeurs de la famille : c'est la famille qui choisit, pas le pays ----------
+// musique (avec instruments, voix et percussions, sans musique), nos fêtes, découvrir celles des autres, peur.
+// La région sert seulement à pré-cocher des réponses ; un seul filtre décide ensuite ce qui s'affiche partout.
+const VA_TXT = {
+  titre: nom3('Les valeurs de votre famille', 'Your family values', 'قيم عائلتكم'),
+  sous: nom3('Lumiole s’adapte à vous. Vous pourrez changer ces choix dans l’espace parents.', 'Lumiole adapts to you. You can change these choices in the parents area.', 'لوميول يتأقلم معكم. يمكنكم تغيير هذه الاختيارات في فضاء الأولياء.'),
+  musique: nom3('🎵 La musique', '🎵 Music', '🎵 الموسيقى'),
+  tout: nom3('Avec instruments', 'With instruments', 'مع آلات موسيقية'),
+  voix: nom3('Voix et percussions', 'Voice and percussion', 'صوت وإيقاع فقط'),
+  aucune: nom3('Sans musique', 'No music', 'بدون موسيقى'),
+  fetes: nom3('🎉 Nos fêtes', '🎉 Our celebrations', '🎉 أعيادنا'),
+  decouvrir: nom3('🌍 Découvrir les fêtes des autres', '🌍 Discover other celebrations', '🌍 التعرّف على أعياد الآخرين'),
+  oui: nom3('Oui', 'Yes', 'نعم'), non: nom3('Non', 'No', 'لا'),
+  peur: nom3('🌙 Histoires et films', '🌙 Stories and films', '🌙 القصص والأفلام'),
+  douce: nom3('Tout doux', 'Gentle only', 'لطيفة فقط'),
+  aventure: nom3('Un peu d’aventure', 'A bit of adventure', 'قليل من المغامرة'),
+  valider: nom3('C’est notre choix', 'That’s our choice', 'هذا اختيارنا'),
+};
+// les fêtes qui ont déjà leurs contenus dans l'app (les autres arriveront avec leurs histoires et coloriages)
+const FETES_FAMILLE = [
+  ['ramadan', '🌙', nom3('Ramadan et Aïd', 'Ramadan and Eid', 'رمضان والعيد')],
+  ['noel', '🎄', nom3('Noël et fin d’année', 'Christmas and New Year', 'الميلاد ورأس السنة')],
+  ['halloween', '🎃', nom3('Halloween', 'Halloween', 'هالوين')],
+];
+var Valeurs = (() => {
+  const LS = 'lumi-valeurs';
+  const lire = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch { return null; } };
+  // pré-cochage selon la région de l'appareil (la famille change tout en un geste)
+  function suggestion() {
+    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch {}
+    const mena = langue === 'ar' || /^(Africa\/(Tunis|Algiers|Casablanca|Tripoli|Cairo|Khartoum|Nouakchott|El_Aaiun)|Asia\/(Riyadh|Dubai|Qatar|Kuwait|Bahrain|Muscat|Aden|Amman|Beirut|Damascus|Baghdad|Gaza|Hebron|Tehran|Karachi)|Europe\/Istanbul)$/.test(tz);
+    return { musique: 'tout', fetes: mena ? ['ramadan'] : ['noel', 'halloween'], decouvrir: true, peur: 'aventure' };
+  }
+  const v = () => ({ ...suggestion(), ...(lire() || {}) });
+  const NEUTRES = ['rentree', 'ete']; // pas des fêtes : tout le monde les voit
+  const celebre = (k) => NEUTRES.includes(k) || v().fetes.includes(k);
+  const permis = (k) => celebre(k) || v().decouvrir;
+  // ce qui disparaît des menus, de l'accueil et de la recherche
+  function caches() {
+    const x = v(), l = [];
+    if (x.musique === 'aucune') {
+      l.push('chansons', 'danse', 'statues', 'jc-chaises', 'jc-potato');
+      Object.keys(SAISONS).forEach((k) => l.push(k + '-chant'));
+      Object.keys(NOEUDS).forEach((id) => { if (id.startsWith('cc-')) l.push(id); });
+    }
+    Object.keys(SAISONS).forEach((k) => { if (!permis(k)) l.push(k, ...(NOEUDS[k]?.enfants || [])); });
+    FILMS.forEach((f) => { if ((f.saison && !permis(f.saison)) || (x.peur === 'douce' && f.peur)) l.push('av-' + f.id); });
+    return l;
+  }
+  // les histoires des fêtes qui ne sont pas les nôtres (si la famille ne veut pas les découvrir)
+  const toutesHistoires = HISTOIRES.slice();
+  function appliquer() {
+    const garde = toutesHistoires.filter((h) => !(h.amb && SAISONS[h.amb] && !permis(h.amb)));
+    HISTOIRES.length = 0; HISTOIRES.push(...garde);
+    ConfigDistante.appliquer();
+  }
+  let memo = null; // l'ensemble des contenus masqués, recalculé quand la famille change ses choix
+  const cacheSet = () => memo || (memo = new Set(caches()));
+  function enregistrer(x) { try { localStorage.setItem(LS, JSON.stringify({ ...v(), ...x })); } catch {} memo = null; appliquer(); }
+  // les questions, réutilisées à l'accueil de la première connexion, dans une fenêtre et dans l'espace parents
+  function formulaire(boite, cls = 'bv-puce') {
+    const q = document.createElement('div'); q.className = 'va-questions'; boite.appendChild(q);
+    const dessiner = () => {
+      const x = v(); q.innerHTML = '';
+      const ligne = (titre, choix) => {
+        const d = document.createElement('div'); d.className = 'va-q';
+        d.innerHTML = '<h4></h4><div class="va-puces"></div>'; d.querySelector('h4').textContent = t3(titre);
+        choix.forEach(([txt, on, fn]) => d.querySelector('.va-puces').appendChild(bouton(txt, () => { fn(); son('tic'); dessiner(); focusPremier?.(q); }, cls + (on ? ' on' : ''))));
+        q.appendChild(d);
+      };
+      ligne(VA_TXT.musique, ['tout', 'voix', 'aucune'].map((k) => [t3(VA_TXT[k]), x.musique === k, () => enregistrer({ musique: k })]));
+      ligne(VA_TXT.fetes, FETES_FAMILLE.map(([k, e, nom]) => [`${e} ${t3(nom)}`, x.fetes.includes(k), () => enregistrer({ fetes: x.fetes.includes(k) ? x.fetes.filter((f) => f !== k) : [...x.fetes, k] })]));
+      ligne(VA_TXT.decouvrir, [[t3(VA_TXT.oui), x.decouvrir, () => enregistrer({ decouvrir: true })], [t3(VA_TXT.non), !x.decouvrir, () => enregistrer({ decouvrir: false })]]);
+      ligne(VA_TXT.peur, ['douce', 'aventure'].map((k) => [t3(VA_TXT[k]), x.peur === k, () => enregistrer({ peur: k })]));
+    };
+    if (!lire()) enregistrer({}); // montrées une fois = réglées (les réponses pré-cochées comptent)
+    dessiner();
+  }
+  // les familles qui avaient déjà l'app : une fenêtre, une seule fois
+  function ouvrir() {
+    const f = fenetre('valeurs'); $('fa-fond').onclick = null; $('fa-fond').classList.add('fond-bienvenue');
+    f.innerHTML = '<div class="bv-corps"></div><div class="bv-actions"></div>';
+    const c = f.querySelector('.bv-corps');
+    c.innerHTML = '<div class="bv-lumi">🏡</div><h2></h2><p class="bv-sous"></p>';
+    c.querySelector('h2').textContent = t3(VA_TXT.titre); c.querySelector('.bv-sous').textContent = t3(VA_TXT.sous);
+    formulaire(c);
+    f.querySelector('.bv-actions').appendChild(bouton(t3(VA_TXT.valider), () => { fermerFenetre(); son('juste'); afficher(); accueillir(); }, 'bv-b principal'));
+    focusPremier(f.querySelector('.bv-actions'));
+  }
+  return { get: v, regle: () => !!lire(), musique: () => v().musique, celebre, permis, caches, cacheSet, appliquer, formulaire, ouvrir };
+})();
+// la fête du moment ne décore l'accueil que si c'est une fête de la famille (sauf choix explicite des parents)
+const activeAvantValeurs = Saisons.active;
+Saisons.active = function (d) { const k = activeAvantValeurs.call(this, d); return k && Saisons.reglage() === 'auto' && !Valeurs.celebre(k) ? null : k; };
+const appliquerSaisonAvantValeurs = appliquerSaison;
+appliquerSaison = function () { // eslint-disable-line no-func-assign
+  appliquerSaisonAvantValeurs();
+  const c = new Set([...Valeurs.caches(), ...(ConfigDistante.conf.modules_caches || [])]);
+  NOEUDS.fetes.enfants = NOEUDS.fetes.enfants.filter((x) => !c.has(x));
+  NOEUDS.accueil.enfants = NOEUDS.accueil.enfants.filter((x) => !c.has(x));
+};
+// la recherche ne propose que ce que la famille a choisi
+const indexRechercheAvantValeurs = indexRecherche;
+indexRecherche = function () { // eslint-disable-line no-func-assign
+  const c = new Set([...Valeurs.caches(), ...(ConfigDistante.conf.modules_caches || [])]), sansChant = Valeurs.musique() === 'aucune';
+  return indexRechercheAvantValeurs().filter((x) => !c.has(x.id) && !(sansChant && x.id.startsWith('c-')));
+};
+Valeurs.appliquer();
+// première connexion : une étape de l'accueil ; familles déjà installées : une fenêtre, une fois
+const bienvenueOuvrirAvant = Bienvenue.ouvrir;
+Bienvenue.ouvrir = function (force) {
+  let vu = false; try { vu = !!localStorage.getItem('lumi-bienvenue'); } catch {}
+  if (!force && vu && !Valeurs.regle()) return Valeurs.ouvrir();
+  return bienvenueOuvrirAvant(force);
+};
+// espace parents : les mêmes questions, en tête des réglages
+const espaceParentsAvantValeurs = espaceParents;
+espaceParents = function (section) { // eslint-disable-line no-func-assign
+  espaceParentsAvantValeurs(section);
+  const f = $('fa-fond')?.querySelector('.fa-t-parents'); if (!f) return;
+  const b = document.createElement('section'); b.className = 'fa-bloc'; b.id = 'fa-valeurs';
+  b.innerHTML = '<h3></h3><p class="st-aide"></p>';
+  b.querySelector('h3').textContent = '🏡 ' + t3(VA_TXT.titre); b.querySelector('.st-aide').textContent = t3(VA_TXT.sous).split('.')[0] + '.';
+  Valeurs.formulaire(b, 'puce');
+  const ref = f.querySelector('#fa-saison'); if (ref) ref.before(b); else f.querySelector('.fa-pied')?.before(b);
+};
 
 // =====================================================================
 // ---------- « Comment on joue ? » : une fiche courte pour chaque jeu ----------
