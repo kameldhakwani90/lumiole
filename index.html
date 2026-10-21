@@ -12064,7 +12064,7 @@ CINE.ajouter({ decors, pantins });
 // ---------- l'histoire (version Lumi : la plus bavarde du village) ----------
 const REFRAIN = T('Sur le chemin, sans traîner, et pas un mot aux inconnus !', 'Stay on the path, don’t dawdle, and not a word to strangers!', 'على الطريق، بلا تأخير، ولا كلمة للغرباء!');
 FILMS.push({
-  id: 'chaperon-rouge', conte: true, emoji: '👧', palette: 'bonbon', debut: 'village', age: '3-7',
+  id: 'chaperon-rouge', conte: true, remplace: ['chaperon'], emoji: '👧', palette: 'bonbon', debut: 'village', age: '3-7',
   gratuit: ['village', 'cuisine', 'chemin', 'foret', 'pre', 'pre2', 'maison', 'porte', 'chambre', 'secours', 'soir'],
   titre: T('Le Petit Chaperon rouge', 'Little Red Riding Hood', 'ليلى والذئب'),
   resume: T('La petite fille la plus bavarde du village doit porter une galette à sa grand-mère, sans parler aux inconnus. Mais dans la forêt, un loup très poli lui dit bonjour…',
@@ -13324,15 +13324,25 @@ function rangeesHistoiresVt() {
   if (!s) themes.push(...themes.splice(themes.findIndex((r) => r.fetes), 1).filter(Boolean));
   return [...R, ...themes];
 }
+// une histoire refaite en histoire animée (film.remplace) : l'ancienne version texte disparaît du catalogue,
+// et l'ouvrir (depuis une culture, la recherche, un lien) lance directement la version animée
+const ANIMEE_DE = {};
+FILMS.filter((f) => f.conte && f.remplace).forEach((f) => f.remplace.forEach((id) => { ANIMEE_DE[id] = 'av-' + f.id; }));
+for (let i = HISTOIRES.length - 1; i >= 0; i--) if (ANIMEE_DE[HISTOIRES[i].id]) HISTOIRES.splice(i, 1);
+const animeeDe = (id) => ANIMEE_DE[id] || ANIMEE_DE[String(id).replace(/^h-/, '')];
 // ouvrir une histoire : le lecteur prend toute la place (le catalogue se cache)
 const ouvrirHistoireAvantCatalogue = ouvrirHistoire;
 ouvrirHistoire = function (h, opts) { // eslint-disable-line no-func-assign
+  if (h && animeeDe(h.id)) return aller(animeeDe(h.id));
   ouvrirHistoireAvantCatalogue(h, opts);
+  // directement au théâtre : pas d'écran intermédiaire
+  setTimeout(() => { if (conte && !Theatre.actif) Theatre.entrer(); }, 60);
   lectureDemandee = false; document.documentElement.classList.remove('hi-reglages');
   if (!modeTele) Vitrine.suivre();
 };
 const ouvrirConteAvantCatalogue = ouvrirConte;
 ouvrirConte = function (id) { // eslint-disable-line no-func-assign
+  if (animeeDe(id)) return aller(animeeDe(id));
   if (!modeTele && pile[pile.length - 1] === 'histoires') { // déjà dans le catalogue : on ouvre le lecteur sans empiler l'écran
     const h = HISTOIRES.find((x) => x.id === id) || HISTOIRES.find((x) => x.id === id.replace(/-\w\w$/, '-fr'));
     if (!h) return;
@@ -13359,6 +13369,16 @@ $('hi-autres').onclick = () => (modeTele ? autresAvantCatalogue() : retour());
 // Lumi ne sait pas dessiner les émojis « photo » (carrés) : on lui donne une forme qui lui va
 const FORME_DE_CARRE = { '🌉': '🎶', '🌌': '✨', '🖼': '🎨', '🖼️': '🎨', '🌅': '☀️', '🌄': '☀️', '🌆': '🌙', '🌃': '🌙', '🏙': '🏢', '🏙️': '🏢', '🎆': '✨', '🎇': '✨', '🏞': '🌳', '🏞️': '🌳' };
 if (typeof avatar !== 'undefined' && avatar?.forme) { const formeAvantCarre = avatar.forme.bind(avatar); avatar.forme = (e, ...r) => formeAvantCarre(FORME_DE_CARRE[e] || e, ...r); }
+// quitter le théâtre (✕, Retour, Échap) ferme l'histoire et ramène au catalogue des histoires
+new MutationObserver(() => {
+  const h = document.documentElement;
+  if (h.classList.contains('theatre')) { h.dataset.thVu = '1'; return; }
+  if (h.dataset.thVu !== '1') return;
+  delete h.dataset.thVu;
+  if (!conte) return;
+  arreterHistoire(); lectureDemandee = false;
+  if (modeTele) TV.montrer('histoires'); else afficher();
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 // ---------- Valeurs de la famille : c'est la famille qui choisit, pas le pays ----------
 // musique (avec instruments, voix et percussions, sans musique), nos fêtes, découvrir celles des autres, peur.
