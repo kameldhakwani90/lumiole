@@ -9,5 +9,7 @@ import { App } from '@capacitor/app';
 
 // Verrou enfant : plugin maison (Android : épinglage de l'écran ; iPhone : Accès guidé, réglé par le parent)
 const Verrou = registerPlugin('Verrou');
+// Caméra de la maison (Tapo, Imou, Ezviz… sur le même Wi-Fi) : plugin maison, Android
+const CameraReseau = registerPlugin('CameraReseau');
 
-window.LumiNatif = { TextToSpeech, SpeechRecognition, StatusBar, Purchases, Verrou, App };
+window.LumiNatif = { TextToSpeech, SpeechRecognition, StatusBar, Purchases, Verrou, CameraReseau, App };
