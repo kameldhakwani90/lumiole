@@ -2592,6 +2592,12 @@
   /* diagnostic caméra : une ligne de chiffres en haut à gauche pendant le jeu */
   .diag-hud { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 8px; z-index: 9999; padding: 6px 10px; border-radius: 8px; background: rgba(0,0,0,.72); color: #9fffd8; font: 600 12px ui-monospace, monospace; pointer-events: none; }
   .tele .diag-hud { font-size: 1.8vh; }
+  /* histoire animée : la vraie Lumi (l'avatar animé) se pose sur sa place dans la scène */
+  html.ci-lumi #scene { position: fixed !important; inset: auto !important; left: calc(var(--lx) - 15vh) !important; top: calc(var(--ly) - 15vh) !important; width: 30vh !important; height: 30vh !important; max-height: none !important; aspect-ratio: 1 / 1 !important; z-index: 9000 !important; pointer-events: none; visibility: visible !important; transform: none !important; }
+  html.ci-lumi .ci.conte .ci-acteur.lumi .ci-corps { opacity: 0; }
+  html.ci-lumi .cote-lumi { display: contents !important; }
+  html.ci-lumi #scene { border-radius: 50%; background: radial-gradient(circle, rgba(127,243,203,.55) 0%, rgba(46,180,170,.32) 30%, rgba(30,60,140,.12) 52%, transparent 68%) !important; }
+  html.ci-lumi .cote-lumi > :not(#scene) { display: none !important; }
 </style>
 </head>
 <body>
@@ -3040,7 +3046,7 @@ const avatar = (() => {
   const t0 = performance.now();
   let tPrec = 0;
   (function boucle() {
-    if (document.hidden || document.querySelector('.ci')) { setTimeout(() => requestAnimationFrame(boucle), 300); return; }
+    if (document.hidden || (document.querySelector('.ci') && !document.documentElement.classList.contains('ci-lumi'))) { setTimeout(() => requestAnimationFrame(boucle), 300); return; }
     const t = (performance.now() - t0) / 1000 * (lent ? .35 : 1);
     const dt = Math.min(.05, t - tPrec); tPrec = t;
     // souffle : inspiration lente, expiration un peu plus rapide
@@ -11169,7 +11175,7 @@ MODULES.aventure = (() => {
     if (!Achat.ouvert && !f.gratuit.includes(id)) return payer();
     if (f.fins[id]) finVue = id;
     try { if (!s.fin) localStorage.setItem(cleSuite(), id); else localStorage.removeItem(cleSuite()); } catch {}
-    $z('.ci-choix').innerHTML = ''; $z('.ci-defi').innerHTML = ''; z.querySelector('.ci').classList.remove('interagit');
+    $z('.ci-choix').innerHTML = ''; $z('.ci-defi').innerHTML = ''; z.querySelector('.ci').classList.remove('interagit'); z.querySelector('.ci').classList.toggle('conte', !!f.conte);
     if (s.musique) Musiquette.jouer({ mystere: 66, aventure: 104, joyeux: 112, berceuse: 72, fete: 128 }[s.musique] || 100, null, s.musique);
     // nouveau décor : les personnages qui ne jouent pas dans cette séquence quittent la scène
     if (decorId !== s.decor) {
@@ -11196,7 +11202,8 @@ MODULES.aventure = (() => {
     (p.acteurs || []).forEach(acteur);
     const texte = p.dit ? t3(p.dit[1]) : p.narr ? t3(p.narr) : '';
     const duree = texte ? Math.max(3200, texte.split(/\s+/).length * 430) : (p.duree || 2600);
-    camera(p.cadre || 'large', p.sur, p.camera, duree);
+    // histoire du soir : la caméra glisse plus lentement, jamais de secousse
+    camera(p.cadre || 'large', p.sur, f.conte && p.camera === 'secousse' ? undefined : p.camera, f.conte ? duree * 1.5 : duree);
     if (p.sfx) bruitage(p.sfx);
     if (p.effet) effet(p.effet);
     if (p.magie) { dust.forme(p.magie, .34, [.5, .36]); setTimeout(() => dust.eteindre(), 4200); }
@@ -11213,7 +11220,7 @@ MODULES.aventure = (() => {
     await dire(texte, voix, moi);
     stop(); if (z) z.querySelector('.ci').dataset.voix = '';
     parle(null);
-    if (vivant(moi)) await attendre(p.pause || 450);
+    if (vivant(moi)) await attendre(p.pause || (f.conte ? 1100 : 450)); // un vrai silence entre deux phrases dans une histoire
   }
   function apres(s, id, moi) {
     const ch = $z('.ci-choix'); ch.innerHTML = ''; $z('.ci-sous').classList.remove('on');
@@ -11398,6 +11405,17 @@ function enregistrerFilms() {
   NOEUDS.aventures = { emoji: '🎬', nom: AV_TXT.aventures, desc: nom3('Des films où vous décidez de la suite', 'Films where you decide what happens', 'أفلام تقررون فيها ما يحدث'), enfants: FILMS.filter((x) => !x.conte).map((x) => 'av-' + x.id), tags: ['histoire', 'deux'] };
   GRATUIT.add('aventures');
 }
+// ----- dans une histoire animée, Lumi est la vraie Lumi de l'app (celle qui bouge), posée là où elle joue dans la scène -----
+(function suivreLumi() {
+  const a = document.querySelector('.ci.conte .ci-acteur.lumi'), h = document.documentElement;
+  if (a) {
+    const r = a.getBoundingClientRect(), etat = a.classList.contains('parle') ? 'heureux' : 'attente';
+    // Lumi reste elle-même : le nuage de lumière (pas une forme), joyeuse quand elle parle
+    if (!h.classList.contains('ci-lumi') || suivreLumi.etat !== etat) { try { clearTimeout(retourNuage); avatar?.forme(null); avatar?.mode(etat); } catch {} suivreLumi.etat = etat; }
+    h.classList.add('ci-lumi'); h.style.setProperty('--lx', (r.left + r.width / 2).toFixed(0) + 'px'); h.style.setProperty('--ly', (r.top + r.height / 2).toFixed(0) + 'px');
+  } else if (h.classList.contains('ci-lumi')) h.classList.remove('ci-lumi');
+  requestAnimationFrame(suivreLumi);
+})();
 
 // =====================================================================
 // ---------- Lumiole cinéma : décors peints et marionnettes ----------
@@ -11492,44 +11510,60 @@ const CINE = (() => {
           <path d="M38 40 L22 38 M38 42 L22 44 M62 40 L78 38 M62 42 L78 44" stroke="#c9b6ff" stroke-width=".8" opacity=".7"/></g></g>
       <defs><filter id="pt-lueur"><feGaussianBlur stdDeviation="1"/></filter></defs></svg>`,
   };
-  // ---------- outils de dessin « de jour » (histoires animées) : réutilisables par chaque conte ----------
+  // ---------- outils de dessin des histoires, dans le style Lumi validé (octobre 2026) ----------
+  // Décor : contours FINS bleu nuit (TD), chaque forme a sa couleur, une ombre du même ton, un reflet.
+  // (Les personnages ont des contours ÉPAIS : voir les marionnettes.) Une source de lumière par décor.
+  const TR = '#232a6a', TD = 3; // trait du décor
+  const teinte = (hex, k) => { const n = parseInt(hex.slice(1), 16), f = (v) => Math.max(0, Math.min(255, Math.round(v * k))); return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((v) => f(v).toString(16).padStart(2, '0')).join(''); };
+  const tr = (w = TD) => `stroke="${TR}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
   const O = {
-    svg, coll, degrade, DEFS, etoiles, lune, sapin, herbes, hasard: h, semer: (g) => { graine = g; },
-    soleil: (x, y, r = 70) => `<circle cx="${x}" cy="${y}" r="${r * 4}" fill="url(#cn-halo)"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fff4c2"/><circle cx="${x}" cy="${y}" r="${r * .82}" fill="#fff9e0"/>`,
-    nuage: (x, y, s, o = .9, c = '#fff') => `<g transform="translate(${x} ${y}) scale(${s})" opacity="${o}"><ellipse cx="0" cy="0" rx="92" ry="32" fill="${c}"/><ellipse cx="-52" cy="8" rx="58" ry="26" fill="${c}"/><ellipse cx="56" cy="6" rx="62" ry="28" fill="${c}"/><ellipse cx="6" cy="-24" rx="54" ry="34" fill="${c}"/><ellipse cx="0" cy="18" rx="120" ry="14" fill="#000" opacity=".04"/></g>`,
-    colline: (y, amp, c, ph = 0, pas = 220) => { let d = `M-300 ${y}`; for (let x = -300; x <= 1900; x += pas) d += ` Q${x + pas / 2} ${(y - amp * (.55 + Math.sin(x * .011 + ph) * .45)).toFixed(0)} ${x + pas} ${y}`; return `<path d="${d} L1900 1000 L-300 1000 Z" fill="${c}"/>`; },
-    // arbre feuillu : boules de feuillage en 3 tons (ombre, milieu, lumière venant d'en haut à gauche)
-    arbre: (x, y, s, [ombre, milieu, lumiere], tronc = '#5a3a24') => `<g transform="translate(${x} ${y}) scale(${s})">
-      <path d="M-14 0 C -10 -50, -12 -90, -6 -130 L 8 -130 C 12 -90, 12 -50, 16 0 Z" fill="${tronc}"/><path d="M-2 -100 C -20 -120, -34 -130, -44 -150 M4 -110 C 24 -126, 34 -140, 40 -160" stroke="${tronc}" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <circle cx="0" cy="-170" r="70" fill="${ombre}"/><circle cx="-56" cy="-140" r="50" fill="${ombre}"/><circle cx="58" cy="-138" r="52" fill="${ombre}"/>
-      <circle cx="-8" cy="-182" r="58" fill="${milieu}"/><circle cx="-56" cy="-150" r="38" fill="${milieu}"/><circle cx="48" cy="-150" r="40" fill="${milieu}"/>
-      <circle cx="-24" cy="-200" r="32" fill="${lumiere}"/><circle cx="-62" cy="-162" r="18" fill="${lumiere}"/><circle cx="26" cy="-176" r="20" fill="${lumiere}" opacity=".8"/></g>`,
-    buisson: (x, y, s, [ombre, milieu, lumiere]) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="-26" rx="70" ry="34" fill="${ombre}"/><circle cx="-34" cy="-38" r="30" fill="${milieu}"/><circle cx="10" cy="-48" r="34" fill="${milieu}"/><circle cx="44" cy="-30" r="24" fill="${milieu}"/><circle cx="-4" cy="-62" r="16" fill="${lumiere}"/><circle cx="-40" cy="-50" r="11" fill="${lumiere}"/></g>`,
-    fleur: (x, y, s, c, coeur = '#ffd34d') => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0 Q2 -14 0 -26" stroke="#3f7a2e" stroke-width="2.4" fill="none"/>${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-34" rx="5" ry="8" fill="${c}" transform="rotate(${a} 0 -26)"/>`).join('')}<circle cx="0" cy="-26" r="4.2" fill="${coeur}"/></g>`,
+    svg, coll, degrade, DEFS, etoiles, herbes, hasard: h, semer: (g) => { graine = g; }, teinte, TR, TD, tr,
+    lune: (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r * 3.2}" fill="url(#cn-halo)"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fff4cf" ${tr()}/><path d="M${x - r * .62} ${y - r * .55} a${r} ${r} 0 0 0 0 ${r * 1.1} a${r * 1.2} ${r * 1.2} 0 0 1 0 ${-r * 1.1}z" fill="#f2dfa6" opacity=".7"/><circle cx="${x - r * .2}" cy="${y - r * .3}" r="${r * .15}" fill="#ecd391"/><circle cx="${x + r * .35}" cy="${y + r * .28}" r="${r * .11}" fill="#ecd391"/>`,
+    soleil: (x, y, r = 70) => `<circle cx="${x}" cy="${y}" r="${r * 4}" fill="url(#cn-halo)"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fff1b0" ${tr()}/><circle cx="${x - r * .25}" cy="${y - r * .25}" r="${r * .45}" fill="#fff9de"/>`,
+    scintille: (x, y, s = 1, c = '#fff6d6') => `<path d="M${x} ${y - 12 * s} l${3 * s} ${9 * s} l${9 * s} ${3 * s} l${-9 * s} ${3 * s} l${-3 * s} ${9 * s} l${-3 * s} ${-9 * s} l${-9 * s} ${-3 * s} l${9 * s} ${-3 * s}z" fill="${c}"/>`,
+    nuage: (x, y, s, o = 1, c = '#fff') => `<g transform="translate(${x} ${y}) scale(${s})" opacity="${o}"><path d="M-110 20 q-6 -30 30 -34 q10 -40 60 -34 q30 -34 76 -10 q40 -6 52 30 q34 6 26 48 z" fill="${c}" ${tr(TD / s)}/><path d="M-70 4 q14 -26 46 -22 q20 -22 50 -6" fill="none" stroke="${teinte(c === '#fff' ? '#e6ecff' : c, 1.15)}" stroke-width="${8 / s}" stroke-linecap="round" opacity=".8"/></g>`,
+    colline: (y, amp, c, ph = 0, pas = 220, trait = true) => { let d = `M-300 ${y}`; for (let x = -300; x <= 1900; x += pas) d += ` Q${x + pas / 2} ${(y - amp * (.55 + Math.sin(x * .011 + ph) * .45)).toFixed(0)} ${x + pas} ${y}`; return `<path d="${d} L1900 1000 L-300 1000 Z" fill="${c}" ${trait ? tr() : ''}/>`; },
+    montagnes: (y, c, neige = true) => { O.semer(91); let d = `M-300 ${y + 60}`, pics = []; for (let x = -300; x <= 1900; x += 140 + h() * 80) { const py = y - 60 - h() * 120; d += ` L${x.toFixed(0)} ${py.toFixed(0)} L${(x + 70).toFixed(0)} ${(y + 20 - h() * 40).toFixed(0)}`; pics.push([x, py]); } return `<path d="${d} L1900 ${y + 60} L1900 1000 L-300 1000 Z" fill="${c}"/>` + (neige ? pics.map(([x, py]) => `<path d="M${x.toFixed(0)} ${py.toFixed(0)} l30 34 l-14 -4 l-16 18 l-14 -16 l-16 6 z" fill="#c9d6ff" opacity=".5"/>`).join('') : ''); },
+    // sapin arrondi en trois étages, ombre à gauche
+    sapin: (x, y, s, c) => { const o = teinte(c, .78); return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-8" y="-24" width="16" height="26" fill="#5a3d5a" ${tr(TD / s)}/>${[[0, 1], [-46, .82], [-88, .62]].map(([dy, k]) => `<path d="M${-60 * k} ${dy - 20} Q0 ${dy - 30} ${60 * k} ${dy - 20} L${8 * k} ${dy - 110 * k} Q0 ${dy - 116 * k} ${-8 * k} ${dy - 110 * k} Z" fill="${c}" ${tr(TD / s)}/><path d="M${-60 * k} ${dy - 20} Q${-20 * k} ${dy - 26} 0 ${dy - 26} L0 ${dy - 112 * k} L${-8 * k} ${dy - 110 * k} Z" fill="${o}"/>`).join('')}</g>`; },
+    // arbre feuillu : un feuillage en nuage avec son ombre et ses reflets, le tronc qui s'évase au pied
+    arbre: (x, y, s, [ombre, milieu, lumiere], tronc = '#5a3d7a') => `<g transform="translate(${x} ${y}) scale(${s})">
+      <path d="M-16 0 C -10 -40 -16 -90 -10 -130 L 12 -130 C 16 -90 12 -40 18 0 C 30 4 36 8 40 12 L-38 12 C -34 8 -28 4 -16 0Z" fill="${tronc}" ${tr(TD / s)}/>
+      <path d="M-96 -150 C -112 -200 -70 -248 -24 -238 C -6 -276 56 -276 72 -238 C 118 -244 140 -196 118 -156 C 132 -124 106 -96 76 -104 C 56 -82 10 -82 -6 -100 C -40 -84 -96 -100 -96 -150Z" fill="${milieu}" ${tr(TD / s)}/>
+      <path d="M118 -156 C 132 -124 106 -96 76 -104 C 56 -82 10 -82 -6 -100 C 30 -104 70 -120 92 -150 C 104 -150 112 -154 118 -156Z" fill="${ombre}"/>
+      <path d="M-70 -160 C -78 -196 -46 -222 -16 -214 C 0 -244 46 -244 56 -214 C 26 -220 0 -204 -8 -184 C -30 -196 -56 -186 -70 -160Z" fill="${lumiere}" opacity=".9"/>
+      <circle cx="-30" cy="-226" r="9" fill="${teinte(lumiere, 1.18)}"/><circle cx="38" cy="-236" r="6" fill="${teinte(lumiere, 1.18)}"/></g>`,
+    buisson: (x, y, s, [ombre, milieu, lumiere]) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-74 0 C -88 -30 -60 -56 -30 -48 C -18 -76 26 -76 36 -50 C 66 -58 86 -30 72 0 Z" fill="${milieu}" ${tr(TD / s)}/><path d="M72 0 C 86 -30 66 -58 36 -50 C 46 -34 40 -16 30 0Z" fill="${ombre}"/><path d="M-50 -24 C -52 -40 -30 -46 -18 -38 C -10 -58 18 -58 22 -42 C 2 -46 -10 -36 -14 -24Z" fill="${lumiere}"/></g>`,
+    fleur: (x, y, s, c, coeur = '#ffd34d') => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0 Q2 -14 0 -24" stroke="#2f7a4e" stroke-width="3" fill="none"/>${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-33" rx="5.5" ry="8" fill="${c}" stroke="${TR}" stroke-width="1.6" transform="rotate(${a} 0 -25)"/>`).join('')}<circle cx="0" cy="-25" r="4.4" fill="${coeur}" stroke="${TR}" stroke-width="1.6"/></g>`,
     fleurs: (n, x0, x1, y0, y1, s = 1, couleurs = ['#ff6b8a', '#ffd34d', '#ffffff', '#b98cff', '#ff9f43']) => coll(n, () => O.fleur((x0 + h() * (x1 - x0)).toFixed(0), (y0 + h() * (y1 - y0)).toFixed(0), (s * (.7 + h() * .6)).toFixed(2), couleurs[Math.floor(h() * couleurs.length)])),
     herbe: (n, y, c, haut = 60, x0 = -100, x1 = 1700) => coll(n, (i) => { const x = x0 + i * ((x1 - x0) / n) + h() * 14, ht = haut * (.5 + h()); return `<path d="M${x.toFixed(0)} ${y} q4 ${(-ht / 2).toFixed(0)} ${(10 - h() * 22).toFixed(0)} ${(-ht).toFixed(0)} q4 ${(ht / 2).toFixed(0)} 8 ${ht.toFixed(0)} Z" fill="${c}"/>`; }),
+    // touffe de premier plan (feuilles larges, contour fin)
+    touffe: (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-90 30 C -84 -40 -50 -70 -30 -76 C -26 -40 -10 -20 14 -12 C 6 -46 22 -80 50 -90 C 56 -50 76 -26 104 30 Z" fill="${c}" ${tr(TD / s)}/><path d="M-30 -76 C -26 -40 -10 -20 14 -12 C -6 -8 -30 0 -50 10 C -52 -20 -44 -56 -30 -76Z" fill="${teinte(c, 1.2)}"/></g>`,
+    champignon: (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-8" y="-24" width="16" height="26" rx="6" fill="#f4ead2" ${tr(TD / s)}/><path d="M-22 -20 C -20 -48 20 -48 22 -20 Z" fill="#ff6b7a" ${tr(TD / s)}/><circle cx="-8" cy="-32" r="4" fill="#fff"/><circle cx="8" cy="-28" r="3" fill="#fff"/></g>`,
+    rocher: (x, y, s, c = '#8a93c4') => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-40 0 C -46 -24 -26 -40 -4 -38 C 20 -44 44 -26 42 0 Z" fill="${c}" ${tr(TD / s)}/><path d="M-30 -14 C -30 -28 -14 -34 0 -30" stroke="${teinte(c, 1.25)}" stroke-width="5" fill="none" stroke-linecap="round"/></g>`,
+    luciole: (x, y) => `<circle cx="${x}" cy="${y}" r="13" fill="#d8ff9a" opacity=".22"/><circle cx="${x}" cy="${y}" r="4" fill="#e8ffb8"/>`,
     // rayons de soleil entre les arbres (fixes : pas d'animation dans une couche)
     rayons: (x, larg, n = 4, o = .16) => coll(n, (i) => { const x0 = x + i * larg; return `<path d="M${x0} -40 L${x0 + 60} -40 L${x0 + 260} 900 L${x0 + 120} 900 Z" fill="url(#cn-rayon)" opacity="${o}"/>`; }),
-    // la chaumière de grand-mère : murs de pierre claire, toit de chaume, cheminée, volets, fleurs aux fenêtres
-    chaumiere: (x, y, s, soir) => `<g transform="translate(${x} ${y}) scale(${s})">
-      <rect x="-150" y="-170" width="300" height="170" fill="#efe1c6"/><rect x="-150" y="-170" width="300" height="170" fill="url(#cn-pierre)"/>
-      <path d="M-182 -160 Q-170 -300 0 -330 Q170 -300 182 -160 Q150 -176 0 -180 Q-150 -176 -182 -160 Z" fill="#c99a52"/><path d="M-170 -170 Q-150 -280 0 -306 Q-120 -260 -140 -168 Z" fill="#dcb46a" opacity=".7"/>
-      ${coll(9, (i) => `<path d="M${-150 + i * 36} -172 q6 -10 12 0" stroke="#a87a3a" stroke-width="3" fill="none"/>`)}
-      <rect x="70" y="-340" width="34" height="80" fill="#8a6a5a"/><rect x="64" y="-346" width="46" height="12" fill="#6a4a3a"/>
-      <rect x="-30" y="-110" width="60" height="110" rx="30" fill="#7a4a2a"/><rect x="-24" y="-104" width="48" height="104" rx="24" fill="#8f5a32"/><circle cx="14" cy="-52" r="4" fill="#e8c06a"/>
-      ${[-100, 100].map((wx) => `<g transform="translate(${wx} -100)"><rect x="-30" y="-30" width="60" height="54" fill="${soir ? '#ffcf7a' : '#bfe6ff'}"/><path d="M0 -30 V24 M-30 -3 H30" stroke="#6a4a3a" stroke-width="4"/><rect x="-46" y="-32" width="16" height="58" fill="#4f8a5a"/><rect x="30" y="-32" width="16" height="58" fill="#4f8a5a"/><rect x="-36" y="24" width="72" height="12" fill="#7a4a2a"/>${coll(4, (k) => `<circle cx="${-26 + k * 17}" cy="22" r="7" fill="${['#ff6b8a', '#ffd34d', '#ff9f43', '#ff6b8a'][k]}"/>`)}</g>`).join('')}
-      ${soir ? '<circle cx="-100" cy="-100" r="70" fill="url(#cn-chaud)" opacity=".5"/><circle cx="100" cy="-100" r="70" fill="url(#cn-chaud)" opacity=".5"/>' : ''}
-      <path d="M-160 0 H160" stroke="#8a7a5a" stroke-width="6"/></g>`,
-    barriere: (x0, x1, y, c = '#8a5a32') => `<g fill="${c}">${coll(Math.floor((x1 - x0) / 46), (i) => `<path d="M${x0 + i * 46} ${y} v-62 l8 -10 l8 10 v62 Z"/>`)}<rect x="${x0}" y="${y - 48}" width="${x1 - x0}" height="8"/><rect x="${x0}" y="${y - 22}" width="${x1 - x0}" height="8"/></g>`,
+    // la chaumière : murs de pierre claire, toit de chaume, cheminée, volets, fleurs aux fenêtres
+    chaumiere: (x, y, s, soir) => { const t = tr(TD / s); return `<g transform="translate(${x} ${y}) scale(${s})">
+      <rect x="70" y="-340" width="34" height="80" fill="#8a6a7a" ${t}/><rect x="62" y="-350" width="50" height="14" rx="4" fill="#6a4a5a" ${t}/>
+      <rect x="-150" y="-170" width="300" height="170" fill="#f2e4c8" ${t}/><rect x="-150" y="-170" width="300" height="170" fill="url(#cn-pierre)"/><rect x="-150" y="-170" width="40" height="170" fill="#d9c7a6" opacity=".6"/>
+      <path d="M-186 -158 Q-172 -300 0 -332 Q172 -300 186 -158 Q150 -176 0 -180 Q-150 -176 -186 -158 Z" fill="#e0b464" ${t}/><path d="M-186 -158 Q-172 -300 0 -332 Q-110 -280 -132 -170 Q-160 -168 -186 -158Z" fill="#c99a52"/>
+      ${coll(7, (i) => `<path d="M${-120 + i * 40} -190 q10 -40 18 -80" stroke="#b8863e" stroke-width="3" fill="none" stroke-linecap="round"/>`)}
+      <rect x="-32" y="-112" width="64" height="112" rx="32" fill="#4f7fc4" ${t}/><path d="M-20 -96 V-6 M0 -104 V-6 M20 -96 V-6" stroke="#3d68a8" stroke-width="3"/><circle cx="18" cy="-52" r="5" fill="#ffd34d" ${tr(2)}/>
+      ${[-100, 100].map((wx) => `<g transform="translate(${wx} -100)"><rect x="-32" y="-30" width="64" height="56" rx="6" fill="${soir ? '#ffcf7a' : '#bfe6ff'}" ${t}/><path d="M0 -30 V26 M-32 -2 H32" stroke="${TR}" stroke-width="${TD / s}"/><rect x="-48" y="-32" width="16" height="60" rx="3" fill="#5aa86a" ${t}/><rect x="32" y="-32" width="16" height="60" rx="3" fill="#5aa86a" ${t}/><rect x="-38" y="26" width="76" height="12" rx="4" fill="#9a6a4a" ${t}/>${coll(4, (k) => `<circle cx="${-27 + k * 18}" cy="22" r="7" fill="${['#ff6b8a', '#ffd34d', '#ff9f43', '#ff6b8a'][k]}" ${tr(1.6)}/>`)}</g>`).join('')}
+      ${soir ? '<circle cx="-100" cy="-100" r="80" fill="url(#cn-chaud)" opacity=".55"/><circle cx="100" cy="-100" r="80" fill="url(#cn-chaud)" opacity=".55"/>' : ''}</g>`; },
+    barriere: (x0, x1, y, c = '#a8744a') => `<g fill="${c}" ${tr()}>${coll(Math.floor((x1 - x0) / 46), (i) => `<path d="M${x0 + i * 46} ${y} v-62 l8 -10 l8 10 v62 Z"/>`)}<rect x="${x0}" y="${y - 50}" width="${x1 - x0}" height="10" rx="3"/><rect x="${x0}" y="${y - 24}" width="${x1 - x0}" height="10" rx="3"/></g>`,
     // intérieurs : un mur, un plancher en perspective
     mur: (c1, c2, motif) => `<rect x="-300" y="-300" width="2200" height="1500" fill="url(#cn-mur)"/>${motif ? coll(26, (i) => coll(10, (k) => `<circle cx="${-260 + i * 80 + (k % 2) * 40}" cy="${-20 + k * 80}" r="5" fill="${motif}" opacity=".35"/>`)) : ''}`,
-    plancher: (y, c1, c2) => `<rect x="-300" y="${y}" width="2200" height="${1000 - y}" fill="${c1}"/>${coll(16, (i) => `<path d="M${800 + (i - 8) * 60} ${y} L${800 + (i - 8) * 230} 1000" stroke="${c2}" stroke-width="3"/>`)}${coll(5, (i) => `<path d="M-300 ${y + 30 + i * i * 14} H1900" stroke="${c2}" stroke-width="2" opacity=".6"/>`)}<rect x="-300" y="${y - 14}" width="2200" height="16" fill="${c2}"/>`,
-    fenetre: (x, y, l, ht, dehors) => `<g transform="translate(${x} ${y})"><rect x="${-l / 2 - 14}" y="${-ht / 2 - 14}" width="${l + 28}" height="${ht + 28}" rx="6" fill="#7a4a2a"/><rect x="${-l / 2}" y="${-ht / 2}" width="${l}" height="${ht}" fill="${dehors}"/>
-      <path d="M0 ${-ht / 2} V${ht / 2} M${-l / 2} 0 H${l / 2}" stroke="#7a4a2a" stroke-width="8"/><rect x="${-l / 2 - 24}" y="${ht / 2 + 8}" width="${l + 48}" height="14" fill="#6a3e22"/></g>`,
-    rideaux: (x, y, l, ht, c) => `<path d="M${x - l / 2 - 40} ${y - ht / 2 - 30} Q${x - l / 2 + 20} ${y} ${x - l / 2 - 10} ${y + ht / 2 + 20} L${x - l / 2 - 50} ${y + ht / 2 + 20} Z" fill="${c}"/><path d="M${x + l / 2 + 40} ${y - ht / 2 - 30} Q${x + l / 2 - 20} ${y} ${x + l / 2 + 10} ${y + ht / 2 + 20} L${x + l / 2 + 50} ${y + ht / 2 + 20} Z" fill="${c}"/><rect x="${x - l / 2 - 60}" y="${y - ht / 2 - 40}" width="${l + 120}" height="10" rx="5" fill="#6a3e22"/>`,
+    plancher: (y, c1, c2) => `<rect x="-300" y="${y}" width="2200" height="${1000 - y}" fill="${c1}"/>${coll(16, (i) => `<path d="M${800 + (i - 8) * 60} ${y} L${800 + (i - 8) * 230} 1000" stroke="${c2}" stroke-width="3"/>`)}${coll(5, (i) => `<path d="M-300 ${y + 30 + i * i * 14} H1900" stroke="${c2}" stroke-width="2" opacity=".6"/>`)}<rect x="-300" y="${y - 14}" width="2200" height="16" fill="${c2}" ${tr()}/>`,
+    fenetre: (x, y, l, ht, dehors) => `<g transform="translate(${x} ${y})"><rect x="${-l / 2 - 14}" y="${-ht / 2 - 14}" width="${l + 28}" height="${ht + 28}" rx="8" fill="#9a6a4a" ${tr()}/><rect x="${-l / 2}" y="${-ht / 2}" width="${l}" height="${ht}" fill="${dehors}" ${tr()}/>
+      <path d="M0 ${-ht / 2} V${ht / 2} M${-l / 2} 0 H${l / 2}" stroke="#9a6a4a" stroke-width="10"/><path d="M0 ${-ht / 2} V${ht / 2} M${-l / 2} 0 H${l / 2}" stroke="${TR}" stroke-width="2" opacity=".5"/><rect x="${-l / 2 - 26}" y="${ht / 2 + 8}" width="${l + 52}" height="16" rx="5" fill="#7a4a2a" ${tr()}/></g>`,
+    rideaux: (x, y, l, ht, c) => `<path d="M${x - l / 2 - 40} ${y - ht / 2 - 30} Q${x - l / 2 + 20} ${y} ${x - l / 2 - 10} ${y + ht / 2 + 20} L${x - l / 2 - 52} ${y + ht / 2 + 20} Z" fill="${c}" ${tr()}/><path d="M${x + l / 2 + 40} ${y - ht / 2 - 30} Q${x + l / 2 - 20} ${y} ${x + l / 2 + 10} ${y + ht / 2 + 20} L${x + l / 2 + 52} ${y + ht / 2 + 20} Z" fill="${c}" ${tr()}/><rect x="${x - l / 2 - 64}" y="${y - ht / 2 - 42}" width="${l + 128}" height="12" rx="6" fill="#7a4a2a" ${tr()}/>`,
   };
   O.DEFS_JOUR = `<linearGradient id="cn-rayon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6c8" stop-opacity=".9"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></linearGradient>
-    <pattern id="cn-pierre" width="60" height="34" patternUnits="userSpaceOnUse"><rect width="60" height="34" fill="none"/><path d="M0 17 H60 M30 0 V17 M0 17 V34 M60 17 V34" stroke="#d6c4a2" stroke-width="2"/></pattern>`;
+    <pattern id="cn-pierre" width="60" height="34" patternUnits="userSpaceOnUse"><rect width="60" height="34" fill="none"/><path d="M0 17 H60 M30 0 V17 M0 17 V34 M60 17 V34" stroke="#d6c4a2" stroke-width="2"/></pattern>
+    <pattern id="cn-pois" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#fff" opacity=".07"/></pattern>`;
   return {
     decor: (id) => DECORS[id]?.(),
     pantin: (id) => PANTINS[id],
@@ -11815,320 +11849,348 @@ FILMS.push({
 })();
 
 // =====================================================================
-// HISTOIRE ANIMÉE : « Le Petit Chaperon rouge » — format Lumiole histoire animée
-// Écrite selon le skill .claude/skills/histoire-lumiole (charte d'écriture, scènes, dialogues, décors peints, FR/EN/AR).
+// HISTOIRE ANIMÉE : « Le Petit Chaperon rouge » (version Lumi, octobre 2026)
+// Écrite selon le skill .claude/skills/histoire-lumiole : style Lumi validé (personnages en gros contours,
+// décor en contours fins), héroïne avec un caractère (la plus bavarde du village), refrain, narrateur sensoriel,
+// rythme doux. Lumi est la vraie Lumi animée de l'app (acteur « lumi »), jamais un dessin.
 // T(fr, en, ar) = un texte dans les trois langues.
 // =====================================================================
 (() => {
 const T = nom3, O = CINE.outils;
-const { svg, coll, degrade, DEFS } = O;
+const { svg, coll, degrade, DEFS, tr, teinte } = O;
 const D = DEFS + O.DEFS_JOUR;
-const FEUILLES = ['#2f6b3a', '#4f9a4a', '#8fd06a'], FEUILLES_SOMBRES = ['#1f4a2c', '#2f6b3a', '#5a9a4a'];
+const VERT = ['#1f6f6a', '#2a948a', '#5fd0bf'], VERT_JOUR = ['#2f7a4e', '#4fa85a', '#9be07a'], VERT_SOMBRE = ['#1a4f52', '#226d6a', '#3fa595'];
+const ciel = (id, c) => degrade(id, c);
+const fond = (id) => `<rect x="-300" y="-300" width="2200" height="1500" fill="url(#${id})"/>`;
+// une maisonnette du village
+const maisonnette = (x, y, s, mur, toit) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-60" y="-96" width="120" height="96" fill="${mur}" ${tr(3 / s)}/><rect x="-60" y="-96" width="22" height="96" fill="${teinte(mur, .88)}"/><path d="M-76 -92 L0 -160 L76 -92 Z" fill="${toit}" ${tr(3 / s)}/><path d="M-76 -92 L0 -160 L-6 -92 Z" fill="${teinte(toit, .82)}"/><rect x="-14" y="-50" width="28" height="50" rx="12" fill="#7a4a3a" ${tr(3 / s)}/><rect x="20" y="-76" width="26" height="24" rx="4" fill="#bfe6ff" ${tr(3 / s)}/><rect x="-46" y="-76" width="26" height="24" rx="4" fill="#bfe6ff" ${tr(3 / s)}/></g>`;
 
-// ---------- les décors peints (1600×900, le sol vers y 700 à 780) ----------
+// ---------- les décors peints (1600×900, le sol entre y 700 et 780) ----------
 const decors = {
-  // la cuisine de maman, le matin : un mur chaud, une fenêtre sur la forêt, la table et la cheminée
-  'chap-maison': () => { O.semer(5); return {
+  // le village au matin : maisons, chemin, prés, montagnes au loin
+  'chv-village': () => { O.semer(7); return {
+    ciel: svg(fond('chv-c1') + O.soleil(1260, 150, 62) + O.nuage(330, 150, 1) + O.nuage(860, 100, .7) + O.nuage(1480, 230, .75), D + ciel('chv-c1', ['#5ab0f0', '#9fd6f5', '#e8f6ff'])),
+    loin: svg(O.montagnes(470, '#a8c4ec') + O.colline(560, 70, '#9ccfa8', 1, 260, false), D),
+    sol: svg(O.colline(660, 50, '#7fc26a', 2) + `<path d="M-300 740 Q400 700 900 716 T1900 700 L1900 1000 L-300 1000 Z" fill="#6ab45a" ${tr()}/><path d="M-300 740 Q400 700 900 716 T1900 700 L1900 1000 L-300 1000 Z" fill="url(#cn-pois)"/>
+      <path d="M380 920 C 520 820, 760 760, 980 740 C 1120 728, 1260 716, 1400 690 L1450 696 C 1300 730, 1160 752, 1020 770 C 800 800, 600 860, 560 920 Z" fill="#ecd3a0" ${tr()}/>`, D),
+    milieu: svg(maisonnette(160, 690, 1.05, '#f4e3c4', '#e0525e') + maisonnette(400, 676, .9, '#ffe0b8', '#4f7fc4') + maisonnette(1240, 668, .85, '#f4e3c4', '#5aa86a') + maisonnette(1460, 680, 1, '#ffe8d0', '#e0525e')
+      + O.arbre(640, 690, .9, VERT_JOUR, '#7a5a4a') + O.barriere(780, 1000, 742) + O.buisson(1060, 742, .9, VERT_JOUR) + O.fleurs(20, -60, 1660, 760, 880, .9), D),
+    avant: svg(O.touffe(-30, 900, 1.3, '#3f8a5a') + O.touffe(1640, 910, 1.4, '#3f8a5a') + O.fleur(220, 880, 1.6, '#ff6b8a') + O.fleur(1380, 890, 1.5, '#ffd34d'), D),
+  }; },
+
+  // la cuisine de maman : la fenêtre sur la forêt, la table, la cheminée
+  'chv-cuisine': () => { O.semer(5); return {
     ciel: svg(O.mur('', '', '#e0b98a'), D + degrade('cn-mur', ['#f7e6c8', '#efd2a8'])),
-    loin: svg(`${O.fenetre(640, 330, 300, 230, 'url(#chap-dehors)')}
-      <g transform="translate(640 330)"><circle cx="70" cy="-40" r="34" fill="#fff4c2"/>${O.arbre(-60, 115, .45, FEUILLES)}${O.arbre(90, 115, .35, FEUILLES)}</g>
-      ${O.rideaux(640, 330, 300, 230, '#d9534f')}${coll(6, (i) => `<rect x="${470 + i * 52}" y="196" width="26" height="8" fill="#fff" opacity=".5"/>`)}
-      <rect x="1080" y="250" width="320" height="14" fill="#8a5a32"/>${[[1110, '#c9a46a'], [1170, '#d9534f'], [1230, '#6a9fd8'], [1300, '#c9a46a'], [1360, '#7fbf6a']].map(([x, c], i) => `<rect x="${x}" y="${200 - i % 2 * 14}" width="40" height="${50 + i % 2 * 14}" rx="8" fill="${c}"/><rect x="${x + 6}" y="${194 - i % 2 * 14}" width="28" height="10" rx="3" fill="#7a4a2a"/>`).join('')}
-      <g transform="translate(1240 140)"><circle r="44" fill="#fffaf0" stroke="#8a5a32" stroke-width="8"/><path d="M0 0 V-28 M0 0 L20 10" stroke="#3a2a1a" stroke-width="5" stroke-linecap="round"/></g>`,
-      D + degrade('chap-dehors', ['#8fd0f5', '#cdeefa'])),
-    sol: svg(O.plancher(640, '#c08a52', '#9a6a3a') + `<ellipse cx="820" cy="790" rx="420" ry="70" fill="#c9524a"/><ellipse cx="820" cy="790" rx="380" ry="56" fill="#e0705a"/><ellipse cx="820" cy="790" rx="300" ry="40" fill="none" stroke="#f4d9a0" stroke-width="6" stroke-dasharray="14 10"/>`, D),
-    milieu: svg(`<g transform="translate(230 680)"><rect x="-190" y="-130" width="380" height="20" fill="#9a6a3a"/><path d="M-200 -128 L200 -128 L180 -60 L-180 -60 Z" fill="#fff"/>${coll(9, (i) => `<rect x="${-200 + i * 44}" y="-128" width="22" height="68" fill="#d9534f" opacity=".85"/>`)}<rect x="-170" y="-60" width="16" height="70" fill="#7a4a2a"/><rect x="154" y="-60" width="16" height="70" fill="#7a4a2a"/>
-        <ellipse cx="-60" cy="-140" rx="60" ry="14" fill="#e8c06a"/><ellipse cx="-60" cy="-146" rx="52" ry="12" fill="#d9a04a"/><path d="M-90 -148 L-70 -144 M-60 -150 L-40 -146" stroke="#b8803a" stroke-width="3"/><rect x="40" y="-176" width="50" height="46" rx="10" fill="#f4b942"/><rect x="36" y="-182" width="58" height="12" rx="5" fill="#fff"/><path d="M36 -182 L94 -182" stroke="#d9534f" stroke-width="4" stroke-dasharray="6 6"/></g>
-      <g transform="translate(1390 690)"><rect x="-150" y="-300" width="300" height="300" fill="#b9a68a"/><rect x="-150" y="-300" width="300" height="300" fill="url(#cn-pierre)"/><rect x="-170" y="-320" width="340" height="30" fill="#8a7a5a"/><path d="M-90 0 V-150 Q0 -220 90 -150 V0 Z" fill="#2a1a10"/><ellipse cx="0" cy="-20" rx="120" ry="80" fill="url(#cn-chaud)"/><path d="M-50 -10 Q-30 -90 0 -60 Q20 -110 40 -50 Q60 -80 55 -10 Z" fill="#ff9f43"/><path d="M-30 -10 Q-10 -60 5 -40 Q25 -70 30 -10 Z" fill="#ffd34d"/><rect x="-60" y="-14" width="120" height="14" rx="6" fill="#5a3a24"/></g>`, D),
-    avant: svg(`<g opacity=".85"><path d="M1600 900 L1600 520 Q1540 520 1530 600 L1520 900 Z" fill="#5a3a24"/><rect x="1460" y="600" width="140" height="20" rx="8" fill="#6a4a2a"/></g><g opacity=".8">${coll(5, (i) => `<path d="M${40 + i * 34} 0 Q${46 + i * 34} 60 ${36 + i * 34} 120" stroke="#5a7a3a" stroke-width="5" fill="none"/><ellipse cx="${36 + i * 34}" cy="${124}" rx="12" ry="20" fill="#7a9a4a"/>`)}</g>`, D),
+    loin: svg(`${O.fenetre(640, 320, 300, 230, 'url(#chv-dehors)')}<g transform="translate(640 320)">${O.soleil(70, -50, 26)}${O.arbre(-60, 115, .4, VERT_JOUR)}${O.arbre(80, 115, .32, VERT_JOUR)}</g>${O.rideaux(640, 320, 300, 230, '#e0525e')}
+      <rect x="1080" y="250" width="330" height="16" rx="5" fill="#9a6a4a" ${tr()}/>${[[1110, '#e3a24f'], [1170, '#e0525e'], [1230, '#6a9fd8'], [1300, '#e3a24f'], [1360, '#7fbf6a']].map(([x, c], i) => `<rect x="${x}" y="${196 - i % 2 * 14}" width="40" height="${54 + i % 2 * 14}" rx="10" fill="${c}" ${tr()}/><rect x="${x + 6}" y="${188 - i % 2 * 14}" width="28" height="12" rx="4" fill="#7a4a2a" ${tr()}/>`).join('')}
+      <g transform="translate(1240 130)"><circle r="44" fill="#fffaf0" ${tr()}/><path d="M0 0 V-28 M0 0 L20 10" stroke="${O.TR}" stroke-width="5" stroke-linecap="round"/></g>`, D + degrade('chv-dehors', ['#8fd0f5', '#cdeefa'])),
+    sol: svg(O.plancher(640, '#c08a52', '#9a6a3a') + `<ellipse cx="820" cy="800" rx="430" ry="72" fill="#e0525e" ${tr()}/><ellipse cx="820" cy="800" rx="370" ry="54" fill="#f07a6a"/><ellipse cx="820" cy="800" rx="300" ry="40" fill="none" stroke="#ffe0a8" stroke-width="6" stroke-dasharray="14 10"/>`, D),
+    milieu: svg(`<g transform="translate(220 690)"><rect x="-180" y="-60" width="16" height="72" fill="#8a5a3a" ${tr()}/><rect x="164" y="-60" width="16" height="72" fill="#8a5a3a" ${tr()}/><path d="M-200 -130 L200 -130 L182 -60 L-182 -60 Z" fill="#fff" ${tr()}/>${coll(9, (i) => `<rect x="${-196 + i * 44}" y="-128" width="22" height="66" fill="#e0525e" opacity=".8"/>`)}
+        <ellipse cx="-60" cy="-140" rx="60" ry="15" fill="#e8b860" ${tr()}/><path d="M-96 -146 L-74 -142 M-62 -150 L-40 -146" stroke="#b8803a" stroke-width="3"/><rect x="40" y="-180" width="50" height="48" rx="12" fill="#ffc85a" ${tr()}/><rect x="36" y="-188" width="58" height="12" rx="5" fill="#fff" ${tr()}/></g>
+      <g transform="translate(1390 690)"><rect x="-150" y="-300" width="300" height="300" fill="#c9b89a" ${tr()}/><rect x="-150" y="-300" width="300" height="300" fill="url(#cn-pierre)"/><rect x="-172" y="-326" width="344" height="32" rx="6" fill="#9a8a6a" ${tr()}/><path d="M-90 0 V-150 Q0 -222 90 -150 V0 Z" fill="#3a2230" ${tr()}/><ellipse cx="0" cy="-30" rx="130" ry="90" fill="url(#cn-chaud)"/><path d="M-50 -10 Q-30 -90 0 -60 Q20 -110 40 -50 Q60 -80 55 -10 Z" fill="#ff9f43" ${tr()}/><path d="M-30 -10 Q-10 -60 5 -40 Q25 -70 30 -10 Z" fill="#ffd34d"/><rect x="-60" y="-16" width="120" height="16" rx="6" fill="#6a3a24" ${tr()}/></g>`, D),
+    avant: svg(`<g opacity=".9">${coll(5, (i) => `<path d="M${40 + i * 34} 0 Q${46 + i * 34} 60 ${36 + i * 34} 120" stroke="#5a7a3a" stroke-width="5" fill="none"/><ellipse cx="${36 + i * 34}" cy="124" rx="13" ry="20" fill="#7aaa5a" ${tr()}/>`)}</g>`, D),
   }; },
 
-  // la sortie du village : le chemin descend entre les prés jusqu'à la forêt
-  'chap-lisiere': () => { O.semer(17); return {
-    ciel: svg(`<rect x="-300" y="-300" width="2200" height="1500" fill="url(#chap-ciel)"/>${O.soleil(1240, 150, 64)}${O.nuage(300, 160, 1.1)}${O.nuage(820, 110, .75)}${O.nuage(1500, 230, .8, .8)}`, D + degrade('chap-ciel', ['#5ab7f0', '#9fd8f5', '#e6f6ff'])),
-    loin: svg(`${O.colline(560, 90, '#a8d4c8', 1)}${O.colline(600, 60, '#8cc49a', 3)}
-      ${[[140, 560, .5], [230, 552, .45], [330, 566, .5]].map(([x, y, s]) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-60" y="-90" width="120" height="90" fill="#f4e3c4"/><path d="M-74 -88 L0 -150 L74 -88 Z" fill="#d9534f"/></g>`).join('')}
-      ${coll(16, (i) => O.sapin(1040 + i * 60, 600 + (i % 3) * 6, .7, '#4f8a6a'))}`, D),
-    sol: svg(`${O.colline(680, 60, '#7fc26a', 2)}<path d="M-300 760 Q400 700 900 720 T1900 700 L1900 900 L-300 900 Z" fill="#6ab45a"/>
-      <path d="M160 900 C 300 800, 520 760, 760 740 C 980 720, 1140 690, 1300 660 L1340 666 C 1200 700, 1040 736, 860 770 C 640 810, 470 850, 420 900 Z" fill="#e8d2a0"/>
-      <path d="M200 900 C 330 812, 530 774, 760 754" stroke="#d4b97e" stroke-width="5" fill="none"/>${O.fleurs(40, -100, 1700, 730, 880, .9)}`, D),
-    milieu: svg(`${O.barriere(-40, 380, 760)}${O.arbre(1260, 680, 1.25, FEUILLES)}${O.arbre(1440, 700, 1.5, FEUILLES_SOMBRES)}${O.arbre(1600, 690, 1.3, FEUILLES)}${O.buisson(1150, 720, 1, FEUILLES)}${O.buisson(70, 790, 1.1, FEUILLES)}`, D),
-    avant: svg(`<g opacity=".9">${O.herbe(60, 910, '#3f8a3a', 70)}</g><g opacity=".85">${O.arbre(1700, 980, 2.4, FEUILLES_SOMBRES)}</g>`, D),
+  // le chemin entre les prés, jusqu'à l'entrée de la forêt
+  'chv-chemin': () => { O.semer(17); return {
+    ciel: svg(fond('chv-c2') + O.soleil(1240, 140, 58) + O.nuage(300, 160, 1.05) + O.nuage(800, 110, .7) + O.nuage(1500, 240, .8), D + ciel('chv-c2', ['#5ab0f0', '#9fd6f5', '#eaf7ff'])),
+    loin: svg(O.montagnes(500, '#a8c4ec') + O.colline(590, 60, '#9ccfa8', 3, 240, false) + coll(14, (i) => O.sapin(1060 + i * 60, 610 + (i % 3) * 6, .55, '#4f8a7a')), D),
+    sol: svg(O.colline(680, 60, '#7fc26a', 2) + `<path d="M-300 760 Q400 700 900 720 T1900 700 L1900 1000 L-300 1000 Z" fill="#6ab45a" ${tr()}/><path d="M-300 760 Q400 700 900 720 T1900 700 L1900 1000 L-300 1000 Z" fill="url(#cn-pois)"/>
+      <path d="M160 920 C 300 800, 520 760, 760 740 C 980 720, 1140 690, 1300 660 L1340 666 C 1200 700, 1040 736, 860 770 C 640 810, 470 850, 420 920 Z" fill="#ecd3a0" ${tr()}/>` + O.fleurs(40, -100, 1700, 740, 880, .9), D),
+    milieu: svg(O.barriere(-40, 380, 770) + O.arbre(1240, 690, 1.15, VERT_JOUR, '#7a5a4a') + O.arbre(1450, 706, 1.4, VERT, '#6a4a5a') + O.buisson(1130, 730, 1, VERT_JOUR) + O.buisson(70, 800, 1.1, VERT_JOUR) + O.rocher(560, 800, 1) + O.champignon(940, 760, 1), D),
+    avant: svg(O.touffe(-20, 910, 1.3, '#3f8a5a') + O.touffe(1620, 920, 1.4, '#2f6a52'), D),
   }; },
 
-  // le sous-bois : de grands troncs, des rayons de soleil, un vieux chêne où le loup se cache
-  'chap-sousbois': () => { O.semer(23); return {
-    ciel: svg(`<rect x="-300" y="-300" width="2200" height="1500" fill="url(#chap-feuillage)"/>${O.rayons(380, 120, 5, .22)}`, D + degrade('chap-feuillage', ['#2f5a3a', '#6a9a5a', '#b8d48a'])),
-    loin: svg(`${coll(18, (i) => { const x = -80 + i * 100 + O.hasard() * 40, l = 18 + O.hasard() * 16; return `<rect x="${x.toFixed(0)}" y="-40" width="${l.toFixed(0)}" height="760" fill="#5a7a5a" opacity="${(.45 + O.hasard() * .3).toFixed(2)}"/>`; })}
-      ${coll(12, (i) => `<circle cx="${-60 + i * 150}" cy="${60 + (i % 3) * 40}" r="${110 + (i % 2) * 40}" fill="#3a6a40" opacity=".55"/>`)}`, D),
-    sol: svg(`<path d="M-300 690 Q300 650 800 676 T1900 660 L1900 900 L-300 900 Z" fill="#5a7a3a"/><path d="M-300 740 Q400 720 900 736 T1900 726 L1900 900 L-300 900 Z" fill="#4a6a2e"/>
-      <path d="M-300 820 C 200 780, 600 760, 900 752 C 1200 744, 1500 740, 1900 744 L1900 790 C 1500 786, 1200 790, 900 800 C 600 812, 200 846, -300 900 Z" fill="#c8b07a" opacity=".85"/>
-      ${coll(14, () => `<ellipse cx="${(O.hasard() * 1700).toFixed(0)}" cy="${(770 + O.hasard() * 110).toFixed(0)}" rx="${(10 + O.hasard() * 14).toFixed(0)}" ry="5" fill="#d98a3a" opacity=".7"/>`)}`, D),
-    milieu: svg(`<g transform="translate(1210 760)"><path d="M-70 0 C -60 -160, -90 -300, -60 -460 L60 -460 C 80 -300, 60 -160, 80 0 Z" fill="#6a4a2e"/><path d="M-40 -60 C -30 -160, -50 -260, -30 -380" stroke="#4a3220" stroke-width="8" fill="none"/><ellipse cx="0" cy="-600" rx="260" ry="190" fill="#2f5a34"/><ellipse cx="-80" cy="-640" rx="150" ry="110" fill="#4a8a44"/><ellipse cx="90" cy="-620" rx="130" ry="100" fill="#3f7a3c"/><path d="M-90 0 Q-130 -10 -150 6 M80 0 Q130 -6 150 8" stroke="#6a4a2e" stroke-width="16" stroke-linecap="round"/></g>
-      ${O.arbre(180, 780, 1.6, FEUILLES_SOMBRES, '#5a3e26')}${O.buisson(420, 790, 1, FEUILLES)}${O.buisson(1500, 800, 1.2, FEUILLES_SOMBRES)}
-      ${[[560, 806], [600, 812], [1040, 800]].map(([x, y]) => `<g transform="translate(${x} ${y})"><rect x="-4" y="-18" width="8" height="18" fill="#f4e8d0"/><ellipse cx="0" cy="-20" rx="16" ry="10" fill="#d9534f"/><circle cx="-5" cy="-23" r="2.5" fill="#fff"/><circle cx="5" cy="-20" r="2" fill="#fff"/></g>`).join('')}`, D),
-    avant: svg(`<g opacity=".8">${coll(9, (i) => { const x = i < 5 ? -40 + i * 50 : 1460 + (i - 5) * 50; return `<path d="M${x} 900 Q${x + 30} 760 ${x + 110} 700 Q${x + 60} 790 ${x + 40} 900 Z" fill="#163a1e"/>`; })}</g>`, D),
+  // le sous-bois : grands sapins, rayons de soleil, le vieux chêne où le loup se cache
+  'chv-foret': () => { O.semer(23); return {
+    ciel: svg(fond('chv-c3') + O.rayons(360, 120, 5, .22), D + ciel('chv-c3', ['#1f4a5a', '#3f7a6a', '#a8d08a'])),
+    loin: svg(coll(16, (i) => O.sapin(-60 + i * 110 + O.hasard() * 30, 640, .9 + O.hasard() * .3, '#2f6a62')).replace(new RegExp(`stroke="${O.TR}"`, 'g'), 'stroke="#2f6a62"'), D),
+    sol: svg(`<path d="M-300 690 Q300 650 800 676 T1900 660 L1900 1000 L-300 1000 Z" fill="#4f8a4a" ${tr()}/><path d="M-300 690 Q300 650 800 676 T1900 660 L1900 1000 L-300 1000 Z" fill="url(#cn-pois)"/>
+      <path d="M-300 830 C 200 784, 600 762, 900 754 C 1200 746, 1500 742, 1900 746 L1900 794 C 1500 790, 1200 794, 900 804 C 600 816, 200 852, -300 900 Z" fill="#d9c08f" ${tr()}/>` + coll(12, () => `<ellipse cx="${(O.hasard() * 1700).toFixed(0)}" cy="${(780 + O.hasard() * 100).toFixed(0)}" rx="${(10 + O.hasard() * 12).toFixed(0)}" ry="5" fill="#e0904a" opacity=".7"/>`), D),
+    milieu: svg(O.arbre(1220, 770, 1.9, VERT_SOMBRE, '#6a4a5a') + O.arbre(170, 790, 1.6, VERT, '#5a3d5a') + O.buisson(430, 800, 1, VERT) + O.buisson(1520, 806, 1.2, VERT_SOMBRE) + O.champignon(560, 812, 1.1) + O.champignon(600, 820, .8) + O.rocher(1040, 812, 1.1) + O.luciole(760, 560) + O.luciole(1400, 600), D),
+    avant: svg(O.touffe(-40, 920, 1.5, '#1d5a4a') + O.touffe(1640, 930, 1.6, '#1d5a4a'), D),
   }; },
 
-  // le pré fleuri : des fleurs partout, la forêt au loin
-  'chap-pre': () => { O.semer(31); return {
-    ciel: svg(`<rect x="-300" y="-300" width="2200" height="1500" fill="url(#chap-ciel2)"/>${O.soleil(360, 170, 60)}${O.nuage(900, 140, .9)}${O.nuage(1400, 210, .7, .85)}`, D + degrade('chap-ciel2', ['#4fb0ef', '#a8dcf5', '#f0f9ff'])),
-    loin: svg(`${O.colline(600, 70, '#9ccf9a', 2)}${coll(26, (i) => O.sapin(-120 + i * 70, 612 + (i % 4) * 6, .65 + (i % 3) * .08, '#3f7a5a'))}`, D),
-    sol: svg(`<path d="M-300 640 Q300 600 900 630 T1900 620 L1900 900 L-300 900 Z" fill="#8fd06a"/><path d="M-300 720 Q500 680 1000 700 T1900 690 L1900 900 L-300 900 Z" fill="#74bf58"/>${O.fleurs(90, -100, 1700, 650, 880, 1)}`, D),
-    milieu: svg(`${O.fleurs(26, -60, 1660, 780, 880, 1.8)}${O.buisson(-20, 760, 1.2, FEUILLES)}${O.buisson(1620, 770, 1.3, FEUILLES)}
-      ${[[700, 540], [1260, 600], [420, 610]].map(([x, y], i) => `<g transform="translate(${x} ${y}) rotate(${i * 20 - 15})"><ellipse cx="-10" cy="0" rx="12" ry="8" fill="${['#ffd34d', '#ff8fb3', '#b98cff'][i]}"/><ellipse cx="10" cy="0" rx="12" ry="8" fill="${['#ffd34d', '#ff8fb3', '#b98cff'][i]}"/><rect x="-1.5" y="-6" width="3" height="12" fill="#3a2a1a"/></g>`).join('')}`, D),
-    avant: svg(`<g opacity=".9">${O.herbe(70, 915, '#3f8a3a', 80)}</g>`, D),
+  // le pré fleuri : des fleurs partout (les cibles du geste), la forêt au loin
+  'chv-pre': () => { O.semer(31); return {
+    ciel: svg(fond('chv-c4') + O.soleil(360, 160, 56) + O.nuage(900, 140, .9) + O.nuage(1400, 210, .7), D + ciel('chv-c4', ['#4fa8ef', '#a8dcf5', '#f2faff'])),
+    loin: svg(O.colline(600, 70, '#a8d8a8', 2, 260, false) + coll(22, (i) => O.sapin(-120 + i * 82, 626 + (i % 4) * 5, .6 + (i % 3) * .06, '#4f8a7a')), D),
+    sol: svg(`<path d="M-300 640 Q300 600 900 630 T1900 620 L1900 1000 L-300 1000 Z" fill="#8fd06a" ${tr()}/><path d="M-300 720 Q500 690 1000 704 T1900 696 L1900 1000 L-300 1000 Z" fill="#7cc25c"/><path d="M-300 640 Q300 600 900 630 T1900 620 L1900 1000 L-300 1000 Z" fill="url(#cn-pois)"/>` + O.fleurs(70, -100, 1700, 660, 880, 1), D),
+    milieu: svg(O.fleurs(22, -60, 1660, 790, 880, 1.7) + O.buisson(-10, 770, 1.2, VERT_JOUR) + O.buisson(1610, 780, 1.3, VERT_JOUR)
+      + [[700, 520], [1260, 590], [420, 600]].map(([x, y], i) => `<g transform="translate(${x} ${y}) rotate(${i * 20 - 15})"><ellipse cx="-11" cy="0" rx="12" ry="8" fill="${['#ffd34d', '#ff8fb3', '#b98cff'][i]}" ${tr(2)}/><ellipse cx="11" cy="0" rx="12" ry="8" fill="${['#ffd34d', '#ff8fb3', '#b98cff'][i]}" ${tr(2)}/><rect x="-2" y="-7" width="4" height="14" rx="2" fill="${O.TR}"/></g>`).join(''), D),
+    avant: svg(O.touffe(-30, 920, 1.3, '#3f8a5a') + O.touffe(1630, 920, 1.3, '#3f8a5a'), D),
   }; },
 
-  // la maison de grand-mère, près des trois grands chênes (l'après-midi, ou le soir pour la fin)
-  'chap-chaumiere': () => chaumiere(false),
-  'chap-chaumiere-soir': () => chaumiere(true),
+  'chv-chaumiere': () => chaumiere(false),
+  'chv-soir': () => chaumiere(true),
 
-  // la chambre de grand-mère : la grande armoire, le lit, la fenêtre
-  'chap-chambre': () => { O.semer(41); return {
-    ciel: svg(O.mur('', '', '#c98a9a'), D + degrade('cn-mur', ['#f4d8d0', '#e8c0b4'])),
-    loin: svg(`${O.fenetre(800, 300, 220, 200, 'url(#chap-soir)')}${O.rideaux(800, 300, 220, 200, '#6a9fd8')}<g transform="translate(800 300)">${[[-60, -50], [30, -70], [70, -20], [-20, -10]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#fff"/>`).join('')}</g>
-      <g transform="translate(470 230)"><rect x="-50" y="-60" width="100" height="120" rx="6" fill="#c9a46a"/><rect x="-40" y="-50" width="80" height="100" fill="#f4e8d0"/><circle cx="0" cy="-10" r="16" fill="#e0a080"/><rect x="-18" y="8" width="36" height="34" rx="10" fill="#9a6ab0"/></g>`, D + degrade('chap-soir', ['#ff9f6a', '#ffcf8a'])),
-    sol: svg(O.plancher(660, '#a8744a', '#8a5a32') + `<ellipse cx="760" cy="800" rx="360" ry="60" fill="#6a9fd8"/><ellipse cx="760" cy="800" rx="310" ry="46" fill="#8ab8e8"/>`, D),
-    milieu: svg(`<g transform="translate(250 700)"><rect x="-170" y="-500" width="340" height="500" rx="10" fill="#8a5a32"/><rect x="-150" y="-470" width="145" height="440" rx="6" fill="#9a6a3a"/><rect x="5" y="-470" width="145" height="440" rx="6" fill="#9a6a3a"/><circle cx="-20" cy="-240" r="8" fill="#e8c06a"/><circle cx="20" cy="-240" r="8" fill="#e8c06a"/><path d="M-180 -500 H180 L170 -530 H-170 Z" fill="#6a3e22"/></g>
-      <g transform="translate(1180 720)"><rect x="-260" y="-260" width="40" height="260" rx="8" fill="#6a3e22"/><circle cx="-240" cy="-270" r="20" fill="#6a3e22"/><rect x="230" y="-180" width="36" height="180" rx="8" fill="#6a3e22"/><circle cx="248" cy="-188" r="18" fill="#6a3e22"/>
-        <rect x="-240" y="-120" width="480" height="70" rx="12" fill="#8a5a32"/><rect x="-230" y="-200" width="470" height="100" rx="20" fill="#fff"/><ellipse cx="-150" cy="-200" rx="80" ry="30" fill="#fffaf0"/>
-        <path d="M-120 -190 H240 V-100 H-120 Z" fill="url(#chap-patch)"/></g>
-      <g transform="translate(1530 720)"><rect x="-50" y="-120" width="100" height="120" fill="#8a5a32"/><rect x="-6" y="-200" width="12" height="80" fill="#3a2a1a"/><path d="M-40 -200 L40 -200 L24 -250 L-24 -250 Z" fill="#ffcf7a"/><circle cx="0" cy="-220" r="90" fill="url(#cn-chaud)" opacity=".6"/></g>`,
-      D + `<pattern id="chap-patch" width="60" height="45" patternUnits="userSpaceOnUse"><rect width="30" height="22.5" fill="#f4a3b8"/><rect x="30" width="30" height="22.5" fill="#ffd8a0"/><rect y="22.5" width="30" height="22.5" fill="#a8d8b8"/><rect x="30" y="22.5" width="30" height="22.5" fill="#b8c8f4"/></pattern>`),
-    avant: svg(`<g opacity=".75"><path d="M0 0 H260 Q200 60 0 90 Z" fill="#5a2a3a"/><path d="M1600 0 H1340 Q1400 60 1600 90 Z" fill="#5a2a3a"/></g>`, D),
+  // la chambre de grand-mère : la grande armoire, le lit, la fenêtre orangée
+  'chv-chambre': () => { O.semer(41); return {
+    ciel: svg(O.mur('', '', '#c98a9a'), D + degrade('cn-mur', ['#f6dcd4', '#ecc4b8'])),
+    loin: svg(`${O.fenetre(800, 290, 220, 200, 'url(#chv-tard)')}${O.rideaux(800, 290, 220, 200, '#6a9fd8')}
+      <g transform="translate(470 220)"><rect x="-50" y="-60" width="100" height="120" rx="8" fill="#c9a46a" ${tr()}/><rect x="-38" y="-48" width="76" height="96" rx="4" fill="#f4e8d0" ${tr(2)}/><circle cx="0" cy="-10" r="16" fill="#f0c8a6" ${tr(2)}/><rect x="-18" y="8" width="36" height="32" rx="10" fill="#9a6ab0" ${tr(2)}/></g>`, D + degrade('chv-tard', ['#ff9f6a', '#ffd08a'])),
+    sol: svg(O.plancher(660, '#b8845a', '#8a5a3a') + `<ellipse cx="760" cy="800" rx="370" ry="62" fill="#6a9fd8" ${tr()}/><ellipse cx="760" cy="800" rx="310" ry="46" fill="#8ab8e8"/>`, D),
+    milieu: svg(`<g transform="translate(250 700)"><rect x="-170" y="-500" width="340" height="500" rx="12" fill="#a8744a" ${tr()}/><rect x="-170" y="-500" width="40" height="500" fill="#8a5a3a" opacity=".5"/><rect x="-150" y="-470" width="140" height="440" rx="8" fill="#b8845a" ${tr()}/><rect x="10" y="-470" width="140" height="440" rx="8" fill="#b8845a" ${tr()}/><circle cx="-24" cy="-240" r="9" fill="#ffd34d" ${tr(2)}/><circle cx="24" cy="-240" r="9" fill="#ffd34d" ${tr(2)}/><path d="M-186 -500 H186 L172 -534 H-172 Z" fill="#7a4a2a" ${tr()}/></g>
+      <g transform="translate(1180 720)"><rect x="-264" y="-270" width="44" height="270" rx="10" fill="#7a4a2a" ${tr()}/><circle cx="-242" cy="-282" r="22" fill="#7a4a2a" ${tr()}/><rect x="226" y="-190" width="40" height="190" rx="10" fill="#7a4a2a" ${tr()}/><circle cx="246" cy="-198" r="20" fill="#7a4a2a" ${tr()}/>
+        <rect x="-244" y="-124" width="490" height="74" rx="14" fill="#9a6a3a" ${tr()}/><rect x="-232" y="-206" width="478" height="106" rx="24" fill="#fff" ${tr()}/><ellipse cx="-150" cy="-204" rx="82" ry="32" fill="#fffaf0" ${tr()}/>
+        <path d="M-120 -192 H244 V-104 H-120 Z" fill="url(#chv-patch)" ${tr()}/></g>
+      <g transform="translate(1530 720)"><rect x="-52" y="-122" width="104" height="122" rx="8" fill="#9a6a3a" ${tr()}/><rect x="-6" y="-200" width="12" height="80" fill="#5a3a2a"/><path d="M-42 -200 L42 -200 L26 -252 L-26 -252 Z" fill="#ffcf7a" ${tr()}/><circle cx="0" cy="-220" r="100" fill="url(#cn-chaud)" opacity=".6"/></g>`,
+      D + `<pattern id="chv-patch" width="60" height="45" patternUnits="userSpaceOnUse"><rect width="30" height="22.5" fill="#f4a3b8"/><rect x="30" width="30" height="22.5" fill="#ffd8a0"/><rect y="22.5" width="30" height="22.5" fill="#a8d8b8"/><rect x="30" y="22.5" width="30" height="22.5" fill="#b8c8f4"/></pattern>`),
+    avant: svg(`<g opacity=".8"><path d="M0 0 H260 Q200 60 0 90 Z" fill="#7a3a4a" ${tr()}/><path d="M1600 0 H1340 Q1400 60 1600 90 Z" fill="#7a3a4a" ${tr()}/></g>`, D),
   }; },
 };
+// la maison aux trois chênes, l'après-midi ou la nuit (la scène validée du style Lumi)
 function chaumiere(soir) {
   O.semer(soir ? 53 : 47);
+  const V = soir ? VERT : VERT_JOUR;
   return {
-    ciel: svg(`<rect x="-300" y="-300" width="2200" height="1500" fill="url(#chap-ciel3)"/>${soir ? O.etoiles(70, 380) + O.lune(300, 150, 44) : O.soleil(300, 190, 58) + O.nuage(700, 150, .8) + O.nuage(1450, 120, .7, .85)}`,
-      D + degrade('chap-ciel3', soir ? ['#1d2a5a', '#5a4a8a', '#f09a6a'] : ['#6ac0f0', '#b8e2f5', '#fff4d8'])),
-    loin: svg(`${O.colline(590, 60, soir ? '#4a4a7a' : '#9ccfa0', 4)}${coll(20, (i) => O.sapin(-100 + i * 95, 600 + (i % 3) * 8, .75, soir ? '#2f3a5a' : '#4f8a6a'))}`, D),
-    sol: svg(`<path d="M-300 680 Q300 650 800 668 T1900 660 L1900 900 L-300 900 Z" fill="${soir ? '#3f6a4a' : '#7fc26a'}"/><path d="M-300 760 Q500 730 1000 744 T1900 736 L1900 900 L-300 900 Z" fill="${soir ? '#355a3e' : '#6ab45a'}"/>
-      <path d="M-300 850 C 200 800, 600 780, 900 760 C 1000 752, 1050 730, 1070 704 L1110 704 C 1110 740, 1060 770, 960 790 C 700 830, 300 860, -300 900 Z" fill="${soir ? '#a08a6a' : '#e8d2a0'}"/>${O.fleurs(30, -100, 1700, 760, 880, .9)}`, D),
-    milieu: svg(`${O.arbre(380, 720, 1.5, soir ? ['#1f3a2e', '#2f5a3e', '#4a7a52'] : FEUILLES_SOMBRES)}${O.arbre(1540, 730, 1.6, soir ? ['#1f3a2e', '#2f5a3e', '#4a7a52'] : FEUILLES)}${O.arbre(620, 700, 1.1, soir ? ['#1f3a2e', '#2f5a3e', '#4a7a52'] : FEUILLES)}
-      ${O.chaumiere(1090, 705, 1.25, soir)}${O.barriere(780, 920, 740)}${O.barriere(1260, 1400, 740)}${O.buisson(1290, 760, .8, FEUILLES)}`, D),
-    avant: svg(`<g opacity=".9">${O.herbe(56, 915, soir ? '#1f3a26' : '#3f8a3a', 70)}</g>`, D),
+    ciel: svg(fond('chv-c5') + (soir ? O.etoiles(70, 380) + coll(4, (i) => O.scintille(200 + i * 360, 120 + (i % 2) * 140, 1.1)) + O.lune(1230, 180, 80) + O.nuage(260, 190, .8, 1, '#3b4fa3') : O.soleil(300, 180, 56) + O.nuage(720, 140, .8) + O.nuage(1450, 120, .7)),
+      D + ciel('chv-c5', soir ? ['#0e1546', '#26357f', '#4b62b8'] : ['#6ac0f0', '#b8e2f5', '#fff4d8'])),
+    loin: svg(O.montagnes(500, soir ? '#2c3d8c' : '#a8c4ec') + O.colline(600, 60, soir ? '#263679' : '#9ccfa8', 4, 260, false) + coll(18, (i) => O.sapin(-100 + i * 100, 616 + (i % 3) * 8, .7, soir ? '#1f6b78' : '#4f8a7a')), D),
+    sol: svg(`<path d="M-300 680 Q300 650 800 668 T1900 660 L1900 1000 L-300 1000 Z" fill="${soir ? '#3e5cb8' : '#7fc26a'}" ${tr()}/><path d="M-300 680 Q300 650 800 668 T1900 660 L1900 1000 L-300 1000 Z" fill="url(#cn-pois)"/>
+      <path d="M-300 860 C 200 806, 600 784, 900 764 C 1000 756, 1050 732, 1070 706 L1112 706 C 1112 742, 1060 774, 960 794 C 700 834, 300 864, -300 920 Z" fill="${soir ? '#d9c08f' : '#ecd3a0'}" ${tr()}/>` + O.fleurs(26, -100, 1700, 770, 880, .9), D),
+    milieu: svg(O.arbre(370, 720, 1.45, V, '#5a3d7a') + O.arbre(1540, 730, 1.55, V, '#5a3d7a') + O.arbre(640, 700, 1.05, V, '#5a3d7a') + O.chaumiere(1090, 706, 1.25, soir) + O.barriere(790, 930, 742) + O.barriere(1250, 1390, 742) + O.buisson(1290, 762, .8, V) + O.champignon(860, 790, 1)
+      + (soir ? O.luciole(300, 560) + O.luciole(1180, 520) + O.luciole(1500, 560) + O.luciole(880, 500) : ''), D),
+    avant: svg(O.touffe(-20, 920, 1.3, soir ? '#1d4a7a' : '#3f8a5a') + O.touffe(1620, 920, 1.3, soir ? '#1d4a7a' : '#3f8a5a') + O.fleur(240, 870, 1.6, '#ff6b7a') + O.fleur(1360, 880, 1.6, '#ff6b7a'), D),
   };
 }
 
-// ---------- les marionnettes (viewBox 100×100, les pieds en bas) ----------
+// ---------- les marionnettes : style Lumi, gros contours bleu nuit, une ombre par couleur ----------
+// Dessinées en grand (le personnage fait environ 400 unités) puis réduites dans la boîte 100×100, pieds en bas.
+const K = '#1a1640', SW = 7;
+const pantin = (contenu, x, y, s) => `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(${x} ${y}) scale(${s})" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round" stroke-linecap="round">${contenu}</g></svg>`;
+const ombreSol = (rx, y) => `<ellipse cx="0" cy="${y}" rx="${rx}" ry="12" fill="${K}" opacity=".3" stroke="none"/>`;
+const jambe = (x, y0, y1, peau) => `<path d="M${x} ${y0} V${y1}" stroke-width="16"/><path d="M${x} ${y0} V${y1}" stroke="${peau}" stroke-width="8"/>`;
+const yeux = (dx, y, r = 9) => `<g class="pt-yeux" stroke="none"><ellipse cx="${-dx}" cy="${y}" rx="${r}" ry="${r * 1.3}" fill="${K}"/><ellipse cx="${dx}" cy="${y}" rx="${r}" ry="${r * 1.3}" fill="${K}"/><circle cx="${-dx + 3}" cy="${y - 5}" r="${r * .4}" fill="#fff"/><circle cx="${dx + 3}" cy="${y - 5}" r="${r * .4}" fill="#fff"/><circle cx="${-dx - 2}" cy="${y + 6}" r="${r * .2}" fill="#fff"/><circle cx="${dx - 2}" cy="${y + 6}" r="${r * .2}" fill="#fff"/></g>`;
+const joues = (dx, y) => `<g stroke="none"><ellipse cx="${-dx}" cy="${y}" rx="11" ry="7" fill="#ff8a96" opacity=".7"/><ellipse cx="${dx}" cy="${y}" rx="11" ry="7" fill="#ff8a96" opacity=".7"/></g>`;
+const PEAU = '#f9d6b8';
 const pantins = {
-  // le Petit Chaperon rouge : la cape et le capuchon rouges, une robe bleue, le panier au bras
-  chaperon: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="97" rx="20" ry="3.5" fill="#000" opacity=".3"/>
-    <rect x="42" y="80" width="6" height="15" rx="3" fill="#f2c7a5"/><rect x="53" y="80" width="6" height="15" rx="3" fill="#f2c7a5"/>
-    <ellipse cx="44" cy="96" rx="6" ry="3" fill="#7a2a2a"/><ellipse cx="57" cy="96" rx="6" ry="3" fill="#7a2a2a"/>
-    <g class="pt-corps">
-      <path class="pt-cape" d="M30 46 C 24 62, 24 76, 28 86 L72 86 C 76 76, 76 62, 70 46 Z" fill="#c62d36"/>
-      <path d="M38 50 C 36 64, 36 76, 38 84 L62 84 C 64 76, 64 64, 62 50 Z" fill="#5a8fd8"/><path d="M42 58 H58 V82 H42 Z" fill="#fff" opacity=".9"/><path d="M38 50 Q50 56 62 50" stroke="#fff" stroke-width="2" fill="none"/>
-      <path d="M62 56 C 68 60, 70 64, 72 66" stroke="#f2c7a5" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <g transform="translate(74 70)"><path d="M-10 -4 Q0 -18 10 -4" stroke="#8a5a2a" stroke-width="2.4" fill="none"/><path d="M-12 -4 H12 L9 10 H-9 Z" fill="#c98a4a"/><path d="M-12 -4 H12 L9 2 H-9 Z" fill="#fff"/><path d="M-9 -2 H9" stroke="#d9534f" stroke-width="2" stroke-dasharray="3 3"/><path d="M-10 4 H10 M-9 7 H9" stroke="#a86a32" stroke-width="1"/></g>
-      <g class="pt-tete">
-        <path d="M28 34 C 26 16, 38 6, 50 6 C 62 6, 74 16, 72 34 C 72 44, 66 50, 50 50 C 34 50, 28 44, 28 34 Z" fill="#b8242e"/>
-        <ellipse cx="50" cy="31" rx="15" ry="16" fill="#f7d2b0"/>
-        <path d="M35 26 C 38 16, 62 16, 65 26 C 60 22, 54 20, 50 24 C 46 20, 40 22, 35 26 Z" fill="#6a3a1e"/>
-        <g class="pt-yeux"><ellipse cx="44" cy="31" rx="2.6" ry="3.2" fill="#2a1a10"/><ellipse cx="56" cy="31" rx="2.6" ry="3.2" fill="#2a1a10"/><circle cx="45" cy="30" r=".9" fill="#fff"/><circle cx="57" cy="30" r=".9" fill="#fff"/></g>
-        <circle cx="40" cy="37" r="3" fill="#ff8a8a" opacity=".5"/><circle cx="60" cy="37" r="3" fill="#ff8a8a" opacity=".5"/>
-        <g class="pt-bouche"><path d="M46 39 Q50 43 54 39 Q50 41 46 39 Z" fill="#a83a3a"/></g>
-        <path d="M36 44 Q50 52 64 44" stroke="#8a1a22" stroke-width="2" fill="none"/></g></g></svg>`,
-  // maman : un chignon, une robe verte, un tablier
-  maman: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="97" rx="20" ry="3.5" fill="#000" opacity=".3"/>
-    <g class="pt-corps"><path d="M34 40 C 30 60, 28 80, 30 95 L70 95 C 72 80, 70 60, 66 40 Z" fill="#3f8a6a"/><path d="M40 48 H60 L62 92 H38 Z" fill="#fff"/><path d="M40 48 Q50 52 60 48" stroke="#d9534f" stroke-width="2" fill="none"/>
-      <path d="M34 42 C 26 54, 28 62, 36 66" stroke="#3f8a6a" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M66 42 C 74 54, 72 62, 64 66" stroke="#3f8a6a" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="37" cy="66" r="3.5" fill="#f0c8a6"/><circle cx="63" cy="66" r="3.5" fill="#f0c8a6"/>
-      <rect x="46" y="34" width="8" height="7" fill="#f0c8a6"/>
-      <g class="pt-tete"><circle cx="50" cy="8" r="7" fill="#7a4a2a"/><ellipse cx="50" cy="22" rx="12" ry="13" fill="#f0c8a6"/><path d="M38 20 C 38 10, 62 10, 62 20 C 58 15, 52 14, 50 17 C 47 14, 42 15, 38 20 Z" fill="#7a4a2a"/>
-        <g class="pt-yeux"><ellipse cx="45" cy="22" rx="2" ry="2.6" fill="#2a1a10"/><ellipse cx="55" cy="22" rx="2" ry="2.6" fill="#2a1a10"/></g>
-        <circle cx="41" cy="27" r="2.4" fill="#ff8a8a" opacity=".45"/><circle cx="59" cy="27" r="2.4" fill="#ff8a8a" opacity=".45"/>
-        <g class="pt-bouche"><path d="M46 29 Q50 32 54 29" stroke="#a83a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/></g></g></g></svg>`,
-  // le loup : gris, un gilet marron, de grandes oreilles, un long museau, la queue qui bouge
-  loup: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="97" rx="22" ry="3.5" fill="#000" opacity=".3"/>
-    <path class="pt-queue" d="M34 80 C 14 82, 8 66, 14 56 C 18 64, 24 70, 34 72 Z" fill="#7a8494"/>
-    <path d="M40 78 L38 95 H46 L47 80 Z M56 80 L56 95 H64 L62 78 Z" fill="#6a7484"/><ellipse cx="42" cy="95" rx="6" ry="3" fill="#4a5262"/><ellipse cx="60" cy="95" rx="6" ry="3" fill="#4a5262"/>
-    <g class="pt-corps"><path d="M34 44 C 30 58, 32 74, 38 82 L64 82 C 70 74, 70 58, 66 44 Z" fill="#8a94a4"/><path d="M42 50 C 40 62, 42 74, 46 80 L56 80 C 60 74, 60 62, 58 50 Z" fill="#c8ccd6"/>
-      <path d="M34 46 L44 46 L44 76 L36 76 Z M66 46 L58 46 L58 76 L66 76 Z" fill="#8a5a32"/><circle cx="41" cy="56" r="1.4" fill="#e8c06a"/><circle cx="41" cy="64" r="1.4" fill="#e8c06a"/>
-      <path d="M34 50 C 26 58, 26 66, 30 70" stroke="#8a94a4" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M66 50 C 74 58, 74 66, 70 70" stroke="#8a94a4" stroke-width="7" stroke-linecap="round" fill="none"/>
-      <g class="pt-tete"><path d="M34 22 L30 2 L44 14 Z" fill="#7a8494"/><path d="M33 18 L32 7 L40 14 Z" fill="#d9a0a8"/><path d="M60 14 L70 2 L68 22 Z" fill="#7a8494"/><path d="M62 14 L68 7 L67 18 Z" fill="#d9a0a8"/>
-        <path d="M30 30 C 30 16, 44 10, 54 12 C 64 14, 70 22, 70 30 C 76 32, 88 34, 90 40 C 90 46, 80 48, 66 46 C 60 50, 40 50, 34 44 C 30 40, 30 34, 30 30 Z" fill="#8a94a4"/>
-        <path d="M66 40 C 76 42, 84 42, 89 40 C 88 45, 78 47, 66 46 Z" fill="#dfe2ea"/><ellipse cx="89" cy="38" rx="3.4" ry="2.6" fill="#2a2a3a"/>
-        <g class="pt-yeux"><ellipse cx="50" cy="27" rx="4" ry="4.4" fill="#ffd34d"/><ellipse cx="62" cy="27" rx="3.6" ry="4" fill="#ffd34d"/><ellipse cx="51" cy="27" rx="1.6" ry="3" fill="#1a1a2a"/><ellipse cx="62.6" cy="27" rx="1.4" ry="2.8" fill="#1a1a2a"/></g>
-        <path d="M45 21 L55 23 M59 22 L66 21" stroke="#4a5262" stroke-width="1.6" stroke-linecap="round"/>
-        <g class="pt-bouche"><path d="M68 46 Q78 52 86 44 Q78 48 68 46 Z" fill="#7a2a3a"/><path d="M72 46 L73 49 L75 46.5 M78 46.5 L79 49 L80.5 46" fill="#fff"/></g></g></g></svg>`,
-  // le loup au lit : le bonnet et les lunettes de grand-mère, la couverture remontée
-  loupLit: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <g class="pt-corps"><g class="pt-tete">
-      <path d="M30 34 L26 18 L40 28 Z M62 28 L72 16 L70 34 Z" fill="#7a8494"/>
-      <path d="M28 46 C 28 30, 42 24, 52 26 C 62 28, 68 36, 68 44 C 74 46, 86 48, 88 54 C 88 60, 78 62, 64 60 C 58 64, 40 64, 32 58 C 28 54, 28 50, 28 46 Z" fill="#8a94a4"/>
-      <path d="M64 54 C 74 56, 82 56, 87 54 C 86 59, 76 61, 64 60 Z" fill="#dfe2ea"/><ellipse cx="87" cy="52" rx="3.2" ry="2.4" fill="#2a2a3a"/>
-      <path d="M22 36 C 20 18, 36 8, 50 8 C 64 8, 78 16, 78 34 C 70 30, 60 28, 50 28 C 40 28, 30 30, 22 36 Z" fill="#fffaf0"/>${coll(9, (i) => `<circle cx="${22 + i * 7}" cy="${34 - Math.sin(i / 8 * Math.PI) * 6}" r="3.4" fill="#fffaf0" stroke="#f0d0d8" stroke-width=".8"/>`)}<path d="M40 14 Q50 10 60 14" stroke="#ff8fb3" stroke-width="3" fill="none"/>
-      <g class="pt-yeux"><ellipse cx="46" cy="42" rx="3.6" ry="4" fill="#ffd34d"/><ellipse cx="59" cy="42" rx="3.4" ry="3.8" fill="#ffd34d"/><ellipse cx="47" cy="42" rx="1.4" ry="2.8" fill="#1a1a2a"/><ellipse cx="59.6" cy="42" rx="1.3" ry="2.6" fill="#1a1a2a"/></g>
-      <circle cx="46" cy="42" r="7" fill="none" stroke="#5a4a3a" stroke-width="1.6"/><circle cx="59" cy="42" r="6.6" fill="none" stroke="#5a4a3a" stroke-width="1.6"/><path d="M53 42 H52.6" stroke="#5a4a3a" stroke-width="1.6"/>
-      <g class="pt-bouche"><path d="M66 60 Q76 66 84 58 Q76 62 66 60 Z" fill="#7a2a3a"/></g></g>
-      <path d="M4 66 C 20 60, 80 60, 98 66 L98 100 L4 100 Z" fill="url(#pt-patch)"/><path d="M4 66 C 20 60, 80 60, 98 66 L98 72 C 80 66, 20 66, 4 72 Z" fill="#fff"/></g>
-    <defs><pattern id="pt-patch" width="16" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="6" fill="#f4a3b8"/><rect x="8" width="8" height="6" fill="#ffd8a0"/><rect y="6" width="8" height="6" fill="#a8d8b8"/><rect x="8" y="6" width="8" height="6" fill="#b8c8f4"/></pattern></defs></svg>`,
-  // grand-mère : un chignon blanc, des lunettes rondes, un châle rose
-  grandmere: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="97" rx="20" ry="3.5" fill="#000" opacity=".3"/>
-    <g class="pt-corps"><path d="M32 50 C 28 66, 28 84, 30 96 L70 96 C 72 84, 72 66, 68 50 Z" fill="#7a5aa8"/><path d="M30 86 H70 V96 H30 Z" fill="#5a3a88"/>
-      <path d="M30 46 C 36 58, 64 58, 70 46 C 66 42, 34 42, 30 46 Z" fill="#f49ab8"/><path d="M40 52 L50 66 L60 52" fill="#f49ab8"/>
-      <path d="M33 52 C 26 60, 28 68, 36 70" stroke="#7a5aa8" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M67 52 C 74 60, 72 68, 64 70" stroke="#7a5aa8" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="37" cy="70" r="3.4" fill="#f0c8a6"/><circle cx="63" cy="70" r="3.4" fill="#f0c8a6"/>
-      <g class="pt-tete"><circle cx="50" cy="14" r="8" fill="#f4f4f4"/><ellipse cx="50" cy="30" rx="13" ry="14" fill="#f0c8a6"/><path d="M37 28 C 36 16, 64 16, 63 28 C 58 22, 42 22, 37 28 Z" fill="#f4f4f4"/>
-        <g class="pt-yeux"><ellipse cx="45" cy="30" rx="1.8" ry="2.2" fill="#2a1a10"/><ellipse cx="55" cy="30" rx="1.8" ry="2.2" fill="#2a1a10"/></g>
-        <circle cx="45" cy="30" r="4.6" fill="none" stroke="#8a6a4a" stroke-width="1.3"/><circle cx="55" cy="30" r="4.6" fill="none" stroke="#8a6a4a" stroke-width="1.3"/><path d="M49.6 30 H50.4" stroke="#8a6a4a" stroke-width="1.3"/>
-        <circle cx="40" cy="36" r="2.6" fill="#ff8a8a" opacity=".45"/><circle cx="60" cy="36" r="2.6" fill="#ff8a8a" opacity=".45"/>
-        <g class="pt-bouche"><path d="M46 38 Q50 41 54 38" stroke="#a83a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/></g></g></g></svg>`,
-  // le bûcheron : grand, une barbe, une chemise à carreaux, un fagot de bois sous le bras
-  bucheron: `<svg class="pt" viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="50" cy="97" rx="22" ry="3.5" fill="#000" opacity=".3"/>
-    <path d="M38 74 L37 95 H47 L48 74 Z M53 74 L54 95 H64 L63 74 Z" fill="#6a4a2a"/><ellipse cx="42" cy="95" rx="7" ry="3" fill="#3a2414"/><ellipse cx="59" cy="95" rx="7" ry="3" fill="#3a2414"/>
-    <g class="pt-corps"><path d="M30 34 C 26 50, 28 66, 34 76 L66 76 C 72 66, 74 50, 70 34 Z" fill="url(#pt-carreaux)"/><rect x="34" y="68" width="32" height="6" fill="#3a2414"/>
-      <path d="M30 38 C 22 50, 22 60, 28 66" stroke="#c0392b" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M70 38 C 80 46, 82 52, 78 58" stroke="#c0392b" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="28" cy="66" r="4" fill="#e8b890"/>
-      <g transform="translate(80 56) rotate(-20)">${coll(5, (i) => `<rect x="-22" y="${-10 + i * 4}" width="44" height="4" rx="2" fill="${i % 2 ? '#8a5a32' : '#a8744a'}"/>`)}<rect x="-4" y="-12" width="5" height="24" fill="#5a3a1e"/></g>
-      <g class="pt-tete"><path d="M36 14 C 36 4, 64 4, 64 14 L66 16 H34 Z" fill="#c0392b"/><rect x="32" y="14" width="36" height="4" rx="2" fill="#8a2a1e"/><ellipse cx="50" cy="22" rx="12" ry="11" fill="#e8b890"/>
-        <path d="M37 22 C 36 34, 42 42, 50 42 C 58 42, 64 34, 63 22 C 60 28, 40 28, 37 22 Z" fill="#7a4a2a"/>
-        <g class="pt-yeux"><ellipse cx="45" cy="20" rx="1.8" ry="2.2" fill="#2a1a10"/><ellipse cx="55" cy="20" rx="1.8" ry="2.2" fill="#2a1a10"/></g><path d="M42 16 H48 M52 16 H58" stroke="#5a3418" stroke-width="1.8" stroke-linecap="round"/>
-        <g class="pt-bouche"><path d="M46 30 Q50 33 54 30" stroke="#5a2a1a" stroke-width="1.8" fill="none" stroke-linecap="round"/></g></g></g>
-    <defs><pattern id="pt-carreaux" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#c0392b"/><rect width="5" height="10" fill="#1a1a1a" opacity=".45"/><rect width="10" height="5" fill="#1a1a1a" opacity=".45"/></pattern></defs></svg>`,
+  // le Petit Chaperon rouge (repris de l'image validée)
+  chaperon: pantin(`${ombreSol(78, 262)}
+    ${jambe(-26, 200, 244, '#f6cfae')}${jambe(22, 200, 244, '#f6cfae')}
+    <path d="M-48 254 C -48 238 -10 236 -10 254 Z" fill="#7a2235"/><path d="M4 254 C 4 238 42 236 42 254 Z" fill="#7a2235"/>
+    <g class="pt-cape"><path d="M-30 70 C -70 120 -96 190 -92 214 C -40 226 40 226 92 214 C 96 190 70 120 30 70 Z" fill="#ff4f63"/>
+      <path d="M-30 70 C -60 116 -80 176 -80 210 C -64 214 -54 214 -46 214 C -50 170 -40 120 -14 80 Z" fill="#d93650" stroke="none"/>
+      <path d="M-10 120 C -14 160 -16 190 -20 214 M30 110 C 36 150 42 184 44 214" fill="none" stroke-width="4" stroke="#b02a44"/></g>
+    <path d="M56 120 C 80 140 92 156 98 172" fill="none" stroke-width="18"/><path d="M56 120 C 80 140 92 156 98 172" fill="none" stroke="#ff4f63" stroke-width="10"/><circle cx="100" cy="176" r="11" fill="#f6cfae"/>
+    <g transform="translate(108 196)"><path d="M-30 -8 C -28 -46 28 -46 30 -8" fill="none" stroke-width="7"/><path d="M-34 -8 H34 L26 34 H-26 Z" fill="#e3a24f"/><path d="M-28 4 H28 M-24 18 H24" stroke-width="3" stroke="#b47a32" fill="none"/><path d="M-36 -10 H36 L32 2 H-32Z" fill="#fff"/><path d="M-26 -10 v12 M-10 -10 v12 M6 -10 v12 M22 -10 v12" stroke="#ff4f63" stroke-width="6"/></g>
+    <g class="pt-tete"><path d="M-84 6 C -92 -70 -40 -112 0 -112 C 40 -112 92 -70 84 6 C 80 54 40 76 0 76 C -40 76 -80 54 -84 6 Z" fill="#ff4f63"/>
+      <path d="M-84 6 C -92 -70 -40 -112 0 -112 C -30 -96 -66 -60 -66 10 C -66 40 -50 60 -30 70 C -60 62 -82 40 -84 6 Z" fill="#d93650" stroke="none"/>
+      <ellipse cx="0" cy="0" rx="62" ry="58" fill="${PEAU}"/>
+      <path d="M-58 -10 C -50 -52 50 -52 58 -10 C 40 -30 20 -34 6 -26 C -10 -40 -40 -34 -58 -10 Z" fill="#6b2e3a"/>
+      ${yeux(23, 6)}${joues(41, 26)}
+      <path d="M-34 -16 Q -24 -22 -14 -18 M14 -18 Q 26 -22 36 -14" fill="none" stroke-width="4"/>
+      <g class="pt-bouche"><path d="M-12 30 Q 2 44 16 30 Q 2 36 -12 30 Z" fill="#b5374a" stroke-width="4"/></g>
+      <path d="M-6 8 Q -2 14 4 10" fill="none" stroke-width="3" stroke="#c98a6a"/></g>`, 50, 30.5, .25),
+  // maman : un chignon, une robe verte, un tablier blanc
+  maman: pantin(`${ombreSol(80, 300)}
+    <path d="M-40 290 C -40 278 -6 276 -6 290 Z M8 290 C 8 278 42 276 42 290 Z" fill="#5a3a4a"/>
+    <path d="M-56 60 C -84 140 -96 240 -88 286 H 88 C 96 240 84 140 56 60 Z" fill="#2fa58a"/><path d="M-56 60 C -84 140 -96 240 -88 286 H -60 C -66 220 -56 130 -36 70 Z" fill="#238a72" stroke="none"/>
+    <path d="M-36 90 H36 L46 272 H-46 Z" fill="#fff"/><path d="M-20 180 H20 V214 H-20 Z" fill="#f4f0ff" stroke-width="4"/><path d="M-36 90 Q0 104 36 90" fill="none" stroke="#e0525e" stroke-width="5"/>
+    <path d="M-54 70 C -78 110 -70 150 -30 160" fill="none" stroke-width="22"/><path d="M-54 70 C -78 110 -70 150 -30 160" fill="none" stroke="#2fa58a" stroke-width="12"/>
+    <path d="M54 70 C 78 110 70 150 30 160" fill="none" stroke-width="22"/><path d="M54 70 C 78 110 70 150 30 160" fill="none" stroke="#2fa58a" stroke-width="12"/>
+    <ellipse cx="0" cy="160" rx="30" ry="14" fill="${PEAU}"/>
+    <g class="pt-tete"><circle cx="0" cy="-104" r="26" fill="#6b3a2a"/>
+      <path d="M-16 40 V60 H16 V40" fill="${PEAU}"/>
+      <ellipse cx="0" cy="-20" rx="56" ry="58" fill="${PEAU}"/>
+      <path d="M-58 -20 C -62 -84 62 -84 58 -20 C 50 -50 20 -62 4 -52 C -14 -64 -46 -52 -58 -20 Z" fill="#6b3a2a"/>
+      ${yeux(20, -10, 8)}${joues(36, 12)}
+      <path d="M-30 -32 Q -20 -36 -10 -32 M10 -32 Q 20 -36 30 -32" fill="none" stroke-width="4"/>
+      <g class="pt-bouche"><path d="M-12 16 Q 0 28 12 16 Q 0 22 -12 16 Z" fill="#b5374a" stroke-width="4"/></g></g>`, 50, 29, .22),
+  // le loup (repris de l'image validée)
+  loup: pantin(`${ombreSol(96, 302)}
+    <g class="pt-queue"><path d="M70 230 C 140 240 180 190 166 130 C 196 150 206 210 170 250 C 140 280 90 276 66 262 Z" fill="#7d8acb"/><path d="M166 130 C 196 150 206 210 170 250 C 176 220 176 176 166 130 Z" fill="#dfe4fb"/></g>
+    <path d="M-34 220 C -38 250 -40 270 -44 292 H -6 C -6 270 -4 250 -4 220 Z" fill="#6c78b8"/><path d="M20 220 C 22 250 22 270 22 292 H 60 C 58 270 54 250 52 220 Z" fill="#6c78b8"/>
+    <path d="M-56 296 C -56 280 -2 278 -2 296 Z M14 296 C 14 280 66 278 66 296 Z" fill="#4e5996"/>
+    <path d="M-60 90 C -84 150 -76 210 -50 236 H 76 C 100 210 104 150 80 90 Z" fill="#7d8acb"/>
+    <path d="M-30 96 C -40 150 -30 200 -14 230 H 36 C 54 200 60 150 50 96 Z" fill="#dfe4fb"/>
+    <path d="M-60 90 C -84 150 -76 210 -50 236 H -14 C -30 200 -40 150 -30 96 Z" fill="#a8582f"/><path d="M80 90 C 104 150 100 210 76 236 H 36 C 54 200 60 150 50 96 Z" fill="#a8582f"/>
+    <g fill="#ffd34d" stroke-width="3"><circle cx="-30" cy="140" r="5"/><circle cx="-26" cy="174" r="5"/></g>
+    <path d="M-62 110 C -96 140 -104 170 -98 196" fill="none" stroke-width="22"/><path d="M-62 110 C -96 140 -104 170 -98 196" fill="none" stroke="#7d8acb" stroke-width="12"/>
+    <path d="M82 108 C 108 132 116 160 110 186" fill="none" stroke-width="22"/><path d="M82 108 C 108 132 116 160 110 186" fill="none" stroke="#7d8acb" stroke-width="12"/>
+    <ellipse cx="-98" cy="204" rx="14" ry="12" fill="#dfe4fb"/><ellipse cx="110" cy="194" rx="13" ry="12" fill="#dfe4fb"/>
+    <g class="pt-tete"><path d="M-56 -40 L-74 -136 L-14 -86 Z" fill="#7d8acb"/><path d="M-54 -58 L-64 -118 L-28 -88 Z" fill="#f2a6c0" stroke-width="4"/>
+      <path d="M46 -40 L62 -138 L4 -88 Z" fill="#7d8acb"/><path d="M42 -60 L52 -120 L16 -90 Z" fill="#f2a6c0" stroke-width="4"/>
+      <path d="M-72 -10 C -80 -70 -30 -100 6 -96 C 50 -94 82 -62 78 -10 C 76 30 60 60 40 80 L-50 80 C -70 60 -76 30 -72 -10 Z" fill="#7d8acb"/>
+      <path d="M-72 20 L-96 30 L-74 40 L-92 56 L-62 60 Z M74 20 L96 30 L76 40 L92 56 L62 62 Z" fill="#7d8acb"/>
+      <path d="M-30 20 C -80 18 -150 26 -176 46 C -180 62 -150 74 -110 72 C -70 72 -40 64 -20 56 Z" fill="#dfe4fb"/>
+      <ellipse cx="-178" cy="44" rx="17" ry="13" fill="${K}"/><circle cx="-184" cy="38" r="4" fill="#fff" stroke="none"/>
+      <g class="pt-bouche"><path d="M-150 66 C -120 84 -70 82 -40 64" fill="none" stroke-width="5"/><path d="M-128 72 L-122 86 L-114 74 M-96 76 L-90 90 L-82 76" fill="#fff" stroke-width="3"/></g>
+      <g class="pt-yeux"><ellipse cx="-32" cy="-18" rx="17" ry="18" fill="#ffd34d"/><ellipse cx="22" cy="-18" rx="17" ry="18" fill="#ffd34d"/><ellipse cx="-34" cy="-14" rx="6" ry="10" fill="${K}" stroke="none"/><ellipse cx="18" cy="-14" rx="6" ry="10" fill="${K}" stroke="none"/>
+        <path d="M-50 -24 C -40 -38 -22 -38 -14 -26 Z M4 -26 C 14 -38 32 -38 40 -24 Z" fill="#6c78b8" stroke-width="5"/></g>
+      <path d="M-54 -46 L-16 -36 M6 -36 L44 -48" fill="none" stroke-width="7"/></g>`, 54, 31, .21),
+  // le loup au lit : le bonnet à dentelles et les lunettes de grand-mère, la couverture remontée
+  loupLit: pantin(`<g class="pt-tete">
+      <path d="M-56 -10 L-74 -100 L-14 -56 Z M46 -10 L62 -102 L4 -58 Z" fill="#7d8acb"/>
+      <path d="M-72 20 C -80 -40 -30 -70 6 -66 C 50 -64 82 -32 78 20 C 76 50 60 70 40 84 L-50 84 C -70 70 -76 50 -72 20 Z" fill="#7d8acb"/>
+      <path d="M-30 40 C -80 38 -150 46 -176 66 C -180 82 -150 94 -110 92 C -70 92 -40 84 -20 76 Z" fill="#dfe4fb"/><ellipse cx="-178" cy="64" rx="17" ry="13" fill="${K}"/>
+      <path d="M-100 -20 C -110 -110 110 -110 100 -20 C 60 -40 -60 -40 -100 -20 Z" fill="#fffaf0"/>${coll(9, (i) => `<circle cx="${-100 + i * 25}" cy="${-22 - Math.sin(i / 8 * Math.PI) * 20}" r="12" fill="#fffaf0" stroke-width="4"/>`)}<path d="M-30 -90 Q0 -100 30 -90" fill="none" stroke="#ff8fb3" stroke-width="10"/>
+      <g class="pt-yeux"><ellipse cx="-32" cy="12" rx="16" ry="17" fill="#ffd34d"/><ellipse cx="22" cy="12" rx="16" ry="17" fill="#ffd34d"/><ellipse cx="-34" cy="15" rx="6" ry="10" fill="${K}" stroke="none"/><ellipse cx="18" cy="15" rx="6" ry="10" fill="${K}" stroke="none"/></g>
+      <circle cx="-32" cy="12" r="26" fill="none" stroke-width="6"/><circle cx="22" cy="12" r="26" fill="none" stroke-width="6"/><path d="M-6 12 H-4" stroke-width="6"/>
+      <g class="pt-bouche"><path d="M-150 86 C -120 102 -70 100 -40 84" fill="none" stroke-width="5"/></g></g>
+    <path d="M-200 110 C -120 90 120 90 200 110 L200 200 L-200 200 Z" fill="url(#pt-patch2)"/><path d="M-200 110 C -120 90 120 90 200 110 L200 130 C 120 110 -120 110 -200 130 Z" fill="#fff"/>
+    <defs><pattern id="pt-patch2" width="64" height="48" patternUnits="userSpaceOnUse"><rect width="32" height="24" fill="#f4a3b8"/><rect x="32" width="32" height="24" fill="#ffd8a0"/><rect y="24" width="32" height="24" fill="#a8d8b8"/><rect x="32" y="24" width="32" height="24" fill="#b8c8f4"/></pattern></defs>`, 50, 50, .24),
+  // grand-mère : chignon blanc, lunettes rondes, châle rose, robe violette, et son balai
+  grandmere: pantin(`${ombreSol(76, 290)}
+    <path d="M90 40 L110 270" stroke-width="12"/><path d="M90 40 L110 270" stroke="#c98a4a" stroke-width="5"/><path d="M96 250 L82 300 L150 296 L124 250 Z" fill="#e8c06a"/>
+    <path d="M-36 282 C -36 270 -4 268 -4 282 Z M6 282 C 6 270 38 268 38 282 Z" fill="#c94a6a"/>
+    <path d="M-60 80 C -84 150 -86 230 -78 278 H 78 C 86 230 84 150 60 80 Z" fill="#8a64c4"/><path d="M-60 80 C -84 150 -86 230 -78 278 H -54 C -60 220 -54 140 -40 90 Z" fill="#7250a8" stroke="none"/><path d="M-78 252 H78 V278 H-78 Z" fill="#6a46a0"/>
+    <path d="M-66 74 C -40 120 40 120 66 74 C 50 56 -50 56 -66 74 Z" fill="#f49ab8"/><path d="M-20 108 L0 146 L20 108" fill="#f49ab8"/>
+    <path d="M60 90 C 84 80 92 64 94 50" fill="none" stroke-width="20"/><path d="M60 90 C 84 80 92 64 94 50" fill="none" stroke="#8a64c4" stroke-width="10"/><circle cx="94" cy="46" r="11" fill="${PEAU}"/>
+    <path d="M-60 90 C -84 120 -78 150 -50 158" fill="none" stroke-width="20"/><path d="M-60 90 C -84 120 -78 150 -50 158" fill="none" stroke="#8a64c4" stroke-width="10"/><circle cx="-46" cy="158" r="11" fill="${PEAU}"/>
+    <g class="pt-tete"><circle cx="0" cy="-86" r="26" fill="#f4f4f8"/><path d="M-6 -110 L10 -96" stroke-width="5"/>
+      <ellipse cx="0" cy="-10" rx="54" ry="54" fill="${PEAU}"/>
+      <path d="M-56 -12 C -60 -70 60 -70 56 -12 C 40 -40 -40 -40 -56 -12 Z" fill="#f4f4f8"/>
+      ${yeux(19, -4, 7)}<circle cx="-19" cy="-4" r="16" fill="none" stroke-width="5" stroke="#8a6a4a"/><circle cx="19" cy="-4" r="16" fill="none" stroke-width="5" stroke="#8a6a4a"/><path d="M-3 -4 H3" stroke="#8a6a4a" stroke-width="5"/>
+      ${joues(36, 20)}
+      <g class="pt-bouche"><path d="M-12 24 Q 0 36 12 24 Q 0 30 -12 24 Z" fill="#b5374a" stroke-width="4"/></g></g>`, 46, 33, .21),
+  // le bûcheron : grand, la barbe, la chemise à carreaux, le bonnet, un fagot sous le bras
+  bucheron: pantin(`${ombreSol(90, 300)}
+    <path d="M-50 296 C -50 280 -6 278 -6 296 Z M8 296 C 8 280 52 278 52 296 Z" fill="#3a2414"/>
+    <path d="M-44 200 L-46 284 H-8 L-4 200 Z M8 200 L10 284 H48 L46 200 Z" fill="#6a4a3a"/>
+    <path d="M-76 60 C -96 120 -92 180 -70 210 H 72 C 94 180 98 120 78 60 Z" fill="url(#pt-carreaux2)"/><path d="M-76 60 C -96 120 -92 180 -70 210 H -50 C -64 170 -66 110 -54 66 Z" fill="${K}" opacity=".25" stroke="none"/><rect x="-70" y="194" width="142" height="16" rx="4" fill="#3a2414"/>
+    <path d="M-76 76 C -104 110 -106 150 -90 176" fill="none" stroke-width="26"/><path d="M-76 76 C -104 110 -106 150 -90 176" fill="none" stroke="#c0392b" stroke-width="16"/><circle cx="-88" cy="182" r="14" fill="#e8b890"/>
+    <g transform="translate(96 120) rotate(-24)">${coll(5, (i) => `<rect x="-50" y="${-24 + i * 10}" width="100" height="10" rx="5" fill="${i % 2 ? '#8a5a32' : '#b8844a'}" stroke-width="3"/>`)}<rect x="-8" y="-28" width="12" height="58" fill="#5a3a1e" stroke-width="3"/></g>
+    <path d="M78 76 C 100 96 106 112 100 128" fill="none" stroke-width="26"/><path d="M78 76 C 100 96 106 112 100 128" fill="none" stroke="#c0392b" stroke-width="16"/>
+    <g class="pt-tete"><ellipse cx="0" cy="-14" rx="52" ry="50" fill="#e8b890"/>
+      <path d="M-52 -26 C -52 -96 52 -96 52 -26 Z" fill="#c0392b"/><rect x="-58" y="-34" width="116" height="18" rx="8" fill="#8a2a1e"/><circle cx="0" cy="-96" r="12" fill="#fff"/>
+      <path d="M-50 -6 C -54 50 -20 74 0 74 C 20 74 54 50 50 -6 C 36 16 -36 16 -50 -6 Z" fill="#7a4a2a"/>
+      ${yeux(18, -8, 7)}<path d="M-30 -22 H-10 M10 -22 H30" stroke-width="6"/>
+      <g class="pt-bouche"><path d="M-12 22 Q 0 32 12 22" fill="none" stroke-width="5"/></g></g>
+    <defs><pattern id="pt-carreaux2" width="36" height="36" patternUnits="userSpaceOnUse"><rect width="36" height="36" fill="#d4453a"/><rect width="18" height="36" fill="#1a1640" opacity=".35"/><rect width="36" height="18" fill="#1a1640" opacity=".35"/></pattern></defs>`, 50, 30, .21),
 };
 CINE.ajouter({ decors, pantins });
 
-// ---------- l'histoire ----------
+// ---------- l'histoire (version Lumi : la plus bavarde du village) ----------
+const REFRAIN = T('Sur le chemin, sans traîner, et pas un mot aux inconnus !', 'Stay on the path, don’t dawdle, and not a word to strangers!', 'على الطريق، بلا تأخير، ولا كلمة للغرباء!');
 FILMS.push({
-  id: 'chaperon-rouge', conte: true, emoji: '👧', palette: 'bonbon', debut: 'maison', age: '3-7',
-  gratuit: ['maison', 'chemin', 'foret', 'fleurs', 'fleurs2', 'loupArrive', 'porte', 'chambre', 'secours', 'gouter'],
+  id: 'chaperon-rouge', conte: true, emoji: '👧', palette: 'bonbon', debut: 'village', age: '3-7',
+  gratuit: ['village', 'cuisine', 'chemin', 'foret', 'pre', 'pre2', 'maison', 'porte', 'chambre', 'secours', 'soir'],
   titre: T('Le Petit Chaperon rouge', 'Little Red Riding Hood', 'ليلى والذئب'),
-  resume: T('Une galette, un pot de miel, un chemin dans la forêt… et un loup très malin. Mais grand-mère est encore plus maligne !',
-    'A cake, a pot of honey, a path through the forest… and a very sly wolf. But Grandma is even slyer!',
-    'كعكة وجرّة عسل وطريق في الغابة… وذئب ماكر جدًّا. لكنّ الجدّة أذكى منه!'),
-  morale: T('On reste sur le chemin, et quand on a peur, on appelle à l’aide.', 'Stay on the path, and when you’re scared, call for help.', 'نبقى على الطريق، وإذا خفنا نطلب النجدة.'),
+  resume: T('La petite fille la plus bavarde du village doit porter une galette à sa grand-mère, sans parler aux inconnus. Mais dans la forêt, un loup très poli lui dit bonjour…',
+    'The chattiest little girl in the village must take a cake to her grandma without talking to strangers. But in the forest, a very polite wolf says hello…',
+    'أكثر بنت ثرثرةً في القرية عليها أن تحمل كعكة إلى جدّتها دون أن تكلّم الغرباء. لكن في الغابة، يلقي عليها ذئب مهذّب جدًّا التحية…'),
+  morale: T('Sa grosse voix, on la garde pour ses amis. Et quand on a peur, on appelle à l’aide.', 'Keep your big voice for your friends. And when you’re scared, call for help.', 'نحتفظ بصوتنا العالي لأصدقائنا، وإذا خفنا نطلب النجدة.'),
   personnages: {
-    conteur: { nom: T('Le conteur', 'The storyteller', 'الراوي'), voix: { ton: 1, vitesse: .9 } },
-    lumi: { e: '✨', lumi: true, nom: T('Lumi', 'Lumi', 'لومي'), couleur: '#7FF3CB', voix: { ton: 1.25, vitesse: .96 } },
-    chaperon: { e: '👧', pantin: 'chaperon', nom: T('Le Petit Chaperon rouge', 'Little Red Riding Hood', 'ليلى'), couleur: '#FF6B6B', voix: { ton: 1.5, vitesse: 1 } },
-    maman: { e: '👩', pantin: 'maman', nom: T('Maman', 'Mum', 'الأمّ'), couleur: '#7FD8A8', voix: { ton: 1.14, vitesse: .94 } },
-    loup: { e: '🐺', pantin: 'loup', nom: T('Le loup', 'The wolf', 'الذئب'), couleur: '#B8C2D8', voix: { ton: .7, vitesse: .86 } },
-    loupLit: { e: '🐺', pantin: 'loupLit', nom: T('« Grand-mère »', '“Grandma”', '«الجدّة»'), couleur: '#B8C2D8', voix: { ton: .8, vitesse: .86 } },
-    grandmere: { e: '👵', pantin: 'grandmere', nom: T('Grand-mère', 'Grandma', 'الجدّة'), couleur: '#F49AB8', voix: { ton: 1.32, vitesse: .82 } },
-    bucheron: { e: '🧔', pantin: 'bucheron', nom: T('Le bûcheron', 'The woodcutter', 'الحطّاب'), couleur: '#E8A070', voix: { ton: .5, vitesse: .9 } },
+    conteur: { nom: T('Le conteur', 'The storyteller', 'الراوي'), voix: { ton: 1, vitesse: .82 } },
+    lumi: { e: '✨', lumi: true, nom: T('Lumi', 'Lumi', 'لومي'), couleur: '#7FF3CB', voix: { ton: 1.25, vitesse: .9 } },
+    chaperon: { e: '👧', pantin: 'chaperon', nom: T('Le Petit Chaperon rouge', 'Little Red Riding Hood', 'ليلى'), couleur: '#FF6B7A', voix: { ton: 1.5, vitesse: .95 } },
+    maman: { e: '👩', pantin: 'maman', nom: T('Maman', 'Mum', 'الأمّ'), couleur: '#5FD0A8', voix: { ton: 1.14, vitesse: .86 } },
+    loup: { e: '🐺', pantin: 'loup', nom: T('Monsieur Loup', 'Mr Wolf', 'السيّد ذئب'), couleur: '#B8C2F0', voix: { ton: .68, vitesse: .82 } },
+    loupLit: { e: '🐺', pantin: 'loupLit', nom: T('« Grand-mère »', '“Grandma”', '«الجدّة»'), couleur: '#B8C2F0', voix: { ton: .82, vitesse: .8 } },
+    grandmere: { e: '👵', pantin: 'grandmere', nom: T('Grand-mère', 'Grandma', 'الجدّة'), couleur: '#D8A8F4', voix: { ton: 1.32, vitesse: .8 } },
+    bucheron: { e: '🧔', pantin: 'bucheron', nom: T('Le bûcheron', 'The woodcutter', 'الحطّاب'), couleur: '#F49A6A', voix: { ton: .5, vitesse: .86 } },
   },
   decors: {
-    maison: { peint: 'chap-maison', part: 'poussiere' },
-    lisiere: { peint: 'chap-lisiere', part: 'feuilles' },
-    sousbois: { peint: 'chap-sousbois', part: 'poussiere' },
-    pre: { peint: 'chap-pre', part: 'feuilles', cibles: [[300, 770], [560, 820], [930, 790], [1180, 835], [1420, 780]] },
-    chaumiere: { peint: 'chap-chaumiere', part: 'feuilles', cibles: [[1090, 600], [1090, 640], [1090, 680]] },
-    chaumiereSoir: { peint: 'chap-chaumiere-soir', part: 'lucioles' },
-    chambre: { peint: 'chap-chambre', part: 'poussiere' },
+    village: { peint: 'chv-village', part: 'poussiere' },
+    cuisine: { peint: 'chv-cuisine', part: 'poussiere' },
+    chemin: { peint: 'chv-chemin', part: 'feuilles' },
+    foret: { peint: 'chv-foret', part: 'poussiere' },
+    pre: { peint: 'chv-pre', part: 'feuilles', cibles: [[300, 790], [560, 830], [930, 800], [1180, 840], [1420, 790]] },
+    chaumiere: { peint: 'chv-chaumiere', part: 'feuilles', cibles: [[1090, 600], [1090, 640], [1090, 680]] },
+    chambre: { peint: 'chv-chambre', part: 'poussiere' },
+    soir: { peint: 'chv-soir', part: 'lucioles' },
   },
-  fins: { gouter: '🍯' },
+  fins: { soir: '🌙' },
   sequences: {
-    // ===================== 1. La maison de maman =====================
-    maison: { chapitre: T('Chapitre 1 — Le panier de grand-mère', 'Chapter 1 — Grandma’s basket', 'الفصل الأول — سلّة الجدّة'), decor: 'maison', musique: 'joyeux', plans: [
-      { transition: 'iris', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'maman', x: .3, y: .81, taille: 24 }, { qui: 'chaperon', x: .56, y: .82, taille: 17 }],
-        narr: T('Il était une fois, au bord d’une grande forêt, une petite fille qui habitait avec sa maman dans une maison pleine de soleil.', 'Once upon a time, at the edge of a great forest, a little girl lived with her mum in a house full of sunshine.', 'كان يا ما كان، على طرف غابة كبيرة، بنت صغيرة تعيش مع أمّها في بيت مليء بالشمس.') },
-      { cadre: 'moyen', sur: 'chaperon', narr: T('Sa grand-mère lui avait cousu une cape rouge avec un capuchon. Elle la portait tous les jours, alors tout le monde l’appelait le Petit Chaperon rouge.', 'Her grandma had sewn her a red cape with a hood. She wore it every day, so everyone called her Little Red Riding Hood.', 'خاطت لها جدّتها رداءً أحمر بقبّعة فصارت تلبسه كلّ يوم. اسمها ليلى، لكنّ الجميع صاروا يسمّونها «ذات الرداء الأحمر».') },
-      { cadre: 'large', dit: ['maman', T('Petit Chaperon rouge ! Viens voir, ma chérie.', 'Little Red Riding Hood! Come here, sweetheart.', 'ليلى! تعالي يا حبيبتي.')] },
-      { cadre: 'moyen', sur: 'maman', dit: ['maman', T('Ma chérie, ta grand-mère est un peu malade. Tu veux bien lui porter cette galette et ce petit pot de miel ?', 'Sweetheart, Grandma is a little poorly. Will you take her this cake and this little pot of honey?', 'يا حبيبتي، جدّتك مريضة قليلًا. هل تأخذين لها هذه الكعكة وجرّة العسل الصغيرة؟')] },
-      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: 'saute' }], dit: ['chaperon', T('Oh oui ! Et je lui ferai un énorme câlin pour qu’elle guérisse vite !', 'Oh yes! And I’ll give her a giant hug so she gets better fast!', 'نعم! وسأعانقها عناقًا كبيرًا لتشفى بسرعة!')] },
-      { cadre: 'moyen', sur: 'maman', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['maman', T('Écoute-moi bien : tu restes sur le chemin, tu ne t’arrêtes pas en route, et tu ne parles pas aux inconnus.', 'Listen carefully: stay on the path, don’t stop along the way, and don’t talk to strangers.', 'اسمعيني جيّدًا: ابقي على الطريق، ولا تتوقّفي في الطريق، ولا تكلّمي الغرباء.')] },
-      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Promis, maman ! Sur le chemin, sans m’arrêter, et pas un mot aux inconnus.', 'Promise, Mum! On the path, no stopping, and not a word to strangers.', 'أعدكِ يا أمّي! على الطريق، بلا توقّف، ولا كلمة للغرباء.')] },
-      { sfx: 'pop', cadre: 'large', acteurs: [{ qui: 'chaperon', sort: 'droite', anim: 'marche' }], narr: T('Elle prit son panier, fit un bisou à sa maman, et partit en sautillant.', 'She picked up her basket, kissed her mum goodbye, and skipped off.', 'أخذت سلّتها، وقبّلت أمّها، وانطلقت تقفز فرحًا.') },
+    // ===================== 1. La plus bavarde du village =====================
+    village: { chapitre: T('Chapitre 1 — La plus bavarde du village', 'Chapter 1 — The chattiest girl in the village', 'الفصل الأول — أكثر بنت ثرثرةً في القرية'), decor: 'village', musique: 'joyeux', plans: [
+      { transition: 'iris', cadre: 'large', camera: 'plongee', acteurs: [{ qui: 'chaperon', x: .3, y: .84, taille: 18 }],
+        narr: T('Au bord de la grande forêt, il y avait un village où les coqs chantaient, où le pain sentait bon… et où vivait la petite fille la plus bavarde du monde.', 'At the edge of the great forest was a village where roosters sang, where bread smelled warm… and where the chattiest little girl in the world lived.', 'على طرف الغابة الكبيرة كانت قرية تصيح فيها الديوك، وتفوح منها رائحة الخبز… وتعيش فيها أكثر بنت ثرثرةً في الدنيا.') },
+      { cadre: 'moyen', sur: 'chaperon', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .55, anim: 'marche' }], dit: ['chaperon', T('Bonjour, monsieur le boulanger ! Bonjour, madame la poule ! Bonjour, le nuage !', 'Good morning, Mr Baker! Good morning, Mrs Hen! Good morning, Cloud!', 'صباح الخير يا سيّد الخبّاز! صباح الخير يا سيّدة الدجاجة! صباح الخير أيّتها الغيمة!')] },
+      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: '' }], narr: T('Elle disait bonjour à tout le monde. Même aux nuages. Et elle portait toujours la cape rouge que sa grand-mère lui avait cousue.', 'She said hello to everyone. Even to the clouds. And she always wore the red cape her grandma had sewn for her.', 'كانت تلقي التحيّة على الجميع، حتى على الغيوم. وكانت تلبس دائمًا الرداء الأحمر الذي خاطته لها جدّتها.') },
+    ], suite: 'cuisine' },
+
+    // ===================== 2. La règle de maman =====================
+    cuisine: { decor: 'cuisine', musique: 'joyeux', plans: [
+      { transition: 'fondu', cadre: 'large', acteurs: [{ qui: 'maman', x: .32, y: .84, taille: 25 }, { qui: 'chaperon', x: .58, y: .86, taille: 18 }], dit: ['maman', T('Mon petit Chaperon rouge ! Grand-mère a un gros rhume. Tu lui apportes ma galette et le pot de miel ?', 'My little Red Riding Hood! Grandma has a bad cold. Will you take her my cake and the pot of honey?', 'يا ليلى! جدّتك مصابة بزكام شديد. هل تأخذين لها كعكتي وجرّة العسل؟')] },
+      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: 'saute' }], dit: ['chaperon', T('Oh oui ! Et je lui raconterai TOUTE ma semaine ! Lundi, j’ai vu une limace qui…', 'Oh yes! And I’ll tell her about my WHOLE week! On Monday, I saw a slug that…', 'نعم! وسأحكي لها عن أسبوعي كلّه! يوم الاثنين رأيت حلزونًا…')] },
+      { cadre: 'moyen', sur: 'maman', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['maman', T('Plus tard, la limace. Écoute bien la règle, ma chérie.', 'The slug can wait. Listen carefully to the rule, sweetheart.', 'الحلزون فيما بعد. اسمعي القاعدة جيّدًا يا حبيبتي.')] },
+      { cadre: 'gros', sur: 'maman', camera: 'zoom', dit: ['maman', REFRAIN, 'doux'] },
+      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', REFRAIN] },
     ], suite: 'chemin' },
 
-    // ===================== 2. Le chemin =====================
-    chemin: { decor: 'lisiere', musique: 'joyeux', plans: [
-      { transition: 'fondu', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .3, y: .82, taille: 16, entre: 'gauche', anim: 'marche' }],
-        narr: T('Le soleil brillait. Les oiseaux chantaient. Le petit chemin descendait entre les prés, jusqu’à l’entrée de la grande forêt.', 'The sun was shining. The birds were singing. The little path ran down between the meadows to the edge of the big forest.', 'كانت الشمس مشرقة والعصافير تغرّد، والطريق الصغير ينزل بين المروج حتى مدخل الغابة الكبيرة.') },
-      { cadre: 'moyen', sur: 'chaperon', dit: ['chaperon', T('La la la… Une galette pour grand-mère, et du miel tout doré… La la la !', 'La la la… A cake for Grandma, and golden honey too… La la la!', 'لا لا لا… كعكة لجدّتي، وعسل ذهبيّ لذيذ… لا لا لا!'), 'doux'] },
-      { cadre: 'large', acteurs: [{ qui: 'chaperon', x: .62 }], narr: T('Plus elle avançait, plus les arbres devenaient grands, et plus l’ombre devenait fraîche.', 'The further she went, the taller the trees grew and the cooler the shade became.', 'وكلّما تقدّمت، صارت الأشجار أعلى، والظلّ أبرد.') },
-      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['chaperon', T('Je n’ai pas peur. Je reste sur le chemin, comme maman a dit.', 'I’m not scared. I’m staying on the path, just like Mum said.', 'لست خائفة. سأبقى على الطريق كما قالت أمّي.')] },
+    // ===================== 3. Le chemin =====================
+    chemin: { decor: 'chemin', musique: 'joyeux', plans: [
+      { transition: 'fondu', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .3, y: .86, taille: 17, entre: 'gauche', anim: 'marche' }],
+        narr: T('Le chemin descendait entre les prés. Les abeilles bourdonnaient. Ça sentait l’herbe chaude et la confiture.', 'The path ran down between the meadows. The bees were buzzing. It smelled of warm grass and jam.', 'كان الطريق ينزل بين المروج، والنحل يطنّ، ورائحة العشب الدافئ والمربّى في كلّ مكان.') },
+      { cadre: 'moyen', sur: 'lumi', acteurs: [{ qui: 'lumi', x: .52, y: .5, entre: 'haut', anim: 'flotte' }], dit: ['lumi', T('Coucou, c’est moi, Lumi ! Je vous accompagne, les amis ? On va veiller sur elle, tous ensemble.', 'Hello, it’s me, Lumi! Shall I come with you, friends? Let’s look after her, all together.', 'مرحبًا، أنا لومي! هل أرافقكم يا أصدقاء؟ سنعتني بها معًا.'), 'doux'] },
+      { cadre: 'moyen', sur: 'chaperon', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .62, anim: 'marche' }], dit: ['chaperon', T('Sur le chemin, sans traîner, et pas un mot aux… papillons ? Non ! Aux inconnus !', 'Stay on the path, don’t dawdle, and not a word to… butterflies? No! To strangers!', 'على الطريق، بلا تأخير، ولا كلمة… للفراشات؟ لا! للغرباء!')] },
+      { cadre: 'large', acteurs: [{ qui: 'chaperon', anim: '' }], narr: T('À l’entrée de la forêt, les arbres devinrent si hauts qu’on ne voyait plus le ciel. Crac. Une branche.', 'At the edge of the forest, the trees grew so tall you couldn’t see the sky. Crack. A branch.', 'عند مدخل الغابة صارت الأشجار عالية جدًّا حتى اختفت السماء. طق! غصن ينكسر.') },
     ], suite: 'foret' },
 
-    // ===================== 3. Le loup dans la forêt =====================
-    foret: { chapitre: T('Chapitre 2 — Le loup', 'Chapter 2 — The wolf', 'الفصل الثاني — الذئب'), decor: 'sousbois', musique: 'mystere', plans: [
-      { transition: 'iris', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .3, y: .82, taille: 16, anim: 'marche' }],
-        narr: T('Dans la forêt, il faisait plus sombre. Des rayons de soleil passaient entre les feuilles, comme des fils d’or.', 'In the forest it was darker. Sunbeams slipped between the leaves like golden threads.', 'في الغابة كان الضوء أخفت، وأشعّة الشمس تتسلّل بين الأوراق كخيوط من ذهب.') },
-      { sfx: 'grincement', cadre: 'moyen', sur: 'loup', camera: 'penche', acteurs: [{ qui: 'chaperon', anim: '' }, { qui: 'loup', x: .74, y: .82, taille: 23, entre: 'droite', miroir: true }],
-        narr: T('Soudain, derrière un gros chêne, deux oreilles pointues bougèrent. Puis une longue queue grise. C’était le loup !', 'Suddenly, behind a big oak, two pointy ears twitched. Then a long grey tail. It was the wolf!', 'وفجأة، خلف شجرة بلّوط كبيرة، تحرّكت أذنان مدبّبتان، ثمّ ذيل رماديّ طويل. إنّه الذئب!') },
-      { cadre: 'moyen', sur: 'loup', dit: ['loup', T('Bonjour, jolie petite fille. Où vas-tu comme ça, avec ce beau panier ?', 'Good morning, pretty little girl. Where are you going with that lovely basket?', 'صباح الخير أيّتها الصغيرة الجميلة. إلى أين تذهبين بهذه السلّة الجميلة؟'), 'doux'] },
-      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Je vais chez ma grand-mère. Elle habite au bout du chemin, près des trois grands chênes.', 'I’m going to my grandma’s. She lives at the end of the path, by the three big oak trees.', 'أنا ذاهبة إلى جدّتي. تسكن في آخر الطريق، قرب أشجار البلّوط الثلاث الكبيرة.')] },
-      { cadre: 'large', narr: T('Oh oh… Le Petit Chaperon rouge avait oublié une chose très importante : on ne parle pas aux inconnus !', 'Uh-oh… Little Red Riding Hood had forgotten something very important: we don’t talk to strangers!', 'أوه… لقد نسيت ليلى شيئًا مهمًّا جدًّا: لا نكلّم الغرباء!') },
-      { cadre: 'gros', sur: 'loup', dit: ['loup', T('Comme c’est gentil… Mais regarde toutes ces fleurs ! Ta grand-mère serait si contente d’avoir un beau bouquet.', 'How kind… But look at all these flowers! Your grandma would be so happy to have a lovely bouquet.', 'ما ألطفكِ… لكن انظري إلى كلّ هذه الأزهار! ستفرح جدّتكِ كثيرًا بباقة جميلة.'), 'doux'] },
-      { cadre: 'moyen', sur: 'chaperon', dit: ['chaperon', T('C’est vrai qu’elles sont belles… Juste quelques fleurs, ce n’est pas bien long.', 'They really are beautiful… Just a few flowers, that won’t take long.', 'صحيح أنّها جميلة… بضع زهرات فقط، لن يستغرق ذلك وقتًا طويلًا.')] },
-      { cadre: 'gros', sur: 'loup', camera: 'zoom', dit: ['loup', T('Hé hé hé… Pendant qu’elle cueille ses fleurs, moi, je prends le raccourci !', 'Heh heh heh… While she picks her flowers, I’ll take the shortcut!', 'هه هه هه… بينما تقطف أزهارها، سآخذ أنا الطريق المختصر!'), 'chuchote'] },
-      { sfx: 'vent', cadre: 'large', acteurs: [{ qui: 'loup', sort: 'droite', anim: 'marche' }], narr: T('Et le loup fila à travers les arbres, aussi vite que le vent, tout droit vers la maison de grand-mère.', 'And the wolf dashed through the trees, as fast as the wind, straight to Grandma’s house.', 'وانطلق الذئب بين الأشجار سريعًا كالريح، مباشرةً إلى بيت الجدّة.') },
-    ], suite: 'fleurs' },
+    // ===================== 4. Monsieur Loup est très poli =====================
+    foret: { chapitre: T('Chapitre 2 — Monsieur Loup est très poli', 'Chapter 2 — Mr Wolf is very polite', 'الفصل الثاني — السيّد ذئب مهذّب جدًّا'), decor: 'foret', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', acteurs: [{ qui: 'chaperon', x: .32, y: .86, taille: 17 }, { qui: 'lumi', x: .2, y: .42, anim: 'flotte' }],
+        narr: T('Dans la forêt, des rayons de soleil passaient entre les feuilles, comme des fils d’or. Et derrière un vieux chêne… deux oreilles pointues bougèrent.', 'In the forest, sunbeams slipped between the leaves like golden threads. And behind an old oak… two pointy ears twitched.', 'في الغابة كانت أشعّة الشمس تتسلّل بين الأوراق كخيوط من ذهب. وخلف شجرة بلّوط عجوز… تحرّكت أذنان مدبّبتان.') },
+      { sfx: 'grincement', cadre: 'moyen', sur: 'loup', camera: 'contre', acteurs: [{ qui: 'loup', x: .7, y: .86, taille: 25, entre: 'droite' }], dit: ['loup', T('Mmmh… Bonjour, mademoiselle ! Quelle cape magnifique. Presque aussi belle que mon pelage.', 'Mmmh… Good morning, miss! What a magnificent cape. Almost as fine as my fur.', 'مممم… صباح الخير يا آنسة! يا له من رداء رائع، يكاد يكون بجمال فروي.'), 'doux'] },
+      { cadre: 'gros', sur: 'chaperon', narr: T('Le Petit Chaperon rouge ouvrit la bouche… et se souvint de la règle. Pas un mot aux inconnus.', 'Little Red Riding Hood opened her mouth… and remembered the rule. Not a word to strangers.', 'فتحت ليلى فمها… ثمّ تذكّرت القاعدة: لا كلمة للغرباء.') },
+      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('… … Bonjour.', '… … Hello.', '… … مرحبًا.'), 'chuchote'] },
+      { cadre: 'moyen', sur: 'loup', dit: ['loup', T('Et où va une si jolie petite fille, avec un si joli panier ?', 'And where is such a pretty little girl going with such a pretty basket?', 'وإلى أين تذهب صغيرة جميلة مثلكِ بسلّة جميلة كهذه؟'), 'doux'] },
+      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Chez ma grand-mère ! La maison aux trois chênes, la porte bleue, la couette à fleurs… et elle a un rhume et… oups.', 'To my grandma’s! The house by the three oaks, the blue door, the flowery quilt… and she has a cold and… oops.', 'إلى جدّتي! البيت عند أشجار البلّوط الثلاث، الباب الأزرق، اللحاف المزهّر… وعندها زكام و… أوه.')] },
+      { cadre: 'gros', sur: 'loup', camera: 'zoom', dit: ['loup', T('Mmmh… la maison aux trois chênes. Délicieux.', 'Mmmh… the house by the three oaks. Delicious.', 'مممم… البيت عند أشجار البلّوط الثلاث. لذيذ.'), 'chuchote'] },
+      { cadre: 'moyen', sur: 'loup', dit: ['loup', T('Regarde toutes ces fleurs ! Ta grand-mère adorerait un bouquet. Prends ton temps…', 'Look at all these flowers! Your grandma would love a bouquet. Take your time…', 'انظري إلى كلّ هذه الأزهار! ستحبّ جدّتكِ باقةً منها. خذي وقتكِ…'), 'doux'] },
+      { sfx: 'vent', cadre: 'large', acteurs: [{ qui: 'loup', sort: 'droite', anim: 'marche' }], narr: T('Et hop ! Le loup disparut entre les arbres, aussi vite que le vent.', 'And whoosh! The wolf vanished between the trees, as fast as the wind.', 'وهوب! اختفى الذئب بين الأشجار، سريعًا كالريح.') },
+    ], suite: 'pre' },
 
-    // ===================== 4. Le pré fleuri (on aide à cueillir) =====================
-    fleurs: { decor: 'pre', musique: 'joyeux', plans: [
-      { transition: 'fondu', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .42, y: .82, taille: 16, anim: '' }],
-        narr: T('Dans le pré, il y avait des fleurs de toutes les couleurs : des rouges, des jaunes, des blanches, des violettes…', 'In the meadow there were flowers of every colour: red ones, yellow ones, white ones, purple ones…', 'في المرج أزهار بكلّ الألوان: حمراء وصفراء وبيضاء وبنفسجيّة…') },
-      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Oh, comme c’est joli ! Vous m’aidez à faire le plus beau bouquet du monde ?', 'Oh, how pretty! Will you help me make the most beautiful bouquet in the world?', 'ما أجملها! هل تساعدونني لأصنع أجمل باقة في الدنيا؟')] },
-    ], defi: { type: 'tap', cible: '🌸', n: 5, t: T('Touchez cinq fleurs pour le bouquet du Petit Chaperon rouge !', 'Tap five flowers for Little Red Riding Hood’s bouquet!', 'المسوا خمس زهرات لباقة ليلى!') }, suite: 'fleurs2' },
-    fleurs2: { decor: 'pre', musique: 'joyeux', plans: [
-      { cadre: 'moyen', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: 'saute' }], dit: ['chaperon', T('Merci ! Quel bouquet magnifique ! Grand-mère va adorer.', 'Thank you! What a wonderful bouquet! Grandma is going to love it.', 'شكرًا! يا لها من باقة رائعة! ستحبّها جدّتي كثيرًا.')] },
-      { cadre: 'large', acteurs: [{ qui: 'chaperon', anim: '' }], narr: T('Mais pendant ce temps, le soleil avait tourné dans le ciel. Il était déjà tard !', 'But meanwhile the sun had moved across the sky. It was already late!', 'لكنّ الشمس كانت قد تحرّكت في السماء، وتأخّر الوقت!') },
-      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Oh non ! Maman avait dit de ne pas m’arrêter… Vite, vite, chez grand-mère !', 'Oh no! Mum said not to stop… Quick, quick, to Grandma’s!', 'أوه، لا! قالت أمّي ألّا أتوقّف… بسرعة، بسرعة، إلى جدّتي!'), 'crie'] },
-      { cadre: 'large', acteurs: [{ qui: 'chaperon', sort: 'droite', anim: 'marche' }], narr: T('Et elle se mit à courir, son panier dans une main et son bouquet dans l’autre.', 'And she started to run, her basket in one hand and her bouquet in the other.', 'وأخذت تركض، السلّة في يد والباقة في اليد الأخرى.') },
-    ], suite: 'loupArrive' },
+    // ===================== 5. Le pré fleuri (on cueille avec elle) =====================
+    pre: { decor: 'pre', musique: 'joyeux', plans: [
+      { transition: 'fondu', cadre: 'large', camera: 'travelling', acteurs: [{ qui: 'chaperon', x: .42, y: .86, taille: 17 }, { qui: 'lumi', x: .6, y: .45, anim: 'flotte' }],
+        narr: T('Des fleurs partout. Des jaunes, des rouges, et des violettes qui chatouillaient le nez.', 'Flowers everywhere. Yellow ones, red ones, and purple ones that tickled your nose.', 'أزهار في كلّ مكان: صفراء وحمراء، وبنفسجيّة تدغدغ الأنف.') },
+      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Juste cinq fleurs. Vous m’aidez ?', 'Just five flowers. Will you help me?', 'خمس زهرات فقط. هل تساعدونني؟')] },
+    ], defi: { type: 'tap', cible: '🌸', n: 5, t: T('Touchez cinq fleurs pour le bouquet de grand-mère !', 'Tap five flowers for Grandma’s bouquet!', 'المسوا خمس زهرات لباقة الجدّة!') }, suite: 'pre2' },
+    pre2: { decor: 'pre', musique: 'joyeux', plans: [
+      { cadre: 'moyen', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: 'saute' }], dit: ['chaperon', T('Un, deux, trois, quatre… cinq ! Le plus beau bouquet du monde !', 'One, two, three, four… five! The most beautiful bouquet in the world!', 'واحد، اثنان، ثلاثة، أربعة… خمسة! أجمل باقة في الدنيا!')] },
+      { sfx: 'cloche', cadre: 'gros', sur: 'chaperon', camera: 'zoom', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['chaperon', T('Ding, dong… Midi ! Oh non. J’ai traîné. Et j’ai parlé à un inconnu…', 'Ding, dong… Noon! Oh no. I dawdled. And I talked to a stranger…', 'دنغ، دونغ… الظهر! أوه، لا. تأخّرت. وكلّمت غريبًا…'), 'chuchote'] },
+      { cadre: 'large', acteurs: [{ qui: 'chaperon', sort: 'droite', anim: 'marche' }, { qui: 'lumi', sort: 'droite' }], narr: T('Elle se mit à courir, son panier dans une main et son bouquet dans l’autre.', 'She started to run, her basket in one hand and her bouquet in the other.', 'فأخذت تركض، السلّة في يد والباقة في اليد الأخرى.') },
+    ], suite: 'maison' },
 
-    // ===================== 5. Le loup chez grand-mère =====================
-    loupArrive: { chapitre: T('Chapitre 3 — La maison des trois chênes', 'Chapter 3 — The house by the three oaks', 'الفصل الثالث — بيت أشجار البلّوط الثلاث'), decor: 'chaumiere', musique: 'mystere', plans: [
-      { transition: 'iris', cadre: 'large', camera: 'plongee', acteurs: [{ qui: 'loup', x: .34, y: .82, taille: 23, entre: 'gauche', anim: 'marche', miroir: false }],
-        narr: T('Au bout du chemin, près des trois grands chênes, se trouvait la jolie maison de grand-mère. Le loup arriva le premier.', 'At the end of the path, by the three big oaks, stood Grandma’s pretty house. The wolf got there first.', 'في آخر الطريق، قرب أشجار البلّوط الثلاث، كان بيت الجدّة الجميل. ووصل الذئب أوّلًا.') },
-      { sfx: 'pop', cadre: 'moyen', sur: 'loup', acteurs: [{ qui: 'loup', x: .6, anim: '' }], narr: T('Toc, toc, toc ! Il frappa à la porte.', 'Knock, knock, knock! He knocked on the door.', 'طق، طق، طق! طرق الباب.') },
-      { cadre: 'large', dit: ['grandmere', T('Qui est là ?', 'Who’s there?', 'مَن هناك؟')] },
-      { cadre: 'gros', sur: 'loup', dit: ['loup', T('C’est moi, le Petit Chaperon rouge ! Je t’apporte une galette et du miel.', 'It’s me, Little Red Riding Hood! I’ve brought you a cake and some honey.', 'أنا ليلى! أحضرت لكِ كعكة وعسلًا.'), 'doux'] },
-      { cadre: 'large', narr: T('Mais grand-mère regarda par la fenêtre… et vit deux grandes oreilles grises. Ce n’était pas sa petite-fille !', 'But Grandma peeked through the window… and saw two big grey ears. That wasn’t her granddaughter!', 'لكنّ الجدّة نظرت من النافذة… فرأت أذنين رماديّتين كبيرتين. هذه ليست حفيدتها!') },
-      { cadre: 'large', dit: ['grandmere', T('Oh oh… Ce n’est pas ma petite-fille, c’est le loup ! Vite, je me cache dans la grande armoire.', 'Uh-oh… That’s not my granddaughter, it’s the wolf! Quick, I’ll hide in the big wardrobe.', 'أوه… هذه ليست حفيدتي، إنّه الذئب! بسرعة، سأختبئ في الخزانة الكبيرة.'), 'chuchote'] },
-      { sfx: 'grincement', cadre: 'moyen', sur: 'loup', acteurs: [{ qui: 'loup', x: .68, anim: 'marche' }], narr: T('Le loup poussa la porte. La maison était vide ! Alors il eut une idée… une idée de loup.', 'The wolf pushed the door open. The house was empty! Then he had an idea… a very wolfish idea.', 'دفع الذئب الباب، فوجد البيت فارغًا! فخطرت له فكرة… فكرة ذئب ماكر.') },
-      { cadre: 'large', acteurs: [{ qui: 'loup', sort: 'droite' }], narr: T('Il mit le bonnet de grand-mère, ses lunettes rondes, et se glissa tout au fond de son lit.', 'He put on Grandma’s bonnet and her round glasses, and slipped right down into her bed.', 'لبس قبّعة الجدّة ونظّارتها المستديرة، واندسّ في سريرها.') },
+    // ===================== 6. La maison aux trois chênes =====================
+    maison: { chapitre: T('Chapitre 3 — La maison aux trois chênes', 'Chapter 3 — The house by the three oaks', 'الفصل الثالث — البيت عند أشجار البلّوط الثلاث'), decor: 'chaumiere', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', camera: 'plongee', acteurs: [{ qui: 'loup', x: .5, y: .86, taille: 24, entre: 'gauche', anim: 'marche' }],
+        narr: T('Pendant ce temps, à la maison aux trois chênes… Toc, toc, toc.', 'Meanwhile, at the house by the three oaks… Knock, knock, knock.', 'في تلك الأثناء، عند البيت قرب أشجار البلّوط الثلاث… طق، طق، طق.') },
+      { cadre: 'moyen', sur: 'loup', acteurs: [{ qui: 'loup', x: .6, anim: '' }], dit: ['loup', T('C’est moi, ta petite-fille ! Je t’apporte une galette.', 'It’s me, your granddaughter! I’ve brought you a cake.', 'أنا حفيدتكِ! أحضرت لكِ كعكة.'), 'doux'] },
+      { cadre: 'large', dit: ['grandmere', T('Sapristi… Ma petite-fille n’a pas de moustaches.', 'Goodness me… My granddaughter doesn’t have whiskers.', 'يا إلهي… حفيدتي ليس لها شوارب!'), 'chuchote'] },
+      { cadre: 'large', narr: T('Grand-mère attrapa son balai et se cacha dans la grande armoire, sans faire un bruit.', 'Grandma grabbed her broom and hid in the big wardrobe without a sound.', 'أمسكت الجدّة مكنستها واختبأت في الخزانة الكبيرة دون أن تُصدر أيّ صوت.') },
+      { sfx: 'grincement', cadre: 'moyen', sur: 'loup', acteurs: [{ qui: 'loup', x: .66, anim: 'marche' }], narr: T('Le loup entra, enfila le bonnet à dentelles, mit les lunettes… et se glissa dans le lit. Mmmh.', 'The wolf went in, put on the lacy bonnet and the glasses… and slipped into the bed. Mmmh.', 'دخل الذئب، ولبس القبّعة المزركشة والنظّارة… واندسّ في السرير. مممم.') },
     ], suite: 'porte' },
-
-    // ===================== 6. Le Chaperon arrive (on frappe avec elle) =====================
     porte: { decor: 'chaumiere', musique: 'mystere', plans: [
-      { transition: 'fondu', cadre: 'large', acteurs: [{ qui: 'chaperon', x: .4, y: .82, taille: 16, entre: 'gauche', anim: 'marche' }],
-        narr: T('Un peu plus tard, le Petit Chaperon rouge arriva devant la porte, tout essoufflée.', 'A little later, Little Red Riding Hood arrived at the door, all out of breath.', 'وبعد قليل وصلت ليلى إلى الباب، تلهث من التعب.') },
-      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['chaperon', T('Tiens… la porte est entrouverte. Grand-mère ne la laisse jamais ouverte.', 'That’s odd… the door is open a little. Grandma never leaves it open.', 'غريب… الباب مفتوح قليلًا. جدّتي لا تتركه مفتوحًا أبدًا.')] },
-    ], defi: { type: 'tap', cible: '✊', n: 3, t: T('Aidez-la à frapper : toc, toc, toc ! Touchez la porte trois fois.', 'Help her knock: knock, knock, knock! Tap the door three times.', 'ساعدوها لتطرق الباب: طق، طق، طق! المسوا الباب ثلاث مرّات.') }, suite: 'chambre' },
+      { transition: 'fondu', cadre: 'large', acteurs: [{ qui: 'loup', sort: 'droite' }, { qui: 'chaperon', x: .4, y: .86, taille: 17, entre: 'gauche', anim: 'marche' }, { qui: 'lumi', x: .3, y: .45, entre: 'gauche', anim: 'flotte' }],
+        narr: T('Un peu plus tard, le Petit Chaperon rouge arriva, tout essoufflée, devant la porte bleue.', 'A little later, Little Red Riding Hood arrived, all out of breath, at the blue door.', 'وبعد قليل وصلت ليلى، تلهث من التعب، أمام الباب الأزرق.') },
+      { cadre: 'gros', sur: 'chaperon', acteurs: [{ qui: 'chaperon', anim: '' }], dit: ['chaperon', T('Grand-mère ? C’est moi ! On frappe ensemble ?', 'Grandma? It’s me! Shall we knock together?', 'جدّتي؟ إنّها أنا! هل نطرق الباب معًا؟')] },
+    ], defi: { type: 'tap', cible: '✊', n: 3, t: T('Toc, toc, toc ! Touchez la porte trois fois.', 'Knock, knock, knock! Tap the door three times.', 'طق، طق، طق! المسوا الباب ثلاث مرّات.') }, suite: 'chambre' },
 
-    // ===================== 7. La chambre =====================
-    chambre: { chapitre: T('Chapitre 4 — Comme vous avez de grandes oreilles !', 'Chapter 4 — What big ears you have!', 'الفصل الرابع — ما أكبر أذنيكِ!'), decor: 'chambre', musique: 'mystere', plans: [
-      { transition: 'iris', cadre: 'large', acteurs: [{ qui: 'loupLit', x: .74, y: .74, taille: 17 }, { qui: 'chaperon', x: .4, y: .81, taille: 17, entre: 'gauche' }],
-        narr: T('Dans la chambre, il faisait sombre. Grand-mère était couchée, le bonnet tiré jusqu’aux yeux.', 'In the bedroom it was dim. Grandma was lying in bed, her bonnet pulled down to her eyes.', 'كانت الغرفة معتمة، والجدّة مستلقية في سريرها، وقبّعتها تغطّي عينيها تقريبًا.') },
-      { cadre: 'moyen', sur: 'loupLit', dit: ['loupLit', T('Entre, mon enfant… Approche-toi, que je te voie mieux.', 'Come in, my child… Come closer, so I can see you better.', 'ادخلي يا صغيرتي… اقتربي لأراكِ جيّدًا.'), 'doux'] },
+    // ===================== 7. Comme vous avez de grandes oreilles =====================
+    chambre: { chapitre: T('Chapitre 4 — Comme vous avez de grandes oreilles', 'Chapter 4 — What big ears you have', 'الفصل الرابع — ما أكبر أذنيكِ'), decor: 'chambre', musique: 'mystere', plans: [
+      { transition: 'iris', cadre: 'large', acteurs: [{ qui: 'loupLit', x: .74, y: .72, taille: 20 }, { qui: 'chaperon', x: .4, y: .86, taille: 18, entre: 'gauche' }, { qui: 'lumi', sort: 'haut' }],
+        narr: T('La chambre était sombre. Le lit faisait une drôle de bosse. Et ça sentait… le chien mouillé.', 'The bedroom was dim. The bed had a funny lump in it. And it smelled… like a wet dog.', 'كانت الغرفة معتمة، والسرير فيه انتفاخ غريب. ورائحة… كرائحة كلب مبلول.') },
       { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Grand-mère, comme vous avez de grandes oreilles !', 'Grandma, what big ears you have!', 'يا جدّتي، ما أكبر أذنيكِ!')] },
       { cadre: 'gros', sur: 'loupLit', dit: ['loupLit', T('C’est pour mieux t’entendre, mon enfant.', 'All the better to hear you with, my dear.', 'لأسمعكِ جيّدًا يا صغيرتي.'), 'doux'] },
       { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Grand-mère, comme vous avez de grands yeux !', 'Grandma, what big eyes you have!', 'يا جدّتي، ما أكبر عينيكِ!')] },
       { cadre: 'gros', sur: 'loupLit', dit: ['loupLit', T('C’est pour mieux te voir, mon enfant.', 'All the better to see you with, my dear.', 'لأراكِ جيّدًا يا صغيرتي.'), 'doux'] },
-      { cadre: 'gros', sur: 'chaperon', camera: 'zoom', dit: ['chaperon', T('Grand-mère… comme vous avez de grandes dents !', 'Grandma… what big teeth you have!', 'يا جدّتي… ما أكبر أسنانكِ!'), 'chuchote'] },
-      { cadre: 'gros', sur: 'loupLit', camera: 'secousse', dit: ['loupLit', T('C’est pour mieux croquer… ta galette ! Miam !', 'All the better to gobble up… your cake! Yum!', 'لآكلَ بها… كعكتكِ! ياممم!'), 'crie'] },
+      { cadre: 'gros', sur: 'chaperon', camera: 'zoom', dit: ['chaperon', T('Grand-mère… comme vous avez de grandes dents…', 'Grandma… what big teeth you have…', 'يا جدّتي… ما أكبر أسنانكِ…'), 'chuchote'] },
+      { cadre: 'gros', sur: 'loupLit', dit: ['loupLit', T('C’est pour mieux croquer… TA GALETTE !', 'All the better to gobble up… YOUR CAKE!', 'لآكلَ بها… كعكتكِ!'), 'crie'] },
     ], suite: 'secours' },
     secours: { decor: 'chambre', musique: 'aventure', plans: [
-      { cadre: 'large', camera: 'secousse', acteurs: [{ qui: 'loupLit', sort: 'haut' }, { qui: 'loup', x: .66, y: .82, taille: 23, anim: 'saute', miroir: true }, { qui: 'chaperon', x: .4, y: .84, taille: 17, anim: 'tremble' }],
-        narr: T('Le loup bondit hors du lit et jeta le bonnet par terre !', 'The wolf leapt out of bed and threw the bonnet on the floor!', 'قفز الذئب من السرير ورمى القبّعة على الأرض!') },
-      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Au secours ! Au secours !', 'Help! Help!', 'النجدة! النجدة!'), 'crie'] },
-      { sfx: 'grincement', cadre: 'moyen', sur: 'grandmere', acteurs: [{ qui: 'grandmere', x: .18, y: .82, taille: 22, entre: 'gauche', anim: 'saute' }], dit: ['grandmere', T('Pas touche à ma petite-fille, vilain loup !', 'Hands off my granddaughter, you naughty wolf!', 'ابتعد عن حفيدتي أيّها الذئب الشقيّ!'), 'crie'] },
-      { cadre: 'large', acteurs: [{ qui: 'grandmere', anim: 'danse' }], narr: T('Grand-mère était sortie de l’armoire avec son balai, et elle le faisait tournoyer comme une épée !', 'Grandma had burst out of the wardrobe with her broom, swinging it round like a sword!', 'خرجت الجدّة من الخزانة ومعها مكنستها، تلوّح بها كالسيف!') },
-      { sfx: 'pop', cadre: 'moyen', sur: 'bucheron', acteurs: [{ qui: 'bucheron', x: .9, y: .82, taille: 26, entre: 'droite' }], dit: ['bucheron', T('Qu’est-ce que c’est que tout ce bruit ? Ah, c’est toi, le loup !', 'What’s all this noise? Ah, it’s you, wolf!', 'ما كلّ هذه الضجّة؟ آه، إنّه أنت أيّها الذئب!'), 'crie'] },
-      { cadre: 'gros', sur: 'loup', acteurs: [{ qui: 'loup', anim: 'tremble' }], dit: ['loup', T('Oh là là… une grand-mère avec un balai ET un bûcheron ? Je m’en vais !', 'Oh dear… a grandma with a broom AND a woodcutter? I’m off!', 'يا ويلي… جدّة بمكنسة وحطّاب أيضًا؟ سأهرب!'), 'crie'] },
-      { sfx: 'vent', cadre: 'large', acteurs: [{ qui: 'loup', sort: 'haut' }, { qui: 'grandmere', anim: '' }, { qui: 'chaperon', anim: '' }],
-        narr: T('Le loup sauta par la fenêtre et courut, courut… si loin qu’on ne le revit plus jamais dans la forêt.', 'The wolf jumped out of the window and ran and ran… so far that he was never seen in the forest again.', 'قفز الذئب من النافذة وركض وركض… بعيدًا جدًّا، فلم يره أحد في الغابة بعد ذلك أبدًا.') },
-      { cadre: 'moyen', sur: 'chaperon', acteurs: [{ qui: 'grandmere', x: .3 }, { qui: 'chaperon', x: .44 }], dit: ['chaperon', T('Grand-mère ! J’ai eu si peur… Pardon, je me suis arrêtée en route.', 'Grandma! I was so scared… I’m sorry, I stopped along the way.', 'جدّتي! خفت كثيرًا… سامحيني، لقد توقّفت في الطريق.'), 'doux'] },
-      { cadre: 'moyen', sur: 'grandmere', dit: ['grandmere', T('Tout va bien, ma chérie. Tu as appelé à l’aide, et c’est exactement ce qu’il fallait faire.', 'It’s all right, darling. You called for help, and that’s exactly the right thing to do.', 'لا بأس يا حبيبتي. لقد طلبتِ النجدة، وهذا بالضبط ما كان يجب فعله.'), 'doux'] },
-    ], suite: 'gouter' },
+      { cadre: 'large', acteurs: [{ qui: 'loupLit', sort: 'haut' }, { qui: 'loup', x: .68, y: .86, taille: 25, anim: 'saute', miroir: false }, { qui: 'chaperon', x: .4, y: .86, taille: 18, anim: '' }],
+        narr: T('Le loup bondit hors du lit ! Le Petit Chaperon rouge prit sa plus grande respiration. Celle des grands jours de bavardage.', 'The wolf leapt out of bed! Little Red Riding Hood took her biggest breath. The one she saved for her chattiest days.', 'قفز الذئب من السرير! فأخذت ليلى أكبر نفَس عندها، نفَسَ أيّام الثرثرة الكبيرة.') },
+      { cadre: 'gros', sur: 'chaperon', camera: 'zoom', acteurs: [{ qui: 'loup', anim: 'tremble' }], dit: ['chaperon', T('AU SECOOOURS !', 'HEEELP!', 'النجدةةة!'), 'crie'] },
+      { cadre: 'large', narr: T('Les oiseaux s’envolèrent. Les vitres tremblèrent. On l’entendit jusqu’au village !', 'The birds flew off. The windows rattled. They heard her all the way to the village!', 'طارت العصافير، واهتزّ زجاج النوافذ، وسمعها أهل القرية كلّهم!') },
+      { sfx: 'grincement', cadre: 'moyen', sur: 'grandmere', acteurs: [{ qui: 'grandmere', x: .18, y: .86, taille: 21, entre: 'gauche', anim: 'saute' }], dit: ['grandmere', T('Pas touche à ma petite-fille !', 'Hands off my granddaughter!', 'ابتعد عن حفيدتي!'), 'crie'] },
+      { cadre: 'moyen', sur: 'bucheron', acteurs: [{ qui: 'grandmere', anim: '' }, { qui: 'bucheron', x: .9, y: .86, taille: 27, entre: 'droite' }], dit: ['bucheron', T('Qui a crié si fort ? Ah… c’est toi, le loup.', 'Who shouted so loudly? Ah… it’s you, wolf.', 'مَن صرخ بهذه القوّة؟ آه… إنّه أنت أيّها الذئب.')] },
+      { cadre: 'gros', sur: 'loup', dit: ['loup', T('Une grand-mère avec un balai, un bûcheron ET la plus grosse voix du monde ? Je m’en vais !', 'A grandma with a broom, a woodcutter AND the biggest voice in the world? I’m off!', 'جدّة بمكنسة، وحطّاب، وأعلى صوت في الدنيا؟ سأرحل!')] },
+      { sfx: 'vent', cadre: 'large', acteurs: [{ qui: 'loup', sort: 'haut' }], narr: T('Il sauta par la fenêtre et partit si loin qu’on ne le revit plus jamais.', 'He jumped out of the window and went so far away that he was never seen again.', 'قفز من النافذة وابتعد كثيرًا، فلم يره أحد بعد ذلك أبدًا.') },
+    ], suite: 'soir' },
 
-    // ===================== 8. Le goûter du soir (fin calme) =====================
-    gouter: { decor: 'chaumiereSoir', musique: 'berceuse', fin: true, plans: [
-      { transition: 'noir', cadre: 'large', acteurs: [{ qui: 'bucheron', x: .13, y: .82, taille: 26, miroir: true }, { qui: 'grandmere', x: .31, y: .82, taille: 22 }, { qui: 'chaperon', x: .45, y: .83, taille: 17 }, { qui: 'maman', x: .6, y: .82, taille: 24, entre: 'droite' }],
-        narr: T('Le soir, devant la maison, tout le monde partagea la galette et le miel. Même maman, venue chercher sa petite fille.', 'That evening, outside the house, everyone shared the cake and the honey. Even Mum, who had come to fetch her little girl.', 'وفي المساء، أمام البيت، تقاسم الجميع الكعكة والعسل، حتى الأمّ التي جاءت لتأخذ ابنتها.') },
-      { cadre: 'moyen', sur: 'chaperon', dit: ['chaperon', T('Maman avait raison. On reste sur le chemin, et on ne parle pas aux inconnus.', 'Mum was right. We stay on the path, and we don’t talk to strangers.', 'كانت أمّي على حقّ: نبقى على الطريق، ولا نكلّم الغرباء.'), 'doux'] },
-      { cadre: 'moyen', sur: 'maman', dit: ['maman', T('Et si un jour tu as peur, tu cries très fort pour qu’on vienne t’aider. Tu as été très courageuse.', 'And if you’re ever scared, you shout very loudly so someone comes to help. You were very brave.', 'وإن خفتِ يومًا، فاصرخي بصوت عالٍ ليأتي من يساعدكِ. لقد كنتِ شجاعة جدًّا.'), 'doux'] },
-      { cadre: 'gros', sur: 'grandmere', dit: ['grandmere', T('Et merci pour ce bouquet. C’est le plus beau que j’aie jamais eu.', 'And thank you for this bouquet. It’s the most beautiful one I’ve ever had.', 'وشكرًا على هذه الباقة، إنّها أجمل باقة حصلت عليها في حياتي.'), 'doux'] },
-      { cadre: 'large', camera: 'monte', narr: T('Les étoiles s’allumèrent une à une au-dessus des trois grands chênes. Bonne nuit, Petit Chaperon rouge… et bonne nuit à toi.', 'One by one, the stars came out above the three big oaks. Goodnight, Little Red Riding Hood… and goodnight to you.', 'وأضاءت النجوم واحدة تلو الأخرى فوق أشجار البلّوط الثلاث. ليلة سعيدة يا ليلى… وليلة سعيدة لك أنت أيضًا.') },
+    // ===================== 8. Sous les trois chênes, le soir =====================
+    soir: { decor: 'soir', musique: 'berceuse', fin: true, plans: [
+      { transition: 'noir', cadre: 'large', acteurs: [{ qui: 'bucheron', x: .14, y: .86, taille: 27 }, { qui: 'grandmere', x: .31, y: .86, taille: 21 }, { qui: 'chaperon', x: .45, y: .87, taille: 18 }, { qui: 'maman', x: .6, y: .86, taille: 25, entre: 'droite' }, { qui: 'lumi', x: .52, y: .38, entre: 'haut', anim: 'flotte' }],
+        narr: T('Le soir, tout le monde partagea la galette sous les trois chênes. Même maman, venue chercher sa fille.', 'That evening, everyone shared the cake under the three oaks. Even Mum, who had come to fetch her daughter.', 'وفي المساء تقاسم الجميع الكعكة تحت أشجار البلّوط الثلاث، حتى الأمّ التي جاءت لتأخذ ابنتها.') },
+      { cadre: 'moyen', sur: 'grandmere', dit: ['grandmere', T('Ta grosse voix nous a sauvés, ma chérie.', 'Your big voice saved us, darling.', 'صوتكِ العالي أنقذنا يا حبيبتي.'), 'doux'] },
+      { cadre: 'gros', sur: 'chaperon', dit: ['chaperon', T('Alors je garde ma grosse voix… mais pour mes amis. Pas pour les inconnus !', 'Then I’ll keep my big voice… but for my friends. Not for strangers!', 'إذن سأحتفظ بصوتي العالي… لكن لأصدقائي، لا للغرباء!'), 'doux'] },
+      { cadre: 'large', dit: ['chaperon', REFRAIN, 'doux'] },
+      { cadre: 'moyen', sur: 'lumi', dit: ['lumi', T('Bonne nuit, Petit Chaperon rouge. Et bonne nuit à toi… même si tu es très bavard.', 'Goodnight, Little Red Riding Hood. And goodnight to you… even if you’re very chatty.', 'ليلة سعيدة يا ليلى. وليلة سعيدة لك أنت أيضًا… حتى لو كنت ثرثارًا جدًّا.'), 'doux'] },
+      { cadre: 'large', camera: 'monte', narr: T('Et les étoiles s’allumèrent, une à une, au-dessus des trois grands chênes.', 'And the stars came out, one by one, above the three great oaks.', 'وأضاءت النجوم، واحدة تلو الأخرى، فوق أشجار البلّوط الثلاث.') },
     ] },
   },
 });
