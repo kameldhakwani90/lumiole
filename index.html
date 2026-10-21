@@ -2598,6 +2598,30 @@
   html.ci-lumi .cote-lumi { display: contents !important; }
   html.ci-lumi #scene { border-radius: 50%; background: radial-gradient(circle, rgba(127,243,203,.55) 0%, rgba(46,180,170,.32) 30%, rgba(30,60,140,.12) 52%, transparent 68%) !important; }
   html.ci-lumi .cote-lumi > :not(#scene) { display: none !important; }
+  /* caméra de la maison : la fenêtre de réglage */
+  .fa-t-cam-maison { width: min(94vw, 760px); }
+  .cm h2 { margin: 0 0 8px; }
+  .cm-p { margin: 6px 0; color: var(--texte-doux, #c9d3f0); }
+  .cm-liste { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+  .cm-cam { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 16px; border-radius: 14px; border: 2px solid rgba(127,243,203,.5); background: rgba(127,243,203,.08); color: inherit; font: 700 16px system-ui; text-align: start; cursor: pointer; }
+  .cm-cam small { opacity: .7; font-weight: 600; }
+  .cm-champ { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-weight: 700; }
+  .cm-champ input { height: 46px; border-radius: 12px; border: 2px solid rgba(255,255,255,.2); background: rgba(0,0,0,.25); color: inherit; padding: 0 12px; font: 600 17px system-ui; }
+  .cm-marques { margin: 6px 0; }
+  .cm-apercu { width: 100%; aspect-ratio: 16 / 9; height: auto; border-radius: 14px; background: #000; display: block; }
+  .cm-flash { position: fixed; inset: 0; z-index: 99999; background: #000; transition: background .05s; }
+  .cm-flash.blanc { background: #fff; }
+  .tele .cm-cam, .tele .cm-champ input { font-size: 2.4vh; } .tele .cm-champ input { height: 6vh; }
+  /* les mains lumineuses */
+  .ml-calque { position: absolute; inset: 0; pointer-events: none; z-index: 40; }
+  .ml-main { position: absolute; left: 0; top: 0; width: 7vh; height: 7vh; margin: -3.5vh 0 0 -3.5vh; border-radius: 50%; opacity: 0; transition: opacity .3s;
+    background: radial-gradient(circle, #fff 0 16%, var(--c) 32%, color-mix(in srgb, var(--c) 40%, transparent) 52%, transparent 70%); filter: drop-shadow(0 0 1.4vh var(--c)); }
+  .ml-main.touche { animation: ml-pop .4s ease-out; }
+  @keyframes ml-pop { 40% { width: 12vh; height: 12vh; margin: -6vh 0 0 -6vh; } }
+  .ml-astuce { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); padding: 1.2vh 2.4vw; border-radius: 99px; background: rgba(10,14,40,.75); color: #fff; font: 800 2.6vh system-ui; white-space: nowrap; }
+  .av-cible.ml-aide { animation: ml-aide 1s ease-in-out infinite !important; z-index: 2; }
+  @keyframes ml-aide { 50% { scale: 1.6; filter: drop-shadow(0 0 2vh #7ff3cb); } }
+  @media (prefers-reduced-motion: reduce) { .ml-main.touche, .av-cible.ml-aide { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -11266,6 +11290,7 @@ MODULES.aventure = (() => {
             b.style.animationDelay = (i * .25) + 's'; zone.appendChild(b);
           });
           if (modeTele) zone.querySelector('button')?.focus({ preventScroll: true });
+          MainsLumineuses.brancher(zone, () => fini); // avec une caméra : on touche avec son bras
         }, 1450);
         return;
       }
@@ -11276,6 +11301,7 @@ MODULES.aventure = (() => {
         if (modeTele) setTimeout(() => b.focus({ preventScroll: true }), 30);
       };
       placer(); if (!modeTele) placer();
+      MainsLumineuses.brancher(zone, () => fini);
       return;
     }
     if (d.type === 'chanson' || d.type === 'compte') {
@@ -14097,6 +14123,340 @@ brancherCamera = async function (cam, type, rappel) { // eslint-disable-line no-
 let installationEnCours = null;
 const capteursArreterAvantPro = Capteurs.arreter;
 Capteurs.arreter = function () { document.querySelectorAll('.cam-hors, .cam-installe').forEach((x) => x.remove()); capteursArreterAvantPro(); };
+
+// ---------- La caméra de la maison (Tapo, Imou, Ezviz, Reolink… sur le même Wi-Fi que la télé) ----------
+// Dans l'app Android (APK) seulement : le module natif « CameraReseau » lit le flux RTSP de la caméra et envoie de petites
+// images ici. On en fait un flux vidéo ordinaire : quand la caméra de la maison est réglée, TOUT ce qui demande la caméra
+// (jeux, histoires, miroir, couleurs) reçoit son image, sans rien changer. L'image ne quitte jamais la maison.
+// La caméra est posée au milieu du meuble télé (basse), tournée vers les enfants, un peu inclinée vers le haut.
+const MA_TXT = {
+  titre: nom3('📹 Caméra de la maison', '📹 Home camera', '📹 كاميرا المنزل'),
+  intro: nom3('Une caméra Wi-Fi (Tapo, Imou, Ezviz, Reolink…) voit mieux qu’un téléphone. Elle doit être sur le même Wi-Fi que la télé.', 'A Wi-Fi camera (Tapo, Imou, Ezviz, Reolink…) sees better than a phone. It must be on the same Wi-Fi as the TV.', 'كاميرا الواي فاي (Tapo وImou وEzviz وReolink…) ترى أفضل من الهاتف. يجب أن تكون على نفس شبكة الواي فاي مع التلفاز.'),
+  poser: nom3('Pose-la au milieu du meuble télé, tournée vers les enfants et un peu inclinée vers le haut. Les enfants jouent à 2 ou 3 grands pas.', 'Put it in the middle of the TV stand, facing the children and tilted slightly up. Children play 2 or 3 big steps away.', 'ضعها في وسط طاولة التلفاز، موجّهة نحو الأطفال ومائلة قليلًا إلى الأعلى. يلعب الأطفال على بُعد خطوتين أو ثلاث.'),
+  chercher: nom3('Chercher ma caméra', 'Find my camera', 'ابحث عن كاميرتي'), recherche: nom3('Recherche sur le Wi-Fi…', 'Searching the Wi-Fi…', 'جارٍ البحث في الواي فاي…'),
+  aucune: nom3('Aucune caméra trouvée. Vérifie qu’elle est allumée et sur le même Wi-Fi, et que son accès local est activé (voir la marque ci-dessous).', 'No camera found. Check it is on, on the same Wi-Fi, and that local access is enabled (see your brand below).', 'لم نجد أيّ كاميرا. تأكّد أنها تعمل وعلى نفس الواي فاي وأن الوصول المحلي مفعّل (انظر العلامة أدناه).'),
+  trouvee: nom3('Caméra trouvée', 'Camera found', 'وُجدت كاميرا'), marque: nom3('Ta marque', 'Your brand', 'العلامة'),
+  utilisateur: nom3('Nom d’utilisateur de la caméra', 'Camera username', 'اسم مستخدم الكاميرا'), mdp: nom3('Mot de passe de la caméra', 'Camera password', 'كلمة مرور الكاميرا'),
+  connecter: nom3('Connecter', 'Connect', 'اتّصال'), connexion: nom3('Connexion à la caméra…', 'Connecting to the camera…', 'جارٍ الاتصال بالكاميرا…'),
+  prete: nom3('✓ Caméra prête', '✓ Camera ready', '✓ الكاميرا جاهزة'), echec: nom3('La caméra ne répond pas. Vérifie le nom d’utilisateur, le mot de passe et l’accès local.', 'The camera isn’t answering. Check the username, password and local access.', 'الكاميرا لا تستجيب. تحقّق من اسم المستخدم وكلمة المرور والوصول المحلي.'),
+  retard: nom3('Mesurer le retard', 'Measure the delay', 'قِس التأخير'), retardAide: nom3('Tourne la caméra vers la télé pendant 10 secondes : l’écran va clignoter.', 'Turn the camera towards the TV for 10 seconds: the screen will flash.', 'وجّه الكاميرا نحو التلفاز لمدّة 10 ثوانٍ: ستومض الشاشة.'),
+  retardOk: nom3('Retard mesuré', 'Measured delay', 'التأخير المقاس'), retardRate: nom3('Je n’ai pas vu l’écran clignoter. Tourne bien la caméra vers la télé et recommence.', 'I didn’t see the screen flash. Point the camera at the TV and try again.', 'لم أرَ الشاشة تومض. وجّه الكاميرا نحو التلفاز وأعد المحاولة.'),
+  lent: nom3('C’est un peu lent : les jeux où il faut réagir très vite seront plus doux.', 'It’s a bit slow: games that need very fast reactions will be gentler.', 'إنّها بطيئة قليلًا: ستكون الألعاب السريعة ألطف.'),
+  fini: nom3('Terminé', 'Done', 'تمّ'), oublier: nom3('Ne plus utiliser cette caméra', 'Stop using this camera', 'التوقّف عن استخدام هذه الكاميرا'),
+  apk: nom3('La caméra de la maison marche dans l’app Lumiole installée sur la télé Android (pas dans le navigateur).', 'The home camera works in the Lumiole app installed on the Android TV (not in the browser).', 'تعمل كاميرا المنزل في تطبيق لوميول المثبّت على تلفاز أندرويد (ليس في المتصفّح).'),
+  utilisee: nom3('Utilisée par Lumiole', 'Used by Lumiole', 'يستخدمها لوميول'),
+};
+const mt = (k) => t3(MA_TXT[k]);
+// le chemin du flux selon la marque (le petit flux « secondaire » : léger, rapide)
+const MARQUES_CAM = {
+  tapo: { nom: 'Tapo (TP-Link)', chemins: ['/stream2', '/stream1'], user: '',
+    aide: nom3('Dans l’app Tapo : ta caméra → ⚙️ Réglages → Réglages avancés → Compte de la caméra. Crée un nom d’utilisateur et un mot de passe, puis tape-les ici.', 'In the Tapo app: your camera → ⚙️ Settings → Advanced settings → Camera account. Create a username and password, then type them here.', 'في تطبيق Tapo: كاميرتك ← ⚙️ الإعدادات ← الإعدادات المتقدّمة ← حساب الكاميرا. أنشئ اسم مستخدم وكلمة مرور ثم اكتبهما هنا.') },
+  imou: { nom: 'Imou / Dahua', chemins: ['/cam/realmonitor?channel=1&subtype=1', '/cam/realmonitor?channel=1&subtype=0'], user: 'admin',
+    aide: nom3('Utilisateur : admin. Mot de passe : le code de sécurité écrit sous la caméra (ou celui que tu as choisi). Dans l’app Imou, active « RTSP » si l’option existe.', 'Username: admin. Password: the safety code under the camera (or the one you chose). In the Imou app, turn on “RTSP” if available.', 'المستخدم: admin. كلمة المرور: رمز الأمان المكتوب أسفل الكاميرا (أو الذي اخترته). فعّل «RTSP» في تطبيق Imou إن وُجد.') },
+  ezviz: { nom: 'Ezviz / Hikvision', chemins: ['/Streaming/Channels/102', '/h264/ch1/sub/av_stream', '/Streaming/Channels/101'], user: 'admin',
+    aide: nom3('Utilisateur : admin. Mot de passe : le code de vérification à 6 lettres écrit sous la caméra. Dans l’app Ezviz : Réglages → « Chiffrement de l’image » désactivé, et « RTSP » activé si proposé.', 'Username: admin. Password: the 6-letter verification code under the camera. In the Ezviz app: Settings → turn off “Image encryption”, and turn on “RTSP” if offered.', 'المستخدم: admin. كلمة المرور: رمز التحقّق المكوّن من 6 أحرف أسفل الكاميرا. في تطبيق Ezviz: الإعدادات ← أوقف «تشفير الصورة» وفعّل «RTSP» إن وُجد.') },
+  reolink: { nom: 'Reolink', chemins: ['/h264Preview_01_sub', '/Preview_01_sub', '/h264Preview_01_main'], user: 'admin',
+    aide: nom3('Utilisateur : admin et ton mot de passe Reolink. Dans l’app Reolink : Réglages → Réseau → Avancé → Ports : active RTSP.', 'Username: admin and your Reolink password. In the Reolink app: Settings → Network → Advanced → Ports: turn on RTSP.', 'المستخدم: admin وكلمة مرور Reolink. في تطبيق Reolink: الإعدادات ← الشبكة ← متقدّم ← المنافذ: فعّل RTSP.') },
+  autre: { nom: nom3('Autre marque', 'Other brand', 'علامة أخرى'), chemins: ['/stream2', '/live', '/11', '/12', '/stream1', '/h264', '/onvif1', '/'], user: 'admin',
+    aide: nom3('Cherche dans l’app de ta caméra « RTSP », « ONVIF » ou « accès local », et active-le. Le nom d’utilisateur est souvent « admin ».', 'Look in your camera’s app for “RTSP”, “ONVIF” or “local access” and turn it on. The username is often “admin”.', 'ابحث في تطبيق كاميرتك عن «RTSP» أو «ONVIF» أو «الوصول المحلي» وفعّله. اسم المستخدم غالبًا «admin».') },
+};
+const marqueDe = (txt = '') => (/tp-?ipc|tapo|tp-link/i.test(txt) ? 'tapo' : /dahua|imou|lechange/i.test(txt) ? 'imou' : /hik|ezviz/i.test(txt) ? 'ezviz' : /reolink/i.test(txt) ? 'reolink' : null);
+
+const CamReseau = (() => {
+  const LS = 'lumi-cam-maison';
+  let reglage = null; try { reglage = JSON.parse(localStorage.getItem(LS) || 'null'); } catch {}
+  const P = () => PLUGINS.CameraReseau;
+  const dispo = () => !!P() && PLATEFORME === 'android';
+  let canvas = null, g = null, ecoute = null, enMarche = null, utilisateurs = 0, minuteurArret = 0, derImage = 0, surImage = null;
+  // une image JPEG (base64) → dessinée dans le canvas qui sert de « caméra »
+  async function image({ d }) {
+    try {
+      const bin = atob(d), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      const bmp = await createImageBitmap(new Blob([u], { type: 'image/jpeg' }));
+      if (canvas.width !== bmp.width) { canvas.width = bmp.width; canvas.height = bmp.height; }
+      g.drawImage(bmp, 0, 0); bmp.close?.(); derImage = performance.now(); surImage?.(g, canvas);
+    } catch {}
+  }
+  async function demarrer(url) {
+    if (!canvas) { canvas = document.createElement('canvas'); canvas.width = 480; canvas.height = 270; g = canvas.getContext('2d', { willReadFrequently: true }); g.fillStyle = '#000'; g.fillRect(0, 0, 480, 270); }
+    if (enMarche && enMarche.url === url) return enMarche.promesse;
+    await arreter();
+    ecoute = await P().addListener('image', image);
+    const promesse = P().demarrer({ url, largeur: 480, hauteur: 270, ips: 15 });
+    enMarche = { url, promesse };
+    try { await promesse; } catch (e) { await arreter(); throw e; }
+    return promesse;
+  }
+  async function arreter() {
+    clearTimeout(minuteurArret); enMarche = null;
+    try { await ecoute?.remove(); } catch {} ecoute = null;
+    try { await P()?.arreter(); } catch {}
+  }
+  // un flux vidéo « comme une webcam », pour tout ce qui appelle getUserMedia
+  async function flux() {
+    await demarrer(reglage.url);
+    const piste = canvas.captureStream(15).getVideoTracks()[0];
+    utilisateurs++; clearTimeout(minuteurArret);
+    const stop = piste.stop.bind(piste);
+    piste.stop = () => { stop(); utilisateurs = Math.max(0, utilisateurs - 1); if (!utilisateurs) minuteurArret = setTimeout(arreter, 5000); }; // on garde la caméra 5 s (le jeu suivant démarre vite)
+    return new MediaStream([piste]);
+  }
+  // essayer les chemins de la marque, du plus léger au plus lourd
+  async function essayer(ip, marque, user, mdp) {
+    const m = MARQUES_CAM[marque] || MARQUES_CAM.autre, id = user ? `${encodeURIComponent(user)}:${encodeURIComponent(mdp)}@` : '';
+    for (const ch of m.chemins) {
+      const url = `rtsp://${id}${ip}:554${ch}`;
+      try { await demarrer(url); return url; } catch {}
+    }
+    return null;
+  }
+  return {
+    dispo, get actif() { return dispo() && !!reglage?.url; }, get reglage() { return reglage; }, flux, essayer, arreter, demarrer,
+    chercher: async () => ((await P().chercher())?.cameras || []),
+    enregistrer(r) { reglage = r; try { if (r) localStorage.setItem(LS, JSON.stringify(r)); else localStorage.removeItem(LS); } catch {} },
+    get canvas() { return canvas; }, get derImage() { return derImage; }, set surImage(f) { surImage = f; },
+  };
+})();
+
+// TOUT ce qui demande la caméra reçoit la caméra de la maison quand elle est réglée
+if (navigator.mediaDevices?.getUserMedia) {
+  const gumAvantMaison = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+  navigator.mediaDevices.getUserMedia = async (c = {}) => {
+    if (!c.video || !CamReseau.actif) return gumAvantMaison(c);
+    try {
+      const v = await CamReseau.flux();
+      if (c.audio) { try { (await gumAvantMaison({ audio: c.audio })).getAudioTracks().forEach((t) => v.addTrack(t)); } catch {} }
+      return v;
+    } catch { return gumAvantMaison(c); } // la caméra de la maison ne répond pas : on reprend la caméra de l'appareil
+  };
+}
+// avec la caméra de la maison, l'installation parle de la caméra posée sur le meuble télé (pas du téléphone)
+const CAM_TXT_MAISON = {
+  poser: MA_TXT.poser,
+  pieds: nom3('On ne voit pas tes pieds : recule un peu', 'Can’t see your feet: step back a little', 'لا نرى قدميك: ارجع قليلًا'),
+  tete: nom3('On ne voit pas ta tête : penche la caméra un peu vers le haut, ou recule', 'Can’t see your head: tilt the camera up a little, or step back', 'لا نرى رأسك: أمِل الكاميرا قليلًا إلى الأعلى أو ارجع'),
+  couche: nom3('Caméra de la maison', 'Home camera', 'كاميرا المنزل'), paysage: nom3('Caméra de la maison', 'Home camera', 'كاميرا المنزل'),
+};
+Object.keys(CAM_TXT_MAISON).forEach((k) => { const avant = CAM_TXT[k]; Object.defineProperty(CAM_TXT, k, { get: () => (CamReseau.actif ? CAM_TXT_MAISON[k] : avant), configurable: true }); });
+
+// ---------- la fenêtre de réglage : chercher, guider, connecter, vérifier ----------
+const FenetreCamMaison = (() => {
+  let f = null, choix = { ip: '', marque: 'tapo', user: '', mdp: '' };
+  function ouvrir() {
+    f = fenetre('cam-maison'); f.classList.add('cm');
+    if (!CamReseau.dispo()) { f.innerHTML = `<h2></h2><p class="cm-p"></p><div class="bv-actions"></div>`; f.querySelector('h2').textContent = mt('titre'); f.querySelector('.cm-p').textContent = mt('apk'); f.querySelector('.bv-actions').appendChild(bouton(mt('fini'), fermerFenetre, 'bv-b principal')); focusPremier(f); return; }
+    if (CamReseau.actif) return prete(true);
+    etapeChercher();
+  }
+  const tete = (sous) => `<h2></h2><p class="cm-p">${sous ? '' : ''}</p>`;
+  function etapeChercher() {
+    f.innerHTML = `${tete()}<p class="cm-p cm-poser"></p><div class="cm-liste"></div><div class="bv-actions"></div>`;
+    f.querySelector('h2').textContent = mt('titre'); f.querySelector('.cm-p').textContent = mt('intro'); f.querySelector('.cm-poser').textContent = '📍 ' + mt('poser');
+    const a = f.querySelector('.bv-actions');
+    a.appendChild(bouton('🔎 ' + mt('chercher'), lancerRecherche, 'bv-b principal'));
+    a.appendChild(bouton(t3(MARQUES_CAM.autre.nom) + ' →', () => etapeMarque(''), 'bv-puce'));
+    focusPremier(a);
+  }
+  async function lancerRecherche() {
+    const l = f.querySelector('.cm-liste'); l.innerHTML = `<p class="cm-p">⏳ ${mt('recherche')}</p>`;
+    let cams = []; try { cams = await CamReseau.chercher(); } catch {}
+    if (!f.isConnected) return;
+    l.innerHTML = '';
+    if (!cams.length) { l.innerHTML = '<p class="cm-p"></p>'; l.querySelector('p').textContent = '😕 ' + mt('aucune'); etapeMarque('', true); return; }
+    cams.forEach((c) => {
+      const m = marqueDe(`${c.marque || ''} ${c.modele || ''}`);
+      const b = bouton(`📹 <b></b><small></small>`, () => etapeMarque(c.ip, false, m), 'cm-cam');
+      b.querySelector('b').textContent = `${mt('trouvee')} : ${m ? t3(MARQUES_CAM[m].nom) : (c.marque || '')} ${c.modele || ''}`.trim(); b.querySelector('small').textContent = c.ip;
+      l.appendChild(b);
+    });
+    focusPremier(l); son('juste');
+  }
+  function etapeMarque(ip, garderListe, marque) {
+    choix.ip = ip || choix.ip; choix.marque = marque || choix.marque;
+    const liste = garderListe ? f.querySelector('.cm-liste')?.innerHTML || '' : '';
+    f.innerHTML = `<h2></h2><div class="cm-liste">${liste}</div><div class="fa-puces cm-marques"></div><p class="cm-p cm-aide"></p>
+      <label class="cm-champ"><span>IP</span><input id="cm-ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.20"></label>
+      <label class="cm-champ"><span></span><input id="cm-user" autocomplete="off"></label><label class="cm-champ"><span></span><input id="cm-mdp" type="password" autocomplete="off"></label>
+      <p class="cm-p cm-msg"></p><div class="bv-actions"></div>`;
+    f.querySelector('h2').textContent = mt('titre');
+    const [lIp, lUser, lMdp] = f.querySelectorAll('.cm-champ');
+    lUser.querySelector('span').textContent = mt('utilisateur'); lMdp.querySelector('span').textContent = mt('mdp');
+    const ipI = f.querySelector('#cm-ip'), uI = f.querySelector('#cm-user'), pI = f.querySelector('#cm-mdp');
+    ipI.value = choix.ip; uI.value = choix.user || MARQUES_CAM[choix.marque].user; pI.value = choix.mdp;
+    if (ip) lIp.hidden = true;
+    const dessinerMarques = () => {
+      const p = f.querySelector('.cm-marques'); p.innerHTML = '';
+      Object.entries(MARQUES_CAM).forEach(([k, m]) => p.appendChild(bouton(t3(m.nom), () => { choix.marque = k; if (!uI.value || Object.values(MARQUES_CAM).some((x) => x.user === uI.value)) uI.value = m.user; dessinerMarques(); }, 'puce' + (k === choix.marque ? ' on' : ''))));
+      f.querySelector('.cm-aide').textContent = '💡 ' + t3(MARQUES_CAM[choix.marque].aide);
+    };
+    dessinerMarques();
+    const a = f.querySelector('.bv-actions');
+    a.appendChild(bouton(mt('connecter'), async () => {
+      choix.ip = ipI.value.trim(); choix.user = uI.value.trim(); choix.mdp = pI.value;
+      const msg = f.querySelector('.cm-msg');
+      if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(choix.ip)) { msg.textContent = 'IP ?'; return; }
+      msg.textContent = '⏳ ' + mt('connexion');
+      const url = await CamReseau.essayer(choix.ip, choix.marque, choix.user, choix.mdp);
+      if (!f.isConnected) return;
+      if (!url) { msg.textContent = '😕 ' + mt('echec'); son('oups'); return; }
+      CamReseau.enregistrer({ url, ip: choix.ip, marque: choix.marque });
+      son('juste'); prete(false);
+    }, 'bv-b principal'));
+    focusPremier(a);
+  }
+  // l'image en direct, « ✓ Caméra prête », le conseil de placement, la mesure du retard
+  async function prete(dejaReglee) {
+    f.innerHTML = `<h2></h2><canvas class="cm-apercu" width="480" height="270"></canvas><p class="cm-p cm-ok"></p><p class="cm-p cm-poser"></p><p class="cm-p cm-retard"></p><div class="bv-actions"></div>`;
+    f.querySelector('h2').textContent = mt('titre'); f.querySelector('.cm-ok').textContent = dejaReglee ? `✓ ${mt('utilisee')} (${CamReseau.reglage.ip})` : mt('prete');
+    f.querySelector('.cm-poser').textContent = '📍 ' + mt('poser');
+    const ap = f.querySelector('.cm-apercu'), ga = ap.getContext('2d');
+    try { await CamReseau.demarrer(CamReseau.reglage.url); } catch { f.querySelector('.cm-ok').textContent = '😕 ' + mt('echec'); }
+    let vivant = true;
+    const dessiner = () => { if (!vivant || !ap.isConnected) { vivant = false; return; } if (CamReseau.canvas) { ga.save(); ga.scale(-1, 1); ga.drawImage(CamReseau.canvas, -ap.width, 0, ap.width, ap.height); ga.restore(); } requestAnimationFrame(dessiner); };
+    dessiner();
+    const ms = +localStorage.getItem('lumi-cam-retard') || 0;
+    if (ms) f.querySelector('.cm-retard').textContent = `⏱️ ${mt('retardOk')} : ${(ms / 1000).toFixed(2).replace('.', ',')} s${ms > 700 ? ' — ' + mt('lent') : ''}`;
+    const a = f.querySelector('.bv-actions');
+    a.appendChild(bouton(mt('fini'), () => { vivant = false; fermerFenetre(); if (!Capteurs?.actif) CamReseau.arreter(); }, 'bv-b principal'));
+    a.appendChild(bouton('⏱️ ' + mt('retard'), () => mesurerRetard(f.querySelector('.cm-retard')), 'bv-puce'));
+    a.appendChild(bouton(mt('oublier'), () => { vivant = false; CamReseau.enregistrer(null); CamReseau.arreter(); etapeChercher(); }, 'bv-puce'));
+    focusPremier(a);
+  }
+  // l'écran clignote (noir / blanc) ; la caméra, tournée vers la télé, le voit un peu plus tard : c'est le retard
+  async function mesurerRetard(sortie) {
+    sortie.textContent = '📺 ' + mt('retardAide');
+    const voile = document.createElement('div'); voile.className = 'cm-flash'; document.body.appendChild(voile);
+    const lum = () => { const c = CamReseau.canvas; if (!c) return 0; const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let s = 0, n = 0; for (let i = 0; i < d.length; i += 64) { s += d[i] + d[i + 1] + d[i + 2]; n++; } return s / n / 3; };
+    await new Promise((ok) => setTimeout(ok, 3000)); // le temps de tourner la caméra
+    const mesures = [];
+    let base = 0; for (let i = 0; i < 10; i++) { base += lum(); await new Promise((ok) => setTimeout(ok, 60)); } base /= 10;
+    for (let k = 0; k < 5; k++) {
+      voile.classList.add('blanc'); const t0 = performance.now();
+      let vu = 0;
+      while (performance.now() - t0 < 2500) { await new Promise((ok) => setTimeout(ok, 15)); if (lum() > base + 35) { vu = CamReseau.derImage - t0; break; } }
+      if (vu > 0) mesures.push(vu);
+      voile.classList.remove('blanc'); await new Promise((ok) => setTimeout(ok, 1500));
+    }
+    voile.remove();
+    if (mesures.length < 2) { sortie.textContent = '😕 ' + mt('retardRate'); return; }
+    mesures.sort((x, y) => x - y); const ms = Math.round(mesures[Math.floor(mesures.length / 2)]);
+    try { localStorage.setItem('lumi-cam-retard', String(ms)); } catch {}
+    sortie.textContent = `⏱️ ${mt('retardOk')} : ${(ms / 1000).toFixed(2).replace('.', ',')} s${ms > 700 ? ' — ' + mt('lent') : ''}`; son('juste');
+  }
+  return { ouvrir };
+})();
+// dans l'espace parents : le bloc « Caméra de la maison »
+const espaceParentsAvantMaison = espaceParents;
+espaceParents = function (section) { // eslint-disable-line no-func-assign
+  espaceParentsAvantMaison(section);
+  const fp = $('fa-fond')?.querySelector('.fa-t-parents'); if (!fp) return;
+  const b = document.createElement('section'); b.className = 'fa-bloc'; b.id = 'fa-cam-maison';
+  b.innerHTML = '<h3></h3><p class="st-aide"></p>';
+  b.querySelector('h3').textContent = mt('titre');
+  b.querySelector('.st-aide').textContent = CamReseau.actif ? `✓ ${mt('utilisee')} (${CamReseau.reglage.ip})` : (CamReseau.dispo() ? mt('intro') : mt('apk'));
+  b.appendChild(bouton(CamReseau.actif ? '⚙️ ' + mt('titre') : '📹 ' + mt('chercher'), () => FenetreCamMaison.ouvrir(), 'fa-bouton'));
+  const ref = fp.querySelector('#fa-diag'); if (ref) ref.before(b); else fp.querySelector('.fa-pied')?.before(b);
+};
+
+// ---------- Les mains lumineuses : sur la télé, on touche avec son vrai bras ----------
+// Quand une caméra voit les enfants (caméra de la maison, ou caméra de la télé), chaque poignet devient une petite lumière
+// de la couleur du joueur, en miroir. Pas de curseur à tenir, pas de main à plat : on tend le bras vers la fleur, c'est cueilli.
+// - La zone que les bras peuvent atteindre est mesurée sur le corps de chaque enfant (épaules) et couvre tout l'écran :
+//   petit ou grand, près ou loin, debout ou assis, chaque cible est à portée de bras, sans se pencher ni s'approcher.
+// - Grandes zones de touche, la lumière est « aimantée » par la cible proche ; toucher = rester 0,12 s dessus.
+// - Jamais bloqué : après 8 s la cible suivante grossit et brille, après 20 s elle se cueille toute seule.
+// - Trop près de la caméra (de la télé) : « Recule un peu ! » et les mains ne comptent plus.
+// La télécommande et le bouton « On l'a fait ! » marchent toujours.
+const MainsLumineuses = (() => {
+  const COULEURS = ['#7FF3CB', '#FF8FB8', '#FFD34D', '#8FD0FF'];
+  let s = null;
+  const camOk = () => {
+    if (typeof CamReseau !== 'undefined' && CamReseau.actif) return true;
+    if (!modeTele) return false;
+    try { return !!JSON.parse(localStorage.getItem('lumi-appareil') || '{}').cam; } catch { return false; }
+  };
+  function brancher(zone, fini) {
+    if (!camOk() || !zone) return;
+    arreter();
+    const ci = zone.closest('.ci') || document.body;
+    const calque = document.createElement('div'); calque.className = 'ml-calque'; ci.appendChild(calque);
+    const moi = s = { zone, fini, ci, calque, lum: new Map(), contact: new Map(), dernier: performance.now(), stop: null, bandeau: null };
+    const astuce = document.createElement('div'); astuce.className = 'ml-astuce'; astuce.textContent = '✨ ' + t3(nom3('Tends le bras : ta main est une lumière !', 'Reach out: your hand is a light!', 'مدّ ذراعك: يدك نور!')); calque.appendChild(astuce);
+    setTimeout(() => astuce.remove(), 5000);
+    analyser('pose', (d) => { if (s === moi) suivre(moi, d); }).then((r) => { if (s === moi) moi.stop = r?.stop; else r?.stop?.(); }).catch(() => { if (s === moi) arreter(); });
+    moi.aide = setInterval(() => aider(moi), 500);
+    moi.obs = new MutationObserver(() => { if (!zone.isConnected || fini()) arreter(); });
+    moi.obs.observe(zone.parentNode || document.body, { childList: true, subtree: true });
+  }
+  function lumiere(m, cle, couleur) {
+    let l = m.lum.get(cle);
+    if (!l) { const el = document.createElement('i'); el.className = 'ml-main'; el.style.setProperty('--c', couleur); m.calque.appendChild(el); l = { el, x: -1, y: -1, vu: 0 }; m.lum.set(cle, l); }
+    return l;
+  }
+  function suivre(m, d) {
+    const R = m.ci.getBoundingClientRect(), W = R.width, H = R.height, t = performance.now();
+    let tropPres = false;
+    (d.poses || []).forEach((p, i) => {
+      const sw = largeurEpaules(p);
+      if (sw > .42) { tropPres = true; return; }
+      if (p[1][2] < .5 || p[2][2] < .5) return;
+      // la portée des bras de CET enfant : autour des épaules, jusqu'au-dessus de la tête et jusqu'au ventre
+      const cx = (p[1][0] + p[2][0]) / 2, cy = (p[1][1] + p[2][1]) / 2, x0 = cx - 2.6 * sw, y0 = cy - 2.3 * sw;
+      [5, 6].forEach((j) => {
+        const w = p[j]; if (w[2] < .45) return;
+        const nx = Math.min(1, Math.max(0, (w[0] - x0) / (5.2 * sw))), ny = Math.min(1, Math.max(0, (w[1] - y0) / (3.9 * sw)));
+        const l = lumiere(m, i + ':' + j, COULEURS[i % COULEURS.length]);
+        const X = (.04 + .92 * nx) * W, Y = (.08 + .84 * ny) * H;
+        l.x = l.x < 0 ? X : l.x + (X - l.x) * .55; l.y = l.y < 0 ? Y : l.y + (Y - l.y) * .55; l.vu = t;
+      });
+    });
+    montrerRecule(m, tropPres);
+    // touches : chaque lumière contre chaque cible encore éteinte
+    const cibles = [...m.zone.querySelectorAll('.av-cible:not(.allumee):not(.pris)')];
+    m.lum.forEach((l, cle) => {
+      const visible = t - l.vu < 450 && !tropPres;
+      l.el.style.opacity = visible ? 1 : 0;
+      if (!visible) { m.contact.delete(cle); return; }
+      let x = l.x, y = l.y, touchee = null;
+      for (const c of cibles) {
+        const r = c.getBoundingClientRect(), ccx = r.left - R.left + r.width / 2, ccy = r.top - R.top + r.height / 2, rayon = Math.max(r.width * .75, H * .075);
+        const dist = Math.hypot(l.x - ccx, l.y - ccy);
+        if (dist < rayon * 1.7) { x = l.x + (ccx - l.x) * .3; y = l.y + (ccy - l.y) * .3; } // aimant
+        if (dist < rayon) { touchee = c; break; }
+      }
+      l.el.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
+      const avant = m.contact.get(cle);
+      if (!touchee) { m.contact.delete(cle); return; }
+      if (!avant || avant.c !== touchee) { m.contact.set(cle, { c: touchee, t }); return; }
+      if (t - avant.t > 120) { m.contact.delete(cle); toucher(m, touchee, l); }
+    });
+  }
+  function toucher(m, c, l) {
+    m.dernier = performance.now();
+    m.zone.querySelectorAll('.ml-aide').forEach((x) => x.classList.remove('ml-aide'));
+    if (l) { l.el.classList.remove('touche'); void l.el.offsetWidth; l.el.classList.add('touche'); }
+    c.click();
+  }
+  // jamais bloqué : la cible suivante se montre, puis se cueille toute seule
+  function aider(m) {
+    if (m.fini() || !m.zone.isConnected) return arreter();
+    const suivante = m.zone.querySelector('.av-cible:not(.allumee):not(.pris)'); if (!suivante) return;
+    const attente = performance.now() - m.dernier;
+    if (attente > 20000) toucher(m, suivante, null);
+    else if (attente > 8000) suivante.classList.add('ml-aide');
+  }
+  function montrerRecule(m, oui) {
+    if (oui && !m.bandeau) { m.bandeau = document.createElement('div'); m.bandeau.className = 'cam-hors'; m.bandeau.textContent = '🙂 ' + ct('recule'); document.body.appendChild(m.bandeau); parler(ct('recule')); }
+    else if (!oui && m.bandeau) { m.bandeau.remove(); m.bandeau = null; }
+  }
+  function arreter() {
+    if (!s) return;
+    const m = s; s = null;
+    clearInterval(m.aide); m.obs?.disconnect(); m.bandeau?.remove(); m.calque.remove();
+    try { m.stop?.(); } catch {}
+  }
+  return { brancher, arreter, get actif() { return !!s; }, camOk, _test: (d) => s && suivre(s, d) };
+})();
 
 // ---------- Diagnostic caméra (pour les tests sur de vrais appareils) ----------
 // Activé dans l'espace parents. Pendant chaque jeu caméra, on note des CHIFFRES seulement (jamais d'image ni de vidéo) :

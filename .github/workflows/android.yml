@@ -30,7 +30,12 @@ jobs:
       - name: Clé de signature (secrets du dépôt)
         env:
           LUMI_KEYSTORE_B64: ${{ secrets.LUMI_KEYSTORE_B64 }}
-        run: if [ -n "$LUMI_KEYSTORE_B64" ]; then echo "$LUMI_KEYSTORE_B64" | base64 -d > android/app/lumiole.keystore; else echo "::warning::Secret LUMI_KEYSTORE_B64 absent : APK signé avec une clé debug (mise à jour impossible sans désinstaller)"; fi
+        run: |
+          if [ -n "$LUMI_KEYSTORE_B64" ]; then
+            echo "$LUMI_KEYSTORE_B64" | base64 -d > android/app/lumiole.keystore
+          else
+            echo "::warning::Secret LUMI_KEYSTORE_B64 absent, APK signé avec une clé debug (mise à jour impossible sans désinstaller)"
+          fi
       - run: chmod +x android/gradlew && cd android && ./gradlew assembleDebug --no-daemon
         env:
           LUMI_KEY_PASS: ${{ secrets.LUMI_KEY_PASS }}
