@@ -2621,6 +2621,11 @@
   .ml-astuce { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); padding: 1.2vh 2.4vw; border-radius: 99px; background: rgba(10,14,40,.75); color: #fff; font: 800 2.6vh system-ui; white-space: nowrap; }
   .av-cible.ml-aide { animation: ml-aide 1s ease-in-out infinite !important; z-index: 2; }
   @keyframes ml-aide { 50% { scale: 1.6; filter: drop-shadow(0 0 2vh #7ff3cb); } }
+  /* la main lumineuse partout : la lumière + le cercle qui se remplit */
+  .ml-pointe { z-index: 95; }
+  .ml-pointe::before { display: none; }
+  .ml-pointe .ml-main { opacity: 1; }
+  .ml-pointe .anneau-dwell { left: -6vh; top: -6vh; width: 12vh; height: 12vh; -webkit-mask: radial-gradient(circle, transparent 4.7vh, #000 4.8vh); mask: radial-gradient(circle, transparent 4.7vh, #000 4.8vh); }
   @media (prefers-reduced-motion: reduce) { .ml-main.touche, .av-cible.ml-aide { animation: none !important; } }
 </style>
 </head>
@@ -14361,12 +14366,57 @@ espaceParents = function (section) { // eslint-disable-line no-func-assign
 // ---------- Les mains lumineuses : sur la télé, on touche avec son vrai bras ----------
 // Quand une caméra voit les enfants (caméra de la maison, ou caméra de la télé), chaque poignet devient une petite lumière
 // de la couleur du joueur, en miroir. Pas de curseur à tenir, pas de main à plat : on tend le bras vers la fleur, c'est cueilli.
-// - La zone que les bras peuvent atteindre est mesurée sur le corps de chaque enfant (épaules) et couvre tout l'écran :
-//   petit ou grand, près ou loin, debout ou assis, chaque cible est à portée de bras, sans se pencher ni s'approcher.
-// - Grandes zones de touche, la lumière est « aimantée » par la cible proche ; toucher = rester 0,12 s dessus.
+// - Portée : mesurée sur le corps de chaque enfant (son épaule), puis apprise en jouant (voir Portee) : où que soit la caméra
+//   (posée bas sur la table télé, en haut d'une étagère, sur le côté), petit ou grand, près ou loin, debout ou assis,
+//   tout l'écran est à portée de bras.
+// - Seul un bras levé compte (au-dessus du ventre) : les bras qui pendent ne touchent rien.
+// - Grandes zones de touche, la lumière est « aimantée » par la cible proche ; toucher = rester 0,2 s dessus.
 // - Jamais bloqué : après 8 s la cible suivante grossit et brille, après 20 s elle se cueille toute seule.
-// - Trop près de la caméra (de la télé) : « Recule un peu ! » et les mains ne comptent plus.
+// - Trop près de la caméra : « Recule un peu ! » et les mains ne comptent plus.
 // La télécommande et le bouton « On l'a fait ! » marchent toujours.
+
+// ---------- La portée du bras, qui s'adapte toute seule ----------
+// Chaque main a sa boîte autour de SON épaule, en largeurs d'épaules : u = vers l'extérieur (+) ou à travers le corps (−),
+// v = vers le haut (−) ou le bas (+). Le bas de la boîte est le ventre (v = 1) : en dessous, le bras est baissé.
+// Les bords de la boîte suivent les gestes réels de l'enfant : s'il va plus loin, la boîte s'agrandit ; s'il ne va jamais
+// jusqu'au bord (bras courts, caméra basse qui écrase les gestes vers le haut, enfant assis), elle rétrécit doucement
+// pour que les bords de l'écran restent atteignables. Bornes min / max : jamais minuscule (tremblements), jamais immense.
+const Portee = (() => {
+  const BAS = 1, DEF = { u0: -1.3, u1: 2.3, v0: -2.2 }, OUBLI = .004, MARGE = .12;
+  const etats = new Map(); // « piste:poignet » → boîte apprise
+  const borne = (x, a, b) => Math.min(b, Math.max(a, x));
+  function boite(cle, t) {
+    let b = etats.get(cle);
+    if (!b || t - b.vu > 3000) { b = { ...DEF, o0: DEF.u0, o1: DEF.u1, ov: DEF.v0, leve: false, vu: t }; etats.set(cle, b); } // un autre enfant a pris la place : on recommence
+    b.vu = t;
+    return b;
+  }
+  function apprendre(b, u, v) {
+    b.o0 = Math.min(u, b.o0 + OUBLI); b.o1 = Math.max(u, b.o1 - OUBLI); b.ov = Math.min(v, b.ov + OUBLI);
+    b.u0 += (borne(b.o0 + MARGE, -2, -.6) - b.u0) * .04;
+    b.u1 += (borne(b.o1 - MARGE, 1.2, 3) - b.u1) * .04;
+    b.v0 += (borne(b.ov + MARGE, -3, -1.1) - b.v0) * .04;
+  }
+  // les mains levées de ce corps, en coordonnées d'écran 0..1 (miroir déjà fait par l'analyse)
+  function mains(p, piste) {
+    if (p[1][2] < .5 || p[2][2] < .5) return [];
+    const sw = largeurEpaules(p), t = performance.now(), out = [];
+    [[5, 1, 2], [6, 2, 1]].forEach(([j, ep, autre]) => {
+      const w = p[j], b = boite(piste + ':' + j, t);
+      if (w[2] < .45) { b.leve = false; return; }
+      const dir = p[ep][0] >= p[autre][0] ? 1 : -1; // cette épaule est à droite (1) ou à gauche (−1) de l'image
+      const u = (w[0] - p[ep][0]) * dir / sw, v = (w[1] - p[ep][1]) / sw;
+      b.leve = v < (b.leve ? BAS + .2 : BAS - .15); // levé au-dessus du ventre (avec un peu de marge pour ne pas clignoter)
+      if (!b.leve) return;
+      apprendre(b, u, v);
+      const k = borne((u - b.u0) / (b.u1 - b.u0), 0, 1);
+      out.push({ j, nx: dir > 0 ? k : 1 - k, ny: borne((v - b.v0) / (BAS - b.v0), 0, 1), v });
+    });
+    return out;
+  }
+  return { mains, _etats: etats };
+})();
+
 const MainsLumineuses = (() => {
   const COULEURS = ['#7FF3CB', '#FF8FB8', '#FFD34D', '#8FD0FF'];
   let s = null;
@@ -14381,7 +14431,8 @@ const MainsLumineuses = (() => {
     const ci = zone.closest('.ci') || document.body;
     const calque = document.createElement('div'); calque.className = 'ml-calque'; ci.appendChild(calque);
     const moi = s = { zone, fini, ci, calque, lum: new Map(), contact: new Map(), dernier: performance.now(), stop: null, bandeau: null };
-    const astuce = document.createElement('div'); astuce.className = 'ml-astuce'; astuce.textContent = '✨ ' + t3(nom3('Tends le bras : ta main est une lumière !', 'Reach out: your hand is a light!', 'مدّ ذراعك: يدك نور!')); calque.appendChild(astuce);
+    MainPartout.verifier();
+    const astuce = document.createElement('div'); astuce.className = 'ml-astuce'; astuce.textContent = '✨ ' + t3(nom3('Lève le bras : ta main est une lumière !', 'Raise your arm: your hand is a light!', 'ارفع ذراعك: يدك نور!')); calque.appendChild(astuce);
     setTimeout(() => astuce.remove(), 5000);
     analyser('pose', (d) => { if (s === moi) suivre(moi, d); }).then((r) => { if (s === moi) moi.stop = r?.stop; else r?.stop?.(); }).catch(() => { if (s === moi) arreter(); });
     moi.aide = setInterval(() => aider(moi), 500);
@@ -14397,17 +14448,11 @@ const MainsLumineuses = (() => {
     const R = m.ci.getBoundingClientRect(), W = R.width, H = R.height, t = performance.now();
     let tropPres = false;
     (d.poses || []).forEach((p, i) => {
-      const sw = largeurEpaules(p);
-      if (sw > .42) { tropPres = true; return; }
-      if (p[1][2] < .5 || p[2][2] < .5) return;
-      // la portée des bras de CET enfant : autour des épaules, jusqu'au-dessus de la tête et jusqu'au ventre
-      const cx = (p[1][0] + p[2][0]) / 2, cy = (p[1][1] + p[2][1]) / 2, x0 = cx - 2.6 * sw, y0 = cy - 2.3 * sw;
-      [5, 6].forEach((j) => {
-        const w = p[j]; if (w[2] < .45) return;
-        const nx = Math.min(1, Math.max(0, (w[0] - x0) / (5.2 * sw))), ny = Math.min(1, Math.max(0, (w[1] - y0) / (3.9 * sw)));
+      if (largeurEpaules(p) > .42) { tropPres = true; return; }
+      Portee.mains(p, 'd' + i).forEach(({ j, nx, ny }) => {
         const l = lumiere(m, i + ':' + j, COULEURS[i % COULEURS.length]);
         const X = (.04 + .92 * nx) * W, Y = (.08 + .84 * ny) * H;
-        l.x = l.x < 0 ? X : l.x + (X - l.x) * .55; l.y = l.y < 0 ? Y : l.y + (Y - l.y) * .55; l.vu = t;
+        l.x = l.x < 0 || t - l.vu > 450 ? X : l.x + (X - l.x) * .55; l.y = l.y < 0 || t - l.vu > 450 ? Y : l.y + (Y - l.y) * .55; l.vu = t;
       });
     });
     montrerRecule(m, tropPres);
@@ -14428,7 +14473,7 @@ const MainsLumineuses = (() => {
       const avant = m.contact.get(cle);
       if (!touchee) { m.contact.delete(cle); return; }
       if (!avant || avant.c !== touchee) { m.contact.set(cle, { c: touchee, t }); return; }
-      if (t - avant.t > 120) { m.contact.delete(cle); toucher(m, touchee, l); }
+      if (t - avant.t > 200) { m.contact.delete(cle); toucher(m, touchee, l); }
     });
   }
   function toucher(m, c, l) {
@@ -14454,8 +14499,108 @@ const MainsLumineuses = (() => {
     const m = s; s = null;
     clearInterval(m.aide); m.obs?.disconnect(); m.bandeau?.remove(); m.calque.remove();
     try { m.stop?.(); } catch {}
+    MainPartout.verifier();
   }
-  return { brancher, arreter, get actif() { return !!s; }, camOk, _test: (d) => s && suivre(s, d) };
+  return { brancher, arreter, get actif() { return !!s; }, camOk, COULEURS, _test: (d) => s && suivre(s, d) };
+})();
+
+// ---------- La main lumineuse partout (caméra de la maison) ----------
+// Dès que la caméra de la maison est réglée, chaque enfant qui lève le bras a sa lumière à l'écran, sur tous les écrans
+// des enfants (accueil, rangées, jeux, choix des films, fin de partie) : on la pose sur une tuile, le cercle se remplit
+// (1,3 s), c'est ouvert. Elle ne touche jamais le menu (rail de gauche, barre du haut, langue, Retour) ni rien de ce qui
+// est aux parents (espace parents, porte, achat, réglages, caméra) : ça reste à la télécommande.
+// Elle se met en veille quand un jeu ou un défi utilise déjà la caméra, pendant le théâtre, et quand l'écran est caché.
+const MainPartout = (() => {
+  const PARENTS = ['achat', 'bienvenue', 'cam-maison', 'parents', 'porte', 'studio', 'valeurs', 'verrou', 'guide', 'manette', 'duo', 'photo'];
+  const INTERDIT = ['.vt-rail', '.vt-onglets', '.vt-rond-ic', '.tv-barre', '#tv-retour', '.fa-acces', '.fa-enfant.plus', '[data-a=p]', '.ml-pointe', ...PARENTS.map((t) => '.fa-t-' + t)].join(', ');
+  const ATTENTE = 1300, CALME = 1200, TREMBLE = 300;
+  let sess = null, occupe = false, echec = 0;
+  const mains = new Map(); // piste → { el, x, y, vu, dw, pause }
+  function permis(el) {
+    if (el.closest(INTERDIT)) return false;
+    if (el.closest('.ci') && !el.closest('.ci-choix')) return false; // dans un film : seulement les choix
+    return true;
+  }
+  const veut = () => typeof CamReseau !== 'undefined' && CamReseau.actif && !occupe && !MainsLumineuses.actif && !Theatre.actif && !document.hidden;
+  function verifier() {
+    if (veut() && !sess && Date.now() - echec > 30000) demarrer();
+    else if (!veut() && sess) arreter();
+  }
+  function demarrer() {
+    const moi = sess = { stop: null };
+    analyser('pose', (d) => { if (sess === moi) suivre(d); })
+      .then((r) => { if (sess === moi) moi.stop = r?.stop; else r?.stop?.(); })
+      .catch((e) => { console.warn('main partout', e); echec = Date.now(); if (sess === moi) sess = null; });
+  }
+  function arreter() {
+    const m = sess; sess = null;
+    try { m?.stop?.(); } catch {}
+    mains.forEach((x) => x.el.remove()); mains.clear();
+  }
+  function cibleProche(x, y) {
+    const R = innerWidth * .07; let mieux = null, dmin = R, aire = Infinity;
+    for (const el of focusables()) {
+      if (!permis(el)) continue;
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom));
+      if (d < dmin || (d === 0 && dmin === 0 && r.width * r.height < aire)) { dmin = d; mieux = el; aire = r.width * r.height; }
+    }
+    return mieux;
+  }
+  function main(cle, couleur) {
+    let m = mains.get(cle);
+    if (!m) {
+      const el = document.createElement('div'); el.className = 'duo-curseur ml-pointe'; el.style.setProperty('--c', couleur);
+      el.innerHTML = '<span class="anneau-dwell"></span><i class="ml-main"></i>';
+      document.body.appendChild(el); m = { el, x: -1, y: -1, vu: 0, dw: null, pause: 0 }; mains.set(cle, m);
+    }
+    return m;
+  }
+  function suivre(d) {
+    const t = performance.now(), W = innerWidth, H = innerHeight;
+    (d.poses || []).forEach((p, i) => {
+      if (largeurEpaules(p) > .42) return; // trop près : on ne pointe pas
+      const levees = Portee.mains(p, 'g' + i); if (!levees.length) return;
+      const h = levees.reduce((a, b) => (b.v < a.v ? b : a)); // un enfant = une lumière : la main la plus haute
+      const m = main(i, MainsLumineuses.COULEURS[i % 4]);
+      const X = (.03 + .94 * h.nx) * W, Y = (.05 + .9 * h.ny) * H, neuf = t - m.vu > 450;
+      m.x = neuf ? X : m.x + (X - m.x) * .5; m.y = neuf ? Y : m.y + (Y - m.y) * .5; m.vu = t;
+      if (neuf) m.pause = Math.max(m.pause, t + 500); // bras qui vient de se lever : un petit temps avant de compter
+      pointer(m, t);
+    });
+    mains.forEach((m) => m.el.classList.toggle('cache', t - m.vu > 450));
+  }
+  function pointer(m, t) {
+    let cible = cibleProche(m.x, m.y);
+    if (!cible && m.dw && t - m.dw.vu < TREMBLE && m.dw.el.isConnected) cible = m.dw.el; // la main tremble : on garde le compte
+    let x = m.x, y = m.y;
+    if (cible) {
+      if (!m.dw || m.dw.el !== cible) {
+        m.dw = { el: cible, t, fait: false };
+        if (!cible.closest('.tv-tuile, .tv-pilule')) cible.focus({ preventScroll: true });
+        cible.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x, clientY: y, pointerType: 'touch' })); // la tuile s'allume, Lumi dit son nom
+        son('tic');
+      }
+      m.dw.vu = t;
+      const r = cible.getBoundingClientRect(); x += (r.left + r.width / 2 - x) * .35; y += (r.top + r.height / 2 - y) * .35; // aimant
+    } else m.dw = null; // dans le vide : on ne touche jamais rien
+    if (t < m.pause && m.dw) m.dw.t = t;
+    const k = !m.dw || m.dw.fait ? 0 : Math.min(1, (t - m.dw.t) / ATTENTE);
+    m.el.style.setProperty('--dwell', k.toFixed(2));
+    m.el.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
+    if (k >= 1) {
+      m.dw.fait = true; m.pause = t + CALME;
+      const l = m.el.querySelector('.ml-main'); l.classList.remove('touche'); void l.offsetWidth; l.classList.add('touche');
+      son('pop'); m.dw.el.click();
+    }
+  }
+  // un jeu prend la caméra : la main lumineuse se met en veille, et revient après
+  const demarrerCapteurs = Capteurs.demarrer, arreterCapteurs = Capteurs.arreter;
+  Capteurs.demarrer = function (...a) { occupe = true; verifier(); return demarrerCapteurs.apply(this, a); };
+  Capteurs.arreter = function (...a) { const r = arreterCapteurs.apply(this, a); occupe = false; setTimeout(verifier, 300); return r; };
+  setInterval(verifier, 2000);
+  document.addEventListener('visibilitychange', verifier);
+  return { verifier, permis, get actif() { return !!sess; }, _test: (d) => suivre(d) };
 })();
 
 // ---------- Diagnostic caméra (pour les tests sur de vrais appareils) ----------
