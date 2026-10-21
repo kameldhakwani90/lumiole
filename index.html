@@ -5499,6 +5499,32 @@ const VoixParent = (() => {
     pret, a: (k) => cles.has(k),
     lire: (k) => tx('readonly', (s) => s.get(k)).catch(() => null),
     ecrire: (k, b) => tx('readwrite', (s) => s.put(b, k)).then(() => cles.add(k)),
+    toutes: () => [...cles],
+  };
+})();
+// voix à envoyer vers le compte : gardées dans une liste tant que l'envoi n'a pas réussi, et réessayées
+// (au démarrage, à la connexion, au retour d'Internet, et chaque minute tant qu'il en reste)
+var VoixFile = (() => {
+  const LS = 'lumi-voix-a-envoyer';
+  let l = []; try { l = JSON.parse(localStorage.getItem(LS) || '[]'); } catch {}
+  const garder = () => { try { localStorage.setItem(LS, JSON.stringify(l)); } catch {} };
+  let enCours = false, minuteur = null;
+  async function vider() {
+    if (enCours || !Famille?.id) return;
+    enCours = true; clearTimeout(minuteur);
+    try {
+      // première fois avec un compte : on envoie aussi les voix enregistrées avant
+      try { if (!localStorage.getItem('lumi-voix-file-init')) { await VoixParent.pret; VoixParent.toutes().forEach((k) => { if (!l.includes(k)) l.push(k); }); garder(); localStorage.setItem('lumi-voix-file-init', '1'); } } catch {}
+      for (const k of [...l]) {
+        const b = await VoixParent.lire(k);
+        if (b) await Famille.voixEnvoyer(k, b);
+        l = l.filter((x) => x !== k); garder();
+      }
+    } catch { minuteur = setTimeout(vider, 60000); } finally { enCours = false; }
+  }
+  return {
+    ajouter(k) { if (!l.includes(k)) { l.push(k); garder(); } return vider(); },
+    vider, attend: (k) => l.includes(k), get reste() { return l.length; },
   };
 })();
 const clePage = (c, p = c.page) => `${c.h.id}:${p}`;
@@ -5729,6 +5755,7 @@ async function commencerEnregistrement() {
       flux.getTracks().forEach((t) => t.stop());
       if (!etat.garder || !morceaux.length) return;
       await VoixParent.ecrire(cle, new Blob(morceaux, { type: rec.mimeType || type || 'audio/mp4' }));
+      VoixFile.ajouter(cle).catch(() => {});
       son('juste'); if (conte) pageHistoire();
       $('hi-info').textContent = TXT_HI.enreg[langue]; setTimeout(() => { $('hi-info').textContent = ''; }, 2500);
     };
@@ -7067,6 +7094,7 @@ const ST_TXT = {
   page: { fr: 'Page', en: 'Page', ar: 'صفحة' },
   fini: { fr: 'Toutes les pages sont enregistrées !', en: 'All pages are recorded!', ar: 'تم تسجيل كل الصفحات!' },
   nuage: { fr: '☁️ Sauvegardé pour la télé', en: '☁️ Saved for the TV', ar: '☁️ محفوظ للتلفاز' },
+  attente: { fr: '⏳ Gardé ici, envoi dès qu’Internet revient', en: '⏳ Kept here, will upload when online', ar: '⏳ محفوظ هنا، سيُرسل عند عودة الإنترنت' },
   local: { fr: 'Connectez le compte parent pour retrouver ces voix sur la télé.', en: 'Sign in to the parent account to get these voices on the TV.', ar: 'سجّلوا الدخول إلى حساب الأولياء لسماع هذه الأصوات على التلفاز.' },
   micro: { fr: 'Le micro n’est pas disponible.', en: 'The microphone isn’t available.', ar: 'الميكروفون غير متاح.' },
   conseil: { fr: 'Lisez doucement, avec le ton. Lumi garde chaque page.', en: 'Read slowly, with feeling. Lumi keeps each page.', ar: 'اقرؤوا ببطء وبإحساس. لومي يحفظ كل صفحة.' },
@@ -7172,12 +7200,13 @@ const Studio = (() => {
         if (!garde.ok || !morceaux.length) return;
         const blob = new Blob(morceaux, { type: r.mimeType || type || 'audio/mp4' });
         await VoixParent.ecrire(cle, blob); son('juste');
-        let nuage = false; try { if (Famille.id) { await Famille.voixEnvoyer(cle, blob); nuage = true; } } catch {}
+        await VoixFile.ajouter(cle).catch(() => {});
+        const nuage = Famille.id && !VoixFile.attend(cle);
         const fin = h.pages.every((_, p) => VoixParent.a(cleVoix(h.id, p, qui)));
         if (fin) { fete(); }
         if (!fin && page < h.pages.length - 1) page++;
         prompteur();
-        corps().querySelector('.st-etat').textContent = fin ? '🎉 ' + ts('fini') : nuage ? ts('nuage') : '✓';
+        corps().querySelector('.st-etat').textContent = fin ? '🎉 ' + ts('fini') : nuage ? ts('nuage') : Famille.id ? ts('attente') : '✓';
       };
       rec = { r, garde };
       r.start();
@@ -7259,28 +7288,59 @@ Famille = (() => {
     const r = await api('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: JSON.stringify({ refresh_token: s.refresh_token }) }, false);
     s = { ...s, ...r }; garder();
   }
-  // tout ce qui appartient aux enfants
+  // ce qui est sauvegardé avec le compte : les réglages de la famille, et pour chaque enfant sa progression
+  // (jamais les photos ni l'album : les images des enfants restent sur l'appareil)
+  const CLES_FAMILLE = ['lumi-langue', 'lumi-saison', 'lumi-cultures', 'lumi-coucher', 'lumi-conte-page', 'lumi-voix-choix', 'lumi-histoires', 'lumi-chansons', 'lumi-son', 'lumi-code', 'lumi-valeurs', 'lumi-liste'];
+  const CLES_ENFANT = ['lumi-progres', 'lumi-coloriages', 'lumi-coffre', 'lumi-fins'];
+  const aSauver = (k) => CLES_FAMILLE.includes(k) || CLES_ENFANT.includes(k.split('@')[0]) || k.startsWith('lumi-film-') || k === 'lumi-profils';
+  const lireJ = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
   function paquet() {
-    const d = { profils: Profils.exporter(), enfants: {} };
-    Profils.liste.forEach((p) => { d.enfants[p.id] = {}; ['lumi-progres', 'lumi-coloriages'].forEach((b) => { try { d.enfants[p.id][b] = JSON.parse(localStorage.getItem(Profils.cle(b, p.id)) || 'null'); } catch {} }); });
+    const d = { profils: Profils.exporter(), enfants: {}, reglages: {}, maj: majLocale() };
+    CLES_FAMILLE.forEach((k) => { try { const v = localStorage.getItem(k); if (v != null) d.reglages[k] = v; } catch {} });
+    const films = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('lumi-film-')) films.push(k); } } catch {}
+    Profils.liste.forEach((p) => {
+      const x = d.enfants[p.id] = {};
+      CLES_ENFANT.forEach((b) => { x[b] = lireJ(Profils.cle(b, p.id)); });
+      films.filter((k) => (k.split('@')[1] || 'p1') === p.id).forEach((k) => { x[k.split('@')[0]] = lireJ(k); });
+    });
     return d;
   }
-  const etoiles = (id) => { try { return JSON.parse(localStorage.getItem(Profils.cle('lumi-progres', id)) || '{}').etoiles || 0; } catch { return 0; } };
+  // date du dernier changement fait sur cet appareil : la version la plus récente des réglages gagne
+  function majLocale() { try { return +localStorage.getItem('lumi-synchro-maj') || 0; } catch { return 0; } }
+  const etoiles = (id) => lireJ(Profils.cle('lumi-progres', id))?.etoiles || 0;
+  let applique = false;
   function fusionner(d) {
     if (!d?.profils?.liste) return;
-    const ici = Profils.exporter(), ids = new Set(ici.liste.map((p) => p.id));
-    d.profils.liste.forEach((p) => { if (!ids.has(p.id)) ici.liste.push(p); });
-    Profils.importer(ici);
-    Object.entries(d.enfants || {}).forEach(([id, x]) => {
-      if ((x?.['lumi-progres']?.etoiles || 0) < etoiles(id)) return; // on garde le plus avancé
-      Object.entries(x || {}).forEach(([b, v]) => { if (v) try { localStorage.setItem(Profils.cle(b, id), JSON.stringify(v)); } catch {} });
-    });
+    applique = true;
+    try {
+      const ici = Profils.exporter(), ids = new Set(ici.liste.map((p) => p.id));
+      d.profils.liste.forEach((p) => { if (!ids.has(p.id)) ici.liste.push(p); });
+      Profils.importer(ici);
+      if (d.reglages && (d.maj || 0) > majLocale()) Object.entries(d.reglages).forEach(([k, v]) => { if (CLES_FAMILLE.includes(k)) try { localStorage.setItem(k, v); } catch {} });
+      Object.entries(d.enfants || {}).forEach(([id, x]) => {
+        if ((x?.['lumi-progres']?.etoiles || 0) < etoiles(id)) return; // on garde le plus avancé
+        Object.entries(x || {}).forEach(([b, v]) => { if (v) try { localStorage.setItem(Profils.cle(b, id), JSON.stringify(v)); } catch {} });
+      });
+    } finally { applique = false; }
   }
+  // un envoi raté (pas d'Internet) est gardé et réessayé : au retour du réseau, puis chaque minute
+  let enAttente = false, essai = null;
   async function envoyer() {
     if (!s) return;
-    await api('/rest/v1/familles', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: s.user.id, donnees: paquet(), maj: new Date().toISOString() }) });
-    derniere = Date.now();
+    try {
+      await api('/rest/v1/familles', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: s.user.id, donnees: paquet(), maj: new Date().toISOString() }) });
+      derniere = Date.now(); enAttente = false; clearTimeout(essai);
+    } catch (e) { enAttente = true; clearTimeout(essai); essai = setTimeout(() => envoyer().catch(() => {}), 60000); throw e; }
   }
+  addEventListener('online', () => { if (enAttente) envoyer().catch(() => {}); VoixFile?.vider?.(); });
+  // tout changement d'une donnée sauvegardée part tout seul vers le compte, quelques secondes après
+  try {
+    const orig = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (k, v) {
+      orig.call(this, k, v);
+      if (this === localStorage && !applique && typeof k === 'string' && aSauver(k)) { orig.call(this, 'lumi-synchro-maj', String(Date.now())); Famille?.changement?.(); }
+    };
+  } catch {}
   async function recevoir() {
     const r = await api(`/rest/v1/familles?user_id=eq.${s.user.id}&select=donnees`);
     if (r?.[0]?.donnees) fusionner(r[0].donnees);
@@ -7290,7 +7350,7 @@ Famille = (() => {
     envoyerCode: (email) => api('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ email, create_user: true }) }, false),
     async verifier(email, token) {
       s = await api('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'email', email, token }) }, false); garder();
-      await recevoir(); await envoyer(); await Achat.init(s.user.id);
+      await recevoir(); await envoyer(); await Achat.init(s.user.id); VoixFile.vider();
     },
     // la télé reçoit un jeton à usage unique du téléphone et ouvre sa propre session
     async depuisJeton(jeton) {
@@ -7330,16 +7390,20 @@ Famille = (() => {
       history.replaceState(null, '', location.pathname + location.search);
       s = { access_token: h.get('access_token'), refresh_token: h.get('refresh_token') };
       s.user = await api('/auth/v1/user'); garder();
-      await recevoir(); await envoyer(); await Achat.init(s.user.id);
+      await recevoir(); await envoyer(); await Achat.init(s.user.id); VoixFile.vider();
       return true;
     },
     sortir() { s = null; try { localStorage.removeItem('lumi-compte'); } catch {} },
     async supprimer() { await api('/functions/v1/supprimer-compte', { method: 'POST', body: '{}' }); this.sortir(); },
     changement() { if (!s) return; clearTimeout(minuteur); minuteur = setTimeout(() => envoyer().catch(() => {}), 4000); },
-    async init() { if (!dispo) return; try { if (await this.retourOAuth()) { this.voixRecevoir().catch(() => {}); return; } } catch {} if (!s) return; try { await rafraichir(); await recevoir(); this.voixRecevoir().catch(() => {}); } catch {} },
+    get enAttente() { return enAttente; },
+    async init() { if (!dispo) return; try { if (await this.retourOAuth()) { this.voixRecevoir().catch(() => {}); return; } } catch {} if (!s) return; try { await rafraichir(); await recevoir(); await envoyer(); this.voixRecevoir().catch(() => {}); VoixFile?.vider?.(); } catch {} },
   };
 })();
 
+// la télé va chercher les nouvelles voix de la famille régulièrement (enregistrées sur le téléphone)
+setInterval(() => { if (Famille?.id && !document.hidden) Famille.voixRecevoir().catch(() => {}); }, 180000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Famille?.id) { Famille.voixRecevoir().catch(() => {}); VoixFile.vider(); } });
 // ----- Le profil de l'enfant dans le bandeau d'accueil -----
 function bandeauEnfant() {
   const p = Profils.actif, b = document.createElement('button');

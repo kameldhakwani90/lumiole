@@ -7,8 +7,9 @@ android {
         applicationId "com.lumiole.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        // chaque construction GitHub a un numéro plus grand : Android installe la mise à jour par-dessus
+        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger() + 1)
+        versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,7 +17,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Clé de signature fixe (secrets GitHub LUMI_KEYSTORE_B64 et LUMI_KEY_PASS) : l'APK se met à jour
+    // par-dessus l'ancien, sans désinstaller, donc sans rien perdre. Sans les secrets, clé debug habituelle.
+    signingConfigs {
+        lumi {
+            storeFile file('lumiole.keystore')
+            storePassword System.getenv('LUMI_KEY_PASS') ?: ''
+            keyAlias 'lumiole'
+            keyPassword System.getenv('LUMI_KEY_PASS') ?: ''
+        }
+    }
     buildTypes {
+        debug {
+            if (file('lumiole.keystore').exists() && System.getenv('LUMI_KEY_PASS')) signingConfig signingConfigs.lumi
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
