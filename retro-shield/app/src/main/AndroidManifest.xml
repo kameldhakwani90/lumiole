@@ -9,7 +9,7 @@
     <uses-feature android:name="android.hardware.gamepad" android:required="false" />
 
     <application
-        android:label="Rétro"
+        android:label="Retro Mac"
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/banner"
         android:usesCleartextTraffic="true"

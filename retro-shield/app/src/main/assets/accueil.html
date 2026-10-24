@@ -3,19 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rétro</title>
+<title>Retro Mac</title>
 <style>
   * { box-sizing: border-box; margin: 0; }
   html, body { width: 100%; height: 100%; overflow: hidden; color: #f4f6ff; cursor: none; user-select: none;
-    font-family: "Segoe UI", system-ui, Roboto, sans-serif; background: #050816; }
-  .halo { position: fixed; border-radius: 50%; filter: blur(10vh); opacity: .55; animation: flotte 14s ease-in-out infinite alternate; }
-  .h1 { width: 70vh; height: 70vh; background: #2b4cff; left: -15vh; top: -20vh; }
-  .h2 { width: 60vh; height: 60vh; background: #9b3dff; right: -10vh; bottom: -25vh; animation-delay: -6s; }
-  .h3 { width: 40vh; height: 40vh; background: #17b5d9; right: 30vw; top: 10vh; opacity: .3; animation-delay: -3s; }
-  @keyframes flotte { to { transform: translate(8vw, 6vh) scale(1.15); } }
+    font-family: "Segoe UI", system-ui, Roboto, sans-serif; background: #07090f; }
+  /* même charte que l'appli : noir profond, lueurs grises qui dérivent lentement, manette blanche */
+  .halo { position: fixed; border-radius: 50%; filter: blur(12vh); animation: flotte 18s ease-in-out infinite alternate; }
+  .h1 { width: 80vh; height: 80vh; background: rgba(255,255,255,.08); right: -10vh; top: -25vh; }
+  .h2 { width: 70vh; height: 70vh; background: rgba(120,140,190,.10); left: -20vh; bottom: -30vh; animation-delay: -7s; }
+  @keyframes flotte { to { transform: translate(-6vw, 5vh) scale(1.12); } }
   main { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 8vw; }
-  .logo { font-size: 11vh; font-weight: 200; letter-spacing: -.02em; }
-  .logo b { font-weight: 700; background: linear-gradient(90deg, #5bf0b8, #17b5d9, #8e7dff); -webkit-background-clip: text; color: transparent; }
+  .logo { display: flex; align-items: center; gap: 2.4vw; }
+  .logo .icone { width: 15vh; height: 15vh; border-radius: 3.6vh; display: grid; place-items: center;
+    background: radial-gradient(circle at 35% 25%, #2a2d36, #0b0c10 75%); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 2vh 5vh rgba(0,0,0,.6); }
+  .logo .icone svg { width: 10vh; height: 10vh; }
+  .logo h1 { font-size: 10vh; font-weight: 800; letter-spacing: -.02em; line-height: .95;
+    background: linear-gradient(180deg, #fff 40%, #aab3c5); -webkit-background-clip: text; color: transparent; }
+  .logo small { display: block; font-size: 2.2vh; font-weight: 700; letter-spacing: .4em; color: rgba(255,255,255,.55); margin-top: 1.2vh; }
   #etat { margin-top: 2vh; font-size: 2.6vh; color: rgba(232,236,255,.7); display: flex; align-items: center; gap: 1.2vw; min-height: 4vh; }
   .rond { width: 2.8vh; height: 2.8vh; border-radius: 50%; border: .35vh solid rgba(255,255,255,.2); border-top-color: #fff; animation: tourne 1s linear infinite; }
   @keyframes tourne { to { transform: rotate(360deg) } }
@@ -24,7 +29,7 @@
   .carte b { display: block; font-size: 2.8vh; font-weight: 500; }
   .carte small { font-size: 1.8vh; color: rgba(232,236,255,.6); }
   .carte svg { width: 5vh; height: 5vh; margin-bottom: 1.6vh; opacity: .9; }
-  .carte.sel { background: #fff; color: #0b1020; transform: scale(1.06); box-shadow: 0 0 6vh rgba(255,255,255,.25); }
+  .carte.sel { background: #fff; color: #0b0c10; transform: scale(1.06); box-shadow: 0 0 6vh rgba(255,255,255,.25); }
   .carte.sel small { color: rgba(11,16,32,.6); }
   #aide { margin-top: 5vh; font-size: 2vh; color: rgba(232,236,255,.55); line-height: 1.7; max-width: 60vw; opacity: 0; transition: opacity 1s; }
   #aide.visible { opacity: 1; }
@@ -39,13 +44,16 @@
 </style>
 </head>
 <body>
-<div class="halo h1"></div><div class="halo h2"></div><div class="halo h3"></div>
+<div class="halo h1"></div><div class="halo h2"></div>
 <main>
-  <div class="logo">Ré<b>tro</b></div>
+  <div class="logo">
+    <div class="icone"><svg viewBox="0 0 24 24"><path fill="#fff" d="M7 6h10a5 5 0 0 1 4.9 4l1 5.5a2.6 2.6 0 0 1-4.6 2.1L16.5 15h-9l-1.8 2.6a2.6 2.6 0 0 1-4.6-2.1l1-5.5A5 5 0 0 1 7 6z"/><path fill="#0b0c10" d="M7 9h1.5v1.5H10V12H8.5v1.5H7V12H5.5v-1.5H7z"/><circle fill="#0b0c10" cx="16" cy="11" r="1"/><circle fill="#0b0c10" cx="18.5" cy="9.5" r="1"/></svg></div>
+    <div><h1>RETRO MAC</h1><small>MAC · TV</small></div>
+  </div>
   <div id="etat"><span class="rond"></span><span id="etat-texte">Recherche de ton Mac sur le Wi-Fi…</span></div>
   <div id="liste"></div>
-  <div id="aide">Pas de Mac trouvé ? Ouvre l’appli <b>Rétro Mac</b> sur ton Mac et vérifie que la Shield et le Mac sont sur le même Wi-Fi.
-    Tu peux aussi entrer l’adresse affichée dans Rétro Mac.</div>
+  <div id="aide">Pas de Mac trouvé ? Ouvre l’appli <b>Retro Mac</b> sur ton Mac et vérifie que la Shield et le Mac sont sur le même Wi-Fi.
+    Tu peux aussi entrer l’adresse affichée dans Retro Mac (par exemple 192.168.1.31).</div>
 </main>
 <div id="saisie"><div class="boite">
   <div class="champ" id="champ"></div>
@@ -73,7 +81,7 @@ function connecter(m) {
   const url = `http://${m.hote}:${m.port}/`;
   // on vérifie que le Mac répond avant d'y aller
   fetch(url + 'api/catalogue', { cache: 'no-store' }).then(r => { if (!r.ok) throw 0; window.Shield ? Shield.ouvrir(url) : (location.href = url); })
-    .catch(() => { $('#etat-texte').textContent = m.nom + ' ne répond pas. Rétro Mac est-il ouvert ?'; });
+    .catch(() => { $('#etat-texte').textContent = m.nom + ' ne répond pas. Retro Mac est-elle ouverte sur le Mac ?'; });
 }
 
 // appelé par l'appli Android quand un Mac est trouvé
