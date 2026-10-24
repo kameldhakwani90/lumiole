@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);   // le son du jeu démarre sans toucher l'écran
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setAllowFileAccess(true);
+        s.setAllowUniversalAccessFromFileURLs(true);   // la page d'accueil (fichier local) peut interroger le Mac
         web.setBackgroundColor(0xFF050816);
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
@@ -152,13 +153,13 @@ public class MainActivity extends Activity {
             } catch (Exception ignore) {}
             if (base == null) return;
             ExecutorService ex = Executors.newFixedThreadPool(48);
-            for (int i = 1; i < 255; i++) { final String h = base + i; ex.submit(() -> essayer(h)); }
+            for (int i = 1; i < 255; i++) { final String h = base + i; ex.submit(() -> essayer(h, 8642)); }
             ex.shutdown();
         }).start();
     }
-    private void essayer(String hote) {
+    private void essayer(String hote, int port) {
         try {
-            HttpURLConnection c = (HttpURLConnection) new URL("http://" + hote + ":8642/api/catalogue").openConnection();
+            HttpURLConnection c = (HttpURLConnection) new URL("http://" + hote + ":" + port + "/api/catalogue").openConnection();
             c.setConnectTimeout(700); c.setReadTimeout(3000);
             if (c.getResponseCode() == 200) {
                 StringBuilder sb = new StringBuilder();
@@ -166,7 +167,7 @@ public class MainActivity extends Activity {
                 JSONObject o = new JSONObject();
                 o.put("nom", new JSONObject(sb.toString()).optString("mac", hote));
                 o.put("hote", hote);
-                o.put("port", 8642);
+                o.put("port", port);
                 envoyer("macTrouve", o);
             }
             c.disconnect();
@@ -208,6 +209,8 @@ public class MainActivity extends Activity {
     private class Pont {
         @JavascriptInterface public void ouvrir(String url) { runOnUiThread(() -> web.loadUrl(url)); }
         @JavascriptInterface public void quitter() { runOnUiThread(MainActivity.this::finish); }
+        // vérifie une adresse (dernière utilisée, ou tapée à la main) : si le Mac répond, macTrouve() est appelé
+        @JavascriptInterface public void essayer(String hote, int port) { new Thread(() -> MainActivity.this.essayer(hote, port)).start(); }
     }
 
     @Override

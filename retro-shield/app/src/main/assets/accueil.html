@@ -74,14 +74,14 @@ function dessiner() {
     ? `<div class="carte ${i === index ? 'sel' : ''}">${ICONE_MAC}<b>${c.m.nom.replace(/</g, '&lt;')}</b><small>${c.m.hote}</small></div>`
     : `<div class="carte ${i === index ? 'sel' : ''}">${ICONE_CLAVIER}<b>Entrer l’adresse</b><small>si ton Mac n’apparaît pas</small></div>`).join('');
 }
+document.addEventListener('click', e => { const c = e.target.closest('.carte'); if (!c || saisie) return; index = [...c.parentNode.children].indexOf(c); agir('ok'); });
 function connecter(m) {
   localStorage.setItem('dernierMac', m.nom);
   localStorage.setItem('derniereAdresse', JSON.stringify(m));
   $('#etat-texte').textContent = 'Connexion à ' + m.nom + '…';
   const url = `http://${m.hote}:${m.port}/`;
-  // on vérifie que le Mac répond avant d'y aller
-  fetch(url + 'api/catalogue', { cache: 'no-store' }).then(r => { if (!r.ok) throw 0; window.Shield ? Shield.ouvrir(url) : (location.href = url); })
-    .catch(() => { $('#etat-texte').textContent = m.nom + ' ne répond pas. Retro Mac est-elle ouverte sur le Mac ?'; });
+  // on y va directement (s'il ne répond pas, l'appli revient ici toute seule avec un message)
+  window.Shield ? Shield.ouvrir(url) : (location.href = url);
 }
 
 // appelé par l'appli Android quand un Mac est trouvé
@@ -98,7 +98,7 @@ window.macPerdu = m => { const i = macs.findIndex(x => x.nom === m.nom); if (i >
 window.signal = s => { $('#etat-texte').textContent = s.message; };
 if (perdu) $('#etat-texte').textContent = 'Connexion au Mac perdue. Nouvelle recherche…';
 // la dernière adresse qui a marché : on la propose tout de suite si le Mac répond
-try { const d = JSON.parse(localStorage.getItem('derniereAdresse') || 'null'); if (d) fetch(`http://${d.hote}:${d.port}/api/catalogue`, { cache: 'no-store' }).then(r => r.ok && window.macTrouve(d)).catch(() => {}); } catch (e) {}
+try { const d = JSON.parse(localStorage.getItem('derniereAdresse') || 'null'); if (d && window.Shield && Shield.essayer) Shield.essayer(d.hote, +d.port || 8642); } catch (e) {}
 setTimeout(() => $('#aide').classList.add('visible'), 8000);
 dessiner();
 
@@ -138,8 +138,8 @@ function agir(a) {
   if (a === 'retour' && window.Shield) return Shield.quitter();
   dessiner();
 }
-const touches = { ArrowLeft: 'gauche', ArrowRight: 'droite', ArrowUp: 'haut', ArrowDown: 'bas', Enter: 'ok', Escape: 'retour', GoBack: 'retour' };
-addEventListener('keydown', e => { const a = touches[e.key]; if (a) { e.preventDefault(); agir(a); } else if (saisie && /^[0-9.:]$/.test(e.key)) { adresse += e.key; dessinerSaisie(); } });
+const touches = { ArrowLeft: 'gauche', ArrowRight: 'droite', ArrowUp: 'haut', ArrowDown: 'bas', Enter: 'ok', ' ': 'ok', Select: 'ok', Accept: 'ok', Escape: 'retour', GoBack: 'retour' };
+addEventListener('keydown', e => { const a = touches[e.key] || (e.keyCode === 23 || e.keyCode === 13 ? 'ok' : null); if (a) { e.preventDefault(); agir(a); } else if (saisie && /^[0-9.:]$/.test(e.key)) { adresse += e.key; dessinerSaisie(); } });
 // bouton A de la manette
 let tenu = false;
 (function boucle() {
