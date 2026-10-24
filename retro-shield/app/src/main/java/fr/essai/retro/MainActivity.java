@@ -21,7 +21,17 @@ import android.webkit.WebViewClient;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * L'appli de la Shield : une page plein écran (WebView).
@@ -71,6 +81,9 @@ public class MainActivity extends Activity {
         web.loadUrl(ACCUEIL);
         web.requestFocus();
         chercherMac();
+        // Bonjour ne passe pas sur tous les réseaux : on essaie aussi toutes les adresses du réseau de la maison
+        balayer();
+        web.postDelayed(this::balayer, 12000);
     }
 
     private void pleinEcran() {
@@ -124,6 +137,40 @@ public class MainActivity extends Activity {
         };
         try { nsd.discoverServices(SERVICE, NsdManager.PROTOCOL_DNS_SD, ecoute); }
         catch (Exception e) { signaler("erreur", e.getMessage()); }
+    }
+
+    // --- Recherche de secours : http://<réseau>.1 à .254:8642/api/catalogue ---
+    private void balayer() {
+        new Thread(() -> {
+            String base = null;
+            try {
+                for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                    if (!ni.isUp() || ni.isLoopback()) continue;
+                    for (InetAddress a : Collections.list(ni.getInetAddresses()))
+                        if (a instanceof Inet4Address && a.isSiteLocalAddress()) { String ip = a.getHostAddress(); base = ip.substring(0, ip.lastIndexOf('.') + 1); }
+                }
+            } catch (Exception ignore) {}
+            if (base == null) return;
+            ExecutorService ex = Executors.newFixedThreadPool(48);
+            for (int i = 1; i < 255; i++) { final String h = base + i; ex.submit(() -> essayer(h)); }
+            ex.shutdown();
+        }).start();
+    }
+    private void essayer(String hote) {
+        try {
+            HttpURLConnection c = (HttpURLConnection) new URL("http://" + hote + ":8642/api/catalogue").openConnection();
+            c.setConnectTimeout(700); c.setReadTimeout(3000);
+            if (c.getResponseCode() == 200) {
+                StringBuilder sb = new StringBuilder();
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"))) { for (String l; (l = r.readLine()) != null; ) sb.append(l); }
+                JSONObject o = new JSONObject();
+                o.put("nom", new JSONObject(sb.toString()).optString("mac", hote));
+                o.put("hote", hote);
+                o.put("port", 8642);
+                envoyer("macTrouve", o);
+            }
+            c.disconnect();
+        } catch (Exception ignore) {}
     }
 
     // Android ne résout qu'un service à la fois : file d'attente

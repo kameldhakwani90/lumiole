@@ -68,6 +68,7 @@ function dessiner() {
 }
 function connecter(m) {
   localStorage.setItem('dernierMac', m.nom);
+  localStorage.setItem('derniereAdresse', JSON.stringify(m));
   $('#etat-texte').textContent = 'Connexion à ' + m.nom + '…';
   const url = `http://${m.hote}:${m.port}/`;
   // on vérifie que le Mac répond avant d'y aller
@@ -88,6 +89,8 @@ window.macTrouve = m => {
 window.macPerdu = m => { const i = macs.findIndex(x => x.nom === m.nom); if (i >= 0) { macs.splice(i, 1); index = 0; dessiner(); } };
 window.signal = s => { $('#etat-texte').textContent = s.message; };
 if (perdu) $('#etat-texte').textContent = 'Connexion au Mac perdue. Nouvelle recherche…';
+// la dernière adresse qui a marché : on la propose tout de suite si le Mac répond
+try { const d = JSON.parse(localStorage.getItem('derniereAdresse') || 'null'); if (d) fetch(`http://${d.hote}:${d.port}/api/catalogue`, { cache: 'no-store' }).then(r => r.ok && window.macTrouve(d)).catch(() => {}); } catch (e) {}
 setTimeout(() => $('#aide').classList.add('visible'), 8000);
 dessiner();
 
