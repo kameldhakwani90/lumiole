@@ -10,6 +10,12 @@ android {
         versionCode 1
         versionName '0.1'
     }
+    // Clé fixe (sans valeur secrète) : chaque nouvel APK peut remplacer l'ancien sur la Shield.
+    // Sans elle, chaque fabrication a sa propre clé et Android répond « Application non installée ».
+    signingConfigs {
+        fixe { storeFile file('retro.keystore'); storePassword 'android'; keyAlias 'retro'; keyPassword 'android' }
+    }
+    buildTypes { debug { signingConfig signingConfigs.fixe } }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
